@@ -91,6 +91,8 @@ documentation plan are ready to implement.
       corrupt-package error, and the distinct recompile-required error. No solver-side symmetry, tuple sorting,
       minimum, or direct `occupation_codes` fallback. The contract is approved and implemented by `step-11.1`;
       the amendment-2 two-member fixture and the pre-map fixture are the evidence.
+      — *Round 4: checked against the approved amendment (optional per-table `code_expansions`, `Σ(8E+4I)` reader
+      budget, `Canonical`/`MissingFromMap`/`ExpansionMapAbsent` semantics) and the named fixtures; see round 4.*
 - [x] **Energy runtime and initial lattice energy (OD-2).** eV→kT once; the site table separate from the
       site+pair vector; per-instance cluster energy; the exact total (site once, pair ×0.5, cluster once at the
       centre); the documented deviation from the original's uniform 0.5 and its hand-computed test.
@@ -882,3 +884,124 @@ non-canonical occupation tuple in a symmetry-reduced `.msl` table, and the desig
 nor provides a canonicalization/expansion mechanism or a non-P1 two-member fixture. F-30–F-33 are minor design
 corrections and F-34–F-38 are notes. No Blocker was found. A fresh round is required after the cluster-code
 decision/limitation, the F-30–F-33 corrections, and the revised fixture plan.
+
+### Re-review round 4
+
+#### Independence and frozen state
+
+I am a fresh, independent planning auditor. I did not author or implement the Step 14 design and have no shared
+conversation with the planner, the implementors, the earlier reviewers, or the orchestrator. I received only the
+frozen design commit `a430d64c23d5c076da160b28f2d04cee29a5e512`, the record at
+`d9586b69ad760b0a1c59976075eb1d5767aa7485`, the repository, and the required commands/scope; no desired verdict
+or summary was supplied. I read the repository, the approved `step-11-amend-2` contract, the Step 13 runtime, the
+Step 15/16 pages, the data contract, and the original solver as a read-only reference rather than relying on the
+request. The review was read-only apart from this record: I edited and committed only
+`docs/planning/reviews/step-14.md` and did not merge, tag, push `main`, delete branches, change
+code/tests/configuration/design docs, or fix a finding.
+
+Frozen state: the reviewed design commit is `a430d64` (the round-4 freeze after review round 3, merged with
+`main` `63cdd06`). The record HEAD `d9586b6` is two documentation-only commits after the freeze (the round-4
+request `7d8d40e` and the gate-evidence update `d9586b6`); `git diff --name-only a430d64..d9586b6` is exactly
+`docs/planning/reviews/step-14.md`, so no design, code, test, configuration, contract, or generated artifact
+moved between the freeze and this record. The working tree was clean before the record edit. The freeze changes
+eight documentation pages (the Step 14 page, Step 15, quality strategy, roadmap, open decisions, parity, solver
+architecture, and `physics/energies.md`); the data contract §3.3 and the amendment page are unchanged by this
+freeze and carry the merged `step-11-amend-2` text. No code, payload, manifest, signature, or fixture is part of
+it. At the freeze `step-11.1` is **not merged**: the `fix/step-11.1-cluster-code-expansion` branch is at the
+design-merge commit `2f3a6fe`, `mocassin-types` `ClusterTable` has `object_id`, `occupation_codes`, `energies`,
+and `particle_table_mapping` but no `lookup`/`expansions`, and the
+`step-11-amend-2`/`amend-2-pre-map` fixtures do not exist yet. The design records this dependency and blocks
+feature 2; the start gate remains conditional on that merge.
+
+#### Commands and results
+
+- `./tools/verify.sh docs --require` → exit 0; Zensical strict, DocFX (0 warnings, 0 errors), and rustdoc clean;
+  `Documentation built in /home/node/worktrees/step-14-design/site`; `Closeout gate completed with required
+  checks enabled.`
+- `./tools/verify.sh policy --require` → exit 0; contracts current (26), model/parameterization/lattice
+  projections OK (5/4/2), Space-group catalog current (274 settings, sha256
+  `1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395`), process consistency OK, 60 tool tests OK,
+  SPDX headers in 1,002 source files, no secret patterns in 1,479 tracked text files, ApiCompat found no breaking
+  changes, cargo-deny advisories/bans/licenses/sources OK.
+- `python tools/check_doc_math.py` → `Documentation math conventions OK (191 files scanned).`, exit 0.
+- `git diff --name-only a430d64..d9586b6` → only `docs/planning/reviews/step-14.md`; `git status --short` was
+  clean before the record edit.
+- Inspected the Step 14 and Step 15 pages, the Step 16 page, `docs/planning/reviews/step-14.md`,
+  `docs/planning/amendments/step-11-amend-2-cluster-code-expansion.md` (§§1–6 and 9), `02-data-contracts.md` §3.3,
+  `05-open-decisions.md` (OD-1, F-29, and item 7), `03-quality-strategy.md` §9.12/§13, `04-roadmap.md` §3.1 and
+  the dependency note, `solver-architecture.md`, `physics/energies.md`, and `appendix-b-parity-matrix.md`.
+- Inspected the frozen code/fixtures: `mocassin-types/src/runtime/energy.rs` (`ClusterTable` has no lookup
+  accessor at the freeze), `ClusterCompilationStage` slot-0 behaviour, `tests/contracts/packages/` (only
+  `msl-v1`, `amend-1-net10`, `step-13-populated`, `step-13-centered`; the two amendment-2 fixtures are the
+  `step-11.1` work), `samples/step-13-centered/`, and the original solver as a read-only reference.
+- Checked the declared sizes arithmetically: `ClusterInstance` 13→16 B, `ClusterAssoc` 5→8 B, `Link` 26→28 B,
+  `IncomingLink` 8 B, `JumpLink` 8 B, `SelectionPool` header 28→32 B, `PoolMember` 5→8 B.
+
+#### Findings
+
+**Round-3 finding closure:**
+
+| Finding | Closure | Evidence |
+| --- | --- | --- |
+| F-29 (Major) | **Closed in the design.** | Step 14 §6.3 builds the raw slot tuple (slot 0 = centre particle, slots `1..=n` = the resolved members, 6 bits per slot) and resolves it with `ClusterTable::lookup(raw) -> ClusterCodeLookup`: `Canonical(index)` stores the canonical `code_ids`; `MissingFromMap` is `MissingOccupationCode`; `ExpansionMapAbsent` is the distinct recompile-required error. The design forbids solver-side symmetry, tuple sorting/minimisation, a neighbouring code, and a direct `occupation_codes` fallback; the expansion map stays in the shared `Arc<ParameterizedModel>` and is not copied into the context. §15 exposes `cluster_lookup(instance, raw_code) -> Result<u32, ContextError>` for Step 15; §22 makes `step-11.1` an implementation dependency and blocks feature 2; §17/§19 add the all-eight/non-canonical/pre-map tests; §13 gives both errors exit 12. The contract matches the approved amendment: optional per-table `code_expansions` (`expanded_codes`/`canonical_indices`), the cumulative `Σ(8E+4I)` 128 MiB reader budget checked before the typed arrays, and the `Canonical`/`MissingFromMap`/`ExpansionMapAbsent` semantics; the named fixtures are `tests/contracts/packages/step-11-amend-2/` (the two-member ceria 8→6 case) and `amend-2-pre-map/` (the pre-map absence case). Step 15 §2/§4/§6, the data contract §3.3, OD-1/F-29, quality strategy §9.12, solver architecture, and parity `11/13/14` agree. F-29's formal closure remains a Step 14 gate, as recorded. |
+| F-30 (Minor) | **Closed.** | §6.1 `ClusterAssoc { instance: u32, slot: u8 }` (8 B); §6.2/§9.3 and Step 15 §4 say the owner is the instance centre; no `cluster_table` field remains. |
+| F-31 (Minor) | **Closed.** | §2 itemises `K*16` `ClusterInstance` (13→16 B), `energy_start (K+1)*4`, `owner_offsets`/`inverse_offsets (P+1)*4` each, `pools` headers `pool_count*32`, counters `(pc*6+2)*8`, and `trackers.mobile_positions mobile_count*4`; the remaining rows (`Link` 28, `ClusterAssoc` 8, `JumpLink` 8, slot CSR 16/slot) are consistent. |
+| F-32 (Minor) | **Closed.** | §2/§17 define `MemoryReport` on planned lengths (`plan == report`) and a separate capacity diagnostic (`>=` plan); no equality with `Vec::capacity` remains. |
+| F-33 (Minor) | **Closed.** | §7.4 sums each instance once per cell (`Σ_instances Σ_cells`); §17/§19 require a multi-cell hand-computed test; Step 15 §5 and `physics/energies.md` state the same instance × cell term. |
+| F-34 (Note) | **Closed.** | §8 asserts `members.capacity() >= planned_capacity` and compares the planned count in the report. |
+| F-35 (Note) | **Closed.** | §6.4 separates the accepted rotated multi-centre member-site image and the accepted single-centre residual risk from the rejected cross-image/ambiguous cases; OD-1, the request's Known limitations, and §21 repeat the distinction. |
+| F-36 (Note) | **Closed.** | §6.4/§19 name the committed sample `samples/step-14-multi-centre-cluster/step-14-multi-centre-cluster.mocprj`, the full artifact set (`.msl`, `.sha256`, summary, payload index, payload, README provenance, .NET rebuild, regeneration), the rationale for a new package, and the amendment-2 ceria fixture as the two-member F-29 case. |
+| F-37 (Note) | **Closed.** | §10 requires checked `u64` products/sum/round-up and `InvalidInput { what: "goal overflow" }` (exit 12); §17/§19 add the overflow test. |
+| F-38 (Note) | **Closed.** | D-11 states the complete-tuple-product + full-space-group-invariance + expansion-map argument and the synthetic non-zero per-instance energy evidence; `physics/energies.md` repeats it. |
+
+**New findings:**
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Minor** | **F-39 — The Step 14 page's Implementation status block is stale about the review history.** It still says the design is at "rounds 1–2 returned `Changes required`; F-1…F-28 addressed", while round 3 returned `Changes required` and raised the F-29 Major plus F-30–F-38, and the round-4 freeze addresses those. The start gate reads this status block; it should name round 3/F-29–F-38 (and the pending round 4) rather than stop at F-28. | Step page `## Implementation status` ("rounds 1–2 … F-1…F-28 addressed"; `Last updated` says after round 3) vs the request record's `Record state`/round history and the F-29–F-38 resolution tables. |
+| **Minor** | **F-40 — "feature 2 has a documented fallback" contradicts the F-29 gate.** The status block says the `step-11.1` implementation is pending "so the Step 14 feature 2 has a documented fallback until it lands". §22 says feature 2 is **blocked** and that no direct `occupation_codes` fallback is permitted; the roadmap dependency note says feature 1 may start but feature 2's cluster work must not. The word "fallback" can be read as authorising the exact F-29 regression. | Step page status block and §22; `04-roadmap.md` dependency note; Step 14 §21 F-29 risk row. |
+| **Minor** | **F-41 — §22 says Step 15 "never calls `lookup` again after initialization", but Step 15 must call `cluster_lookup` at run time.** §15 exposes `cluster_lookup(instance, raw_code)` precisely for Step 15's S2/commit-time raw-tuple resolution; Step 15 §2 and §4 call `ctx.cluster_lookup(instance, raw)`. The parenthetical is only true for a *direct* `ClusterTable::lookup`; as written it can lead an implementor to avoid the required wrapper. | Step 14 §15 row 15 and §22; Step 15 §2/§4. |
+| **Note** | **F-42 — The §20 500k memory example's "site ≤5" is only consistent if "positions" means environments.** `site` is `P*pc*8`; with 500,000 P1 positions and 64 particles the site table is ~244 MiB, not ≤5 MiB. The figures are consistent for ~500,000 environments with ~10,000 P1 positions × 50 cells, and the total stays under the 1 GiB cap under either reading, so the cap is not wrong; the scenario label/figures should be made unambiguous. | Step 14 §2 (`site` = `P*pc*8`) and §20 row. |
+| **Note** | **F-43 — The roadmap's Step 14 table row still lists only `13` as the dependency.** The dependency note immediately below, the Step 14 page, and the request all add `step-11.1`; the table row should point at the note or list both so the start-gate order is not misread. | `04-roadmap.md` step table row 14 vs the "Dependency note (2026-11-21)" and Step 14 §22. |
+
+#### Closure status
+
+No Blocker remains. **F-29 is closed in the design** against the approved `step-11-amend-2` contract: the raw
+tuple is resolved with `ClusterTable::lookup`, the three outcomes map to the canonical id and two distinct
+exit-12 errors, no solver-side symmetry or direct-index fallback is permitted, `cluster_lookup` is exposed for
+Step 15, feature 2 is gated on `step-11.1`, and the two-member ceria fixture plus the pre-map fixture are the
+named evidence. The amendment's field shape (`expanded_codes`/`canonical_indices`), cumulative `Σ(8E+4I)` 128 MiB
+budget, and fail-closed semantics are consistent across the amendment, the data contract §3.3, the Step 14 page,
+OD-1/F-29, the quality strategy, the solver architecture, and the parity row. F-30–F-38 are closed as recorded
+above; the F-23/F-32 residual is resolved.
+
+F-39–F-41 are minor documentation/status corrections; F-42–F-43 are notes. None changes the runtime design, a
+persisted format, or a scientific invariant. The F-29 implementation dependency is real: at the freeze
+`step-11.1` is unmerged, `ClusterTable` has no `lookup`, and the two amendment-2 fixtures are absent; the design
+records this, blocks feature 2, and makes the start gate conditional on that merge. The request's start-gate
+order (feature 1 may proceed, feature 2 must not), the fixture authorship (feature 6 for the multi-centre package;
+`step-11.1` for the two-member/pre-map fixtures), and the OD-1 accepted-versus-rejected wording are otherwise
+properly recorded.
+
+**Other requested checks.** No new format change: the freeze diff `530ef16..a430d64` is eight documentation
+pages; `contracts/manifest.json`, the `.msl` schema/payload/version/signatures, and the fixtures are untouched.
+The `code_expansions` field is the separately approved `step-11-amend-2` amendment; Step 14 adds no field or
+version. The High class/no-split case is recorded in Step 14 §4 and `04-roadmap.md` §3.1 with the owner's
+start-gate acceptance request. Cross-page consistency is otherwise good: data contract §3.3 has slot-0 plus the
+expansion map; OD-1/F-29/item 7 are recorded; Step 15 uses the instance × cell sum, the owner-major delta, and
+`cluster_lookup`; Step 16 has the supercell pool, `total/100`, and no lattice-signature check; parity shows
+`11/13/14`; solver architecture and `physics/energies.md` agree. The library gates (`docs`, `policy`,
+`check_doc_math`) pass. The F-39–F-41 corrections and F-42–F-43 notes are documentation-only and can be fixed in
+the step-agent resolution commit without changing the design.
+
+#### Verdict
+
+- [ ] Ready for implementation
+- [x] Ready with notes
+- [ ] Changes required
+- [ ] Waived
+
+**Ready with notes.** F-29 is closed in the design and F-30–F-38 are closed; no Blocker or Major remains. The
+remaining findings are minor status/documentation corrections (F-39–F-41) and two notes (F-42–F-43), which the
+human owner should explicitly accept or have fixed in the step-agent's resolution/status commit before the start
+gate. The start gate itself remains conditional on the `step-11.1` merge, as the request and §22 state.
