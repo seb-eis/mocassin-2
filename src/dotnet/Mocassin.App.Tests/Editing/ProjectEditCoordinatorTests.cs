@@ -82,11 +82,15 @@ public sealed class ProjectEditCoordinatorTests
     }
 
     [Fact]
-    public void RejectedEditLeavesTheProjectAndDirtyStateUnchanged()
+    public void RejectedEditLeavesTheProjectStacksAndSavePointUnchanged()
     {
         var project = CreateProject();
         var document = new ProjectDocument(project);
         var coordinator = new ProjectEditCoordinator(document);
+        coordinator.Apply("Rename project", projectValue => Rename(projectValue, "Renamed"));
+        Assert.True(coordinator.Undo());
+        Assert.True(coordinator.CanRedo);
+        var lastSaved = document.LastSavedProject;
         var changed = 0;
         EditRejectedEventArgs? rejection = null;
         coordinator.ProjectChanged += (_, _) => changed++;
@@ -100,8 +104,10 @@ public sealed class ProjectEditCoordinatorTests
         Assert.Null(result.Edit.Change);
         Assert.False(string.IsNullOrWhiteSpace(result.Message));
         Assert.Same(project, document.Project);
+        Assert.Same(lastSaved, document.LastSavedProject);
         Assert.False(coordinator.IsDirty);
         Assert.False(coordinator.CanUndo);
+        Assert.True(coordinator.CanRedo);
         Assert.Equal(0, changed);
         Assert.NotNull(rejection);
         Assert.Contains(
