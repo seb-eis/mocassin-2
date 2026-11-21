@@ -66,11 +66,15 @@ internal sealed class CrashRecoveryWriter : ICrashRecoveryWriter
         }
 
         timeout.Cancel();
-        return writes
-            .Select((write, index) => write.IsCompletedSuccessfully
-                ? write.Result
-                : new CrashRecoveryResult(snapshots[index], CrashRecoveryStatus.TimedOut))
-            .ToArray();
+        var results = new CrashRecoveryResult[snapshots.Count];
+        for (var index = 0; index < writes.Length; index++)
+        {
+            results[index] = writes[index].IsCompletedSuccessfully
+                ? await writes[index].ConfigureAwait(false)
+                : new CrashRecoveryResult(snapshots[index], CrashRecoveryStatus.TimedOut);
+        }
+
+        return results;
     }
 
     private async Task<CrashRecoveryResult> WriteOneAsync(
