@@ -461,8 +461,9 @@ Implemented on `fix/gui-visual-refresh` from `main` at `89dbe22`; the design com
 | Console tabs and layout defaults | `f7f5627` — `app: add console tabs and refreshed layout defaults` |
 | Palette, tokens, and shell surfaces | `eb69292` — `app: add light and dark visual token palette and card chrome` |
 | Baselines and documentation | `c137421` — `docs: refresh visual baselines and document the UI refresh` |
-| Branch pushed | `origin/fix/gui-visual-refresh` at `c137421` before the platform runs |
-| Evidence commit | the documentation-only commit that appends this section; it does not change code or tests |
+| Warning contrast and platform-evidence correction | the follow-up commit that applies `#A15C00` and corrects §12.3/§12.4 (owner-approved 2026-11-21) |
+| Branch pushed | `origin/fix/gui-visual-refresh` at `c137421` before the platform runs; the final head includes the follow-up correction |
+| Evidence commits | the documentation-only commits that append and correct this section; they do not change the scientific model or contracts |
 
 ### 12.1 Local gates
 
@@ -495,23 +496,21 @@ Each capture was reviewed against the visual contract. The comparison now normal
 
 ### 12.3 Platform gates
 
-Dispatched one at a time from the pushed branch; both are Windows/macOS build plus `Mocassin.Packages.Tests`, `Mocassin.Results.Tests`, and `Mocassin.Cli.Tests`. They do not execute the App headless suite.
+Dispatched one at a time from the pushed branch at `c13742195fe3eb8e6290f9bbe726cea6429abf07`. Both runs executed the platform test steps, including `Platform tests - Avalonia headless workspace` (`Mocassin.App.Tests`), and succeeded. Later commits on the branch are test/docs plus `ac5b394` (the transparent status-progress track); the final tree is covered by the local `./tools/verify.sh all --require` run. The platform runs remain recommended evidence, not a merge gate, under the owner's Q5 decision.
 
 | Gate | Run | Result |
 | --- | --- | --- |
-| Windows | <https://github.com/seb-eis/mocassin-2/actions/runs/44961539734> | Success; `.NET (windows-latest)` success, Ubuntu-only jobs skipped |
-| macOS | <https://github.com/seb-eis/mocassin-2/actions/runs/44961806131> | Success; `.NET (macos-latest)` success, Ubuntu-only jobs skipped |
+| Windows | <https://github.com/seb-eis/mocassin-2/actions/runs/44961539734> | Success; `.NET (windows-latest)` and `Platform tests - Avalonia headless workspace` succeeded; Ubuntu-only jobs skipped |
+| macOS | <https://github.com/seb-eis/mocassin-2/actions/runs/44961806131> | Success; `.NET (macos-latest)` and `Platform tests - Avalonia headless workspace` succeeded; Ubuntu-only jobs skipped |
 
 A human Windows/macOS visual spot-check remains recommended evidence, not a merge gate.
 
 ### 12.4 Deviations and residual risks
 
-- **Light warning contrast (stop-and-ask).** The approved light `WarningForeground` `#B26A00` is 3.82:1 on
-  `#F3F3F3` and 3.85:1 on `#FFF4CE`, below the 4.5 normal-text floor in visual contract §11.1. The implementation
-  keeps the approved value as a glyph and border role (it meets the 3:1 non-text floor) and renders read-only
-  banner body text in `ForegroundStrongBrush` (at least 12:1). The owner must either confirm this non-text role
-  and clarify the contract, or approve a contrast-safe light warning foreground. No approved palette value was
-  changed.
+- **Light warning contrast (resolved 2026-11-21).** The owner approved darkening the light `WarningForeground`
+  to `#A15C00`, which is 4.68:1 on `#F3F3F3` and 4.72:1 on `#FFF4CE`; it now meets the 4.5 normal-text floor.
+  The dark `#CCA700` value and the light `WarningBorderBrush` `#B26A00` are unchanged. The contrast test asserts
+  both light warning backgrounds, and the read-only banner body remains `ForegroundStrongBrush`.
 - `Mocassin.RegionGap` is a `Thickness` so the workspace can consume it as an inset; the splitter hit target
   stays a literal 6 px because the interaction contract requires 6 px even in compact density.
 - The Validation filter row is horizontally scrollable instead of wrapping in a narrow console, and the column
@@ -520,7 +519,8 @@ A human Windows/macOS visual spot-check remains recommended evidence, not a merg
 - `OnAccentBrush` is published by the applier for the five optional accents and removed for the default so the
   theme dictionary stays authoritative; under high contrast both direct accent roles are removed so the
   high-contrast dictionary wins.
-- The App headless suite is still Linux-only for pixel comparison; Windows/macOS builds do not run it. Custom
+- The App headless suite executes on the Windows/macOS platform gates through
+  `Platform tests - Avalonia headless workspace`; pixel screenshot comparison remains Linux-only. Custom
   scrollbar, menu, tooltip, context-menu templates, tab drag-reorder, console tab close/reorder, charts, and 3D
   remain deferred as recorded in §5.
 - The status bar is the one full-accent chrome surface and keeps `#007ACC` with white text/glyphs; severity is
@@ -528,5 +528,6 @@ A human Windows/macOS visual spot-check remains recommended evidence, not a merg
 
 ### 12.5 Next action
 
-The branch is ready for the owner's `--no-ff` merge approval under `AGENTS.md` §3.5. It has not been merged,
-tagged, or squashed, and no step branch or amendment exists.
+The branch is ready for the owner's `--no-ff` merge approval under `AGENTS.md` §3.5 after the owner-approved
+light-warning correction and the platform-evidence correction. It has not been merged, tagged, or squashed, and
+no step branch or amendment exists.

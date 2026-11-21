@@ -28,7 +28,7 @@
       <SolidColorBrush x:Key="Mocassin.SelectedBackground" Color="#CCE5FF" />
       <SolidColorBrush x:Key="Mocassin.SelectedForeground" Color="#1F1F1F" />
       <SolidColorBrush x:Key="Mocassin.ErrorForeground" Color="#A1260D" />
-      <SolidColorBrush x:Key="Mocassin.WarningForeground" Color="#B26A00" />
+      <SolidColorBrush x:Key="Mocassin.WarningForeground" Color="#A15C00" />
       <SolidColorBrush x:Key="Mocassin.SuccessForeground" Color="#1B5E20" />
       <SolidColorBrush x:Key="Mocassin.InfoForeground" Color="#0B4F8A" />
       <SolidColorBrush x:Key="Mocassin.ErrorBackground" Color="#FDECEA" />
@@ -190,7 +190,7 @@
       <SolidColorBrush x:Key="Mocassin.SelectedBackground" Color="#CCE5FF" />
       <SolidColorBrush x:Key="Mocassin.SelectedForeground" Color="#1F1F1F" />
       <SolidColorBrush x:Key="Mocassin.ErrorForeground" Color="#A1260D" />
-      <SolidColorBrush x:Key="Mocassin.WarningForeground" Color="#B26A00" />
+      <SolidColorBrush x:Key="Mocassin.WarningForeground" Color="#A15C00" />
       <SolidColorBrush x:Key="Mocassin.SuccessForeground" Color="#1B5E20" />
       <SolidColorBrush x:Key="Mocassin.InfoForeground" Color="#0B4F8A" />
       <SolidColorBrush x:Key="Mocassin.ErrorBackground" Color="#FDECEA" />

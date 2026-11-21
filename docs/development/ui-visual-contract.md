@@ -113,7 +113,7 @@ contrast-safe `OnAccentBrush` for that accent. The default and the `blue` key ar
 | `Mocassin.SelectedBackground` | `#094771` | `#CCE5FF` | selected list row, combo item, or tree row |
 | `Mocassin.SelectedForeground` | `#FFFFFF` | `#1F1F1F` | text on `SelectedBackground` |
 | `Mocassin.ErrorForeground` | `#F48771` | `#A1260D` | inline errors and error glyphs |
-| `Mocassin.WarningForeground` | `#CCA700` | `#B26A00` | warnings |
+| `Mocassin.WarningForeground` | `#CCA700` | `#A15C00` | warnings |
 | `Mocassin.SuccessForeground` | `#89D185` | `#1B5E20` | success text |
 | `Mocassin.InfoForeground` | `#75BEFF` | `#0B4F8A` | informational text |
 | `Mocassin.ErrorBackground` | `#3A1D1D` | `#FDECEA` | error banner fill |

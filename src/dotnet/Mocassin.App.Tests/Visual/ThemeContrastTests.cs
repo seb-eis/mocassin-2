@@ -44,7 +44,7 @@ public sealed class ThemeContrastTests
             ["Mocassin.SelectedBackground"] = ("#094771", "#CCE5FF"),
             ["Mocassin.SelectedForeground"] = ("#FFFFFF", "#1F1F1F"),
             ["Mocassin.ErrorForeground"] = ("#F48771", "#A1260D"),
-            ["Mocassin.WarningForeground"] = ("#CCA700", "#B26A00"),
+            ["Mocassin.WarningForeground"] = ("#CCA700", "#A15C00"),
             ["Mocassin.SuccessForeground"] = ("#89D185", "#1B5E20"),
             ["Mocassin.InfoForeground"] = ("#75BEFF", "#0B4F8A"),
             ["Mocassin.ErrorBackground"] = ("#3A1D1D", "#FDECEA"),
@@ -330,11 +330,9 @@ public sealed class ThemeContrastTests
         AssertAtLeast("#75BEFF", "#2D2D30", 4.5);
         AssertAtLeast("#0B4F8A", "#F3F3F3", 4.5);
 
-        // The approved light WarningForeground (#B26A00) is a glyph and border role: it is 3.82:1 on the light
-        // card and 3.85:1 on the warning fill, above the 3:1 non-text floor. Warning banner body text uses the
-        // strong foreground, which meets the normal-text floor. This is recorded in the maintenance evidence.
         AssertAtLeast("#CCA700", "#2D2D30", 4.5);
-        AssertAtLeast("#B26A00", "#F3F3F3", 3.0);
+        AssertAtLeast("#A15C00", "#F3F3F3", 4.5);
+        AssertAtLeast("#A15C00", "#FFF4CE", 4.5);
         AssertAtLeast("#FFFFFF", "#000000", 21.0);
         AssertAtLeast("#000000", "#FFD700", 4.5);
     }
