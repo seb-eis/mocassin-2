@@ -15,7 +15,7 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — post-merge maintenance branch after approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `5112180128cce8b7eaa3c1192706448136e06a67` |
+| Reviewed commit | `bf273ff5cf9f17f66ec48669e39d010006c4d0a9` |
 | Docs branch | `docs/step-11-amend-2` |
 | Review date | 2026-11-21 |
 | Reviewer | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh context, no shared conversation with the planner, implementor, or orchestrator |
@@ -41,6 +41,13 @@ generated artifact, or fixture is included.
 it changes this record only. The round-2 reviewer text is unchanged. The corrections are design/doc-only: the
 `8E + 4I` budget and scan-time `E != I`/duplicate rejection, the three-way `ClusterTable::lookup` result, the
 `step-NN.json` typo, and the historical freeze-note reconciliation.
+
+**Re-review freeze (round 4).** Round 3 returned `Ready with notes` with A2-R3-01 (Minor) and A2-R3-02/A2-R3-03
+(Notes); the owner directed their correction, refreeze, and round 4 on 2026-11-21. The corrections are in
+`bf273ff5cf9f17f66ec48669e39d010006c4d0a9`; the request/resolution commit after it changes this record only.
+The round-3 reviewer text is unchanged. The corrections are design/doc-only: the explicit
+`#[doc(hidden)] pub expansions` construction path with no constructor, the `lookup`/`ExpansionMapAbsent` test
+wording, the .NET raised-limit acceptance case, and the owner approvals below.
 
 > Orchestration: the orchestrator spawns a fresh planning auditor after the planner has frozen the design and
 > completed this request, and relays the verdict and owner decisions. The planner and implementor update the
@@ -262,7 +269,7 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Ready with notes
+**State:** Re-review required
 
 Round 2 verdict: `Ready with notes` — see `### Re-review round 2` below. The round-1 Major (A2-01) and all ten
 Minors (A2-02…A2-11) are closed; A2-12…A2-16 are accepted and corrected. One new Minor (A2-R2-01) and three Notes
@@ -272,6 +279,11 @@ human-owner acceptance, not a start authorization.
 **Round-3 correction (request owner).** A2-R2-01…A2-R2-04 were corrected in
 `5112180128cce8b7eaa3c1192706448136e06a67`; the record state is `Re-review required` for a fresh review. The
 round-2 verdict paragraph above is historical and is not altered.
+
+**Round-4 correction (request owner).** A2-R3-01…A2-R3-03 were corrected in
+`bf273ff5cf9f17f66ec48669e39d010006c4d0a9`; the record state is `Re-review required` for round 4. The round-3
+`Ready with notes` verdict is historical and is not altered. The owner approvals recorded in `## Human approval`
+are dated 2026-11-21.
 
 **Round-3 verdict (reviewer).** Round 3 returned `Ready with notes` — see `### Re-review round 3` below. The
 request-owner note above records the state at the round-3 request; the current state is the round-3 verdict.
@@ -348,13 +360,27 @@ Findings and resolutions:
 
 ## Human approval
 
+**Owner decisions recorded 2026-11-21.**
+
+- [x] **A2-07 process change approved.** A post-merge amendment's audit record is the single evidence source
+      for the audited commit, closeout CI, `main` SHA, merge commit, merge-tree CI, platform CI, and tag; the
+      parent `closeout/step-NN.json` stays historical; the closeout-evidence checker is unchanged.
+- [x] **`step-11.1` implementation path approved after the design gate.** The maintenance branch, the separate
+      amendment audit, and the `step-11.1` tag only after a green `main` CI run; `step-11` is never moved.
+- [x] **Design corrections directed.** Fix A2-R3-01 and A2-R3-02/A2-R3-03, refreeze, and run review round 4
+      before implementation.
+
+The design-verdict checkboxes below remain unchecked: the owner has **not** accepted the round-3
+`Ready with notes` verdict, and round 4 is requested. These approvals are process/path decisions, not a design
+verdict acceptance.
+
 - [ ] Accepted: Ready for implementation
 - [ ] Accepted: Ready with notes
 - [ ] Changes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Human owner
+Date: 2026-11-21
 
 ## Resolution status
 
@@ -380,10 +406,13 @@ Date:
 | A2-R2-02 (Note) | **Resolved.** The single accessor is `ClusterTable::lookup(raw) -> ClusterCodeLookup` with `Canonical(index)`, `MissingFromMap(raw)`, and `ExpansionMapAbsent(raw)`; the two fail-closed errors are selected without inspecting the map. `expansions` is private; a `canonical_index` convenience, if kept, is explicitly not the semantic accessor. Step 14 maps `MissingFromMap`/`ExpansionMapAbsent`; Step 15 matches `Canonical`. | Planner | `5112180` |
 | A2-R2-03 (Note) | **Resolved.** `audits/README.md` §3.1 now says `closeout/step-NN.json` (not `step-NNN.json`). | Planner | `5112180` |
 | A2-R2-04 (Note) | **Resolved.** The request's original note is now labelled **Round-1 freeze note (historical)** and says the current `Reviewed commit` is the latest re-review freeze; a separate round-3 freeze note names `5112180`. The round-1/round-2 reviewer text is unchanged. | Planner | `5112180` |
+| A2-R3-01 (Minor) | **Resolved.** One construction path is specified: `ClusterTable` keeps its all-public struct shape and `expansions` is **`#[doc(hidden)] pub`** with a doc comment, so `map_energy` and the integration test keep their struct literals (the test adds `expansions: None`). No constructor/builder is introduced; the supported semantic API is `lookup`, the hidden field is out of rustdoc, and `missing_docs` is satisfied by its doc comment. A future `ClusterTable::new`/builder that makes it private is recorded as a separate API change. | Planner | `bf273ff` |
+| A2-R3-02 (Note) | **Resolved.** §9.2 and §9.3 now use `ClusterCodeLookup::ExpansionMapAbsent` (or `canonical_index(...).is_none()` if the convenience is kept) and `lookup`; no test reads `expansions == None` or the hidden field. | Planner | `bf273ff` |
+| A2-R3-03 (Note) | **Resolved.** The .NET budget row now includes the raised-`MaxClusterExpansionBytes` acceptance case, matching the Rust row; the budget matrix is complete on both readers. | Planner | `bf273ff` |
 
 The implementor fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
-verdict. The round-1/round-2 text above is unchanged; the design corrections are in `ff112cf` (round 2) and
-`5112180` (round 3), and each request/resolution commit changes only this record.
+verdict. The round-1…round-3 reviewer text above is unchanged; the design corrections are in `ff112cf` (round 2),
+`5112180` (round 3), and `bf273ff` (round 4), and each request/resolution commit changes only this record.
 
 ## Review rounds
 
