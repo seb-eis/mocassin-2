@@ -141,12 +141,15 @@ The reader produces the types Step 14 consumes:
   eV to kT.
 - Transitions keep collections, directions, rules, `jump_count`, the derived prefix-sum `jump_offsets`,
   `jump_mapping`, and the tracker mappings. `tracker_order` is variable-length with a `0xFF` sentinel.
-- `DirectionPool`: `direction_count`, flat `(PositionId, ParticleId)` members, and the caller-indexed
-  `slot_of` map. Its `PositionId` is contractually the P1 index, so it **cannot** represent the supercell pool
-  member Step 14 needs; Step 14 replaces it with `context::pools::SelectionPool` and retires the placeholder
-  (review F-1). `JumpStatus` is the CSR container (`offsets: Vec<u32>`, `links: Vec<JumpLink>`); Step 14 computes
-  the entries and extends `JumpLink` with `receiver_path_id` so the receiver-major orientation is explicit
-  (review F-2). Both containers are type-only in Step 13 and have invariant tests (`JumpStatus::is_valid`).
+- `DirectionPool` was the Step 13 placeholder (`direction_count`, P1 `(PositionId, ParticleId)` members, and a
+  `slot_of` map). Its `PositionId` is contractually the P1 index, so it could not represent the supercell pool
+  member; Step 14 feature 4 retired it and replaced it with `context::pools::SelectionPools` (`PoolMember { env:
+  EnvId, particle }`, a global `slot` map, a per-P1 `pool_of`, reserved per-pool capacity). `JumpStatus` remains
+  the CSR container (`offsets: Vec<u32>`, `links: Vec<JumpLink>`); `JumpLink` is now
+  `{ sender_path_id: u8, receiver_path_id: u8, link_id: u32 }`, with `link_id` indexing the receiver's owner-major
+  forward list (review F-2). The context builds the jump status only for the job simulation's active collections;
+  the payload direction tables are a union across collections. `DirectionPool`'s removal and the `JumpLink` field
+  change are the Step 14 public Rust API break (no format change).
 - `JobPackage`: job id, kind, shared model, initial lattice, settings, effective seed, optimizers, extensions,
   instruction, and doping summary.
 
@@ -245,6 +248,20 @@ reports each array's planned length (not allocator capacity) and equals the plan
 separate diagnostic, and the benchmark records peak RSS. The 10×10×10 real-writer fixture (table-free ceria) and
 the populated-model 10×10×10 clone are both budgeted at `< 100 ms` and `≤ 64 MiB`; the clone is the pair/cluster
 measurement because the ceria model has no pair or cluster tables.
+
+**Implementation evidence (feature 6).** The real-writer 10×10×10 ceria fixture initializes in 75.6 µs and the
+populated-model clone in 315.3 µs (Criterion, release, same-runner class), with memory plans of 308,632 B and
+234,832 B and a counting-allocator proof of zero allocations in the hot accessors and the pool `set_selectable`
+helpers after construction. The fixtures, snapshots, allocation proof, and baseline are recorded in
+`tests/contracts/packages/step-14-*`, `tests/reference/bench/step-14-context.json`, and the `rustContext` entry in
+`baselines.json`.
+
+**Active directions and void members.** The `.msl` `jump_count`/`jump_mapping` are a union over all compiled
+collections; the context filters the selection pools, `direction_for`, and the jump-status build to the job
+simulation's active collections, so a KMC job never offers an MMC direction. A cluster cell whose centre (or a
+member) is void has no canonical occupation row: the link/code is absent and the contribution is zero (the empty
+cluster). The energy engine must not call `cluster_lookup` for a void-member tuple; it uses the zero row. The
+amendment-2 `code_expansions` fail-closed behavior is unchanged for non-canonical non-void tuples.
 
 ## RNG
 

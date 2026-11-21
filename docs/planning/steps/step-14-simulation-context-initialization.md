@@ -10,12 +10,12 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
 
 ## Implementation status
 
-- **Status:** In progress (six feature branches approved; feature 1 next)
+- **Status:** In audit — `Passed with notes` accepted by the owner 2026-11-21; merge/tag in progress
 - **Step branch:** `step/14-simulation-context-initialization`
-- **Step CI:** — (one closeout `workflow_dispatch`; no per-feature CI)
+- **Step CI:** [44922414484](https://github.com/seb-eis/mocassin-2/actions/runs/44922414484) — Ubuntu closeout, green at `3fd4516` (no per-feature CI)
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Not requested
+- **Audit:** `Passed with notes` — accepted by the owner 2026-11-21; F-1–F-3/N-1–N-3 deferred to `fix/step-14-structure-and-tests` ([record](../audits/step-14.md))
 - **Design review:** `Ready with notes` — accepted by the human owner 2026-11-21. Round 4 at record `620f20a`
   (freeze `a430d64`) closed F-29 and F-30–F-38; F-39–F-43 are minor/note corrections the step agent records
   with the start-gate status. Rounds 1–3 returned `Changes required` (F-1–F-38). Record:
@@ -31,16 +31,16 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
   gate.
 - **Sizing:** Complexity class **High** — accepted by the human owner at the start gate 2026-11-21 as one
   unit; no split proposed. See §4.
-- **Last updated:** 2026-11-21 (start gate: design accepted, step branch created)
+- **Last updated:** 2026-11-21 (closeout CI green at `3fd4516`; audit requested)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| 1 Context skeleton, arenas, limits, errors | `feature/step-14-simulation-context-initialization/context-arenas-and-limits` | Planned | — | — | — |
-| 2 Neighbour-link CSR and cluster runtime | `feature/step-14-simulation-context-initialization/link-csr-and-clusters` | Planned | — | — | — |
-| 3 Energy runtime and initial lattice energy | `feature/step-14-simulation-context-initialization/energy-runtime-and-initial-energy` | Planned | — | — | — |
-| 4 Selection pools and jump status | `feature/step-14-simulation-context-initialization/selection-pools-and-jump-status` | Planned | — | — | — |
-| 5 Goals, counters, normalization, time step, resume | `feature/step-14-simulation-context-initialization/goals-normalization-and-resume` | Planned | — | — | — |
-| 6 Fixtures, benchmarks, documentation, and closeout | `feature/step-14-simulation-context-initialization/fixtures-benchmarks-and-closeout` | Planned | — | — | — |
+| 1 Context skeleton, arenas, limits, errors | `feature/step-14-simulation-context-initialization/context-arenas-and-limits` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (36 lib + 9 acceptance tests, 1 `Send` doctest, 1 `!Sync` compile-fail doctest), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | `1a73969860715c55260cd1db0257c8a59241a647` |
+| 2 Neighbour-link CSR and cluster runtime | `feature/step-14-simulation-context-initialization/link-csr-and-clusters` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (38 lib + 15 link + 16 cluster + 9 skeleton acceptance tests, 1 `Send` + 1 `!Sync` doctest), `cargo build --release`, `structure` (7 passed), `docs --require` all exit 0 | Not run (no per-feature CI) | `486389ec5736571f50adda0d77ae95aa8f9ea4cb` |
+| 3 Energy runtime and initial lattice energy | `feature/step-14-simulation-context-initialization/energy-runtime-and-initial-energy` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (38 lib + 8 energy + 16 cluster + 15 link + 9 skeleton acceptance tests, 1 `Send` + 1 `!Sync` doctest), `cargo build --release`, `structure` (7 passed), `docs --require` all exit 0 | Not run (no per-feature CI) | `2f284cce2f65532007a9be883eaaea83ae4500b5` |
+| 4 Selection pools and jump status | `feature/step-14-simulation-context-initialization/selection-pools-and-jump-status` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (38 lib + 10 pools + 10 jump + 8 energy + 16 cluster + 13 link + 9 skeleton acceptance tests, 1 `Send` + 1 `!Sync` doctest), `cargo build --release`, `structure` (7 passed), `docs --require` all exit 0 | Not run (no per-feature CI) | `1613cfc6da1832fc4faacba0b0073e001cd30f1f` |
+| 5 Goals, counters, normalization, time step, resume | `feature/step-14-simulation-context-initialization/goals-normalization-and-resume` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (38 lib + 15 goals + 7 resume + 10 pools + 10 jump + 8 energy + 17 cluster + 13 link + 9 skeleton acceptance tests, 1 `Send` + 1 `!Sync` doctest), `cargo build --release`, `structure` (7 passed), `docs --require` all exit 0 | Not run (no per-feature CI) | `6500055d6cf14e544a85d09db02dd27b1e2f9e5f` |
+| 6 Fixtures, benchmarks, documentation, and closeout | `feature/step-14-simulation-context-initialization/fixtures-benchmarks-and-closeout` | Squashed | `./tools/verify.sh all --require` exit 0 at `8c09a8c` (all .NET tests, Rust, Python, docs strict, contracts/policy, AOT evidence); the only later delta to the audited commit is the benchmark-evidence provenance string | [44922414484](https://github.com/seb-eis/mocassin-2/actions/runs/44922414484) — Ubuntu, green at `3fd4516` | `00fceabce7fa6d910cb79f701f175aa4b681bf5f` |
 
 ### Feature list (scope and outcomes)
 
@@ -51,7 +51,355 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
 | 3 | Energy runtime and initial lattice energy | `feature/step-14-simulation-context-initialization/energy-runtime-and-initial-energy` | eV→kT factor; site table; site+pair vectors; per-instance cluster energy; exact initial total; debug recomputation helper; `field_scale` | The hand-computed site/pair/cluster total matches; the vectors equal a brute-force sum; `step-13-populated` initializes with the documented energies |
 | 4 | Selection pools and jump status | `feature/step-14-simulation-context-initialization/selection-pools-and-jump-status` | Supercell direction-count pools with reserved capacity; mask/optimizer application; `selectable_jump_count`; O(1) slot maps and update helpers; per-`(P1, direction)` receiver-major jump status with the structural filter, derived bound, link-carried cluster associations, and `resolve_node`; **retires `DirectionPool` / reshapes `JumpLink` (public Rust API break recorded, Step 13 invariant tests updated)** | Pool counts/removal/swap-remove are correct in several cells; jump links equal a naive receiver-major recomputation; a cross-bucket direction resolves at the selected bucket; `step-13-centered` passes |
 | 5 | Goals, counters, normalization, time step, resume | `feature/step-14-simulation-context-initialization/goals-normalization-and-resume` | Mobile/static tracker index space; goals/block size; counters; `K_fix`/`K_auto`/`K_norm`/`dof`/`nu_max`/`dt`; `ResumeState`/`ResumePhase` validation, re-derived mapping, `AlreadyCompleted` | Goal/normalization arithmetic matches the hand values; resume restores exactly and rejects mismatches; the MMC context has no pools/jump status/time |
-| 6 | Fixtures, benchmarks, documentation, and closeout | `feature/step-14-simulation-context-initialization/fixtures-benchmarks-and-closeout` | New 10×10×10 real-writer fixture and .NET rebuild test; new multi-centre cluster fixture from the centred sample; context-summary snapshots; allocation test; `context` Criterion benchmark and `rustContext` baseline; docs/parity/status/closeout | `< 100 ms`/`< 20 ms` and memory budgets measured on the recorded runner class; zero-allocation proof; docs build strictly; closeout evidence passes its checker; audit request complete |
+| 6 | Fixtures, benchmarks, documentation, and closeout | `feature/step-14-simulation-context-initialization/fixtures-benchmarks-and-closeout` | New 10×10×10 real-writer fixture and .NET rebuild test; new multi-centre cluster fixture from the centred sample; context-summary snapshots; allocation test; `context` Criterion benchmark and `rustContext` baseline; docs/parity/status/closeout | `< 100 ms` and `≤ 64 MiB` budgets measured on the recorded runner class; zero-allocation proof; docs build strictly; closeout evidence passes its checker; audit request complete |
+
+### Feature 1 evidence — context-arenas-and-limits
+
+- **Branch:** `feature/step-14-simulation-context-initialization/context-arenas-and-limits` (squashed; squash
+  commit recorded by the feature-2 row update).
+- **Scope delivered:** the `mocassin-solver` `context/` module layout (`mod`, `dimensions`, `error`, `goals`,
+  `jumps`, `lattice`, `limits`, `links`, `pools`), the `Dimensions`/`EnvId` index and `i64`-`rem_euclid` wrap
+  contract, `ContextLimits`, the phase-0 `MemoryPlan` with checked `u64` arithmetic and `LimitExceeded`/exit 12,
+  `MemoryReport` (`plan == report` on planned lengths; capacity is a diagnostic), the particle/flag/mobile-tracker
+  arenas, the zeroed counter block, the empty link/cluster/pool/jump containers, the phased pipeline with
+  boundary and 4096-environment cancellation, the error/exit mapping, and the `Send`/`!Sync` marker.
+- **Cargo:** `mocassin-msl` moved to `[dev-dependencies]`; `mocassin-state`, `mocassin-extension`, and `rayon`
+  removed as designed in §22. No new external crate.
+- **Tests:** index/wrap round-trip (including `i32::MIN`/`i32::MAX` offsets), dimension overflow and the
+  position/particle/total caps, `plan == report` equality, the ascending phase trace, pre-set cancellation,
+  the arena container sizes (`Link` 28 B, `ClusterInstance` 16 B, `PoolMember` 8 B), the exit mapping, and the
+  `msl-v1` ceria job (6×6×6, P=4, pc=5, 864 environments) building the skeleton context with flags, sequential
+  mobile tracker ids, zeroed counters, empty later-feature containers, and a matching memory report.
+- **Known limitations / deferred to later features:** links, clusters, energy vectors, pools, jump status,
+  goals/normalization/time `dt`, the tracker index space, and resume are type shells or absent; `MemoryPlan`
+  currently plans the lattice/environment and counter arrays and each later feature appends its own arrays and
+  enforces its own caps; `ContextOptions` currently carries only `limits` (feature 4 adds
+  `build_jump_status`/`apply_optimizers`, feature 5 adds `resume`). No public Rust API break in this feature
+  (`DirectionPool`/`JumpLink` are untouched until feature 4). No new fixture and no `.msl`/manifest/signature
+  change.
+
+### Feature 2 evidence — link-csr-and-clusters
+
+- **Branch:** `feature/step-14-simulation-context-initialization/link-csr-and-clusters` (squashed; squash commit
+  recorded by the feature-3 row update).
+- **Scope delivered:**
+  - **Links:** the owner-major per-P1 forward CSR with the stable `(pair_id, partner_position, offset)` sort, the
+    compact per-P1 inverse routing index, and `i64` `rem_euclid` partner resolution. `partner_of`,
+    `incoming_owner`, `owner_link`, and `linked(a, b)` (either-direction membership, never a synthesised reverse
+    link) are exposed. Duplicate periodic images are kept; a link's inverse entry is its exact forward entry.
+  - **Clusters:** one instance per slot-0 link (`K`), the centre CSR, flat slot geometry, slot 0 = the centre
+    `[0,0,0]`, candidate-position resolution with the multi-centre member-site fallback, and fail-closed
+    `ClusterGeometry` for a slot-0 site span, a non-contiguous or duplicated slot, an absent or ambiguous member
+    image, the same link in two slots, or more than 9 slots.
+  - **Codes:** the raw 6-bit slot tuple (slot 0 least significant) is resolved only with
+    `ClusterTable::lookup`: `Canonical(index)` is stored, `MissingFromMap` is `MissingOccupationCode`, and
+    `ExpansionMapAbsent` is the distinct recompile-required error (both exit 12). No solver-side symmetry, tuple
+    sorting, or direct `occupation_codes` indexing. The context exposes `cluster_lookup`, `cluster_row`,
+    `cluster_code`, `cluster_code_id`, and the allocation-free `occupation_code`. The per-instance energy-row
+    prefix (`energy_start`) and the zeroed energy array are allocated; feature 3 fills the values.
+  - **Plan/caps:** `MemoryPlan` adds the forward/inverse link arrays and associations and every cluster array,
+    enforcing `max_pair_links`, `max_links_per_position`, `max_cluster_tables`, `max_cluster_instances`,
+    `max_link_bytes`, `max_cluster_state_bytes`, `max_cluster_energy_bytes`, and the `max_context_bytes` total
+    before the first allocation. The invariant sweep now compares every planned length with the built array and
+    re-checks the cluster associations (owner = centre, slot range, geometry).
+- **Invariant/fixture matrix:**
+
+| Fixture / case | Assertion |
+| --- | --- |
+| `msl-v1` ceria | offset arrays built, zero links/instances, plan/report 5508 B |
+| `step-13-centered` | 8 forward/inverse links equal the brute-force payload expansion; deterministic order; no cluster; 996 B |
+| `step-13-populated` KMC/MMC | 6 links, 6 inverse, three incoming at P0, both P2 duplicate images kept and sorted by table then offset; one cluster instance `[P1, P0, P2]` with zero offsets; 2 associations; initial code 4160 with no cluster row, `4161→0` and `4162→1`; 16 zeroed energy rows; MMC links/clusters equal KMC; 940 B |
+| `step-11-amend-2` | 10 links; one instance `[P0, P4, P1]`, slot cells `[0, [-1,0,0], 0]`; all eight raw assignments resolve `8322→0, 8323→1, 8386→2, 8387→3, 12418→2, 12419→3, 12482→4, 12483→5`; initial 8320 has no row; 1204 B |
+| `amend-2-pre-map` | initializes because the reached tuples are canonical; `8322/12418` resolve and `8386/8387` return `ExpansionMapAbsent`; a mutated lattice whose reached tuple is `8386` fails at initialization; removing a tuple from a present map returns `MissingOccupationCode` |
+| Synthetic multi-centre (the real centered model, no new package) | four slot-0 links give four instances `[P0,P1]`, `[P3,P2]`, `[P4,P5]`, `[P7,P6]`; the member-site fallback resolves the rotated images; centre CSR; four associations; codes 65 with canonical id 0 |
+| Hostile geometry / offsets | slot-0 site span, non-contiguous slot, duplicate slot, zero member link, ambiguous member link, slot 9, two slots on one link, missing table, and `i32::MIN`/`i32::MAX` offsets are all handled without panic (geometry fails closed; forward and inverse offsets wrap exactly, including the widened `-i32::MIN` inverse subtraction) |
+| Asymmetric table / missing reverse link | the forward link keeps the owner's table and row orientation; no reverse link is synthesised; `linked` is true only when a real link exists in either direction |
+| Shared forward link (synthetic two-table case) | one forward link carries associations from two instances; every association range is contiguous, grouped by link, and names the right instance/slot |
+| Determinism / caps | two initializations produce identical links and clusters; each link/cluster cap rejects with the documented `LimitExceeded` label, value, and limit before allocation |
+
+- **Plan arithmetic:** populated 940 B, `step-11-amend-2`/`amend-2-pre-map` 1204 B, `step-13-centered` 996 B,
+  `msl-v1` 5508 B; `MemoryReport` equals the plan on every entry and `capacity_bytes ≥ total_bytes`.
+- **Clarifications/limitations (recorded):**
+  - **D2-1 — unmapped centre particle.** `particle_table_mapping` is the allowed centre-particle list; a
+    particle outside it (void included) has no cluster row (data contract §3.3). `code_ids` stores
+    `NO_CLUSTER_CODE` (`u32::MAX`) for such a current centre particle, `cluster_row` returns `None`, and
+    `cluster_lookup` is defined only for a mapped centre particle (an unmapped one is an internal contract
+    violation, exit 13). This is required by the populated/amend-2 fixtures, whose centre is void at
+    initialization, and changes no format or physics.
+  - **D2-2 — initial-check scope.** Initialization resolves the current tuple for every instance/cell and the
+    tuple for every allowed centre particle with the actual member particles (the §6.3 scope). It does not
+    enumerate the complete allowed tuple product; a pre-map package whose reached tuples are canonical
+    initializes (the pre-map fixture does), and a non-canonical reached tuple fails at initialization (mutated
+    lattice test) or through `cluster_lookup` (direct eight-code tests). The reader's expansion-map budget still
+    bounds a hostile map, and no solver-side symmetry exists.
+  - **D2-3 — instance order.** Instances are ordered by ascending centre position, then table index; `centres`
+    therefore lists `0..K` grouped by position. The order is deterministic and fixes the assoc/code order.
+  - **D2-4 — zeroed energy array.** Feature 2 reserves the per-instance cluster energy array (zeroed) so the
+    plan, report, and cap are complete and feature 3 performs no reallocation; the values are feature 3's.
+- **No new fixture, format, manifest, signature, or public API break.** `DirectionPool`/`JumpLink` are untouched
+  until feature 4; the context accessors are additive.
+
+### Feature 3 evidence — energy-runtime-and-initial-energy
+
+- **Branch:** `feature/step-14-simulation-context-initialization/energy-runtime-and-initial-energy` (squashed;
+  squash commit recorded by the feature-4 row update).
+- **Scope delivered:**
+  - **Energy runtime:** `ev_to_kt = 1/(k_B_eV·T)`, `kT_eV`, `field_scale = |E|·1e-10/kT_eV`, the job's field
+    direction, the unit-cell site table `[P][pc]`, and the per-environment site+pair vectors `[env][pc]`, all in
+    kT. The temperature/kT/factor/field checks are `NonFiniteFactor` (exit 13); table lengths and used values are
+    `InvalidInput` (exit 12).
+  - **Exact total:** `U = Σ_stable site + 0.5·Σ_stable (vector − site) + Σ_instances Σ_cells cluster(centre)`
+    (Step 14 §7.4), stored as `lattice_energy_ev = U_kT · kT_eV`. The cluster term is instance × cell at the
+    centre particle, never folded into the site+pair vector and never halved.
+  - **Cluster energies:** the per-instance array is filled from the canonical code (slot 0 = the mapped centre
+    particle, members from the current geometry) through `ClusterTable::lookup`; a non-canonical tuple uses the
+    approved expansion map's canonical energy. A particle outside `particle_table_mapping` contributes zero.
+  - **APIs:** `node_energy(EnvId, ParticleId)`, `site_energy(PositionId, ParticleId)`,
+    `cluster_energy(instance, cell, ParticleId)`, `field_scale`, `field_direction`, `cell_vectors`,
+    `ev_to_kt`, `kt_ev`, and the independent `recompute_lattice_energy_kt` plus the debug-only
+    `check_lattice_energy` consistency assertion.
+  - **Plan:** the `energy.site` and `energy.vectors` entries and the `max_energy_vector_bytes` cap; every
+    planned length is checked against the built array in the invariant sweep.
+  - No cluster-geometry or lookup change; features 4–5 (pools/jump status, goals/resume) remain.
+- **Energy convention / fixture matrix:**
+
+| Case | Assertion |
+| --- | --- |
+| Toy site+pair (2 cells, P=1, pc=2) | site 2 eV, pair A–A 3 eV, two stable environments: `U = 4 + 0.5·6 = 7 eV`; `node_energy = 5 kT`, `site_energy = 2 kT`; the recomputation agrees; `field_scale` matches its formula; the identity cell vectors and direction are exposed |
+| Toy cluster | a two-slot cluster with 10 eV per centre adds 10 eV in each of the two cells: `U = 27 eV`; `cluster_energy` is 10 kT for the mapped centre and 0 for void |
+| Real fixtures | `msl-v1` 0 eV; `step-13-centered` 0 eV; `step-13-populated` −3.2 eV (its non-zero site background over 8 cells × (P0 −0.5 + P2 +0.1)); `step-11-amend-2` −8.0 eV (P1/P4 −0.5 each per cell); the independent recomputation agrees in every case |
+| Mutated populated (non-zero site/pair/cluster) | every `node_energy` equals a brute-force site + owner-link pair sum; every `cluster_energy` row equals the mapped table value; `lattice_energy_ev` equals the direct site + 0.5·pair + cluster sum |
+| Amend-2 non-canonical tuple | centre 2 with members (3,2) → raw 8386 → canonical index 2 → 3 kT; centre 3 → 8387 → index 3 → 4 kT; void centre → 0; total 20 eV |
+| Determinism | two initializations produce identical `EnergyRuntime` and totals |
+| Cap / non-finite | `energy.site` + `energy.vectors` = 864 B for populated; a cap of 863 rejects with exit 12 and 864 is accepted; `T = 0`/∞, infinite field, and a NaN direction each return `NonFiniteFactor` (exit 13) |
+- **Memory plan:** populated 1804 B, `step-11-amend-2`/`amend-2-pre-map` 2644 B, `step-13-centered` 3300 B,
+  `msl-v1` 40228 B. The two new entries are `energy.site` (P·pc·8 B) and `energy.vectors` (A·B·C·P·pc·8 B),
+  summed and capped by `max_energy_vector_bytes` (default 512 MiB) before allocation. Feature 2's recorded
+  totals (940/1204/996/5508 B) are its commit-time values; feature 3 adds these two entries.
+- **Clarifications/limitations (recorded):**
+  - **D3-1 — no converted table copies.** The audited memory plan has no pair/cluster table copies, so the model
+    keeps its eV tables. The context computes the factor once and stores every precomputed value (site, vectors,
+    cluster rows, total) in kT; `ev_to_kt()` is exposed so Step 15 scales a model eV delta exactly once per
+    delta. This is the audited plan's allocation set, and the physics is unchanged.
+  - **D3-2 — the static total has no field term.** §7.4 defines the lattice energy without the field; the
+    context supplies `field_scale`/`field_direction` for Step 15's per-rule transition term
+    (`-0.5·field_scale·(transport·ê)`), which is not a static site/pair/cluster contribution.
+  - **D3-3 — unmapped centre particles.** A centre particle outside `particle_table_mapping` (void included) has
+    no cluster row, so `cluster_energy` returns 0 (consistent with D2-1).
+  - **D3-4 — non-finite used table values.** The reader already rejects NaN/Inf table values; a synthetic model
+    that slips one through is rejected as `InvalidInput` (exit 12) when the value is used, never silently
+    propagated.
+- **No new fixture, format, manifest, signature, or public API break.**
+
+### Feature 4 evidence — selection-pools-and-jump-status
+
+- **Branch:** `feature/step-14-simulation-context-initialization/selection-pools-and-jump-status` (squashed;
+  squash commit recorded by the feature-5 row update).
+- **Scope delivered:**
+  - **Selection pools:** `SelectionPools` with supercell `PoolMember { env: EnvId, particle }`, a global
+    `slot[env·pc + particle]`, a P1 `pool_of[P·pc + particle]`, ascending direction-count pools, and
+    `selectable_jump_count`. Members are inserted in ascending environment order; each pool is created with the
+    capacity of every compiled-selectable `(environment, particle)` combination that could join it, so
+    `set_selectable` never reallocates. The selection mask filters the combinations; the job's optimizers remove
+    their `(P1, particle)` members after construction while leaving `pool_of` for re-entry; an MMC context has no
+    pools; KMC with no selectable combination returns `NoSelectableJumps`.
+  - **Direction filtering:** the `.msl` `jump_count`/`jump_mapping` are a union over all collections (the
+    populated fixture mixes KMC and MMC), so the pool direction count, `direction_for`, and the jump-status build
+    use only the job simulation's active collections. `direction_is_active` exposes the check; a KMC job never
+    offers an MMC direction.
+  - **Jump status:** receiver-major per-`(P1, direction)` CSR (`S = P·D`, `status = direction·P + position`),
+    built only for active directions (inactive statuses are empty). The receiver filter is the compiled
+    structural site stability, not the initial particle; a jump link is emitted only when the receiver's sorted
+    forward list has a link whose resolved partner is the sender (first sorted link wins); the link carries the
+    receiver's cluster associations. The per-status bound is `L·(L−1) ≤ 90`; the path is at most `max_path_nodes`.
+    `resolve_node`/`resolve_path` replace node 0 with the selected bucket and wrap the relative cell offsets;
+    `path_len`, `allowed_mask_of`, `rule`, and `collection_rules` complete the Step 16 interface.
+  - **Plan/caps:** `pools.headers/members/slot/pool_of` (members planned as reserved capacity) with `max_pools`
+    and `max_pool_bytes`; `jumps.offsets/links` added by the counting pass before allocation, with
+    `max_status_count`, `max_jump_links`, and `max_jump_status_bytes`. The final plan is stored and the report
+    matches it; the invariant sweep checks pool/member/slot consistency, status coverage, receiver links, the
+    structural filter, and every planned length.
+- **Public Rust API break (no format change):** `mocassin_types::DirectionPool` and its module/exports/tests are
+  removed; `mocassin_types::JumpLink` changes from `{ sender_path_id: i32, link_id: i32 }` to
+  `{ sender_path_id: u8, receiver_path_id: u8, link_id: u32 }` (8 bytes). `JumpStatus` remains. No reader
+  constructed the removed/changed container; the Step 13 page records the retirement.
+- **Invariants / fixtures / caps tests:**
+
+| Case | Assertion |
+| --- | --- |
+| `step-13-populated` KMC | one active direction per key (the MMC direction is filtered out); 1 pool of count 1, 16 members, `selectable_jump_count = 16`; the brute-force selectable count agrees; `direction_for(P0, O, 0) = dir0` and relative 1 is `None`; `direction_for` never returns the MMC dir 2 |
+| `step-11-amend-2` KMC | one pool of count 2, 16 members, selectable 32; relative 0/1 map to the two active directions and relative 2 is `None` |
+| Populated/centered MMC | pools empty, selectable 0, jump status empty |
+| Mask / optimizer | a changed mask removes the affected `(P1, particle)`; an optimizer removes every cell member but `pool_of` still allows `set_selectable` re-entry; the count/slot maps agree |
+| `set_selectable` | a particle change remove/adds the member, swap-remove updates the moved member's slot, the pool capacities/pointers do not change across 200 changes, and the count follows |
+| Multi-cell | members in different cells have distinct `slot` keys and the same P1 `pool_of` |
+| Jump status | for populated/amend-2 every active status equals a naive brute-force recomputation (sorted receiver link, structural filter); inactive statuses are empty; total links 4 (populated) and 8 (amend-2) |
+| Structural filter / clusters | P1 is unstable at init and excluded; setting it stable includes its void receiver; the receiver link carries the cluster associations (slot 1/2) without duplicating them in the jump link |
+| `resolve_node` | node 0 is the selected bucket; node cells wrap; the centered cross-bucket direction 3 at selected P2 resolves node 1 to P7; an out-of-range node is `None`; `resolve_path` fills a caller slice |
+| Ten-node bound | a synthetic 10-position, one-cell model with one 10-node direction yields exactly 90 jump links for status 0 (the `L·(L−1)` bound), all sender/receiver ids in `0..10` |
+| Caps | `max_pools`/`max_pool_bytes` (value 720, limit 719), `max_selectable_jump_count` (16/15), `max_status_count` (12/11), `max_jump_links` (4/3), and `max_jump_status_bytes` (84/83) reject before allocation |
+| Invalid path / no selectable | an out-of-cell path node and an 11-node path are `InvalidInput`; a job with every selection mask cleared is `NoSelectableJumps` (exit 12) |
+- **Plan totals (report):** at the feature-4 commit: populated KMC 2608 B (pools 720 + jumps 84 added to the feature-3 1804), populated
+  MMC 1804 B, `step-11-amend-2` 3800 B, `step-13-centered` 3300 B, `msl-v1` 64568 B; the report equals its
+  entries and capacity ≥ total. Feature 5 adds the `trackers.mobile_positions` entry; see its evidence for
+  the current totals.
+- **Clarifications/limitations (recorded):**
+  - **D4-1 — active-collection filtering.** The design's §8/§9 read `jump_count`/`jump_mapping` as the job's
+    direction table, but the payload tables are a union over collected kinds; the context filters the selection
+    and jump-status space to `simulation.jump_collection_ids`. Without this a KMC job would offer MMC directions.
+    This is a correctness correction, not a format change; the populated fixture is the evidence.
+  - **D4-2 — inactive statuses are empty.** The CSR keeps the global `direction·P + position` index space, but
+    statuses of inactive directions are never filled; the plan still counts `S = P·D`.
+  - **D4-3 — jump entries are planned at their phase.** `J` is only known after the receiver-link counting pass,
+    so the jump entries are appended/updated in the plan after that pass and before the `links` vector is
+    allocated; all caps (including the total) are checked then. The phase-0 plan contains zero jump entries.
+  - **D4-4 — `set_selectable` semantics.** The method sets the membership for a `(environment, particle)` from
+    the lattice's current particle at that environment: the arrived particle is inserted, the departed removed.
+    Callers update the particle first; `set_particle` is the raw mutator (flags/tracker/pool refresh is Step 15's
+    state application). The optimizer is a start condition and does not clear `pool_of`.
+- **No new fixture, format, manifest, or signature change.** The public Rust API break is the placeholder
+  retirement above.
+
+### Feature 5 evidence — goals-normalization-and-resume
+
+- **Branch:** `feature/step-14-simulation-context-initialization/goals-normalization-and-resume` (squashed;
+  squash commit recorded by the feature-6 row update).
+- **Scope delivered:**
+  - **Goals and counters:** `mobile_count` is the number of non-void environments; for KMC `prerun =
+    pre_run_mcsp × mobile_count`, `main = target_mcsp × mobile_count`, `total` rounded up to the next multiple of
+    100, `cycles_per_block = total / 100`. Every product, the sum, and the round-up are checked `u64`; overflow is
+    `InvalidInput { what: "goal overflow" }` (exit 12), a zero total is `InvalidInput { what: "total goal" }`
+    (exit 12), and zero mobile is `NoMobileParticles` (exit 12) checked after the lattice (before pools, so the
+    error is not masked by `NoSelectableJumps`). MMC goals are zero. Counters are zeroed fresh and restored on
+    resume (`per_particle`, `cycles`, `mcs`).
+  - **Tracker index space:** KMC `mobile_positions[id] = environment` (the inverse of the sequential mobile ids),
+    `static_trackers_per_cell`, `static_tracker_count = cells × per_cell` (checked against `u32`), the global
+    tracker count, the read-only static/global mappings, and `static_tracker_id(env, particle)`; MMC has an empty
+    index space. Step 18 owns tracker values.
+  - **Normalization/time:** `K_fix = 1` or `exp(E_norm/kT)`, `K_auto = 1/RawMax` while positive, `K_norm =
+    K_fix × K_auto` with the `K_fix` fallback, `nu_max` from the job cap or the maximum active-rule frequency,
+    `dof = 2` with `use_dual_dof_correction`, and `dt = dof × K_norm / (nu_max × selectable_count)`. Non-finite
+    `K_fix`/`K_norm`/`nu_max`/`dt` are `NonFiniteFactor` (exit 13). MMC uses unit factors, no `nu_max`/`dt`, and
+    time 0.
+  - **RNG/time/origin:** a fresh `Rng::from_seed(job.seed)` at time 0 (`ContextOrigin::Fresh`), or the exact
+    `Rng::from_state` stream and restored simulated time (`ContextOrigin::Resumed`); a bad stream is
+    `ContextError::RngState` (exit 13). `state_flags` is stored opaquely (0 fresh).
+  - **Resume:** `ResumeState`/`ResumePhase` with the parameterized `model_signature`, recomputed `seed_hash`, job
+    id/kind/dimensions/counts, per-particle counters, cycles/mcs, time, normalization, RNG blob, state flags, and
+    optional mobile mapping. The resumed particles drive the lattice flags, tracker index, pools, energy vectors,
+    cluster codes/energies, goals, and initial lattice energy; `job.lattice` remains the package lattice.
+    `AlreadyCompleted` is returned for a completed state (with the job's computed total goal) after full
+    validation. Every binding/value mismatch is `ResumeMismatch` (exit 12); the mobile mapping is re-derived and
+    compared when present.
+  - **Plan:** `trackers.mobile_positions` is updated after the lattice before its allocation; `plan == report`
+    and the invariant sweep checks goals, tracker bounds, normalization finiteness/`dt`, time, and the MMC
+    zero-time/goal rules.
+- **Goals/time/resume test matrix:**
+
+| Case | Assertion |
+| --- | --- |
+| Populated KMC | mobile 16; goals 800/1600/2400, block 24; counters zeroed; `K_fix=K_auto=K_norm=1`, `RawMax=0`, `nu_max=1e13`, `dof=2`, `dt=1.25e-14`, time 0, origin Fresh |
+| `msl-v1` ceria 6×6×6 job 1 (§17 acceptance) | mobile 648, selectable 432, goals 162000/97200/259200, block 2592, `dof=2`, `nu_max=1e13`, `dt=2/(1e13·432)` |
+| Round-up | `target=1, pre=0` → main 16, total 100, block 1; `pre=3, target=4` → total 200/block 2 |
+| Zero/overflow/mobile | zero total → `total goal`; `target=u64::MAX` or `pre=u64::MAX` → `goal overflow`; an all-void lattice → `NoMobileParticles` (exit 12) |
+| Normalization | `E_norm=0.05` gives `K_fix=exp(0.05/kT)` and the matching `dt`; a job cap 2e13 overrides `nu_max`; zero/NaN/negative caps and all-zero active rule frequencies → `NonFiniteFactor "nu_max"`; `E_norm=f64::MAX` → `K_fix` (exit 13) |
+| MMC | goals zero, unit factors, `nu_max=1`, `dof=1`, `dt=0`, time 0, no tracker index space |
+| Trackers | the mobile mapping is the exact inverse of the mobile ids; void environments have none; static count = cells × 9 and the static id formula; global count/mappings exposed; the plan entry is the mobile count |
+| Resume exact | counters/cycles/mcs/time/normalization/RawMax/state flags preserved; the lattice, mobile mapping, goals, energy, and RNG next draw equal the fresh context; `K_norm` preserved with a custom `RawMax=8` |
+| Resumed lattice | a changed resumed particle (env0 void) drives 15 mobile environments, 15 pool members, goals 750/1500/2300/23, recomputed energy, and a 15-element plan entry; the job's initial lattice is unchanged |
+| Completed | `AlreadyCompleted { mcs, total_goal }` with the job's computed total goal and no context |
+| Mismatches | model signature, seed hash, job id, kind, lattice size, position/particle counts, particle array length/index, time NaN/negative, counter length, `K_fix`/`K_auto`/`K_norm`/`RawMax`, and mobile mapping all reject with `ResumeMismatch` (exit 12); a completed state still validates the mapping |
+| MMC resume | time is forced to 0, goals zero, unit normalization, no tracker index space |
+- **Plan totals (report):** populated KMC 2672 B (the feature-4 2608 + 16 mobile positions × 4), populated MMC
+  1804 B, `step-11-amend-2` 3928 B, `step-13-centered` 3300 B, `msl-v1` 67160 B; report equals its entries and
+  capacity ≥ total.
+- **Clarifications/limitations (recorded):**
+  - **D5-1 — per-particle resume counters.** The design's `ResumeState.counters: ParticleCounters` is read as the
+    per-particle counter array (`Vec<ParticleCounters>`) because `.mcs` stores one counter entry per particle
+    (data contract §4.4); `cycles`/`mcs` remain separate. No format change.
+  - **D5-2 — a void cluster member has no row.** The `.msl` occupation table enumerates only the site's allowed
+    (non-void) particles; a cluster cell with a void member has no canonical code. Its `cluster_code_id` is
+    `None` and every energy row for that cell is 0 (the empty-cluster contribution), instead of failing the
+    initialization. This is physically the empty cluster and is exposed by the resumed-lattice test; Step 15 must
+    skip `cluster_lookup`/use the zero row for a void-member tuple. The amendment-2 fail-closed behavior for
+    non-canonical **non-void** tuples is unchanged.
+  - **D5-3 — resume drives state-dependent construction.** The resumed particles are used from the lattice phase
+    onward; the context's `job.lattice` remains the package lattice. This is why pools/energy/cluster codes/goals
+    match the resumed state.
+  - **D5-4 — tracker index is KMC-only.** MMC has empty/zero tracker index space, matching §10; the lattice's
+    mobile ids still exist internally for the generic arena.
+  - **D5-5 — `nu_max` classification.** A zero/NaN `nu_max` (job cap or active-rule maximum) is
+    `NonFiniteFactor` (exit 13), not a data error, per §11.1.
+  - **D5-6 — opaque state flags and API adjustment.** `state_flags` is exposed as a context field for Step 18
+    (0 fresh, restored on resume) because §12 says it is stored opaquely and Step 14 never interprets it. The
+    state-aware builders (`LatticeState::build`, `ClusterArena::build/build_code`, `ClusterArena::occupation_code`)
+    now take the particle slice; the public `SimulationContext::occupation_code(instance, cell, overrides)`
+    signature is unchanged. The static tracker count is checked against `u32` and fails closed
+    (`LimitExceeded { what: "static trackers" }`) for a supercell whose expanded count cannot be addressed.
+- **No new fixture, format, manifest, or signature change.**
+
+### Feature 6 evidence — fixtures-benchmarks-and-closeout
+
+- **Branch:** `feature/step-14-simulation-context-initialization/fixtures-benchmarks-and-closeout` (squashed as
+  `00fceabce7fa6d910cb79f701f175aa4b681bf5f`).
+- **Local gates (feature branch, exact commands):** `cargo fmt --manifest-path src/rust/Cargo.toml --all
+  --check` → OK; `cargo clippy --manifest-path src/rust/Cargo.toml --workspace --all-targets -- -D warnings` →
+  OK; `cargo test --manifest-path src/rust/Cargo.toml --workspace` → all test binaries pass (including
+  `context_fixtures` 3, `allocation` 1, `context_clusters` 17, `context_links` 13, `context_jumps` 10,
+  `context_pools` 10, `context_goals` 15, `context_resume` 7, `context_energy` 8, `context_skeleton` 9, and the
+  `Send`/`!Sync` doctests); `dotnet format Mocassin.slnx --verify-no-changes` → OK; `dotnet test
+  src/dotnet/Mocassin.Results.Tests/Mocassin.Results.Tests.csproj -c Release --filter
+  "FullyQualifiedName~Step14CeriaFixtureTests|FullyQualifiedName~Step14MultiCentreFixtureTests"` → 12 passed;
+  `./tools/verify.sh docs --require` → exit 0; `./tools/verify.sh structure --require` → 7 passed. The full
+  `./tools/verify.sh all --require` and the single closeout CI run are recorded at closeout.
+- **New fixtures (real .NET writer, fixed `created_utc = 2026-11-21T12:00:00Z`):**
+  - [`tests/contracts/packages/step-14-ceria-10x10x10`](../../../tests/contracts/packages/step-14-ceria-10x10x10/README.md)
+    — derived from `samples/step-14-ceria-10x10x10/` (a copy of the job sweep with one KMC job at 10×10×10).
+    5 particles, 4 P1 positions, 4 sites, no pair/cluster tables, 4,000 environments; `.msl` 98,304 B, SHA-256
+    `0865dd75...`, summary 2,026 B, payloads 3,475/4,061/530 B. The model signature is the msl-v1 ceria model.
+  - [`tests/contracts/packages/step-14-multi-centre-cluster`](../../../tests/contracts/packages/step-14-multi-centre-cluster/README.md)
+    — derived from `samples/step-14-multi-centre-cluster/` (the centred sample plus a third site C and an
+    A-centred two-member cluster); `step-13-centered` stays byte-identical. 4 particles, 12 P1 positions, 3
+    sites, 12 pair tables, 1 cluster table, 1 MMC job; `.msl` 98,304 B, SHA-256 `ace6f38e...`, summary 1,960 B.
+    The writer emits four slot-0 links (one per A position), so the context builds **four instances**; the Rust
+    test asserts the per-instance slots/codes and a per-instance code→energy mapping with a synthetic
+    distinct-energy table.
+  - **Model-validator deviation (recorded):** the project model's `ENM008` requires 2–8 surrounding offsets, so
+    the design's one-member cluster cannot be authored. The fixture uses two **distinct** member sites (B and C),
+    not two images of one member site (the rejected OD-1 ambiguity); this still exercises the multi-centre
+    member-site fallback and one instance per slot-0 link. `step-13-centered` is unchanged; the deviation is
+    fixture-only and is recorded for the audit.
+- **Context-summary snapshot / determinism:** `tests/context_fixtures.rs` snapshots the 10×10×10 summary
+  (kind, cell, counts, mobile/selectable, link histogram, cluster sizes, site/vector sums, total energy, pool
+  sizes, jump sizes, goals, normalization, trackers, time/origin/flags) and asserts two initializations have an
+  identical summary, memory report, energy, goals, normalization, RNG state, and flags. The committed snapshot is
+  `tests/snapshots/context_fixtures__step14_ceria_10x10x10.snap`.
+- **Allocation proof:** `tests/allocation.rs` (own test binary, counting global allocator). The 10×10×10 build
+  makes **98 allocations / 316,872 B** against a **308,632 B** plan (capacity equal to the plan); the populated
+  2×2×2 build makes 103 / 11,861 B against a 2,672 B plan. After construction the hot accessors
+  (`node_energy`, `site_energy`, `cluster_energy`, `cluster_code`, `link_range`, `incoming`, `jump_links`,
+  `mobile_positions`, mappings, `dt`, goals, normalization) and 200 pool `set_selectable` particle-change cycles
+  allocate **zero**; the pool capacities/pointers are unchanged. The test process peak RSS is 11,060 KiB
+  (`VmHWM`, non-gating context next to the memory report).
+- **Benchmark:** `benches/context.rs` (Criterion, release) measures the real-writer 10×10×10 fixture at
+  **75.565 µs** (CI 74.908–76.269) and the populated clone at **315.26 µs** (313.18–317.73); memory plans
+  **308,632 B** and **234,832 B** (capacities 308,632/234,864). Both are far below the `< 100 ms`/`≤ 64 MiB`
+  budgets. Evidence: `tests/reference/bench/step-14-context.json`, raw log
+  `step-14-context-2026-11-21.txt`, `rustContext` in `baselines.json` (runner class
+  `linux-x64-local-container-amd-ryzen-7-7840u-rust-1.99.1`).
+- **Documentation:** `solver-architecture.md` (implementation evidence, active directions, void-member rule),
+  `physics/energies.md` (void-member zero contribution), `performance/index.md` (context bench/allocation
+  numbers), `troubleshooting/errors.md` (context failures, exit 12/13/15 vs 14), `testing-and-parity.md`
+  (fixtures/tiers/allocation/snapshot), and `msl-format.md` (cluster geometry and void-member rule). The parity
+  matrix and status dashboard are updated; the Step 15 void-member rule is recorded.
+- **Closeout:** merged current `main` (`929327e`) as `8c09a8c`; `./tools/verify.sh all --require` exited **0** at
+  `8c09a8c` (2,007 .NET tests, the Rust workspace tests including `context_fixtures`/`allocation`, Python 3
+  passed and sdist/wheel built, docs links 196 files + Zensical strict + DocFX 0 errors + rustdoc clean,
+  contracts/policy, and the AOT evidence: the real CLI publish fails 62 IL2xxx/IL3xxx diagnostics and is
+  recorded as non-gating). The single Ubuntu closeout run
+  [44922414484](https://github.com/seb-eis/mocassin-2/actions/runs/44922414484) is green at `3fd4516`; the
+  audited commit and run are recorded in `docs/planning/closeout/step-14.json`; the audit request is
+  `docs/planning/audits/step-14.md`.
 
 ## Goal
 
@@ -637,12 +985,14 @@ Step 14 derives each instance's geometry from the payload and fails closed inste
 - **Fixtures (review F-36).** `step-13-populated` has one cluster centred on position 1 with members 0 and 2,
   each with a single `[0,0,0]` image (one slot-0 link); the other Step 13 fixtures have no cluster table. The
   new `step-14-multi-centre-cluster` package (feature 6) is built from the committed
-  `samples/step-14-multi-centre-cluster/step-14-multi-centre-cluster.mocprj` (a copy of the centred sample, so
-  the `step-13-centered` golden does not move) and has the full artifact set: `.msl`, `.sha256`,
+  `samples/step-14-multi-centre-cluster/step-14-multi-centre-cluster.mocprj` (a derivation of the centred sample
+  with a third stable site C; the `step-13-centered` package stays byte-identical) and has the full artifact set: `.msl`, `.sha256`,
   `package-summary-v1.json`, `payloads/index.json`, `payloads/model-1.bin`, a README with provenance (writer
   commit, SDK, `created_utc`, job count), a .NET rebuild test, and the usual regeneration command. Its centre
-  site owns four P1 positions, so it must yield four instances with per-instance codes/energies. It has one
-  member per instance; the **two-member non-P1 case that exercises F-29 is the amendment-2 ceria fixture**
+  site owns four P1 positions, so it must yield four instances with per-instance codes/energies. The two member
+  offsets resolve to **distinct member sites** (B and C) because the project-model `ENM008` validator requires
+  2–8 surrounding offsets; a one-member cluster is not authorable. The **two-member non-P1 case that exercises
+  F-29 is the amendment-2 ceria fixture**
   (`tests/contracts/packages/step-11-amend-2/`), not a second multi-centre package, because two images of one
   member site are the ambiguous case above. A synthetic distinct-energy table in the unit tests evidences the
   code→energy mapping, since the sample tables are zero.
@@ -1085,92 +1435,92 @@ row (§7.2). A link that is absent in both directions means the two environments
 
 ## 16. Implementation tasks
 
-- [ ] Create the `mocassin-solver` context module layout (§2.2 of `code-structure.md`) with the `ContextOptions`,
+- [x] Create the `mocassin-solver` context module layout (§2.2 of `code-structure.md`) with the `ContextOptions`,
       `ContextLimits`, `ContextError`, `MemoryPlan`/`MemoryReport`, `EnvId`, and `Dimensions`; make
       `Cargo.toml` match §22 (`mocassin-msl` dev-only; no `mocassin-state`, `mocassin-extension`, or `rayon`).
-- [ ] Implement the lattice/environment arenas, index/wrap helpers, flags, tracker id space, and cancellation.
-- [ ] Implement the memory plan (checked bytes for every derived array, per-array caps, total cap) and reject
+- [x] Implement the lattice/environment arenas, index/wrap helpers, flags, tracker id space, and cancellation.
+- [x] Implement the memory plan (checked bytes for every derived array, per-array caps, total cap) and reject
       before the first allocation.
-- [ ] Implement the owner-major per-P1 link CSR, the inverse routing index (i64 `rem_euclid` resolution),
+- [x] Implement the owner-major per-P1 link CSR, the inverse routing index (i64 `rem_euclid` resolution),
       partner resolution, sorting, and the cluster associations.
-- [ ] Implement the **one-instance-per-slot-0-link** cluster runtime: centre/member-site validation, the
+- [x] Implement the **one-instance-per-slot-0-link** cluster runtime: centre/member-site validation, the
       per-instance slot resolution (candidate position, then member-site image), the centre index, codes,
       code ids, and energies; reject an absent/ambiguous image with `ClusterGeometry`.
-- [ ] Consume the approved cluster-code expansion contract: build the raw tuple, call
+- [x] Consume the approved cluster-code expansion contract: build the raw tuple, call
       `ClusterTable::lookup`, store `Canonical(index)` as `code_id`, map `MissingFromMap` to
       `MissingOccupationCode` and `ExpansionMapAbsent` to the distinct recompile-required error; no solver-side
       symmetry and no direct `occupation_codes` fallback. Gate this task on the `step-11.1` merge (see §22).
-- [ ] Implement the site table, per-owner site+pair vectors, per-instance cluster energies, and the exact
+- [x] Implement the site table, per-owner site+pair vectors, per-instance cluster energies, and the exact
       initial lattice energy.
-- [ ] Implement the supercell selection pools (`EnvId` members, global slot map, `pool_of`, `max_pools` check,
+- [x] Implement the supercell selection pools (`EnvId` members, global slot map, `pool_of`, `max_pools` check,
       per-pool reserved capacity), mask/optimizer application, selectable count, and `set_selectable`.
-- [ ] Implement the per-`(P, direction)` receiver-major jump status (`sender_path_id`, `receiver_path_id`,
+- [x] Implement the per-`(P, direction)` receiver-major jump status (`sender_path_id`, `receiver_path_id`,
       `link_id`), the counting pass and caps, the derived bound, and `resolve_node`; retire the Step 13
       `DirectionPool`/`JumpLink` placeholders or adjust them as §8/§9.2 describes. Record the **public Rust API
       break** in the feature log and update the `mocassin-types` container invariant tests in the same feature.
-- [ ] Implement the goals (`total/100`, zero-total error), counters, `K_fix`/`K_auto`/`K_norm`, `nu_max`
+- [x] Implement the goals (`total/100`, zero-total error), counters, `K_fix`/`K_auto`/`K_norm`, `nu_max`
       (exit 13), `dof`, and `dt`.
-- [ ] Implement the resume hook (`ResumeState` with `seed_hash`, parameterized `model_signature`, validation,
+- [x] Implement the resume hook (`ResumeState` with `seed_hash`, parameterized `model_signature`, validation,
       re-derived mobile mapping, `AlreadyCompleted`).
-- [ ] Add the real-writer 10×10×10 acceptance fixture, the **multi-centre cluster fixture** derived from the
+- [x] Add the real-writer 10×10×10 acceptance fixture, the **multi-centre cluster fixture** derived from the
       centred sample, the populated-model 10×10×10 clone benchmark, context-summary snapshots, the allocation
       test, the `compile_fail` `!Sync` doctest, the hostile-offset test, and the `context` Criterion benchmark
       with a same-class baseline entry.
-- [ ] Update the documentation, parity rows, status dashboard, and closeout evidence; write the
+- [x] Update the documentation, parity rows, status dashboard, and closeout evidence; write the
       `msl-format.md`/`troubleshooting/errors.md` notes that carry the OD-1 writer follow-up.
 
 ## 17. Acceptance criteria
 
-- [ ] `msl-v1` job 1 (6×6×6 ceria) and `amend-1-net10` initialize a context whose mobile count, selectable count,
+- [x] `msl-v1` job 1 (6×6×6 ceria) and `amend-1-net10` initialize a context whose mobile count, selectable count,
       `prerun`/`main`/`total` goals, block size, `dt`, and tracker counts are asserted against computed values.
-- [ ] `step-13-populated` KMC and MMC jobs initialize; the pair link set and the inverse set equal a brute-force
+- [x] `step-13-populated` KMC and MMC jobs initialize; the pair link set and the inverse set equal a brute-force
       expansion of the payload for every supercell cell; the clustered energy vectors equal a direct table
       lookup; the MMC context has no pools/jump status/time.
-- [ ] `step-13-centered` initializes; a direction mapped into another start bucket resolves its path at the
+- [x] `step-13-centered` initializes; a direction mapped into another start bucket resolves its path at the
       selected bucket; the per-node allowed masks are exposed unchanged.
-- [ ] The multi-centre cluster fixture initializes with **one instance per slot-0 link** (four instances for the
+- [x] The multi-centre cluster fixture initializes with **one instance per slot-0 link** (four instances for the
       centred model's four-position centre site), each with its own slot positions, code, and centre energy; the
       per-instance codes equal a brute-force rebuild from the instance's slots; the committed sample, package
       summary/SHA-256/payload set, README provenance, .NET rebuild test, and regeneration command are present
       (§6.4/F-36).
-- [ ] The amendment-2 two-member ceria fixture (`step-11-amend-2`) resolves **all eight** raw assignments,
+- [x] The amendment-2 two-member ceria fixture (`step-11-amend-2`) resolves **all eight** raw assignments,
       including the two non-canonical ones; the pre-map fixture returns the distinct `ExpansionMapAbsent`
       (recompile-required) error for those two, and a present map that lacks a tuple returns
       `MissingOccupationCode`; the context never re-derives symmetry (review F-29).
-- [ ] A multi-centre member whose image is absent or ambiguous returns the documented `ClusterGeometry` (exit 12)
+- [x] A multi-centre member whose image is absent or ambiguous returns the documented `ClusterGeometry` (exit 12)
       naming the instance, slot, and member site; a unique rotated multi-centre image is **accepted**, not
       reported as a cross-image (review F-35).
-- [ ] A transition evaluated on a package whose pair table is **asymmetric** (`t[a][b] ≠ t[b][a]`) and that has
+- [x] A transition evaluated on a package whose pair table is **asymmetric** (`t[a][b] ≠ t[b][a]`) and that has
       no reverse link produces the owner-major delta; the result differs from the sender-major delta that the
       draft would have produced.
-- [ ] A pool contains members in two different supercell cells; selecting, removing, and re-adding each member
+- [x] A pool contains members in two different supercell cells; selecting, removing, and re-adding each member
       addresses the right environment and never collides in the slot map; no pool insert reallocates (reserved
       capacity).
-- [ ] A hostile package with `i32::MIN`/`i32::MAX` pair offsets initializes or fails cleanly, never panics, and
+- [x] A hostile package with `i32::MIN`/`i32::MAX` pair offsets initializes or fails cleanly, never panics, and
       the wrapped target is correct.
-- [ ] The 10×10×10 real-writer fixture initializes in `< 100 ms` (release, warm, same-runner-class) and the
+- [x] The 10×10×10 real-writer fixture initializes in `< 100 ms` (release, warm, same-runner-class) and the
       reported memory total is within budget; the populated-model 10×10×10 clone is measured in the same run
       and recorded, because the ceria fixture has no pair/cluster tables.
-- [ ] The initial lattice energy matches a hand-computed site/pair/cluster system exactly on a **multi-cell**
+- [x] The initial lattice energy matches a hand-computed site/pair/cluster system exactly on a **multi-cell**
       lattice (at least two cells), so the instance × cell cluster sum is exercised (review F-33).
-- [ ] A job with `target_mcsp`/`pre_run_mcsp` values whose products or sum overflow `u64` returns the documented
+- [x] A job with `target_mcsp`/`pre_run_mcsp` values whose products or sum overflow `u64` returns the documented
       exit-12 `InvalidInput` (`goal overflow`), never a wrapped goal (review F-37).
-- [ ] The context summary (counts, link histogram, pool sizes, jump-status sizes, goals, `dt`) is byte-identical
+- [x] The context summary (counts, link histogram, pool sizes, jump-status sizes, goals, `dt`) is byte-identical
       across two initializations of the same package.
-- [ ] `MemoryPlan` rejects an over-cap package before any allocation; `plan == report` on planned lengths; the
+- [x] `MemoryPlan` rejects an over-cap package before any allocation; `plan == report` on planned lengths; the
       capacity diagnostic is recorded.
-- [ ] `SimulationContext` is `Send` and not `Sync` (the `compile_fail` doctest fails to compile).
-- [ ] Zero selectable directions, zero mobile particles, a zero total goal, a bad cluster geometry, a missing
+- [x] `SimulationContext` is `Send` and not `Sync` (the `compile_fail` doctest fails to compile).
+- [x] Zero selectable directions, zero mobile particles, a zero total goal, a bad cluster geometry, a missing
       occupation code, a context-limit overflow, a cancelled initialization, and a mismatched resume each return
       the documented
       error/exit.
-- [ ] Resume restores lattice, counters, RNG, time, and normalization exactly; `RawMax` is preserved; a
+- [x] Resume restores lattice, counters, RNG, time, and normalization exactly; `RawMax` is preserved; a
       completed state returns `AlreadyCompleted`.
-- [ ] A counting allocator observes zero allocations in the hot accessors and the pool add/remove helpers after
+- [x] A counting allocator observes zero allocations in the hot accessors and the pool add/remove helpers after
       construction.
-- [ ] `MemoryReport` reports each array's planned length × `size_of` and equals the plan (`plan == report`);
+- [x] `MemoryReport` reports each array's planned length × `size_of` and equals the plan (`plan == report`);
       summed capacity bytes are a diagnostic (`>=` plan), not the equality target (review F-32).
-- [ ] Documentation written: `solver-architecture.md` (context section), `physics/energies.md` (total-energy
+- [x] Documentation written: `solver-architecture.md` (context section), `physics/energies.md` (total-energy
       convention), `performance/index.md` (context budget), `troubleshooting/errors.md` (context failures),
       `testing-and-parity.md` (tiers/fixtures), `msl-format.md` (cluster-link limitation and runtime expansion).
 
@@ -1214,9 +1564,14 @@ second fixture. Because the ceria writer fixture has no pair or cluster tables, 
 measurement for the pair/cluster-scale budget (§20), not the real-writer fixture.
 
 Feature 6 also adds `tests/contracts/packages/step-14-multi-centre-cluster/`, a real-writer test artifact built
-from the committed `samples/step-14-multi-centre-cluster/step-14-multi-centre-cluster.mocprj` (a copy of the
-centred sample, so the `step-13-centered` golden does not move) with one cluster centred on the four-position
-site and **one member** on the other site. The artifact set is the same shape as the 10×10×10 fixture: `.msl`,
+from the committed `samples/step-14-multi-centre-cluster/step-14-multi-centre-cluster.mocprj` (a derivation of
+the centred sample, which stays byte-identical, so the `step-13-centered` golden does not move) with one cluster
+centred on the four-position site and **two distinct member sites** (B and C). The project model's `ENM008`
+validator requires 2–8 surrounding offsets, so the design's literal one-member cluster cannot be authored; using
+two **images of one member site** is the rejected ambiguous OD-1 case, so the implemented fixture adds a third
+stable site C and two distinct member offsets (`[0,0,0.05]`, `[0,0,0.1]`). This is a recorded fixture-authoring
+deviation; it still exercises the multi-centre member-site fallback and the four slot-0 links unchanged. The
+artifact set is the same shape as the 10×10×10 fixture: `.msl`,
 `.sha256`, `package-summary-v1.json`, `payloads/index.json`, `payloads/model-1.bin`, a README with provenance
 (writer commit, SDK, `created_utc`, job count), a .NET rebuild test, and the regeneration command. It is the F-17
 acceptance fixture: the centre site's four P1 positions produce four slot-0 links, hence four runtime instances,

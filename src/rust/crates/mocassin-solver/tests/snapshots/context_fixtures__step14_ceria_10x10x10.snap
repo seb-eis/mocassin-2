@@ -1,0 +1,14 @@
+---
+source: crates/mocassin-solver/tests/context_fixtures.rs
+expression: first
+---
+kind=Kmc
+cell=10x10x10 p=4 pc=5 envs=4000
+mobile=3000 selectable=2000 members=2000
+links=0 per_owner=[0, 0, 0, 0]
+clusters instances=0 codes=0 energy_rows=0 cluster_sum=-0.000000
+site=0 vector=0 energy_ev=0.000000000
+pools=[(1, 2000)] jumps=[0, 0, 0, 0, 0, 0, 0, 0]
+goals=Goals { prerun: 750000, main: 450000, total: 1200000, cycles_per_block: 12000 }
+normalization=Normalization { k_fix: 1.0, k_auto: 1.0, raw_max: 0.0, k_norm: 1.0, nu_max: 10000000000000.0, dof: 2, dt: 1e-16 }
+trackers mobile=3000 static=16000 global=2 time=0 origin=Fresh flags=0

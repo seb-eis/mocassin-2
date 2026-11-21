@@ -15,10 +15,15 @@ workspace = true
 
 [dependencies]
 mocassin-types.workspace = true
-mocassin-msl.workspace = true
 mocassin-rng.workspace = true
-mocassin-state.workspace = true
-mocassin-extension.workspace = true
 thiserror.workspace = true
 tracing.workspace = true
-rayon.workspace = true
+
+[dev-dependencies]
+criterion.workspace = true
+insta.workspace = true
+mocassin-msl.workspace = true
+
+[[bench]]
+name = "context"
+harness = false

@@ -104,6 +104,12 @@ design (D-3) and covered by a hand-computed test and the Step 29 parity work. En
 solver and converted to eV only at output boundaries; the initial total is computed once at context
 initialization (Step 14) and maintained incrementally by the energy engine (Step 15).
 
+A cluster cell whose centre or member slot is **void** has no canonical occupation row: the `.msl` table
+enumerates only the site's allowed non-void particles. Its cluster contribution is zero (the empty cluster), not a
+missing-code error. The energy engine must not call the cluster lookup for such a tuple; the context exposes an
+absent `cluster_code_id` and a zero energy row for that cell. The multi-centre instance fixture and the
+resumed-lattice test cover the rule.
+
 ## Units
 
 Model and parameter tables use electronvolts (eV). The solver converts to thermal units once per job.

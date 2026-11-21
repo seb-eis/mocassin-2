@@ -1,0 +1,265 @@
+{
+  "$schema": "https://mocassin.dev/schemas/project-v1.json",
+  "schemaVersion": 1,
+  "projectId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9d01",
+  "masterSeed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "name": "Step 14 multi-centre cluster",
+  "description": "A derivation of the Step 13 centered sample with a third site C and a two-member A-centred cluster (member sites B and C); the Step 14 multi-centre instance fixture.",
+  "createdUtc": "2026-11-21T12:00:00.0000000Z",
+  "modifiedUtc": "2026-11-21T12:00:00.0000000Z",
+  "model": {
+    "particles": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f10",
+        "name": "O2-",
+        "symbol": "O",
+        "charge": -2,
+        "isVacancy": false
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f11",
+        "name": "Vacancy",
+        "symbol": "Vc",
+        "charge": 0,
+        "isVacancy": true
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f12",
+        "name": "Proton",
+        "symbol": "H",
+        "charge": 1,
+        "isVacancy": false
+      }
+    ],
+    "particleSets": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f13",
+        "name": "Exchange site",
+        "particleIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f10",
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f11"
+        ]
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f14",
+        "name": "Exchange site extended",
+        "particleIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f10",
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f11",
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f12"
+        ]
+      }
+    ],
+    "structure": {
+      "name": "C-centered exchange",
+      "spaceGroup": {
+        "number": 5,
+        "axis": "uniqueAxisB",
+        "origin": "none"
+      },
+      "cell": {
+        "a": 5.0,
+        "b": 6.0,
+        "c": 7.0,
+        "alpha": 90.0,
+        "beta": 100.0,
+        "gamma": 90.0
+      },
+      "sites": [
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f05",
+          "name": "A",
+          "fractional": [
+            0.1,
+            0.2,
+            0.3
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f13",
+          "stability": "stable"
+        },
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "name": "B",
+          "fractional": [
+            0.1,
+            0.2,
+            0.35
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f14",
+          "stability": "stable"
+        },
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "name": "C",
+          "fractional": [
+            0.1,
+            0.2,
+            0.4
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f14",
+          "stability": "stable"
+        }
+      ]
+    },
+    "stateChanges": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000d21",
+        "name": "O -> vacancy",
+        "donorParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f10",
+        "acceptorParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f11"
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000d22",
+        "name": "Vacancy -> O",
+        "donorParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f11",
+        "acceptorParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f10"
+      }
+    ],
+    "stateChangeGroups": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000d31",
+        "name": "Exchange",
+        "stateChangeIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-000000000d21",
+          "018f4c9a-7f6b-7c3a-9d2e-000000000d22"
+        ]
+      }
+    ],
+    "chains": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000d42",
+        "name": "2-site exchange",
+        "pattern": "metropolis2",
+        "groupIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-000000000d31",
+          "018f4c9a-7f6b-7c3a-9d2e-000000000d31"
+        ],
+        "linkers": [
+          "dynamic"
+        ],
+        "generatesReverse": true
+      }
+    ],
+    "metropolisTransitions": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000d61",
+        "name": "A/B exchange",
+        "chainId": "018f4c9a-7f6b-7c3a-9d2e-000000000d42",
+        "siteAId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f05",
+        "siteBId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06"
+      }
+    ],
+    "simulations": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f71",
+        "name": "Exchange 1000 K",
+        "kind": "mmc",
+        "metropolisTransitionIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-000000000d61"
+        ],
+        "settings": {
+          "temperatureK": 1000,
+          "targetMcsp": 100,
+          "writeOutCount": 10,
+          "timeLimitSeconds": 31536000,
+          "minSuccessRate": null,
+          "jobCount": 5,
+          "rngSeed": null,
+          "executionFlags": [],
+          "instruction": null,
+          "breakTolerance": 0.05,
+          "breakSampleLengthMcsp": 1000,
+          "breakSampleIntervalMcsp": 100,
+          "resultSampleMcsp": 200
+        }
+      }
+    ],
+    "clusters": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9d70",
+        "name": "A-centred multi-centre cluster",
+        "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f05",
+        "offsetVectors": [
+          [
+            0.0,
+            0.0,
+            0.05
+          ],
+          [
+            0.0,
+            0.0,
+            0.1
+          ]
+        ]
+      }
+    ]
+  },
+  "parameterizations": [],
+  "jobTemplates": [
+    {
+      "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9c10",
+      "name": "Centered exchange job",
+      "collections": [
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9c11",
+          "name": "C1000",
+          "simulationId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f71",
+          "baseSettings": {
+            "temperatureK": 1000.0
+          },
+          "jobCountPerConfig": 1,
+          "configs": [
+            {
+              "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9c12",
+              "name": "x001",
+              "lattice": {
+                "a": 2,
+                "b": 2,
+                "c": 2
+              },
+              "dopings": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "buildTemplates": [],
+  "viewSettings": {
+    "camera": {
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "target": [
+        0,
+        0,
+        -1
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "projection": "perspective",
+      "fieldOfViewDegrees": 45,
+      "nearPlane": 0.1,
+      "farPlane": 1000
+    },
+    "renderBox": {
+      "min": [
+        -1,
+        -1,
+        -1
+      ],
+      "max": [
+        1,
+        1,
+        1
+      ],
+      "visible": true
+    },
+    "objectStyles": []
+  }
+}

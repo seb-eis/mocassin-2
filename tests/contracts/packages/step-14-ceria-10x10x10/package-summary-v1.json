@@ -1,0 +1,73 @@
+{
+  "format": "mocassin.package-summary",
+  "formatVersion": 1,
+  "schema": {
+    "formatVersion": 1,
+    "projectId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9d00",
+    "jobSelection": "all",
+    "symmetryContractVersion": "symmetry-1",
+    "spaceGroupDataVersion": "spglib-2.8.0/catalog-1",
+    "spaceGroupDataSha256": "1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395"
+  },
+  "models": [
+    {
+      "signature": "1845b70e82320d75f768b33d1a9a46a8ae6170c33ad96013317f89fe9189a74b",
+      "modelSignature": "92cf375eb1cc9bf6efaac33430fa3d44660ad8a7b355d3976441ce7c1d683e60",
+      "payloadFormatVersion": 1,
+      "particleCount": 5,
+      "positionCount": 4,
+      "siteCount": 4,
+      "environmentCount": 4,
+      "pairTableCount": 0,
+      "clusterTableCount": 0,
+      "collectionCount": 1,
+      "ruleCount": 4
+    }
+  ],
+  "lattices": [
+    {
+      "signature": "867a313522a3e8741cef9622fb0f6a90ae9a222845fc27e30628f7364b3040e1",
+      "latticeSize": [
+        10,
+        10,
+        10
+      ],
+      "positionCount": 4,
+      "latticeLength": 4000
+    }
+  ],
+  "jobs": [
+    {
+      "jobId": 1,
+      "modelSignature": "92cf375eb1cc9bf6efaac33430fa3d44660ad8a7b355d3976441ce7c1d683e60",
+      "latticeSignature": "867a313522a3e8741cef9622fb0f6a90ae9a222845fc27e30628f7364b3040e1",
+      "kind": "kmc",
+      "collectionName": "T773",
+      "configName": "x001",
+      "collectionIndex": 0,
+      "configIndex": 0,
+      "jobIndex": 0,
+      "temperatureK": 773,
+      "electricFieldVm": 10000000,
+      "targetMcsp": 150,
+      "writeOutCount": 100,
+      "preRunMcsp": 250,
+      "timeLimitS": 31536000,
+      "minSuccessRate": null,
+      "latticeSize": [
+        10,
+        10,
+        10
+      ],
+      "dopingInfo": "v1:018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9c07:0:10:10:5:0.01",
+      "flags": 114,
+      "seedHex": "979cab2a2e9a07b2cbbd3e7c0aae5b568118cd84cf6f5e7be22720bdb43e4170"
+    }
+  ],
+  "counts": {
+    "modelCount": 1,
+    "latticeCount": 1,
+    "jobCount": 1,
+    "latticeReuseFactor": 1
+  }
+}
