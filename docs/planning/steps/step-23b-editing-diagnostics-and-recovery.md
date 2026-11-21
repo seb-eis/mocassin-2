@@ -22,7 +22,7 @@ review record is [`reviews/step-23b.md`](../reviews/step-23b.md).
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** **Re-review required** — round 2 returned `Changes required`; the round-3 freeze is in
+- **Design review:** **Re-review required** — round 2 returned `Changes required`; the current freeze is in
   [`reviews/step-23b.md`](../reviews/step-23b.md). The owner decisions of 2026-11-21 are recorded there and in
   §17.2.
 - **Feature list:** **Approved by the human owner 2026-11-21** (four features; the list below is the approved
