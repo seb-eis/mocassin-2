@@ -39,7 +39,7 @@ branch is `step/23b-editing-diagnostics-and-recovery`. The review record is
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| 1 | Edit pipeline and undo/redo | — | Planned | — | — | — |
+| 1 | Edit pipeline and undo/redo | `feature/step-23b-editing-diagnostics-and-recovery/edit-pipeline-and-undo-redo` | In progress | — | — | — |
 | 2 | Validation surface | — | Planned | — | — | — |
 | 3 | Dirty state, autosave, crash recovery | — | Planned | — | — | — |
 | 4 | 23B tests, documentation, and closeout | — | Planned | — | — | — |

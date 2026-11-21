@@ -58,6 +58,8 @@ Mocassin.Core.Editing.ProjectDocument.LastSavedProject.get -> Mocassin.Core.Proj
 Mocassin.Core.Editing.ProjectDocument.MarkAutosaved(System.DateTimeOffset now) -> void
 Mocassin.Core.Editing.ProjectDocument.MarkSaved() -> void
 Mocassin.Core.Editing.ProjectDocument.MarkSaved(Mocassin.Core.Project.Project! savedProject) -> void
+Mocassin.Core.Editing.ProjectDocument.MaxUndoDepth.get -> int
+Mocassin.Core.Editing.ProjectDocument.MaxUndoDepth.init -> void
 Mocassin.Core.Editing.ProjectDocument.Project.get -> Mocassin.Core.Project.Project!
 Mocassin.Core.Editing.ProjectDocument.ProjectDocument(Mocassin.Core.Project.Project! project, Mocassin.Core.Editing.ProjectEditor? editor = null) -> void
 Mocassin.Core.Editing.ProjectDocument.Redo() -> bool

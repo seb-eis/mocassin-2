@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Editing;
 using Mocassin.App.ViewModels.Documents;
+using Mocassin.App.ViewModels.Editing;
 using Mocassin.Core.Project;
 using Mocassin.Packages.Projects;
 using Mocassin.Packages.Projects.Validation;
@@ -15,6 +16,8 @@ namespace Mocassin.App.ViewModels.Projects;
 /// </summary>
 internal sealed class ProjectSession
 {
+    private bool isReadOnly;
+
     private ProjectSession(
         ProjectDocument document,
         string path,
@@ -28,17 +31,23 @@ internal sealed class ProjectSession
         Document = document;
         Path = path;
         LastWrittenUtc = lastWrittenUtc;
-        IsReadOnly = isReadOnly;
+        this.isReadOnly = isReadOnly;
         LockPath = lockPath;
         LoadDiagnostics = loadDiagnostics.IsDefault ? ImmutableArray<Diagnostic>.Empty : loadDiagnostics;
         Validation = validation;
         Stamp = stamp;
+        EditCoordinator = new ProjectEditCoordinator(document, canEdit: !isReadOnly);
     }
 
     /// <summary>
     /// Gets the mutable project document.
     /// </summary>
     public ProjectDocument Document { get; internal set; }
+
+    /// <summary>
+    /// Gets the single edit coordinator over <see cref="Document"/>.
+    /// </summary>
+    public ProjectEditCoordinator EditCoordinator { get; }
 
     /// <summary>
     /// Gets the current immutable project.
@@ -68,7 +77,20 @@ internal sealed class ProjectSession
     /// <summary>
     /// Gets a value indicating whether the session is read-only.
     /// </summary>
-    public bool IsReadOnly { get; internal set; }
+    public bool IsReadOnly
+    {
+        get => isReadOnly;
+        internal set
+        {
+            if (isReadOnly == value)
+            {
+                return;
+            }
+
+            isReadOnly = value;
+            EditCoordinator.SetCanEdit(!value);
+        }
+    }
 
     /// <summary>
     /// Gets the lock path, whether or not this session owns the lock.
@@ -155,7 +177,7 @@ internal sealed class ProjectSession
             throw new ArgumentException("A session cannot be created from a failed load.", nameof(load));
         }
 
-        var document = new ProjectDocument(load.Project);
+        var document = new ProjectDocument(load.Project) { MaxUndoDepth = 200 };
         var validation = pipeline.Validate(load.Project, load.Diagnostics);
         return new ProjectSession(
             document,

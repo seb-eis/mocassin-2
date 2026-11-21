@@ -18,6 +18,7 @@ public sealed class ProjectDocument
     private readonly ProjectEditor editor;
     private readonly List<ProjectChange> undoStack = [];
     private readonly List<ProjectChange> redoStack = [];
+    private int maxUndoDepth;
     private DateTimeOffset? lastAutosaveUtc;
 
     /// <summary>
@@ -62,6 +63,31 @@ public sealed class ProjectDocument
     public bool CanRedo => redoStack.Count > 0;
 
     /// <summary>
+    /// Gets or initializes the maximum number of retained undo entries; <c>0</c> means unbounded.
+    /// </summary>
+    /// <remarks>
+    /// The GUI initializes documents with a finite bound (200); the library default keeps Step 01's unbounded
+    /// behaviour. Overflow drops the oldest entries first. Redo entries are bounded by the same value.
+    /// </remarks>
+    /// <exception cref="ArgumentOutOfRangeException">The value is negative.</exception>
+    public int MaxUndoDepth
+    {
+        get => maxUndoDepth;
+        init
+        {
+            if (value < 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(value),
+                    value,
+                    "The maximum undo depth must be zero (unbounded) or positive.");
+            }
+
+            maxUndoDepth = value;
+        }
+    }
+
+    /// <summary>
     /// Gets the current undo stack in oldest-first order.
     /// </summary>
     public ImmutableArray<ProjectChange> UndoStack => [.. undoStack];
@@ -91,6 +117,7 @@ public sealed class ProjectDocument
         }
 
         undoStack.Add(result.Change);
+        TrimUndoStack();
         redoStack.Clear();
         Project = result.Project;
         return result;
@@ -128,8 +155,23 @@ public sealed class ProjectDocument
         var change = redoStack[^1];
         redoStack.RemoveAt(redoStack.Count - 1);
         undoStack.Add(change);
+        TrimUndoStack();
         Project = change.After;
         return true;
+    }
+
+    private void TrimUndoStack()
+    {
+        if (maxUndoDepth == 0)
+        {
+            return;
+        }
+
+        var overflow = undoStack.Count - maxUndoDepth;
+        if (overflow > 0)
+        {
+            undoStack.RemoveRange(0, overflow);
+        }
     }
 
     /// <summary>

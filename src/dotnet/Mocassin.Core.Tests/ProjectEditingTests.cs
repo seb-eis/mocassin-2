@@ -172,6 +172,53 @@ public sealed class ProjectEditingTests
         Assert.False(document.IsDirty);
     }
 
+    [Fact]
+    public void MaxUndoDepthRejectsNegativeAndZeroIsUnbounded()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => new ProjectDocument(CreateProject()) { MaxUndoDepth = -1 });
+
+        var document = new ProjectDocument(CreateProject()) { MaxUndoDepth = 0 };
+        Assert.Equal(0, document.MaxUndoDepth);
+        for (var index = 0; index < 5; index++)
+        {
+            document.Apply(
+                $"Rename {index}",
+                project => project with { Metadata = project.Metadata with { Name = $"Name {index}" } });
+        }
+
+        for (var index = 0; index < 5; index++)
+        {
+            Assert.True(document.Undo());
+        }
+
+        Assert.False(document.CanUndo);
+        Assert.Equal("Ceria", document.Project.Metadata.Name);
+    }
+
+    [Fact]
+    public void MaxUndoDepthDropsTheOldestEntriesFirst()
+    {
+        var document = new ProjectDocument(CreateProject()) { MaxUndoDepth = 2 };
+
+        for (var index = 1; index <= 3; index++)
+        {
+            document.Apply(
+                $"Rename {index}",
+                project => project with { Metadata = project.Metadata with { Name = $"Name {index}" } });
+        }
+
+        Assert.Equal(2, document.UndoStack.Length);
+        Assert.Equal("Rename 2", document.UndoStack[0].Description);
+        Assert.Equal("Rename 3", document.UndoStack[1].Description);
+
+        Assert.True(document.Undo());
+        Assert.Equal("Name 2", document.Project.Metadata.Name);
+        Assert.True(document.Undo());
+        Assert.Equal("Name 1", document.Project.Metadata.Name);
+        Assert.False(document.CanUndo);
+    }
+
     private static ProjectModel CreateProject()
     {
         return new ProjectModel(
