@@ -466,3 +466,23 @@ The round-1 audit read the code, tests, fixtures, docs, ADRs, contracts, and the
 commit, ran `./tools/verify.sh all --require` and the targeted .NET/Rust tests, reproduced the one-time forward read
 with the parent `bbc2d08` toolchain, and verified the closeout CI via the GitHub API. The two Minor findings are
 documentation-only. `step-11` remains at `84ceb76`; no `step-11.1` tag was created.
+
+## Final resolution — accepted, merged, and tagged (2026-11-21)
+
+Recorded by the step agent after the owner decision. This is a status record only; the reviewer's `Findings`,
+`Evidence`, `Verdict`, and `Audit rounds` text above are unchanged.
+
+| Item | Value |
+| --- | --- |
+| Owner decision | The human owner **accepted `Passed with notes` on 2026-11-21** together with the A2A-01/A2A-02 corrections and the A2A-03 Note, and approved the `--no-ff` merge and the `step-11.1` tag |
+| Resolutions | A2A-01, A2A-02, and A2A-03 **fixed** in the docs-only resolutions commit (`b0e8898`); see `Resolution status` |
+| Merge | `--no-ff` into `main` as `58c8e9afb68916aaa09d1105de5631659356cadf` (`step-11.1: add the cluster occupation code expansion map`; parents `63cdd06` and `b0e8898`) |
+| Main CI | [`44912274715`](https://github.com/seb-eis/mocassin-2/actions/runs/44912274715) — automatic `main` run, `success` at `58c8e9afb68916aaa09d1105de5631659356cadf` |
+| Tag | Annotated `step-11.1` → `58c8e9afb68916aaa09d1105de5631659356cadf` (pushed 2026-11-21); `step-11` is unchanged at `84ceb76eaa3e14c7cbe42c7ccbdc9842611891bc` |
+| Maintenance branch | `fix/step-11.1-cluster-code-expansion` merged and deleted locally and remotely |
+
+This record remains the single evidence source for the post-merge amendment (A2-07);
+`docs/planning/closeout/step-11.json` stays historical and the closeout-evidence checker is not run for
+`step-11.1`. The merge, the green `main` CI run, and the tag complete the round-1 post-merge conditions; no code,
+test, fixture, format, or contract file changed after the audited commit
+`ef568beca62f6f51559460d01ba5627219e90345`.

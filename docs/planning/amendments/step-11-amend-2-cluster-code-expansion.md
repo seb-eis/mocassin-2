@@ -6,13 +6,13 @@
 | --- | --- |
 | Amendment ID | `step-11-amend-2` |
 | Parent step | 11 — Simulation Package and `.msl` Writer |
-| Status | Ready for audit — implementation branch frozen; design review round 4 `Ready for implementation` at `bf273ff`; A2-07 process change and the `step-11.1` path owner-approved 2026-11-21 |
-| Branch | `fix/step-11.1-cluster-code-expansion` (implementation); `docs/step-11-amend-2` design merged into `main` as `2f3a6fe` |
+| Status | **Merged and tagged `step-11.1`** — audit round 1 `Passed with notes` at `ef568be`, accepted by the owner 2026-11-21; A2A-01–A2A-03 fixed in `b0e8898`; merged into `main` as `58c8e9a`; main CI `44912274715` green |
+| Branch | `fix/step-11.1-cluster-code-expansion` (implementation, merged and deleted); `docs/step-11-amend-2` design merged into `main` as `2f3a6fe` |
 | Design review | `docs/planning/reviews/step-11-amend-2.md` |
 | Parent audit | Step 11 audit is historical (`docs/planning/audits/step-11.md`); the post-merge amendment audit is `docs/planning/audits/step-11-amend-2.md` |
-| Integration commit | — (pending `--no-ff` merge into `main` after audit and owner approval) |
-| Combined audit commit | — (the maintenance branch head at freeze) |
-| Tag | `step-11.1` (proposed; `step-11` is never moved) |
+| Integration commit | `58c8e9afb68916aaa09d1105de5631659356cadf` (`--no-ff` merge into `main`) |
+| Combined audit commit | `ef568beca62f6f51559460d01ba5627219e90345` (frozen code); record commit `52032fe`; resolutions `b0e8898` |
+| Tag | `step-11.1` (annotated) on `58c8e9afb68916aaa09d1105de5631659356cadf`; `step-11` is never moved |
 | Date | 2026-11-21 |
 | Owner | Human owner |
 
@@ -673,8 +673,11 @@ one maintenance delivery plus its audit.
 - [x] The audit/closeout pages and template define the post-merge amendment evidence rule; no page claims a
       `step-11.1` JSON evidence file (A2-07).
 - [x] `samples/README.md` and `samples/step-11-cluster-expansion/README.md` are added (A2-10).
-- [ ] `./tools/verify.sh all --require` is green at the audit commit; the single closeout CI run is green; the
+- [x] `./tools/verify.sh all --require` is green at the audit commit; the single closeout CI run is green; the
       main CI run is green before `step-11.1` is tagged.
+      — Verified: `all --require` exit 0 at the audited tree; closeout CI `44896189617` green at `ef568be`;
+      automatic main CI [`44912274715`](https://github.com/seb-eis/mocassin-2/actions/runs/44912274715) green at
+      the merge commit `58c8e9a`, before the tag was created.
 - [x] Documentation is updated (§8) and `./tools/verify.sh docs --require` passes.
 - [x] The Step 14 pointer names `87be9de`/`1ea8090` and records F-29's formal closure as a Step 14 gate; the
       parity row's evidence is updated after implementation (A2-08).
@@ -765,18 +768,21 @@ one-time forward read.
 
 ## Integration
 
-- Branch: `docs/step-11-amend-2` (design, this branch); `fix/step-11.1-cluster-code-expansion` (implementation)
+- Branch: `docs/step-11-amend-2` (design); `fix/step-11.1-cluster-code-expansion` (implementation, merged and
+  deleted locally and remotely)
 - Parent step branch: none (Step 11 is merged and deleted); maintenance branch from `main`
-- Approval: human owner approves the design verdict, the implementation start, the merge, and the tag
-- Squash/merge: implementation branch `--no-ff` into `main` after the audit
+- Approval: the human owner approved the design verdict, the implementation start, the merge, and the tag
+- Merge: implementation branch `--no-ff` into `main` as `58c8e9afb68916aaa09d1105de5631659356cadf` on 2026-11-21
 - Parent audit request updated: no parent audit; separate `docs/planning/audits/step-11-amend-2.md`
-- Combined frozen commit: the implementation branch head at freeze
+- Combined frozen commit: `ef568beca62f6f51559460d01ba5627219e90345` (audit record `52032fe`; resolutions
+  `b0e8898`)
 
 ## Audit
 
 - Parent audit record: `docs/planning/audits/step-11.md` (historical; not reopened)
-- Amendment audit record: `docs/planning/audits/step-11-amend-2.md` (to be created)
-- Audit verdict: pending
-- Merge commit: pending
-- Tag: `step-11.1` (proposed; `step-11` stays)
-- Post-merge fallback required: yes
+- Amendment audit record: [`docs/planning/audits/step-11-amend-2.md`](../audits/step-11-amend-2.md)
+- Audit verdict: **`Passed with notes`** — round 1 at `ef568be` (A2A-01/A2A-02 Minor, A2A-03 Note); accepted by
+  the human owner 2026-11-21, findings fixed in `b0e8898`
+- Merge commit: `58c8e9afb68916aaa09d1105de5631659356cadf`; main CI `44912274715` green
+- Tag: `step-11.1` (annotated) on the merge commit; `step-11` stays at `84ceb76`
+- Post-merge fallback required: yes (applied)

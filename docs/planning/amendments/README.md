@@ -113,7 +113,7 @@ If the parent step is already merged or tagged:
 | `step-02-amend-2` (`docs-math`) | 02 — Symmetry and Geometry | **Integrated** | `feature/step-02-symmetry-and-geometry/amend-2-docs-math` | [Review](../reviews/step-02-amend-2.md) | `dbf5691`; audit `6341b56` |
 | `step-08-amend-1` (`canonical-projection`) | 08 — Model Compilation Pipeline | **Integrated** | `feature/step-08-model-compilation-pipeline/amend-1-canonical-projection` | [Review](../reviews/step-08-amend-1.md) | `28e741f`; audit passed with notes; merged and tagged `step-08` |
 | `step-11-amend-1` (`dotnet-11-native-zstd`) | 11 — Simulation Package and `.msl` Writer | **Integrated** | `feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd` | [Review](../reviews/step-11-amend-1.md) — `Ready with notes`, accepted 2026-11-15 | `00753e7`; the parent audit has not started |
-| `step-11-amend-2` (`cluster-code-expansion`) | 11 — Simulation Package and `.msl` Writer | **In progress** — implementation complete, audit requested | `fix/step-11.1-cluster-code-expansion` (design `docs/step-11-amend-2` merged as `2f3a6fe`) | [Review](../reviews/step-11-amend-2.md) — round 4 `Ready for implementation` at `bf273ff` | `step-11` stays; post-merge audit `docs/planning/audits/step-11-amend-2.md`; tag `step-11.1` proposed, evidence in the audit record (A2-07) |
+| `step-11-amend-2` (`cluster-code-expansion`) | 11 — Simulation Package and `.msl` Writer | **Merged and tagged `step-11.1`** — audit `Passed with notes` accepted 2026-11-21; A2A-01–A2A-03 fixed | `fix/step-11.1-cluster-code-expansion` (merged and deleted; design `docs/step-11-amend-2` merged as `2f3a6fe`) | [Review](../reviews/step-11-amend-2.md) — round 4 `Ready for implementation` at `bf273ff` | Merge `58c8e9a`; main CI `44912274715`; tag `step-11.1`; `step-11` stays; evidence in [the audit record](../audits/step-11-amend-2.md) (A2-07) |
 | `step-13-amend-1` (`fixture-properties`) | 13 — Rust Solver Foundation and Package Reader | **Withdrawn** — resolved by the Step 08 fix `1f5b473` | `feature/step-13-rust-solver-foundation-and-package-reader/fix-audit-round-1` (historical) | — (withdrawn; no review requested) | Audit round 1 `Fixes required`; F-1 resolved by `step-13-centered`; re-audit pending |
 
 `step-02-amend-1` covers the public generic math layer (`Vector3<T>`, `Vector4<T>`, `Matrix3<T>`,
@@ -136,7 +136,8 @@ or solver-contract change. See
 
 `step-11-amend-2` is a **post-merge** amendment. It closes Step 14 design-review F-29 by adding one optional
 `code_expansions` member to each `.msl` cluster table, mapping every raw slot-tuple code to its canonical
-occupation index and applied energy. It follows the post-merge fallback in §7: a maintenance branch from `main`,
-a focused design review, a separate audit, and a proposed `step-11.1` tag. The existing `step-11` tag is not
-moved. See
+occupation index and applied energy. It followed the post-merge fallback in §7: a maintenance branch from `main`,
+a focused design review, a separate audit, and the `step-11.1` tag. The audit returned `Passed with notes`, the
+owner accepted it on 2026-11-21, and the amendment merged as `58c8e9a` with a green main CI `44912274715`. The
+existing `step-11` tag was not moved. See
 [`step-11-amend-2-cluster-code-expansion.md`](step-11-amend-2-cluster-code-expansion.md).
