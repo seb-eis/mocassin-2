@@ -5,11 +5,12 @@
 Not dependent on Steps 08–11 or 13–22.
 **Delivers:** The single-project edit pipeline with undo/redo, the validation and Problems surface, dirty state
 and save-point handling, autosave, crash recovery, and unclean-exit session restore — on top of the 23A shell.
-**Status:** **In audit — `Passed with notes` accepted; merge pending.** The design was accepted by the human
-owner on 2026-11-21 as `Ready with notes` (round-4 freeze `a33711d`, record `c4ded0e`), class High and the four
-features were approved, and the step branch is `step/23b-editing-diagnostics-and-recovery`. Audit round 1
-returned `Fixes required` (F1–F7); round 2 returned `Passed with notes`, which the owner accepted on 2026-11-21
-(F8/F9/N1 fixed in the docs-only resolution commit; F10 accepted as a note). The review record is
+**Status:** **Done.** The design was accepted by the human owner on 2026-11-21 as `Ready with notes` (round-4
+freeze `a33711d`, record `c4ded0e`), class High and the four features were approved, and the step branch was
+`step/23b-editing-diagnostics-and-recovery`. Audit round 1 returned `Fixes required` (F1–F7); round 2 returned
+`Passed with notes`, which the owner accepted on 2026-11-21 (F8/F9/N1 fixed in the docs-only resolution commit;
+F10 accepted as a note). The step merged into `main` at `a48da3b`, the automatic main CI passed (44935708199),
+and the annotated `step-23b` tag points to the merge commit. The review record is
 [`reviews/step-23b.md`](../reviews/step-23b.md).
 
 > **Split note.** Step 23 was split into **23A** and **23B** by the owner on 2026-11-20 (complexity class High,
@@ -20,11 +21,11 @@ returned `Fixes required` (F1–F7); round 2 returned `Passed with notes`, which
 
 ## Implementation status
 
-- **Status:** **In audit** — audit round 2 returned `Passed with notes`; the human owner accepted on 2026-11-21 with F8/F9/N1 fixed in the docs-only resolution commit and F10 accepted as a note; merge and tag pending
-- **Step branch:** `step/23b-editing-diagnostics-and-recovery`
-- **Step CI:** replacement Ubuntu closeout [44932597523](https://github.com/seb-eis/mocassin-2/actions/runs/44932597523), Windows [44932918537](https://github.com/seb-eis/mocassin-2/actions/runs/44932918537), and macOS [44932432910](https://github.com/seb-eis/mocassin-2/actions/runs/44932432910) green at `fe79552`; the original `eb120e1` runs are historical
-- **Main merge:** —
-- **Step tag:** —
+- **Status:** **Done** — audit round 2 `Passed with notes` accepted 2026-11-21; merged, tagged, and main CI green
+- **Step branch:** `step/23b-editing-diagnostics-and-recovery` (deleted locally and remotely after the merge)
+- **Step CI:** replacement Ubuntu closeout [44932597523](https://github.com/seb-eis/mocassin-2/actions/runs/44932597523), Windows [44932918537](https://github.com/seb-eis/mocassin-2/actions/runs/44932918537), and macOS [44932432910](https://github.com/seb-eis/mocassin-2/actions/runs/44932432910) green at `fe79552`; automatic main CI [44935708199](https://github.com/seb-eis/mocassin-2/actions/runs/44935708199) green at the merge commit; the original `eb120e1` runs are historical
+- **Main merge:** `a48da3b69bbf80ff2001e75db8cd3c75d754af93` (`--no-ff`)
+- **Step tag:** `step-23b` (annotated, tag object `da30a9633fd0cd3cfc425de245b2413110717452`) on the merge commit
 - **Audit:** `Passed with notes` — **accepted by the human owner 2026-11-21** ([`audits/step-23b.md`](../audits/step-23b.md)); closeout evidence [`closeout/step-23b.json`](../closeout/step-23b.json) binds `fe79552`
 - **Design review:** **Accepted `Ready with notes` by the human owner 2026-11-21** at the round-4 freeze
   `a33711d` (record `c4ded0e`, round-4 verdict `Ready with notes`) — see
@@ -243,6 +244,9 @@ seam fills in §1.
   so it is vacuous; the assignment is verified at `ProjectSessionService.cs:464`. A diagnostic-bearing fixture is
   deferred as a test-strength improvement, not a product defect.
 - **Owner decision:** `Passed with notes` accepted on 2026-11-21; merge `--no-ff` and tag `step-23b` approved.
+- **Merge/tag:** merged as `a48da3b69bbf80ff2001e75db8cd3c75d754af93`; automatic main CI
+  [44935708199](https://github.com/seb-eis/mocassin-2/actions/runs/44935708199) green; annotated tag `step-23b`
+  (`da30a96`) targets the merge commit; the step branch was deleted.
 
 ### Inherited 23A deviations and how 23B respects them
 
