@@ -236,9 +236,10 @@ entries; neither mutates the project. `NotifySaved()` and `ReplaceDocument` are 
 - `ProjectDocument.CreateRecovered(current, lastSaved, maxUndoDepth: 200)` is the recovery entry point: the
   current snapshot is the document value and the saved file is the clean point. It clears both stacks. A
   recovery candidate is offered only when `RecoveryComparison.HasContentDifference(snapshot, savedFile)` is
-  true; that helper normalizes `Metadata.ModifiedUtc` to a fixed sentinel and compares the existing
-  `ProjectHasher.ComputeDocument` projection. `ProjectDocument.IsDirty` is unchanged and still includes
-  `modifiedUtc` for the save point (m-5).
+  true; that helper normalizes `Metadata.ModifiedUtc` to a fixed sentinel and reads
+  `ProjectDocument.CreateRecovered(normalizedSnapshot, normalizedSaved).IsDirty`. It does **not** call
+  `ProjectHasher` in the ViewModels layer: the hash stays inside the Core document, and `IsDirty` still includes
+  `modifiedUtc` for the save point (m-5/M-2).
 
 ### 3. Validation surface
 
@@ -293,12 +294,18 @@ entries; neither mutates the project. `NotifySaved()` and `ReplaceDocument` are 
   "Unsaved changes" / "Saved". The marker never relies on colour alone. `DocumentViewModel` gains a virtual
   `IsDirty` (default false) and the two project documents override it, raising change notifications from the
   coordinator's state.
+- **Return to clean (m-12).** When a content change leaves `Document.IsDirty` false (undo/redo back to the save
+  point, or a save), `ProjectSessionService` deletes the sidecar and any recovery snapshot for that project
+  through the session gate, so a later open cannot offer edits the user already returned past. A clean close
+  does the same before removing the session. This makes the save → edit → autosave → undo-to-clean trace leave
+  no sidecar.
 - **Unsaved changes.** `IProjectSessionService.CloseAsync` gains `bool discardChanges = false`:
   `CloseAsync(session, discardChanges: false, cancellationToken)`. With a dirty document and
-  `discardChanges == false` it returns `ProjectSessionOutcome.UnsavedChanges` and closes nothing. The shell then
-  prompts Save/Discard/Cancel; with several dirty projects it prompts per project with "apply to all"; Cancel
-  aborts the close and closes nothing. Choosing **Discard** calls `CloseAsync(session, discardChanges: true)`,
-  which deletes the project's sidecar/recovery snapshot before removing the session (m-3). Closing a project
+  `discardChanges == false` it returns `ProjectSessionOutcome.UnsavedChanges` and closes nothing, leaving
+  `IsClosing` false. The shell then prompts Save/Discard/Cancel; with several dirty projects it prompts per
+  project with "apply to all"; Cancel aborts the close and closes nothing. Choosing **Discard** calls
+  `CloseAsync(session, discardChanges: true)`, which sets `IsClosing`, deletes the project's sidecar/recovery
+  snapshot, and removes the session (m-3). Closing a project
   updates the settings `session.openProjects` list; `cleanExit` stays `false` while the application is running
   and is written `true` only by a clean application shutdown. A cancelled or failed window close leaves it
   `false`. The shell window's `Closing` path is intercepted by `ShellViewModel`/`IShellLifetime` so the same
@@ -330,10 +337,13 @@ entries; neither mutates the project. `NotifySaved()` and `ReplaceDocument` are 
   close, reload, and recovery. The autosave tick uses a non-blocking `Wait(0)` and skips a busy session;
   `SaveAsync`, `CloseAsync`, `ReloadAsync`, and `RecoverAsync` await the gate. `CloseAsync` sets
   `session.IsClosing = true` before waiting, so a queued autosave does not start, and the tick skips
-  `IsClosing` sessions (m-10). `CloseAsync` resets `IsClosing` if the close is cancelled. Autosave never clears
-  dirty state and never updates the save point. On a successful save, the sidecar (and any recovery file for
-  that project) is deleted. On an explicit discard (close prompt or discard-reload) the same files are deleted
-  before the operation completes (m-3).
+  `IsClosing` sessions (m-10). `CloseAsync` sets `IsClosing` only after the `discardChanges` guard passes and
+  clears it on every non-closing return (`UnsavedChanges` or cancel), so a shell Cancel cannot leave autosave
+  permanently skipped (n-8). Autosave never clears dirty state and never updates the save point. On a successful
+  save, the sidecar (and any recovery file for that project) is deleted. On an explicit discard (close prompt or
+  discard-reload) the same files are deleted before the operation completes (m-3). The same cleanup runs when a
+  content change returns the document to the save point (`!IsDirty`) and on a clean close (m-12); the cleanup
+  takes the session gate so it cannot race an autosave write.
 - Read-only sessions never autosave and never write recovery files. A failed autosave logs a warning, updates
   the status item, and leaves the dirty state and save point untouched.
 - The scheduler is a singleton; it enumerates sessions through `IProjectSessionService`, not by holding a
@@ -394,15 +404,20 @@ prompts; the service never prompts.
   an opened or restored project has a manifest candidate, the shell composes the offer from the `Sidecar`
   candidate and the `Crash`/`AutosaveFallback` candidate (newest valid `SavedUtc` wins) and passes the chosen
   candidate to the same operations (m-4). Recovering loads the candidate snapshot through
-  `ProjectStore.LoadAsync` (bounded by the 64 MiB `MaxDocumentBytes`), builds a document with
+  `ProjectStore.LoadAsync` (bounded by the 64 MiB `MaxDocumentBytes`), assigns the snapshot load's
+  `ProjectSession.LoadDiagnostics`, recomputes `ProjectSession.Validation` from those diagnostics, and only then
+  calls `ReplaceDocument` so the `Replaced` event and the validation coordinator see the recovered snapshot's
+  result (n-6/n-7). It builds the document with
   `ProjectDocument.CreateRecovered(snapshot, savedFile, maxUndoDepth: 200)`, replaces the document, and leaves it
-  dirty. It also recomputes `ProjectSession.Validation` for the recovered snapshot, using the snapshot load's
-  diagnostics and **not** the saved file's `LoadDiagnostics`; this recovery run is not the forbidden open-time
-  second validation (m-7). The next save writes the main file and deletes the snapshot. "Decide later" keeps it
-  and the status bar shows "Recovery available". A snapshot for a different project id is rejected.
-- **Recovery comparison (m-5).** `RecoveryComparison.HasContentDifference(a, b)` normalizes both projects'
-  `Metadata.ModifiedUtc` to a fixed sentinel and compares `ProjectHasher.ComputeDocument`; it does not change
-  `ProjectDocument.IsDirty`, which still includes `modifiedUtc` for the save point. This prevents the
+  dirty. This recovery run uses the snapshot's diagnostics and **not** the saved file's `LoadDiagnostics`; it is
+  not the forbidden open-time second validation (m-7). The next save writes the main file and deletes the
+  snapshot. "Decide later" keeps it and the status bar shows "Recovery available". A snapshot for a different
+  project id is rejected.
+- **Recovery comparison (m-5/M-2).** `RecoveryComparison.HasContentDifference(a, b)` normalizes both projects'
+  `Metadata.ModifiedUtc` to a fixed sentinel and reads
+  `ProjectDocument.CreateRecovered(normalizedA, normalizedB).IsDirty`. It never calls `ProjectHasher` and adds
+  no App contract; the hash stays in Core through the document's `IsDirty`. `ProjectDocument.IsDirty` is
+  unchanged and still includes `modifiedUtc` for the save point. This prevents the
   save → edit → autosave → undo-to-clean → reopen case from offering a timestamp-only recovery.
 - **Unclean exit.** The settings `session` block records the open project paths, the active project, and
   `cleanExit`; it is written on open/close/activate and at shutdown. At startup, a stale `cleanExit = false`
@@ -425,10 +440,10 @@ prompts; the service never prompts.
   this is recorded as a limitation because the document snapshots are UI-thread-confined.
 - **Retention.** The startup sequence sweeps `recovery/` first, then scans it. Recovery files older than 7 days
   are deleted by `RecoveryRetentionPolicy` through `IRecoveryStore.SweepAsync`; log files keep 23A's
-  14 days/100 MB. A `.autosave` sidecar next to a user's project is **never** swept — only a successful save or
-  an explicit discard removes it. Projects, packages, results, and job folders are never auto-deleted. The sweep
-  deletes only the known snapshot/manifest patterns and leaves unknown files alone; failures are logged, not
-  fatal.
+  14 days/100 MB. A `.autosave` sidecar next to a user's project is **never** swept — only a successful save, a
+  return to the save point, a clean close, or an explicit discard removes it. Projects, packages, results, and
+  job folders are never auto-deleted. The sweep deletes only the known snapshot/manifest patterns and leaves
+  unknown files alone; failures are logged, not fatal.
 - Recovery files are untrusted input. The store bounds the manifest at **64 KiB** and **100 entries**, and the
   snapshot goes through the same `ProjectStore` load path (schema, migration, `MaxDocumentBytes` = **64 MiB**).
   The manifest's project path is passed through the session's normal path validation before any open. No path
@@ -543,6 +558,7 @@ Two additive Core changes; no Packages change and no App public surface change.
 | Seam | 23B edit |
 | --- | --- |
 | `ProjectSessionService.SaveAsync`/`SaveAsAsync` | call `MarkSaved()` (no-arg), delete the sidecar/recovery file on success, take the session gate; keep the stamp |
+| `ProjectSessionService.ProjectChanged` handler | delete the sidecar/recovery snapshot when a content change returns the document to the save point (`!IsDirty`); take the session gate (m-12) |
 | `ProjectSessionService.CloseAsync`/`ReloadAsync` | add the `discardChanges` guard, delete discarded sidecars/recovery files, take the session gate, set/clear `IsClosing` (m-3, m-10) |
 | `ProjectSessionService.OpenAsync`/`ActivateAsync` | write the settings `session` block (paths, active project, `cleanExit`) on open/activate; detect the sidecar `RecoveryCandidate` |
 | `ProjectSessionService.RecoverAsync`/`DiscardRecoveryAsync` | new operations; recompute `ProjectSession.Validation` for the recovered snapshot (m-7) |
@@ -550,6 +566,7 @@ Two additive Core changes; no Packages change and no App public surface change.
 | `ProjectSession` | own the `ProjectEditCoordinator`, `SemaphoreSlim`, `IsClosing`, `PendingRecovery`; create documents with `MaxUndoDepth = 200`; replace the document on reload/recovery |
 | `ProjectSession.CreateFromLoad`/schemas | construct the GUI document with `MaxUndoDepth = 200` and create the coordinator |
 | `DocumentViewModel`/tab template | add `IsDirty` and the dirty marker |
+| `StatusBarItemViewModel`/`StatusBarView` | optional status glyph/severity for the validity/autosave items; existing text/tooltip/command surface remains |
 | `ProjectOverviewViewModel`/`ProjectJsonViewModel` | subscribe to `ProjectChanged`/`EditRejected`; metadata form; observable JSON |
 | `ProjectNavigationTargetProvider` | map project metadata properties to Overview focus |
 | `IShellLauncher` | add `OpenUriAsync` for diagnostic help anchors |
@@ -565,6 +582,9 @@ Two additive Core changes; no Packages change and no App public surface change.
 
 - **Steps 24–28 (consumers):** the edit coordinator and `ProjectChanged` (24, 25, 26, 27), the validation
   surface's navigation (24, 25), and the console/status seams (26, 28).
+- **Recovery comparison (M-2).** `RecoveryComparison` stays in ViewModels `Recovery/` and is a pure helper over
+  `ProjectDocument.CreateRecovered(...).IsDirty`; it does not call `ProjectHasher`, does not add an App contract,
+  and does not change the 23A seam table. The hash remains Core-owned.
 - **Not consumed:** Steps 13–22 APIs; no solver, results, or analysis types in this step.
 - **Parallel track:** this design touches planning docs only; the implementor merges `main` when 23B starts and
   re-reads the 23A surface.
@@ -575,9 +595,9 @@ Two additive Core changes; no Packages change and no App public surface change.
 | --- | --- |
 | `docs/getting-started/quickstart.md` | validation/Problems, metadata editing, undo/redo, autosave/recovery sections |
 | `docs/getting-started/first-project.md` | undo/redo, dirty/save point, autosave, crash recovery |
-| `docs/user-guide/projects.md` | undo/redo, dirty state and save point, autosave, recovery, retention; replace the 23A "later work" statements; state that a read-only session refuses edits with a session message and emits no diagnostic code (M-1) |
-| `docs/development/ui-architecture.md` | edit pipeline (including `EditApplyOutcome.ReadOnly`), validation surface, recovery, harness/screenshot/a11y chapters |
-| `docs/development/design-decisions.md` | the save-point, `ProjectChanged`, autosave-tick, and recovery-source decisions |
+| `docs/user-guide/projects.md` | undo/redo, dirty state and save point, autosave, recovery, retention, and the return-to-clean/clean-close sidecar cleanup; replace the 23A "later work" statements; state that a read-only session refuses edits with a session message and emits no diagnostic code (M-1) |
+| `docs/development/ui-architecture.md` | edit pipeline (including `EditApplyOutcome.ReadOnly`), validation surface, recovery (including the `IsDirty`-based comparison and no ViewModels hash), harness/screenshot/a11y chapters |
+| `docs/development/design-decisions.md` | the save-point, `ProjectChanged`, autosave-tick, sidecar cleanup, and recovery-source decisions |
 | `docs/development/testing-and-parity.md` | 23B harness, tiers, and the recovery/crash policy; move the save-point coverage from the 23A list |
 | `docs/troubleshooting/installation.md` | recovery prompts and recovery-file problems |
 | `docs/reference/file-layout.md` | `recovery/` layout and manifest, the autosave sidecar, retention rules; the `autosave`/`session` settings fields |
@@ -603,8 +623,9 @@ dispatcher, time, and the in-memory `IRecoveryStore`/`IAppSettingsStore` for non
 | Read-only | PR-fast | Every `Apply` on a read-only session returns `EditApplyOutcome.ReadOnly`, changes nothing, adds no `Diagnostic`/`PROJ031`, and the edit commands are disabled |
 | Validation surface | PR-fast | Debounce coalesces edits; a stale result is discarded by `DocumentHash`; counts/codes match `ValidationResult`; double-click requests the registered target; an unknown domain produces a notice; a metadata path focuses the Overview field; an unknown code is unlinked; the help map covers every catalog code (or the explicit unlinked set) and the launcher receives the anchored URI |
 | Statistics trigger | PR-fast | The Overview does not request statistics on open; the explicit toggle/command runs one `IncludeStatistics = true` pipeline and caches by document hash; a content change while the panel is active invalidates and reruns it |
-| Dirty/autosave | PR-fast | Only dirty writable documents are written; the interval comes from settings and the tick uses `IsAutosaveDue`; save/autosave/close/reload never interleave (tick skips busy/closing; close/reload await the gate); a clean save or explicit discard deletes the sidecar/recovery file; a discard-close and a discard-reload are not re-offered; read-only sessions never write; a sidecar failure falls back to `recovery/` |
-| Recovery | PR-fast | A simulated crash leaves a `recovery/` snapshot and manifest; startup offers recovery; a sidecar candidate has `RecoverySource.Sidecar` and the newest valid candidate wins; Recover yields a dirty document equal to the snapshot and recomputes `ProjectSession.Validation` for the snapshot; a timestamp-only snapshot is not offered; Discard deletes; Reload replaces the document; retention removes only old recovery files; sidecars are never swept; a missing project file is reported without an untitled session; manifest 64 KiB/100-entry and snapshot 64 MiB caps are enforced |
+| Dirty/autosave | PR-fast | Only dirty writable documents are written; the interval comes from settings and the tick uses `IsAutosaveDue`; save/autosave/close/reload never interleave (tick skips busy/closing; close/reload await the gate); a clean save or explicit discard deletes the sidecar/recovery file; a discard-close and a discard-reload are not re-offered; a return to the save point and a clean close delete the sidecar; an `UnsavedChanges` return/Cancel leaves `IsClosing` false; read-only sessions never write; a sidecar failure falls back to `recovery/` |
+| Recovery | PR-fast | A simulated crash leaves a `recovery/` snapshot and manifest; startup offers recovery; a sidecar candidate has `RecoverySource.Sidecar` and the newest valid candidate wins; Recover yields a dirty document equal to the snapshot, updates `LoadDiagnostics`, and recomputes `Validation` before `ReplaceDocument` raises `Replaced`; a timestamp-only snapshot constructed directly is not offered; the save → edit → autosave → undo-to-clean → reopen trace leaves no sidecar and offers no recovery; Discard deletes; Reload replaces the document; retention removes only old recovery files; sidecars are never swept; a missing project file is reported without an untitled session; manifest 64 KiB/100-entry and snapshot 64 MiB caps are enforced |
+| Recovery comparison (M-2) | PR-fast | `RecoveryComparison` normalizes `ModifiedUtc` and reads `ProjectDocument.CreateRecovered(...).IsDirty`; the ViewModels source token scan/architecture test has no `ProjectHasher` use in `Mocassin.App.ViewModels`; a timestamp-only pair is not different |
 | Unclean exit | PR-fast | `cleanExit=false` offers restore; `cleanExit=true` does not; missing paths are reported; the active project is restored; a clean shutdown writes `true` |
 | Crash path | PR-fast | `Task.WhenAny(writes, Task.Delay(budget, timeProvider, cts.Token))` completes within budget or reports a timeout; a timeout cancels the writes; no blocking call; the dialog reports per-session results; a dead UI thread writes no recovery files |
 | Settings additions | PR-fast | The `autosave`/`session` blocks round-trip in the v1 document without a schema bump; a 23A document without them still loads with defaults; the interval range and open-project cap normalize with warnings |
@@ -629,7 +650,8 @@ PR-fast test; the only test time limit is a hang guard.
 | Autosave/save/close races | Per-session gate and `IsClosing`; autosave skips busy/closing sessions; save/close/reload/recovery await the gate; immutable snapshots; atomic writes |
 | Crash-path hang | `Task.WhenAny(writes, Task.Delay(budget, timeProvider, cts.Token))` with a 2 s budget and per-session reporting; a timeout cancels the writes; no sync-over-async; dead-UI path writes no recovery files |
 | Recovery file corruption/path abuse | Manifest 64 KiB/100 entries and snapshot 64 MiB caps; real `ProjectStore` load path; manifest paths validated; sweep only known patterns |
-| Spurious timestamp-only recovery | `RecoveryComparison` normalizes only `Metadata.ModifiedUtc`; the save-point `IsDirty` rule is unchanged (m-5) |
+| Spurious timestamp-only recovery | `RecoveryComparison` normalizes only `Metadata.ModifiedUtc` and reads `ProjectDocument.IsDirty`; a return to the save point deletes the sidecar (m-12); the save-point `IsDirty` rule is unchanged |
+| ViewModels hash boundary (M-2) | `RecoveryComparison` uses `ProjectDocument.CreateRecovered(...).IsDirty`; no `ProjectHasher` call in `Mocassin.App.ViewModels`; the token/architecture test guards it |
 | Missing project file | Reported as a limitation; no untitled session or new lifecycle path |
 | 23A seam insufficiency | The documented seam fills are bounded; any other signature/region change stops for an amendment |
 | Console channel selector scope | One view addition in the existing console region; no new region or command model |
@@ -673,7 +695,11 @@ amendment before feature 2. **No further split is proposed.**
 | `Apply` uses the structural `ProjectValidator`; the full pipeline is advisory | This page §2 |
 | Read-only edit refusal is an app-level `EditApplyOutcome.ReadOnly` message, not a diagnostic code; `PROJ031` is not reused | This page §2/§10 |
 | The save point is `MarkSaved()` no-arg; the store's returned value is not installed | This page §2.2; [`05-open-decisions.md`](../05-open-decisions.md) |
-| Recovery candidate equality normalizes only `Metadata.ModifiedUtc`; `IsDirty` still includes it | This page §2.2/§6 |
+| Recovery candidate equality normalizes only `Metadata.ModifiedUtc` and reads `ProjectDocument.CreateRecovered(...).IsDirty`; no ViewModels hash/App contract | This page §2.2/§6/§11 |
+| Return to the save point or a clean close deletes the sidecar/recovery snapshot | This page §4/§5 |
+| Recovery updates `LoadDiagnostics`/`Validation` before `ReplaceDocument` raises `Replaced` | This page §6 |
+| `CloseAsync` clears `IsClosing` on `UnsavedChanges`/Cancel | This page §4/§5 |
+| The start-gate owner questions are listed explicitly in §17.1 | This page §17.1 |
 | Explicit discard (close or discard-reload) deletes the sidecar/recovery file | This page §4/§5 |
 | `RecoverySource` includes `Sidecar`; the newest valid candidate wins | This page §6 |
 | Recovery recomputes `ProjectSession.Validation` for the snapshot | This page §6 |
@@ -692,6 +718,22 @@ Open items for the 23B start gate: confirm that the 23A seams proved sufficient 
 beyond the §11 list), that the two Core additions are still additive after 23A merged, and that the owner accepts
 the `MaxUndoDepth` GUI bound (default 0/unbounded, GUI sets 200), the app-level read-only refusal (no `PROJ031`
 reuse), and the no-untitled recovery scope.
+
+#### 17.1 Owner questions for the start gate (n-9)
+
+These are the same decisions as §16/§17, listed explicitly so the gate questions are discoverable:
+
+1. Accept **class High** as one unit, with no further split, per §16.
+2. Approve the **four-feature list** in the proposed order.
+3. Confirm the **two additive Core APIs** (`MaxUndoDepth`, `CreateRecovered`) and that the GUI sets
+   `MaxUndoDepth = 200` while the library default stays `0`/unbounded.
+4. Confirm the **app-level read-only refusal** (`EditApplyOutcome.ReadOnly`, no `PROJ031`, no new code).
+5. Confirm that 23B introduces **no untitled-project model** and that `recovery/` is the crash/fallback
+   snapshot store described in §6.
+6. Confirm the **§11 seam fills** (console channel selector, status-bar glyph/severity, shell/session/workspace
+   edits, registration) are acceptable without an amendment.
+7. Confirm the **recovery limitations**: a missing main project file is reported but not opened as a new
+   session, and the dead-UI crash path writes no recovery files.
 
 ### 18. Closeout and audit plan
 
@@ -739,11 +781,12 @@ reuse), and the no-untitled recovery scope.
       result reaches Problems and a clean load leaves the `Load` stage `Skipped`; opening does not run a second
       validation or a statistics run; the help map matches the documented anchors.
 - [ ] Dirty state is correct across save, undo, and redo; closing with unsaved changes prompts; Cancel closes
-      nothing; Discard and discard-reload delete the sidecar/recovery file.
+      nothing and leaves autosave running; Discard and discard-reload delete the sidecar/recovery file; a return
+      to the save point or a clean close deletes the sidecar.
 - [ ] Autosave writes only dirty documents and deletes its file on save; save/autosave/close/reload/recovery do
       not interleave; a simulated crash leaves a `recovery/` snapshot; recovery restores a dirty document equal
-      to the snapshot and recomputes its validation; a timestamp-only snapshot is not offered; the crash path
-      completes within its budget or reports the timeout.
+      to the snapshot, updates `LoadDiagnostics`, and recomputes validation before the `Replaced` event; a
+      timestamp-only snapshot is not offered; the crash path completes within its budget or reports the timeout.
 - [ ] Recovery candidates include the sidecar source; the newest valid candidate wins; recovery files are swept
       after 7 days; sidecars are never swept; unclean-exit session restore works; missing project files are
       reported without an untitled session.

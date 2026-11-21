@@ -276,12 +276,15 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-review required — round 1 returned `Changes required` on freeze
-`f629dd514f5e4e3c83584aff468969545c407b5c` for M-1, m-1–m-10, and n-1–n-5. The design was refrozen at
-`022132e24e38ca4b90a3df37d7f37140c4313cd1`; the resolutions are in `Resolution status` below. Round 1 reviewer
-text is unchanged.
+**State:** Changes required — round 2 reviewed the refreeze
+`022132e24e38ca4b90a3df37d7f37140c4313cd1` and found one new Major (M-2: the view-model `RecoveryComparison`
+computes a project hash), two Minors (m-11: the §11 seam list omits the `StatusBarItemViewModel` edit; m-12: the
+named m-5 regression trace still leaves a content-bearing sidecar), and Notes n-6–n-9. Round 1's M-1,
+m-1–m-10, and n-1–n-5 are resolved or clarified as recorded in `Re-review round 2`; m-5's helper is correct for
+a timestamp-only difference, but its named test trace needs m-12. Round 1 reviewer text is unchanged.
 
-`Re-review required` is a record state, not a verdict.
+`Changes required` is the round-2 verdict, not an approval; the record state is kept in sync with the latest
+round.
 
 ## Reviewer independence
 
@@ -479,3 +482,127 @@ consistent, and no format/contract/licensing change is introduced. It cannot sta
 diagnostic that cannot exist under the step's own no-new-code rule; the Minors also need a design update, mostly
 around the seam list and the sidecar/recovery lifecycle. The human owner decides the next freeze; this round is
 the record for `f629dd5`.
+
+### Re-review round 2
+
+#### Independence and frozen state
+
+I am a fresh context (DeepSeek V4.1 Flash 1017, opencode-go). I did not author, design, or implement the reviewed
+work and have no shared conversation with the planner, implementor, the round-1 reviewer, or the orchestrator. I
+received only the frozen commit, the request record, repository links, and the required commands/scope; no
+desired verdict or summary was supplied. The round-1 reviewer used the same model name in a different context; I
+read only the durable record, not its conversation.
+
+The design under review is `022132e24e38ca4b90a3df37d7f37140c4313cd1` (the round-1 resolution/refreeze). The
+record HEAD `1a586beab707ad7f62b483c3f497d980a319018e` is the request's documentation-only round-1
+resolution/refreeze commit; `git diff --name-status 022132e 1a586be` is exactly
+`M docs/planning/reviews/step-23b.md`, so the record delta is the only later change and I record it as a note per
+the review README §8.1. `git diff --name-status f629dd5 022132e` is six documentation files
+(`testing-and-parity`, `01-target-architecture`, `03-quality-strategy`, `05-open-decisions`, the record, and the
+step page). `git diff --name-status 63cdd06 022132e` is ten documentation files; `git diff 63cdd06 022132e --
+contracts src tests tools .github` is empty. No code, test, configuration, contract, generated, or
+status-dashboard file changed. `step-23a` is the only `step-23*` tag locally and on `origin`; no `step-23` alias
+exists. The `### Review round 1` body text is unchanged from `3efae49` (103 content lines; the only added bytes
+are the blank separator before this section and this round-2 section).
+
+The 23A deviations named in the request are respected: first-party `Avalonia.Headless` (no
+`Avalonia.Headless.XUnit`), the ANGLE exception is unchanged, `InternalsVisibleTo` covers `Mocassin.App`,
+`Mocassin.App.Views`, and `Mocassin.App.Tests`, no tab drag-reorder is claimed, Xvfb evidence is the Linux
+route, `ProjectPathRules`/`ExistingTarget` is unchanged, the single 23A load-validation pass is consumed and not
+repeated, and `ProjectSession.LastWrittenUtc` is the only saved-time surface. The design adds no 24–28 task and
+no format/contract/licensing change.
+
+#### Commands and results
+
+Run serially in a clean worktree at `1a586be`; `git status --porcelain` was empty before the record edit.
+
+- `./tools/verify.sh docs --require` — **pass**; final line "Closeout gate completed with required checks
+  enabled." (strict Zensical build, DocFX, rustdoc).
+- `./tools/verify.sh policy --require` — **pass**; "Public API is compatible with the checked-in baseline";
+  ApiCompat for the checked App assemblies; contract artifacts current (26 files); process consistency OK; 60
+  tool tests OK; SPDX headers in 1002 source files; no secret patterns in 1479 tracked text files; cargo-deny
+  advisories/bans/licenses/sources OK; final line "Closeout gate completed with required checks enabled."
+- `python tools/check_doc_math.py` — **pass**; "Documentation math conventions OK (191 files scanned)."
+- `git diff --name-status 022132e 1a586be` — `M docs/planning/reviews/step-23b.md` only.
+- `git diff --name-status f629dd5 022132e` — six documentation files; `git diff --name-status 63cdd06 022132e` —
+  ten documentation files.
+- `git diff 63cdd06 022132e -- contracts src tests tools .github` — empty; `git tag --list 'step-23*'` and
+  `git ls-remote --tags origin 'step-23*'` — `step-23a` only.
+- Round-1 preservation: the `### Review round 1` content from `3efae49` and the current file is unchanged
+  (103 content lines; the only diff is the blank separator before the appended round-2 section).
+- Read-only inspection: `ProjectHasher` has no current use in `Mocassin.App.ViewModels`; `ProjectDocument.IsDirty`
+  is the Core hash owner; `ProjectSession.LoadDiagnostics` (line 91) and `ProjectSessionService.ReloadAsync`
+  (lines 290-292) update both load state fields; `StatusBarItemViewModel` has only `Text`/`ToolTip`/`Command`;
+  `ProjectSessionService.CloseAsync` currently has no `discardChanges`/gate; `ProjectSessionService` uses
+  `MarkSaved(result.SavedProject!)` at lines 220/270; `ProjectStore.LoadAsync`/`LoadAutosaveAsync` accept the
+  sidecar and recovery paths; `ProjectDiagnosticCodes` still has no read-only/edit code.
+
+Owner-facing decisions: the record and page contain no separately numbered "owner questions 1–7" list. The
+equivalent decisions are recorded at page §16 (class High/one unit; no further split), the implementation-status
+and feature table (four features), §10/§17 (two Core APIs; `MaxUndoDepth` default 0/GUI 200), §2/§17 (app-level
+read-only refusal; no `PROJ031`), and §17 (no-untitled recovery scope; 23A seam and Core-additivity open items).
+If a seven-item list was intended as a separate gate artifact, it is not in the frozen record; I did not invent
+items for it.
+
+#### Closure of round-1 findings
+
+| Finding | Round-2 status | Evidence |
+| --- | --- | --- |
+| **M-1** | **Closed** | The read-only refusal is `EditApplyOutcome.ReadOnly` with an app-owned message and no `Diagnostic`; `PROJ031` is explicitly not reused. §2/§10/§12/§13, the §17 decisions row, `01-target-architecture.md` §3.2, `05-open-decisions.md`, and `testing-and-parity.md` agree. `ProjectDiagnosticCodes` and the catalog are unchanged; the freeze touches no code. |
+| **m-1** | **Closed, with m-11 residual** | §11 now lists `ShellViewModel`, `ShellWindow`/`IShellLifetime`, session open/activate/close/reload writes, the gate/`IsClosing`, `CreateFromLoad`, workspace dirty markers, both shell views, settings registration, and `AppServiceRegistration`/`App.axaml.cs`. The one remaining 23A type edit is `StatusBarItemViewModel` (m-11). |
+| **m-2** | **Closed** | `ProjectChangeKind { Edited, Undo, Redo, Saved, Replaced }`; `NotifySaved()` raises `Saved`; `ReplaceDocument` raises `Replaced`; the §2.1 table gives `ShellViewModel`, the Overview, the JSON view, `ValidationCoordinator`, and `ProblemsChannelViewModel` (`EditRejected`) their own subscriptions. |
+| **m-3** | **Closed** | §4/§5, §11, §13, and acceptance require discard-close and discard-reload to delete the sidecar/recovery file, with tests that the files are not re-offered. |
+| **m-4** | **Closed** | `RecoverySource.Sidecar` is in §6; the sidecar candidate participates in the newest-valid-wins composition, and the recovery test asserts the source and the winner. |
+| **m-5** | **Closed for the timestamp-only helper; m-12 for the named trace** | `RecoveryComparison.HasContentDifference` normalizes only `Metadata.ModifiedUtc` and compares the existing `ProjectHasher` projection; `IsDirty` still includes `modifiedUtc`. The named save→edit→autosave→undo-to-clean trace still needs m-12. |
+| **m-6** | **Closed** | Statistics are an explicit Overview toggle/command; one `IncludeStatistics = true` run is cached by hash; the test asserts that opening starts no statistics run and that the toggle runs once. |
+| **m-7** | **Closed, with n-6/n-7** | §6 recomputes `ProjectSession.Validation` from the snapshot load diagnostics and the test asserts the recovered hash; the `LoadDiagnostics` copy and the `Replaced` ordering are n-6/n-7. |
+| **m-8** | **Closed** | `Document { get; private set; }`; `ReplaceDocument(document, canEdit)` resets `CanEdit`, the stacks, the cached dirty state, raises `PropertyChanged`, and raises `Replaced`. |
+| **m-9** | **Closed** | The init accessor throws `ArgumentOutOfRangeException` for a negative value; 0 is unbounded; the test constructs `-1` and `0`. |
+| **m-10** | **Closed, with n-8** | The per-session gate, non-blocking autosave `Wait(0)`, `IsClosing`, save/close/reload/recovery awaiting, and the cancel reset are stated; the `UnsavedChanges` return needs n-8. |
+| **n-1** | **Closed in design** | §2 names the six per-domain validators and keeps the structural/full-pipeline distinction. |
+| **n-2** | **Closed in design** | Manifest 64 KiB/100 entries and snapshot 64 MiB are named and asserted by the untrusted-input test. |
+| **n-3** | **Closed in design** | The budget is `Task.WhenAny(allWrites, Task.Delay(budget, timeProvider, cts.Token))`; a timeout cancels and reports. |
+| **n-4** | **Closed in design** | The pure map test and the launcher URI test are named in §3/§13/§15. |
+| **n-5** | **Deferred** | `status.md` remains step-agent-owned; §18 records the `23b` design-review cell update at the start gate. |
+
+#### New findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Major** | **M-2 — `RecoveryComparison` is a `Mocassin.App.ViewModels` type but computes a project hash with `ProjectHasher.ComputeDocument`, contradicting the one-writer/no-hash rule.** §2 says "view models ... never call `ProjectHasher`"; architecture §3.2 says "View models never ... compute a project hash"; §8 places `RecoveryComparison` in the ViewModels `Recovery/` folder; and §6 says it "compares `ProjectHasher.ComputeDocument`". `Mocassin.App.ViewModels` currently has no `ProjectHasher` use, and `ProjectDocument.IsDirty` is the sanctioned hash owner. As frozen, feature 3 cannot implement the recovery offer without either breaking the architecture rule or adding an unplanned Core/App API. Resolve by moving the comparison to `Mocassin.App` behind a ViewModels contract, or by comparing normalized `ProjectDocument` values through `IsDirty` (no direct `ProjectHasher` call), or by recording a Core-owned comparison as a third API; update §2/§6/§8/§11 and the architecture/decision rows. | 23B page §2 line 166; §6 lines 403-405; §8 lines 462-463; `01-target-architecture.md` §3.2 line 207; `ProjectDocument.IsDirty` (`ProjectDocument.cs:44-49`); `ProjectHasher.ComputeDocument` (`ProjectHasher.cs:56`); `rg ProjectHasher src/dotnet/Mocassin.App.ViewModels` — no hits. |
+| **Minor** | **m-11 — The §11 seam-edit list still omits the `StatusBarItemViewModel` change that §8 requires.** §8 says `StatusBarItemViewModel` gains an optional status glyph/severity for the validity item, but the §11 "23A seam edits owned by 23B" table has no `StatusBarItemViewModel` row. §16's guard says any 23A seam needing a signature change beyond §11 stops for an amendment, so the implementor would have to stop for a trivial additive property or edit outside the guard. Add the type (and its status-bar host if one changes) to §11, or implement the validity item with the existing text/tooltip/command and remove the §8 property. | 23B page §8 lines 464-465; §11 table lines 543-564; §16 guard lines 663-665; `StatusBarItemViewModel.cs` (Text/ToolTip/Command only); 23A page §4 line 427 (the item is the base for the later validity/autosave slots). |
+| **Minor** | **m-12 — The named m-5 regression trace still leaves a content-bearing sidecar, so the timestamp normalization alone does not make it pass.** The sequence save → edit → autosave → undo-to-clean leaves the sidecar holding the edited project. Undo does not rewrite the sidecar, and a clean close is neither a successful save nor an explicit discard, so §5/§6 keep the sidecar. On reopen `HasContentDifference(sidecar, savedFile)` normalizes only `ModifiedUtc`; the edited content still differs, so recovery is offered even though the in-memory document is clean at the save point. Either delete the sidecar when the document returns to the save point or closes clean (and test that), or make the regression test construct an explicitly timestamp-only snapshot. As written, the m-5 test does not validate the stated "no spurious recovery" outcome. | 23B page §5 lines 334-336; §6 lines 403-406 and 428-429; §13 Recovery row line 607; m-5 resolution text; `ProjectDocument.IsDirty`/`IsAutosaveDue` (`ProjectDocument.cs:44`, `:157`); `ProjectSessionService.CloseAsync` (no `discardChanges`/sidecar deletion in 23A). |
+| **Note** | **n-6 — Recovery recomputes `Validation` but does not state that it updates `ProjectSession.LoadDiagnostics`.** §6 says to use the snapshot load's diagnostics and not the saved file's `LoadDiagnostics`, but the retained `ProjectSession.LoadDiagnostics` property would otherwise keep the saved file's array while `Validation` describes the snapshot. `ReloadAsync` updates both fields; recovery should do the same so the two load-state surfaces agree. | 23B page §6 lines 399-400; `ProjectSession.LoadDiagnostics` (`ProjectSession.cs:91`); `ProjectSessionService.ReloadAsync` (`ProjectSessionService.cs:290-292`). |
+| **Note** | **n-7 — The recovery flow must assign the recomputed `Validation` before `ReplaceDocument` raises `Replaced`.** §2.1 says `ValidationCoordinator` seeds from `ProjectSession.Validation` on `Replaced`; §6's prose says recovery "replaces the document ... It also recomputes `ProjectSession.Validation`". If the replace/event precedes the recompute, the coordinator seeds the saved file's result, recreating the m-7 symptom for the Problems surface. State the order (compute and assign `Validation`/`LoadDiagnostics`, then raise `Replaced`, or notify the coordinator after the recompute). | 23B page §2.1 line 211; §6 lines 396-400; §6 line 548 (seam row). |
+| **Note** | **n-8 — `IsClosing` must be cleared on the `UnsavedChanges` return and the shell's Cancel, not only on a "cancelled" close.** `CloseAsync(discardChanges: false)` on a dirty session returns `UnsavedChanges` and closes nothing; the shell then prompts, and Cancel aborts. If the session was set `IsClosing` before the dirty check and is only reset "if the close is cancelled", a user Cancel can leave `IsClosing` true and autosave permanently skipped. State the reset on the `UnsavedChanges` return and on Cancel explicitly. | 23B page §4 lines 296-301; §5 lines 331-333; §13 Dirty/autosave row line 606. |
+| **Note** | **n-9 — The request has no separately numbered "owner questions 1–7" record.** The equivalent owner-facing decisions are recorded at page §16 (class/one unit/no further split), the feature table (four features), §10/§17 (two Core APIs, `MaxUndoDepth` 0/200), §2/§17 (read-only refusal), and §17 (no-untitled scope; seams and Core additivity). If the orchestrator intended a seven-item list as a gate artifact, add it; otherwise no action. | 23B record request/step summary; 23B page §16/§17; no "owner question" string in either file. |
+
+Severity values: **Blocker**, **Major**, **Minor**, **Note**. The planning auditor writes the findings and
+verdict directly. The step agent adds resolutions in the separate `Resolution status` section without altering
+the auditor's findings, evidence, or verdict.
+
+#### Verdict
+
+**Changes required.** Round 2 confirms that the round-1 design edits are real and consistent: M-1 is closed
+with the app-level `EditApplyOutcome.ReadOnly` and no code/catalog change across §2/§10/§12/§13, the decisions,
+the architecture, and the quality strategy; m-1's main seam list, m-2's notification contract, m-3's discard
+deletion, m-4's sidecar source, m-6's explicit statistics, m-8's private setter/reset, m-9's init rejection, and
+m-10's gate are all stated and tested; n-1–n-4 are closed and n-5 remains step-agent bookkeeping. The High
+class/one-unit case, the four features, the 23A deviations, the no-24–28 scope, and the no-format/contract/
+licensing delta are consistent, and the three required gates pass.
+
+It cannot start as frozen because the m-5 resolution introduces M-2: `RecoveryComparison` is a ViewModels type
+that directly computes a project hash, contradicting both the architecture's one-writer rule and the page's own
+"view models ... never call `ProjectHasher`" statement. m-11 and m-12 are small but concrete inconsistencies in
+the §11 guard and the m-5 regression trace; n-6–n-9 are clarifying notes. The design must be refrozen and
+re-reviewed after those are resolved or explicitly accepted; this round is the record for `022132e`.
+
+- [ ] Ready for implementation
+- [x] Changes required
+- [ ] Ready with notes
+- [ ] Waived
+
+Follow-up owner: planner/step agent — resolve M-2 (the ViewModels hash boundary), m-11 (the status-bar seam),
+and m-12 (the sidecar trace), then decide n-6–n-9 and re-freeze for a fresh re-review. The human owner decides
+the next freeze; this round does not create the step branch, mark the step `In progress`, or authorize
+implementation.
