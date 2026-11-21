@@ -77,6 +77,14 @@ Panel proportions, overlay focus, and the `Enter`/`Escape` mapping are normative
 only one overlay layer is interactive at a time, and every overlay captures and restores focus. Editors added
 in Steps 24–28 must follow that page.
 
+## Visual contract
+
+The colour roles, typography, spacing, shape, state treatment, surface chrome, and accessibility floor are
+normative in [UI visual contract](ui-visual-contract.md). Views consume the `Mocassin.*` tokens rather than
+literal colours; the palette defines light and dark, while the existing high-contrast and density dictionaries
+remain overrides with higher precedence. The contract also owns the two fixed console tabs and the welcome-page
+button alignment rule. The interaction contract remains the home for layout behaviour, focus, and keys.
+
 ## Navigation and commands
 
 `INavigationService` opens documents and navigates `ModelPath` targets through registered
