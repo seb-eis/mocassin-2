@@ -10,22 +10,28 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
 
 ## Implementation status
 
-- **Status:** Design frozen — `Re-review required` (rounds 1–2 returned `Changes required`; F-1…F-28 addressed)
-- **Step branch:** — (not created; the step branch is created from the reviewed `main` commit after the start gate)
-- **Step CI:** —
+- **Status:** In progress (six feature branches approved; feature 1 next)
+- **Step branch:** `step/14-simulation-context-initialization`
+- **Step CI:** — (one closeout `workflow_dispatch`; no per-feature CI)
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** `Re-review required` at the corrected freeze commit recorded in
-  [`docs/planning/reviews/step-14.md`](../reviews/step-14.md)
+- **Design review:** `Ready with notes` — accepted by the human owner 2026-11-21. Round 4 at record `620f20a`
+  (freeze `a430d64`) closed F-29 and F-30–F-38; F-39–F-43 are minor/note corrections the step agent records
+  with the start-gate status. Rounds 1–3 returned `Changes required` (F-1–F-38). Record:
+  [`docs/planning/reviews/step-14.md`](../reviews/step-14.md). **F-39** (stale status block) and **F-40**
+  (the "feature 2 fallback" wording) are corrected in this block; **F-41** in §22, **F-42** in §20, and
+  **F-43** in the roadmap row.
 - **Cross-step dependency:** F-29 (cluster-code expansion) is resolved at the format level by
   [`step-11-amend-2`](../amendments/step-11-amend-2-cluster-code-expansion.md), approved and merged
-  (`2f3a6fe`, design freeze `bf273ff`). Step 14 consumes `ClusterTable::lookup` and the three-way
-  `Canonical`/`MissingFromMap`/`ExpansionMapAbsent` result; the format is implemented by `step-11.1`, so the
-  Step 14 feature 2 has a documented fallback until it lands. F-29's formal closure is a Step 14 gate.
-- **Sizing:** Complexity class **High**; owner acceptance as one High unit is requested at the start gate (no
-  split proposed). See §4.
-- **Last updated:** 2026-11-21 (design corrections after review round 3)
+  (`2f3a6fe`, design freeze `bf273ff`), and implemented by `step-11.1` (merged 2026-11-21, `58c8e9a`).
+  Step 14 consumes `ClusterTable::lookup` and the three-way
+  `Canonical`/`MissingFromMap`/`ExpansionMapAbsent` result. Feature 2's cluster work is gated on that merge
+  and has **no** direct-`occupation_codes` fallback (review F-40). F-29's formal closure remains a Step 14
+  gate.
+- **Sizing:** Complexity class **High** — accepted by the human owner at the start gate 2026-11-21 as one
+  unit; no split proposed. See §4.
+- **Last updated:** 2026-11-21 (start gate: design accepted, step branch created)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
@@ -1259,7 +1265,7 @@ binary (a true process/allocator boundary).
 | Context init, populated-model 10×10×10 clone (3,000 positions, pair/cluster tables) | `< 100 ms` |
 | Context init, `msl-v1` 6×6×6 and `step-13-populated` 2×2×2 | `< 20 ms` each |
 | Context memory total (`MemoryReport`), 10×10×10 fixture and populated clone | `≤ 64 MiB` each |
-| Context memory total, 500,000 positions × 64 particles (limit case) | `≤ max_context_bytes` = 1 GiB total. A passing example: 500,000 positions × 64 particles, 8M pair links, 2M statuses, no clusters ≈ 660 MiB (energy 244 + site ≤5 + forward links 214 + inverse 61 + slot map 122 + jump 8). The earlier "≤ 512 MiB energy vectors + links" row was arithmetically impossible at the per-array caps (16M links alone are 448 MiB forward + 128 MiB inverse); the plan's total cap replaces it. The table-free 10×10×10 ceria fixture is not a pair/cluster-scale measurement — the populated clone is, and both are recorded. |
+| Context memory total, 500,000 environments × 64 particles (limit case) | `≤ max_context_bytes` = 1 GiB total. A passing example: 500,000 **environments** (≈10,000 P1 positions × 50 cells) × 64 particles, 8M pair links, 2M statuses, no clusters ≈ 660 MiB (energy 244 + site ≈5 (4.9, `P·pc·8` on 10,000 P1 positions) + forward links 214 + inverse 61 + slot map 122 + jump 8). The `energy` array is sized by environments (`A·B·C·P`) and `site` by P1 positions (`P`); the earlier wording used "positions" for both. The earlier "≤ 512 MiB energy vectors + links" row was arithmetically impossible at the per-array caps (16M links alone are 448 MiB forward + 128 MiB inverse); the plan's total cap replaces it. The table-free 10×10×10 ceria fixture is not a pair/cluster-scale measurement — the populated clone is, and both are recorded. |
 | Allocation after construction | 0 in hot accessors |
 | A same-runner-class Criterion baseline | `tests/reference/bench/baselines.json` `rustContext` entry; > 10 % regression is a release failure |
 
@@ -1314,8 +1320,10 @@ only within the recorded runner class; a different CPU/OS/Rust version records i
   permitted**: it is exactly the F-29 regression. The F-29 closure is a Step 14 gate (it is not a `step-11.1`
   acceptance criterion), and the start gate is expected after `step-11.1` is merged and tagged.
 - **Step 15 (next):** owns S0/S1/S2, pair/cluster deltas, the field term, state application, and the incremental
-  lattice energy; consumes §15's interface, the owner-major/inverse rule, and the canonical `code_id` (it never
-  calls `lookup` again after initialization).
+  lattice energy; consumes §15's interface, the owner-major/inverse rule, and the canonical `code_id`. It never
+  calls `ClusterTable::lookup` directly after initialization: run-time raw-tuple resolution goes through the
+  context's `cluster_lookup` wrapper (§15), which preserves the `Canonical`/`MissingFromMap`/`ExpansionMapAbsent`
+  semantics (review F-41).
 - **Step 16:** owns selection, rule lookup, the exact per-direction occupation check, acceptance, normalization
   updates, time, pre-run, aborts, and resume orchestration; consumes §9.4 and §15.
 - **Step 17:** MMC selection, exchange, Metropolis, break check; consumes the same runtime with no pools/jump

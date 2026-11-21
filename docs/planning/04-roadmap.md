@@ -78,7 +78,7 @@ comparability and planning, not as a sizing gate.
 | 11 | Compiled package encoding and `.msl` v1 writer | 08–10 | 3–4 pw |
 | 12 | Build orchestration and `mocassin` CLI | 10, 11 | 1–3 pw (owner-approved 3.0–4.0 pw single-step exception, 2026-11-16; owner-approved 2.75–3.75 pw on 2026-11-17 after the `System.CommandLine` decision) |
 | 13 | Rust workspace, `mocassin-sim`, `.msl` reader, job model | 11 | 2–4 pw (owner-approved 4.5 pw single-step exception, 2026-11-18) |
-| 14 | Simulation context initialization | 13 | 2–4 pw |
+| 14 | Simulation context initialization | 13 + `step-11.1` | 2–4 pw |
 | 15 | Energy engine and field terms | 14 | 3–5 pw |
 | 16 | KMC engine, pre-run, normalization, time | 15 | 4–6 pw |
 | 17 | MMC engine and equilibrium breaking | 15 | 2–4 pw |
