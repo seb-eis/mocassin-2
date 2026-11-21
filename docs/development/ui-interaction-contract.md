@@ -187,8 +187,9 @@ Mapping rules:
 - **Progress.** `Enter` does nothing unless focus has deliberately moved to the Cancel button; the initial
   focus is the container. `Escape` does not close the dialog.
 - **Crash.** `Enter` activates the focused recovery or exit action; there is no cancel route.
-- **Lists and trees.** The palette, Problems list, and explorer implement activation explicitly. A new list or
-  tree that offers a double-click action must offer the same action on `Enter`.
+- **Lists and trees.** The palette, Validation list, and explorer implement activation explicitly. The internal
+  channel id and type names remain `problems`; the visible label is Validation. A new list or tree that offers a
+  double-click action must offer the same action on `Enter`.
 
 ### 5.3 Multiline opt-out
 
@@ -236,11 +237,14 @@ and console. The shell stores **fractions**, never pixels:
 
 | Value | Meaning | Default | Minimum |
 | --- | --- | --- | --- |
-| `LeftFraction` | projects panel share of the workspace width | 260 / 1200 | 160 px |
-| `RightFraction` | inspector share of the workspace width | 320 / 1200 | 160 px |
-| centre share | `1 - LeftFraction - RightFraction` | remainder | 360 px |
-| `ConsoleFraction` | console share of the documents + console height | 180 / 800 | 80 px |
-| documents share | `1 - ConsoleFraction` | remainder | 200 px |
+| `LeftFraction` | projects panel share of the workspace width | 0.20 (240 px nominal at 1200) | 160 px |
+| `RightFraction` | inspector share of the workspace width | 0.22 (264 px nominal at 1200) | 160 px |
+| centre share | `1 - LeftFraction - RightFraction` | remainder (696 px nominal; 684 px after two 6 px splitters) | 360 px |
+| `ConsoleFraction` | console share of the documents + console height | 0.32 (256 px nominal at 800) | 80 px |
+| documents share | `1 - ConsoleFraction` | remainder (544 px nominal at 800) | 200 px |
+
+At the 900 × 600 window minimum the nominal extents are 180 px left, 198 px right, and 192 px console; the
+minima above and the window minimum keep every visible region reachable.
 
 Splitters are 6 logical pixels wide, matching the Fluent `GridSplitter` minimum, and live in `Auto` tracks so
 they collapse when their region is hidden. A splitter rebalances only its two adjacent star tracks; the third
@@ -270,22 +274,36 @@ panel.
   new ratio.
 - Visibility toggles and drag completion share the existing debounced persistence path. The persisted layout
   is the most recent completed gesture.
+- **View → Reset layout** restores the three defaults, shows all regions, writes the current defaults revision,
+  and persists through the same path. It does not change the theme, density, recent files, or active console
+  tab.
 - The layout is application-local settings, not a `contracts/manifest.json` format and not a cross-language
   fixture.
 
 ### 6.4 Persisted fields and migration
 
-`LayoutSettings` stores `leftFraction`, `rightFraction`, and `consoleFraction` as doubles. The existing
-`leftVisible`, `rightVisible`, `consoleVisible`, and `activeConsoleChannel` fields are unchanged.
+`LayoutSettings` stores `leftFraction`, `rightFraction`, and `consoleFraction` as doubles, plus the additive
+integer `defaultsRevision`. The existing `leftVisible`, `rightVisible`, `consoleVisible`, and
+`activeConsoleChannel` fields are unchanged.
 
-- A document without fraction fields but with the pre-fix `leftWidth`/`rightWidth`/`consoleHeight` values is
-  migrated once by dividing by the 1200 × 800 design size and clamping to the persisted range. The console
-  height uses the same 800 px reference; the small difference from the inner content height is accepted.
-- The writer never emits the pixel fields again; a second load is idempotent.
-- Missing, non-finite, or out-of-range values fall back to the default with a settings warning. The defaults
-  reproduce the pre-fix 260 / 320 / 180 look at the design size.
+- **Pixel migration first.** A document without fraction fields but with the pre-fix
+  `leftWidth`/`rightWidth`/`consoleHeight` values is migrated once by dividing by the 1200 × 800 design size and
+  clamping to the persisted range. The console height uses the same 800 px reference; the small difference from
+  the inner content height is accepted. The writer never emits the pixel fields again.
+- **Then the defaults-revision migration.** `defaultsRevision` is absent as `0`; a non-integer or negative value
+  is a settings warning and falls back to `0`. When the revision is below `1` and all three post-read fractions
+  equal the old defaults within `1e-6` (`260/1200`, `320/1200`, `180/800`), all three are replaced with `0.20`,
+  `0.22`, and `0.32`. Any fraction that differs from the old defaults is a custom layout and is preserved. The
+  write stores revision `1`; a second load is idempotent. This is an additive application-local field with no
+  schema bump.
+- Missing, non-finite, or out-of-range values fall back to the new defaults with a settings warning. The
+  defaults are the visual-refresh values (`0.20` / `0.22` / `0.32`), not the pre-fix 260 / 320 / 180 look.
 - The persisted range is 0.08–0.45 for the side panels and 0.08–0.60 for the console. The runtime minima are
   enforced by the grid, not by the settings validator, because they depend on the window size.
+
+`activeConsoleChannel` stores the tab id, `application` or `problems`. An unknown id falls back to the first
+tab, and switching tabs schedules the existing debounced persist. The visible labels and tab behaviour are in
+[UI visual contract §8](ui-visual-contract.md#8-console-tab-model).
 
 ### 6.5 Keyboard and accessibility
 

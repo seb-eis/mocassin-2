@@ -325,9 +325,8 @@ the matching background, border, and foreground tokens.
 
 The splitter behaviour, fraction model, minima, and keyboard rules remain normative in
 [UI interaction contract §6](ui-interaction-contract.md#6-shell-layout). This section records the visual
-refresh's default values and the one-time migration; the interaction contract's numeric defaults are updated
-to these values in the same implementation change. The maintenance record flags that update as an owner
-decision before code starts.
+refresh's default values and the one-time migration; the interaction contract's numeric defaults were updated
+to these values on 2026-11-21.
 
 | Value | Default | Nominal at 1200 × 800 | Nominal at 900 × 600 | Persisted range |
 | --- | --- | --- | --- | --- |

@@ -12,11 +12,11 @@ design and test plan for one `fix/gui-visual-refresh` branch and one owner `--no
 | Worktree | `/workspace` (clean, in place) |
 | Normative visual contract | [`docs/development/ui-visual-contract.md`](../../development/ui-visual-contract.md) |
 | Interaction behaviour | [`docs/development/ui-interaction-contract.md`](../../development/ui-interaction-contract.md) |
-| Status | Design ready; implementation may start only after the owner answers §10 |
+| Status | Design accepted 2026-11-21; ready for implementation |
 | Tracking | One branch; internal commit sequence in §4; local gates; one owner `--no-ff` merge approval |
 
 This record holds the defect evidence, scope, migration algorithm, test plan, acceptance criteria, risks, and
-open questions. It does not restate the palette or surface rules; the visual contract is the single home for
+owner decisions. It does not restate the palette or surface rules; the visual contract is the single home for
 those. If the two disagree, the visual contract wins and this record is corrected.
 
 ## 1. Owner-reported defects and direction
@@ -396,7 +396,7 @@ high-contrast capture keeps compact density. Regeneration uses
 | A Fluent key is missed, leaving a control blue or light in one theme | The contract lists the expected key set; add a resolved-resource test for every key; screenshot the shell and one overlay per theme; stop and add the key to the contract before inventing a template |
 | High contrast leaks a palette colour | `HighContrast.axaml` defines every role and key; a test enumerates the list and asserts HC values; density still applies |
 | Overriding Fluent keys changes a control template layout | Only colours, borders, padding, and corner radius are changed; no templates are replaced; compare screenshots and control bounds; stop if a control needs a template rewrite |
-| Light palette or state/semantic colours are outside the owner's five dark values | The values are the Light+ equivalent and the contrast-safe state/text derivations; owner review is requested in §10 before merge |
+| Light palette or state/semantic colours are outside the owner's five dark values | The values are the Light+ equivalent and the contrast-safe state/text derivations; the owner approved them on 2026-11-21 (Q2) |
 | Welcome centring differs by font metrics | The test measures the rendered text centre, not the CSS metrics, with a 1 px tolerance; check both densities and both themes |
 | One-time migration discards a deliberate layout | Upgrade only when all three values equal the old defaults within `1e-6`; preserve any custom value; add a reset command; test custom fractions and legacy pixels |
 | Adding `defaultsRevision` is treated as a format change | It is additive and application-local; no schema bump, manifest, ADR, or cross-language fixture; document it in `reference/file-layout.md` |
@@ -414,15 +414,16 @@ high-contrast capture keeps compact density. Regeneration uses
 | ADR | **Not required.** The change is application-local visual tokens and settings, not a project/package/results/state format, dependency, or architecture boundary. No `contracts/manifest.json` change. |
 | Amendment | **Not applicable.** This is an out-of-step maintenance fix under `AGENTS.md` §3.5, not a step amendment. |
 | Independent design review | **Not required by this design.** The owner fixed the direction, the change is bounded to the existing shell surfaces, and the contrast/migration/tab/screenshot tests cover the risky parts. The reviewer harness binding also cannot host a record on a `fix/` branch. If the owner wants a review, stop before implementation and use the §3.9 process. |
-| `ui-interaction-contract.md` | **Numeric/default update required.** §6.1 must show left 0.20, right 0.22, console 0.32; §6.4 must add the `defaultsRevision` rule and state the reset command; the §5.2 "Problems list" reference becomes "Validation list". The focus, `Escape`, `Enter`, layer, and splitter behaviour is unchanged. The planner did not edit that page in this pass; the owner must approve the numeric update and the implementor must make it in the same branch. See Q1. |
+| `ui-interaction-contract.md` | **Updated 2026-11-21.** §5.2 now says Validation list; §6.1 shows left 0.20, right 0.22, console 0.32 with the nominal extents; §6.4 records the `defaultsRevision` migration, the reset command, and the `activeConsoleChannel` tab ids. The focus, `Escape`, `Enter`, layer, and splitter behaviour is unchanged. See Q1. |
 | Step tag | **None.** No step is created and no `step-NN` tag is moved. |
 | Parity matrix | **No change.** This is a visual maintenance fix, not a feature; no parity row is added or moved. |
 | Merge | One owner `--no-ff` approval after the local gates and the evidence in this record. No per-feature CI. |
 | Platform runs | Not a merge gate in this record. The headless suite runs on the platform matrix when a platform job is dispatched; screenshots remain Linux-only. A human Windows/macOS visual spot-check is recommended and recorded as evidence if performed. |
 
-## 10. Owner decisions and open questions
+## 10. Owner decisions
 
-The following are already decided and are not reopened:
+The owner approved the design and resolved every open question on 2026-11-21. These are fixed inputs for
+implementation and are not reopened.
 
 | ID | Decision |
 | --- | --- |
@@ -432,35 +433,18 @@ The following are already decided and are not reopened:
 | D4 | Console tabs `Console` then `Validation`; Problems content becomes Validation; active tab persists; no close/reorder; internal id may stay `problems`. |
 | D5 | Light theme restyled in parallel to a VS Code Light+ equivalent. |
 | D6 | One `fix/gui-visual-refresh` branch and one owner `--no-ff` merge; no independent review unless this design concludes one is needed. |
-
-Open questions for the owner, to answer before implementation:
-
-- **Q1 — interaction-contract update.** Confirm that `ui-interaction-contract.md` may be updated in this branch
-  for the new default fractions, the `defaultsRevision` migration, and the "Problems list" to "Validation list"
-  wording in §5.2. The behaviour is unchanged; without the update, the two normative pages disagree. This is
-  the only stop-and-ask that blocks the start.
-- **Q2 — derived palette values and surface mapping.** The five dark surface values are fixed. The design adds
-  text, state, semantic, focus, and light-theme values (visual contract §3) because a five-colour surface set
-  cannot express readable text, disabled, error, or hover states. It maps the three region cards to
-  `WorkspaceBackground` `#252526` and overlays/nested cards to `CardBackground` `#2D2D30`. Confirm these
-  derived values and that this is the intended meaning of "workspace" versus "cards/panels"; the alternative
-  is region cards in `#2D2D30` with a darker inner workspace.
-- **Q3 — status bar.** The design makes the status bar the one accent surface with white text/glyphs, replacing
-  the old per-severity colours. Confirm, or require a neutral status bar and a separate contrast-safe severity
-  palette.
-- **Q4 — optional accents.** The five non-default accent keys (`teal`, `green`, `amber`, `violet`, `rose`)
-  keep their values; the `blue` key and the null/default accent become `#007ACC`; the applier chooses a white
-  or black on-accent foreground to meet contrast. Confirm that this is acceptable, or restrict the settings
-  accent to the default blue for this pass.
-- **Q5 — platform visual evidence.** A Windows/macOS human spot-check is recommended but not a merge gate.
-  Confirm whether one is required; if it is, the merge waits for both runs.
+| Q1 | **Approved.** The interaction contract is updated in this branch: new default fractions, `defaultsRevision` migration, `activeConsoleChannel` tab ids, reset command, and the Validation wording. Splitter, focus, `Enter`/`Escape`, and layer behaviour is unchanged. |
+| Q2 | **Approved — planner mapping.** Chrome `#1e1e1e`, region cards `#252526`, overlays/nested cards `#2D2D30`; the derived text, state, semantic, focus, and light-theme values in visual contract §3 are approved as written. |
+| Q3 | **Approved — accent status bar.** The status bar keeps the accent background with white text/glyphs; severity is carried by glyph and text. |
+| Q4 | **Approved — keep all five optional accents.** The five non-default keys keep their values; `blue` and the null/default accent are `#007ACC`; the applier uses a contrast-safe on-accent foreground. |
+| Q5 | **Approved — recommended evidence, not a gate.** A human Windows/macOS visual spot-check is recommended and recorded if performed; it is not a merge gate. |
 
 ## 11. Done when
 
 - The visual contract is accepted and linked from `ui-architecture.md` and the development index; the nav entry
   is added by the implementor.
-- The owner answers Q1–Q5 and, if Q1 is approved, the interaction contract's numeric/default and migration text
-  is updated in the same branch.
+- The 2026-11-21 decisions in §10 are recorded and the interaction contract's numeric/default, migration,
+  Validation, and reset text is updated in the same branch.
 - The palette, density, high-contrast, shell, region, menu/status, console-tab, welcome, palette/settings/dialog/
   notification, layout/migration, and reset work in §5 is implemented.
 - The tests in §6 pass; the screenshot baselines in §6.6 are regenerated/added and reviewed.
