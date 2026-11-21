@@ -470,12 +470,12 @@ Run from `/workspace` on 2026-11-21.
 
 | Command | Result |
 | --- | --- |
-| `./tools/verify.sh all --require` | Exit 0; `Closeout gate completed with required checks enabled.` The .NET build reported 0 warnings and 0 errors; the suite passed 38/38 contracts, 223/223 symmetry, 91/91 results, 689/689 core, 99/99 compilation, 203/203 CLI, 536/536 packages, 9/9 architecture, and 277/277 App tests. Rust fmt/clippy/test, Python (3 passed), strict Zensical, DocFX (0 warnings, 0 errors), rustdoc, contract/policy, SPDX/secret/cargo-deny, and the AOT evidence step all passed. The AOT step recorded the existing CLI publish diagnostics as evidence, not a gate. |
+| `./tools/verify.sh all --require` | Exit 0; `Closeout gate completed with required checks enabled.` The .NET build reported 0 warnings and 0 errors; the suite passed 38/38 contracts, 223/223 symmetry, 91/91 results, 689/689 core, 99/99 compilation, 203/203 CLI, 536/536 packages, 9/9 architecture, and 278/278 App tests. Rust fmt/clippy/test, Python (3 passed), strict Zensical, DocFX (0 warnings, 0 errors), rustdoc, contract/policy, SPDX/secret/cargo-deny, and the AOT evidence step all passed. The AOT step recorded the existing CLI publish diagnostics as evidence, not a gate. |
 | `python tools/check_docs_links.py` | `Documentation links OK (202 files scanned).` |
 | `python tools/check_doc_math.py` | `Documentation math conventions OK (199 files scanned).` |
 | `dotnet format Mocassin.slnx --verify-no-changes --no-restore` | Clean. |
 
-The App suite now passes 277/277 tests (250 test methods at the design freeze `d446079`). The new coverage includes `ThemeContrastTests` (7), `ConsoleTabsTests` (5), `WelcomeCentringTests` (1), the defaults-revision reader/store cases, the reset-layout test, the region/console-tab accessibility checks, the Validation-label checks, the colour-literal scan, and the 1.5x compact clipping check.
+The App suite now passes 278/278 tests (250 test methods at the design freeze `d446079`). The new coverage includes `ThemeContrastTests` (7), `ConsoleTabsTests` (5), `WelcomeCentringTests` (1), the defaults-revision reader/store cases, the reset-layout test, the region-card chrome/gap test, the region/console-tab accessibility checks, the Validation-label checks, the colour-literal scan, and the 1.5x compact clipping check.
 
 ### 12.2 Screenshots
 
