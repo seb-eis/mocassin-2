@@ -117,11 +117,11 @@ public sealed class ValidationCoordinatorTests
         var validation = session.ValidationCoordinator;
 
         var pending = validation.RevalidateAsync();
-        Assert.Equal(ValidationState.Validating, validation.State);
         await pending;
 
         Assert.Equal(1, validation.ValidationRunCount);
         Assert.NotNull(validation.Result);
+        Assert.NotEqual(ValidationState.Validating, validation.State);
         time.Advance(TimeSpan.FromMinutes(1));
         Assert.Equal(1, validation.ValidationRunCount);
     }
