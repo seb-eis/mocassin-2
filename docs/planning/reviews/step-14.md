@@ -269,10 +269,10 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-review required
+**State:** Changes required — round 2 at record `e844a13` (frozen design `b6dc503`) closes F-1, F-2, and F-3 in substance and closes F-4–F-16 in the Step 14 freeze; it adds F-17 (Major, cluster instance per table) and the minor cross-step corrections F-18–F-22 plus notes F-23–F-28. The request owner set `Re-review required` after round 1; the reviewer-authored round-1 text, findings, and verdict remain unchanged as history.
 
-The request owner set this state after applying the round-1 resolutions; the reviewer-authored round-1 text below
-is unchanged.
+The request owner set `Re-review required` after applying the round-1 resolutions; the round-2 reviewer set the
+current state. The reviewer-authored round-1 text below is unchanged.
 
 ## Reviewer independence
 
@@ -488,3 +488,132 @@ testable, and traceable.
 and recorded, but F-1, F-2, and F-3 are material implementability/scientific/trust-boundary contradictions that
 must be corrected before implementation. No Blocker was found. After the design docs are corrected and re-frozen,
 a fresh review round is required.
+
+### Re-review round 2
+
+#### Independence and frozen state
+
+I am a fresh, independent planning auditor. I did not author or implement the Step 14 design and have no shared
+conversation with the planner, the implementors, the round-1 reviewer, or the orchestrator. I received only the
+frozen commit `b6dc50361e749954480efa1d1559d987c10b4142`, the record at `e844a13`, the repository, and the
+required commands/scope; no desired verdict or summary was supplied. I read the repository, the Step 13 runtime
+and reader code and fixtures, the .NET writer/compiler, and the original solver as a read-only reference rather
+than relying on the request. The review was read-only apart from this record: I edited and committed only
+`docs/planning/reviews/step-14.md` and did not merge, tag, push `main`, delete branches, change
+code/tests/configuration/design docs, or fix a finding.
+
+Frozen state: the reviewed commit is `b6dc50361e749954480efa1d1559d987c10b4142` (the design freeze after round 1).
+The record HEAD `e844a13` is the documentation-only re-review request commit; `git diff --name-only
+b6dc503..e844a13` is exactly `docs/planning/reviews/step-14.md`, so no design, code, test, configuration,
+contract, or generated artifact moved between the freeze and this record. The working tree was clean before the
+record edit. The freeze includes the corrected Step 14 page, the Step 13 container reconciliation, the Step
+15/16 interface reconciliation, and the architecture/data-contract/quality/roadmap/open-decision/parity/
+code-structure/solver-architecture/physics updates; no code or fixture exists yet.
+
+#### Commands and results
+
+- `./tools/verify.sh docs --require` → exit 0; Zensical strict, DocFX, and rustdoc clean; `Documentation built
+  in .../site`; `Closeout gate completed with required checks enabled.`
+- `./tools/verify.sh policy --require` → exit 0; contracts current (26), model/parameterization/lattice
+  projections OK (5/4/2), Space-group catalog current (274 settings, sha256
+  `1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395`), process consistency OK, 60 tool tests OK,
+  SPDX headers in 780 files, no secret patterns in 1,217 files, ApiCompat found no breaking changes (the
+  unresolved `MessagePack`/`Microsoft.Data.Sqlite` reference messages are non-fatal), cargo-deny
+  advisories/bans/licenses/sources OK.
+- `python tools/check_doc_math.py` → `Documentation math conventions OK (179 files scanned).`, exit 0.
+- `git diff --name-only b6dc503..e844a13` → only `docs/planning/reviews/step-14.md`; `git status --short`
+  clean before the record edit.
+- Inspected the Step 13 runtime/reader (`runtime/{direction_pool,jump_status,model,energy,transition}.rs`,
+  `limits.rs`, `settings.rs`, `mocassin-msl/src/map/{model,transition}.rs`), the .NET writer/compiler
+  (`ClusterCompilationStage.cs`, `PairCompilationStage.cs`, `TransitionCompilationStage.cs`,
+  `CompiledStructureModel.cs`, `EnergyPayloadMapper.cs`), the original `EnvironmentRoutines.c`,
+  `JumpStatusInititialization.c`, `SimulationContextInitialization.c`, `StatisticsRoutines.{c,h}`, the
+  populated/centered fixtures and payloads, and `samples/jobs/ceria-temperature-sweep.mocprj`.
+
+#### Findings
+
+**Round-1 finding closure:**
+
+| Finding | Round-1 severity | Closure | Evidence |
+| --- | --- | --- | --- |
+| F-1 | Major | **Closed.** The pool is now supercell-addressed: `SelectionPool`/`PoolMember { env: EnvId, particle }`, one global `slot` over `E*pc`, `pool_of` over `P*pc`, `set_selectable(env, particle)`, `selectable_jump_count` over `Σ members.len()*direction_count`; Step 16 selects `member.env`. Two cells are distinct members and the slot key cannot collide. The Step 13 `DirectionPool` placeholder is retired (no reader constructed it). | Step 14 §8 and §15; Step 16 §2; `src/rust/crates/mocassin-types/src/runtime/direction_pool.rs`; `ids.rs` (`PositionId` = P1); grep over `src/rust` shows only the re-exports. |
+| F-2 | Major | **Closed.** The static vector is owner-major: `E(owner,p) = site + Σ pair_table[pair_id][p][partner]`; a second CSR `inverse(partner P1) -> { owner_position, link_id }` finds the owners; a change at `V` updates each owner's vector with the owner's table and row. `JumpLink { sender_path_id, receiver_path_id, link_id }` is receiver-major; `link_id` indexes the receiver's forward list and the receiver's cluster associations travel with it. A missing reverse link is not synthesised. Step 15 §2–§6 is rewritten; the asymmetric-table/one-directional-link tests and the D-10 multi-member cluster rebuild are present. | Step 14 §6.1, §7.2, §9.2, §9.3; Step 15 §2–§6; original `EnvironmentRoutines.c` `DistributeEnvironmentUpdate`/`InvokeJumpLinkDeltas`; `physics/energies.md`; `02-data-contracts.md` §3.3. |
+| F-3 | Major | **Closed.** Phase-0 `MemoryPlan` computes every array with checked `u64` arithmetic before allocation; the table covers the lattice, energy/site, forward/inverse links, cluster association, cluster instances/geometry/codes/code-ids/energy, pools, and jump offsets/links; per-array caps plus a 1 GiB `max_context_bytes`; `LimitExceeded` is exit 12; the 500k example is arithmetically consistent and the impossible 512 MiB row is gone; `plan == report` is required. | Step 14 §2, §13, §17, §20; `docs/development/solver-architecture.md` memory section; `docs/planning/03-quality-strategy.md` §9.12. The capacity-definition note is F-23. |
+| F-4 | Minor | **Closed for the slot-0 rule.** Slot 0 is the centre and `[0,0,0]` by definition; the unique centre→member image rule applies only to slots `1..n`; `ClusterGeometry` is exit 12. The multi-position-site table issue is the new F-17. | Step 14 §6.2, §6.4; `step-13-populated` payload: position 1 has slot 0, positions 0/2 have slots 1/2. |
+| F-5 | Minor | **Closed.** `pool_of: Vec<u32>` plus `max_pools` (65,536) checked in the plan; no silent `u8` wrap. The `pool_of` code-block key comment still says `P*pc + particle` where the prose and table say `P1*pc + particle` — a documentation nit (F-28). | Step 14 §8, §2; `pool_of` key prose. |
+| F-6 | Minor | **Closed in Step 14.** §11.1 now says the payload persists only the optional job cap, not the derived build-time `AttemptFrequencyModulus`/`BaseFrequency`. The Step 16 §6 wording is stale (F-18). | Step 14 §11.1; `mocassin-types/src/settings.rs`; `JobPayloadDtos`. |
+| F-7 | Minor | **Closed in Step 14.** `ResumeState.model_signature` is the parameterized `.mcs` `modelSignature`; `seed_hash` is the `.mcs` `seedHash`; no lattice signature is required; `totalGoal`/`flags`/`abortReason` are explicitly not re-validated. The Step 16 §9 wording is stale (F-18). | Step 14 §12; `02-data-contracts.md` §4.3; `mocassin-types/src/runtime/model.rs` (`signature` vs `model_signature`). |
+| F-8 | Minor | **Closed.** Step 16 §3 now uses the relative-to-start encodings and `ctx.resolve_node(selected, direction, i)`; the cumulative formula is removed. The compiler subtracts the start encoding (`TransitionCompilationStage.cs` 535–541). | Step 14 §9.1/§9.4; Step 16 §3; `TransitionCompilationStage.cs`. |
+| F-9 | Minor | **Closed.** The real-writer 10×10×10 fixture and the populated-model 10×10×10 clone are both budgeted; the ceria fixture is explicitly table-free and the clone is the pair/cluster-scale measurement; the limitation is recorded in §19/§20 and the quality strategy. | Step 14 §19/§20; `03-quality-strategy.md` §13; `msl-v1/package-summary-v1.json` (`pairTableCount=0`, `clusterTableCount=0`). |
+| F-10 | Minor | **Closed.** The impossible 512 MiB row is replaced by the per-array caps and the 1 GiB total; the 500k example totals about 660 MiB and fits; the 16M-link forward/inverse size is stated. | Step 14 §2 and §20. |
+| F-11 | Minor | **Closed.** `_not_sync: PhantomData<Cell<()>>` makes the context `!Sync` while preserving `Send`; a `compile_fail` doctest and a positive `Send` assertion are required. | Step 14 §1 and §17. |
+| F-12 | Minor | **Closed in Step 14.** `goals.total == 0` is `InvalidInput` exit 12; `cycles_per_block = total/100` after the round-up; the `max(1, ...)` is removed. The Step 16 §8 wording is stale (F-18). | Step 14 §10; original `StatisticsRoutines.c` `SetCycleCounterStateToDefault`. |
+| F-13 | Note | **Closed (follow-up recorded).** OD-1 names the writer build-time diagnostic, owner, trigger, and the `msl-format.md`/`troubleshooting/errors.md` notes in feature 6; no payload revision now. | Step 14 §6.4/§21; `05-open-decisions.md` OD-1; `msl-format.md`/`troubleshooting/errors.md` plan in §18. |
+| F-14 | Note | **Closed.** Exit 12 is the context-cannot-be-represented/data error; exit 14 is the run-time abort; the distinction is explicit in Step 14 §2/§13, `01-target-architecture.md` §7.3, and the quality strategy. | Step 14 §13; architecture §7.3; `03-quality-strategy.md` §9.12. |
+| F-15 | Note | **Closed as an implementation task.** `mocassin-solver/Cargo.toml` still declares `mocassin-msl` (normal), `mocassin-state`, `mocassin-extension`, and `rayon`; feature 1 makes `mocassin-msl` dev-only and removes the others, and the target graph is recorded in `solver-architecture.md`. No code change is part of the freeze. | `src/rust/crates/mocassin-solver/Cargo.toml`; Step 14 §22; `solver-architecture.md`. |
+| F-16 | Note | **Closed for Step 15.** `EnergyEngine<'a> { ctx: &'a mut SimulationContext }` with `&mut self` methods; `environment_energy`/`lattice_energy_ev` take `&self`; `EnvId` is used at the boundary. The Step 16 `KmcEngine` composition is the new F-19. | Step 15 §1; Step 14 §15. |
+
+**New findings:**
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Major** | **F-17 — The cluster runtime is one instance per table, but the .NET writer links the same cluster table to every P1 position owned by the centre site. A writer-valid package with a cluster on a multi-position site is therefore rejected or cannot represent the per-centre codes/energies, and the design records no v1 limitation for it.** | `src/dotnet/Mocassin.Compilation/Energy/ClusterCompilationStage.cs` 238–241: `foreach (var p in context.Structure.Sites[centerSite.Index].PositionIndices) links[p].Add(new CompiledClusterLink(tableIndex, 0));` — slot 0 is added to every position of the centre site. `tests/contracts/packages/step-13-centered/payloads/model-1.bin` decodes to 8 positions, 2 sites, `site_index` `[0,1,1,0,0,1,1,0]`; site 0 owns 4 positions (this fixture has `clusterTableCount=0`). `step-13-populated` has 3 sites/3 positions, so its one cluster (centre position 1, members 0/2) does not exercise the case. Step 14 §6.2 items 2/5 require slot 0 on exactly one P1 position and the multiset of `byte_position` to be `0..=n`; §6.3/§2 define `instance_of_table[table] -> instance` one-to-one, `K` = one instance per referenced table, and `codes`/`energy` per instance/cell. Either support multiple centres (one `ClusterInstance` per slot-0 link; `instance_of_table` becomes a `T+1`/`K` CSR; `K` is the slot-0 link count; per-instance `slot_start`/`codes`/`energy`; update the plan table and tests) or record an explicit v1 limitation (OD-1/step page) with a writer build-time diagnostic and a fixture/test; `step-13-centered` is a suitable base. |
+| **Minor** | **F-18 — The Step 16 cross-step text was not updated after F-6, F-7, and F-12.** | Step 16 §6: `nu_max` is still described as `AttemptFrequencyModulus`, which Step 14 §11.1 says the payload does not persist (F-6); §8 still uses `max(1, total_goal / 100)` where Step 14 §10 removes the `max` and makes zero total exit 12 (F-12); §9 still says to validate the "model/lattice signature" although Step 14 §12 removes the lattice signature (F-7). Fix the Step 16 page or add a reconciliation note. |
+| **Minor** | **F-19 — Step 16's `KmcEngine<'a>` would need two simultaneous mutable borrows of the context.** | Step 15 §1: `pub struct EnergyEngine<'a> { ctx: &'a mut SimulationContext }`; Step 16 §1: `pub struct KmcEngine<'a> { ctx: &'a mut SimulationContext, energy: EnergyEngine<'a>, ... }`. `EnergyEngine<'a>` already borrows the context mutably, so the struct cannot also hold `ctx`. The F-16 fix is correct for Step 15 but was not reconciled with Step 16. Hold only the engine (and expose the context through it) or hold `ctx` and create a short-lived `EnergyEngine<'_>` per call; update Step 16 §1/§5. |
+| **Minor** | **F-20 — `nu_max` exit code is inconsistent between §11.1 and §13/quality strategy.** | Step 14 §11.1: "`nu_max > 0` and finite, else exit 12"; §13: `NonFiniteFactor { what }` → 13 "`kT`, `K_fix`, `K_norm`, `nu_max`, or `dt`"; `03-quality-strategy.md` §9.12: non-finite factor/`nu_max`/`dt` → 13. Choose one (likely 13) and align §11.1. |
+| **Minor** | **F-21 — `wrap(owner_cell + link.offset)` uses unchecked index arithmetic; a hostile package can overflow `i32`.** | Step 14 §6.1: `partner = wrap(owner_cell + link.offset) * P + link.partner_position`; `Link.offset` is `[i32;3]`. `mocassin-msl/src/map/model.rs` 416–426 bounds `|offset[i]| ≤ |interaction_range[i]| + 1` but does not bound the interaction range above, so a package with a huge range/offset can overflow before the wrapped-index check. Use checked/`i64` `rem_euclid` or reject a range larger than the lattice; add a hostile-offset test. |
+| **Minor** | **F-22 — `SelectionPool.members` capacity is not reserved per pool, so `set_selectable` can allocate.** | Step 14 §8: `set_selectable` swap-removes or inserts a member; §17 requires zero allocations in the pool add/remove helpers after construction. The plan sizes `pools.members` as `M*8` in total, but each `members: Vec<PoolMember>` must reserve its per-pool maximum (the number of selectable `(env, particle)` combinations with that direction count) at construction; otherwise an insert after a particle change reallocates. State the per-pool capacity in §8 and plan it. |
+| **Note** | **F-23 — `plan == report` is defined against "actual vector capacities", which `Vec::with_capacity` does not guarantee to equal the plan.** | Step 14 §2 says `MemoryReport` is computed from the allocated vectors and `plan == report`; §17 says `MemoryReport` matches the actual vector capacities. `Vec::with_capacity(n)` may have capacity > n (allocator rounding), so a strict equality can fail. Define the report from the plan/lengths or assert `report >= plan`; state which. The `max_context_bytes` is the derived-array cap, not process RSS; the benchmark records peak RSS separately. |
+| **Note** | **F-24 — The §9.2 parenthetical reverses the original's link storage.** | Step 14 §9.2 says "`EnvironmentLink.TargetEnvironmentId` points from the receiver back to the changed neighbour". The original `LinkEnvironmentToSurroundings` stores the link on the **target** (the changed/partner) environment with `TargetEnvironmentId` set to the centre/receiver, and `BufferJumpLinksOfJumpPath` stores `link_id` in the sender's list. The design's receiver-major `JumpLink` is the dual and the energy rule (receiver's table/row) is correct; clarify the wording so a port reviewer does not think the original stores the link on the receiver. |
+| **Note** | **F-25 — Step 17's `linked(a,b)` is still named but not defined.** | Step 14 §15 lists `linked(a,b)` for Step 17; no definition is given. Implement it as a helper over `link_range(position(a))`/`incoming`, or define the exact semantics (owner's forward link to the resolved partner, no reverse synthesis). |
+| **Note** | **F-26 — The `MOBILE` static/passive assumption should be confirmed and tested.** | Step 14 §3: `MOBILE = particle != void && jump_count >= 0`; `jump_count` is `u32`, so the predicate is always true for non-void and the original's `-1` (static)/`0` (passive) split is not representable. The design says the distinction is "not needed"; add a fixture or test where a particle is not in any KMC collection's mobile mask and record the assumption for Step 29 parity. |
+| **Note** | **F-27 — "twelve-phase" does not match the 13-phase list (0–12).** | Request summary and Step 14 `Delivers` say "the twelve-phase build order"; §1 lists phases 0–12. Update the count to thirteen (or "phase 0 plus twelve"). |
+| **Note** | **F-28 — `pool_of` code-block key comment typo.** | Step 14 §8 code block: `pub pool_of: Vec<u32>, // length P*pc; key = P*pc + particle`; the prose and §2 table use `P1*pc + particle`. Fix the comment so an implementor does not use a constant key. |
+
+#### Closure status
+
+No Blocker remains. The three round-1 Majors are genuinely redesigned and the round-1 minor/note set is closed
+in the Step 14 freeze. F-17 is a new Major that needs a design decision (support multiple centre positions per
+cluster table or record the v1 limitation and writer follow-up). F-18–F-22 are minor corrections and F-23–F-28 are
+notes; none of the notes changes a persisted format or a scientific invariant.
+
+**Other requested checks.** The `LimitExceeded` 12-vs-14 distinction is explicit and correct: `14` is the
+run-time abort, `12` is a context/package the job cannot represent, and Step 14 §2/§13, architecture §7.3, and
+quality strategy §9.12 agree (F-14 closed). The crate graph is the Step 14 target, not the Step 13 state:
+`mocassin-solver/Cargo.toml` still has `mocassin-msl` normal plus `mocassin-state`/`mocassin-extension`/`rayon`;
+feature 1 makes `mocassin-msl` dev-only and removes the others, and `solver-architecture.md` records the target
+(F-15 is an implementation task, not a design gap). The `EnergyEngine<'a>` fix is correct for Step 15 (`&mut`
+context, `&mut self` methods); Step 16's `KmcEngine` composition is F-19. The 10×10×10 evidence is the real-writer
+ceria fixture plus the populated-model clone; the ceria model has no pair/cluster tables, the clone is the
+pair/cluster-scale measurement, both are budgeted at `< 100 ms`/`≤ 64 MiB`, and the benchmark/baseline and
+allocation tests are specified (F-9/F-10 closed). The High class/no-split decision is recorded in Step 14 §4 and
+roadmap §3.1 with the owner-acceptance request; six features and one acceptance story are bounded; no code or
+fixture exists. The docs/parity plan names `solver-architecture`, `physics/energies`, `performance/index`,
+`troubleshooting/errors`, `testing-and-parity`, `msl-format`, and the new parity row; `docs --require` passes. No
+format change: `contracts/manifest.json`, `.msl` schema/payload/version/signature, and fixtures are untouched;
+the new 10×10×10 package is a test artifact.
+
+**Cross-step Step 13/14 concern (judged acceptable).** The Step 14 retirement of the Step 13 `DirectionPool`
+placeholder and the `JumpLink` shape change are acceptable design evolution inside Step 14 feature 1/4, not an
+ADR/amendment/tag-note trigger: the Step 13 containers were explicitly type-only and no reader constructed them
+(grep over `src/rust` shows only the re-exports); the Step 13 page now records the reconciliation (container note
+at lines 1216–1227); the Step 14 page §8/§9.2/§22 records the replacement; no `.msl` field, manifest, signature,
+fixture, or scientific invariant changes; and the `step-13` tag is the historical checkpoint and must not move.
+The feature log should record the public Rust API break, and the Step 13 invariant tests should be updated when
+the placeholder is removed. If the owner wants a durable process record, the Step 13 page note is sufficient; an
+ADR would be warranted only if the placeholder or the state format were a persisted/contract surface, which it is
+not.
+
+#### Verdict
+
+- [ ] Ready for implementation
+- [ ] Ready with notes
+- [x] Changes required
+- [ ] Waived
+
+**Changes required.** F-1, F-2, and F-3 are genuinely redesigned and F-4–F-16 are closed in the Step 14 freeze.
+F-17 is a new Major: the cluster runtime cannot represent a writer-valid cluster table linked to every P1
+position of its centre site, and the design does not record the limitation. F-18–F-22 are minor corrections and
+F-23–F-28 are notes. No Blocker was found. The Step 13 placeholder retirement is acceptable as planned type-only
+evolution with the Step 13 reconciliation note; no ADR/tag note is required. A fresh round is required after the
+cluster-instance decision and the Step 16 reconciliation.
