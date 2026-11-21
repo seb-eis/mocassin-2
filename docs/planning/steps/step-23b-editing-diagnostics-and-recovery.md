@@ -19,12 +19,12 @@ and the step branch is `step/23b-editing-diagnostics-and-recovery`. Audit round 
 
 ## Implementation status
 
-- **Status:** **In audit** — audit round 1 returned `Fixes required` (F1–F7); fixes applied on the audit-round-1 feature branch; replacement closeout and re-audit pending
+- **Status:** **In audit** — audit round 1 returned `Fixes required` (F1–F7); the fixes are squashed at `ca64c9a`, the replacement Ubuntu/Windows/macOS runs are green at the re-audit candidate `fe79552`, and the audit record is `Re-audit required`
 - **Step branch:** `step/23b-editing-diagnostics-and-recovery`
-- **Step CI:** Ubuntu closeout [44929014836](https://github.com/seb-eis/mocassin-2/actions/runs/44929014836); Windows [44929276522](https://github.com/seb-eis/mocassin-2/actions/runs/44929276522); macOS [44929582584](https://github.com/seb-eis/mocassin-2/actions/runs/44929582584) green at `eb120e1`
+- **Step CI:** replacement Ubuntu closeout [44932597523](https://github.com/seb-eis/mocassin-2/actions/runs/44932597523), Windows [44932918537](https://github.com/seb-eis/mocassin-2/actions/runs/44932918537), and macOS [44932432910](https://github.com/seb-eis/mocassin-2/actions/runs/44932432910) green at `fe79552`; the original `eb120e1` runs are historical
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Re-audit required — [`audits/step-23b.md`](../audits/step-23b.md) records the round-1 findings; resolutions are recorded there and in the feature log below; closeout evidence [`closeout/step-23b.json`](../closeout/step-23b.json) is rebound at the replacement audited commit
+- **Audit:** Re-audit required — [`audits/step-23b.md`](../audits/step-23b.md) records the round-1 findings and the resolutions; closeout evidence [`closeout/step-23b.json`](../closeout/step-23b.json) is rebound at `fe79552`
 - **Design review:** **Accepted `Ready with notes` by the human owner 2026-11-21** at the round-4 freeze
   `a33711d` (record `c4ded0e`, round-4 verdict `Ready with notes`) — see
   [`reviews/step-23b.md`](../reviews/step-23b.md).
@@ -192,10 +192,10 @@ seam fills in §1.
 - **Known limitations carried into the audit:** per-project close/exit prompts (no apply-to-all batch choice);
   ordinary Open on a missing main file reports the load failure without a dedicated snapshot-path/discard
   dialog, while session restore reports missing paths; the dead-UI crash path writes no recovery files; the
-  autosave failure-to-`recovery/` fallback is implemented but not failure-injected in a PR-fast test; a deferred
-  `recovery/` candidate may expire under the accepted m-14 seven-day sweep.
+  autosave failure-to-`recovery/` fallback is now failure-injected in a PR-fast test; a deferred `recovery/`
+  candidate may expire under the accepted m-14 seven-day sweep.
 - **Evidence:** [`closeout/step-23b.json`](../closeout/step-23b.json); audit request
-  [`audits/step-23b.md`](../audits/step-23b.md) (`Ready for audit`).
+  [`audits/step-23b.md`](../audits/step-23b.md) (`Re-audit required`).
 
 #### Audit round 1 fixes (F1–F7)
 
@@ -221,9 +221,11 @@ seam fills in §1.
   asynchronous. The trigger is the UI-thread `ProjectChanged` handler.
 - **F7 (Note):** added the `--project` + restore, two-session cancel, `LoadDiagnostics` recovery assertion, and
   timestamp-tie tests; the tie-break is sidecar first, then ordinal snapshot path.
-- **Gates:** `./tools/verify.sh all --require`, the focused App/Recovery/Scheduling tests, and the docs checks
-  run on the integrated tree; the replacement Ubuntu closeout and Windows/macOS platform runs are recorded at
-  the new audited commit.
+- **Gates:** `./tools/verify.sh all --require` exited 0 at `fe79552` (including strict docs/DocFX/rustdoc,
+  structure, API, contracts/policy, and the AOT evidence gate); the focused App/Recovery/Scheduling tests and
+  `dotnet format --verify-no-changes` were clean. Replacement Ubuntu closeout 44932597523, Windows 44932918537,
+  and macOS 44932432910 are green at `fe79552`. Two initial parallel dispatches were cancelled by the workflow's
+  per-ref concurrency group before starting; the serialized replacement runs above are the gate evidence.
 
 ### Inherited 23A deviations and how 23B respects them
 
