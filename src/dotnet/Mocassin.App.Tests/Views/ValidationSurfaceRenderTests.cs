@@ -125,6 +125,50 @@ public sealed class ValidationSurfaceRenderTests
                 }
             });
 
+    [Fact]
+    public Task TheEditMenuUndoRedoCommandsFollowTheActiveProject() =>
+        HeadlessSession.DispatchAsync(
+            async () =>
+            {
+                using var workspace = new TempWorkspace();
+                using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+
+                try
+                {
+                    var shell = Assert.IsType<ShellViewModel>(window.DataContext);
+                    var session = CreateDiagnosticSession();
+                    shell.Workspace.Add(new ProjectWorkspaceEntry(session));
+                    await shell.Navigation.NavigateToAsync(
+                        new ModelPath("project", session.Id, "overview"),
+                        NavigationIntent.Activate);
+                    HeadlessSession.Pump(window);
+                    var overview = Assert.IsType<ProjectOverviewViewModel>(shell.Documents.ActiveDocument);
+                    overview.NameDraft = "Renamed";
+                    overview.CommitNameCommand.Execute(null);
+                    HeadlessSession.Pump(window);
+
+                    var undo = shell.Commands.Find("edit.undo");
+                    var redo = shell.Commands.Find("edit.redo");
+                    Assert.NotNull(undo);
+                    Assert.NotNull(redo);
+                    Assert.True(undo.Command.CanExecute(null));
+                    undo.Command.Execute(null);
+                    HeadlessSession.Pump(window);
+                    Assert.Equal("Diagnostics", session.Name);
+                    Assert.True(redo.Command.CanExecute(null));
+
+                    redo.Command.Execute(null);
+                    HeadlessSession.Pump(window);
+                    Assert.Equal("Renamed", session.Name);
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+
     private static ProjectSession CreateDiagnosticSession()
     {
         var time = new ManualTimeProvider();

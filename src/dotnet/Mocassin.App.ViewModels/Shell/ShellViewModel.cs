@@ -21,8 +21,6 @@ namespace Mocassin.App.ViewModels.Shell;
 /// </summary>
 internal sealed partial class ShellViewModel : ObservableObject
 {
-    private static readonly MenuKind[] menuOrder = [MenuKind.File, MenuKind.Edit, MenuKind.View, MenuKind.Help];
-
     private readonly IShellLifetime lifetime;
     private readonly ISettingsService settings;
     private readonly IConsoleService consoleService;
@@ -34,6 +32,7 @@ internal sealed partial class ShellViewModel : ObservableObject
     private readonly AsyncRelayCommand saveAsProjectCommand;
     private readonly AsyncRelayCommand closeProjectCommand;
     private readonly AsyncRelayCommand reloadProjectCommand;
+    private readonly ShellEditCommands editCommands;
     private readonly IProjectSessionService sessions;
     private readonly IStorageService storage;
     private readonly IDialogService dialogs;
@@ -131,11 +130,12 @@ internal sealed partial class ShellViewModel : ObservableObject
         saveAsProjectCommand = new AsyncRelayCommand(SaveAsProjectAsync, () => sessions.ActiveSession is not null);
         closeProjectCommand = new AsyncRelayCommand(CloseProjectAsync, () => sessions.ActiveSession is not null);
         reloadProjectCommand = new AsyncRelayCommand(ReloadProjectAsync, () => sessions.ActiveSession is not null);
+        editCommands = new ShellEditCommands(sessions);
 
         RegisterCommands(commands);
         Palette = new CommandPaletteViewModel(commands, () => IsPaletteOpen = false);
         Shortcuts = new ShortcutCheatSheetViewModel(commands, () => IsCheatSheetOpen = false);
-        Menus = BuildMenus(menuProvider);
+        Menus = ShellMenuFactory.Build(menuProvider);
 
         documents.ActiveDocumentChanged += OnActiveDocumentChanged;
         workspace.ActiveProjectChanged += OnActiveProjectChanged;
@@ -359,6 +359,7 @@ internal sealed partial class ShellViewModel : ObservableObject
             MenuKind.File,
             new KeyGestureDescriptor("F5"),
             reloadProjectCommand);
+        editCommands.Register(catalog);
         catalog.Add(
             "view.settings",
             "Settings…",
@@ -424,37 +425,6 @@ internal sealed partial class ShellViewModel : ObservableObject
             new RelayCommand(PreviousDocument));
     }
 
-    private static List<MenuViewModel> BuildMenus(IMenuItemProvider provider)
-    {
-        var menus = new List<MenuViewModel>();
-        foreach (var menu in menuOrder)
-        {
-            var items = provider.CreateMenuItems(menu)
-                .Select(command => new MenuItemViewModel(
-                    command.Title,
-                    command.Command,
-                    command.Gesture,
-                    command.GestureText))
-                .ToList();
-            if (items.Count > 0)
-            {
-                menus.Add(new MenuViewModel(HeaderFor(menu), items));
-            }
-        }
-
-        return menus;
-    }
-
-    private static string HeaderFor(MenuKind menu) =>
-        menu switch
-        {
-            MenuKind.File => "_File",
-            MenuKind.Edit => "_Edit",
-            MenuKind.View => "_View",
-            MenuKind.Help => "_Help",
-            _ => menu.ToString(),
-        };
-
     private async Task CloseActiveAsync(CancellationToken cancellationToken)
     {
         if (Documents.ActiveDocument is { } document)
@@ -488,6 +458,7 @@ internal sealed partial class ShellViewModel : ObservableObject
     private void OnActiveProjectChanged(object? sender, EventArgs e)
     {
         UpdateActiveProject();
+        editCommands.Attach(sessions.ActiveSession);
         saveProjectCommand.NotifyCanExecuteChanged();
         saveAsProjectCommand.NotifyCanExecuteChanged();
         closeProjectCommand.NotifyCanExecuteChanged();
