@@ -1,0 +1,42 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Mocassin.App.ViewModels.Commands"
+             x:Class="Mocassin.App.Views.Commands.ShortcutCheatSheetView"
+             x:DataType="vm:ShortcutCheatSheetViewModel">
+  <Grid Background="#66000000">
+    <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+            BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+            BorderThickness="1"
+            CornerRadius="6"
+            Width="640"
+            MaxHeight="620"
+            VerticalAlignment="Center"
+            Padding="16">
+      <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
+        <TextBlock Text="Keyboard shortcuts" FontSize="18" FontWeight="SemiBold" />
+        <ScrollViewer Grid.Row="1">
+          <ItemsControl ItemsSource="{Binding Groups}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:ShortcutGroup">
+                <StackPanel Spacing="4" Margin="0,0,0,12">
+                  <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                  <ItemsControl ItemsSource="{Binding Commands}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="vm:ShellCommand">
+                        <Grid ColumnDefinitions="*,Auto">
+                          <TextBlock Text="{Binding Title}" />
+                          <TextBlock Grid.Column="1" Text="{Binding GestureText}" Classes="caption" />
+                        </Grid>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+        <Button Grid.Row="2" Content="Close" Command="{Binding CloseCommand}" HorizontalAlignment="Right" />
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

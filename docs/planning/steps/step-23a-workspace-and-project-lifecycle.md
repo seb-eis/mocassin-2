@@ -19,12 +19,12 @@ those are Step 23B.
 
 ## Implementation status
 
-- **Status:** In progress
-- **Step branch:** `step/23a-workspace-and-project-lifecycle`
-- **Step CI:** — (no CI runs until closeout)
-- **Main merge:** —
-- **Step tag:** —
-- **Audit:** Not requested
+- **Status:** Done — audit `Passed with notes` accepted 2026-11-21; merged and tagged
+- **Step branch:** `step/23a-workspace-and-project-lifecycle` (merged and deleted)
+- **Step CI:** Ubuntu closeout [44889193801](https://github.com/seb-eis/mocassin-2/actions/runs/44889193801), Windows gate [44889462922](https://github.com/seb-eis/mocassin-2/actions/runs/44889462922), macOS gate [44889646766](https://github.com/seb-eis/mocassin-2/actions/runs/44889646766) green at `30dcf3e`; [main CI 44892961809](https://github.com/seb-eis/mocassin-2/actions/runs/44892961809) green at `9f4d186`
+- **Main merge:** `9f4d186` (`--no-ff`; `main` `eadfe13` was merged into the step branch at `a584b20`)
+- **Step tag:** `step-23a`
+- **Audit:** Passed with notes — accepted by the human owner 2026-11-21; R3-1…R3-3 fixed, R3-4/R3-5 accepted ([record](../audits/step-23a.md), [evidence](../closeout/step-23a.json))
 - **Design review:** Ready with notes — **accepted by the human owner 2026-11-20** at `b9c56fe`
   ([record](../reviews/step-23a.md), round 3 record commit `b6a472c`). Notes n-12/n-13 are corrected in
   feature 5.
@@ -33,11 +33,39 @@ those are Step 23B.
 - **Complexity class:** **High** — cross-step interfaces and test-matrix breadth; the class and one-paragraph
   justification are in §18. The human owner accepted the class at the start gate on 2026-11-20; a further
   split is not proposed and §18 states why.
-- **Last updated:** 2026-11-20
+- **Last updated:** 2026-11-21
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| 1 | `app-host-and-boundaries` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0 | — (none run) | `13945b1` |
+| 2 | `documents-navigation-and-commands` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0 | — (none run) | `75d95de` |
+| 3 | `settings-theming-and-accessibility` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0 | — (none run) | `d0bca73` |
+| 4 | `project-session-lifecycle` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0 | — (none run) | `a17482a` |
+| 5 | `tests-docs-and-closeout` | Squashed | `./tools/verify.sh all --require` 0 on the merged tree | Ubuntu [44841374175](https://github.com/seb-eis/mocassin-2/actions/runs/44841374175) green at `6901e76` | `114f31c` |
+| 5-fix | `fix-audit-round-1` | Squashed | `./tools/verify.sh all --require` 0 on the fixed tree at `008b133` | Ubuntu [44849296444](https://github.com/seb-eis/mocassin-2/actions/runs/44849296444), Windows [44848841598](https://github.com/seb-eis/mocassin-2/actions/runs/44848841598), macOS [44849147125](https://github.com/seb-eis/mocassin-2/actions/runs/44849147125) green at `008b133` | `657bc5f`, `008b133` |
+| 6-fix | `fix-audit-round-2` | Squashed | `./tools/verify.sh all --require` 0 on the merged tree at `30dcf3e` | Ubuntu [44889193801](https://github.com/seb-eis/mocassin-2/actions/runs/44889193801), Windows [44889462922](https://github.com/seb-eis/mocassin-2/actions/runs/44889462922), macOS [44889646766](https://github.com/seb-eis/mocassin-2/actions/runs/44889646766) green at `30dcf3e` | `30dcf3e` |
+
+### Recorded implementation deviations and limitations (feature 5)
+
+These are the accepted deviations from the approved design and the limitations the auditor must examine. They
+are recorded here rather than left implicit.
+
+| # | Deviation / limitation | Status and rationale |
+| --- | --- | --- |
+| 1 | `Avalonia.Headless.XUnit` is not used | Avalonia 12.1.6 requires xunit v3; the repository uses xunit 2.9.3. The suite uses first-party `Avalonia.Headless` with a direct `HeadlessUnitTestSession`, so headless tests still run without a display. The package list in the design is superseded for this test-only dependency. |
+| 2 | ANGLE licence exception | `Avalonia.Desktop` pulls the Windows `Avalonia.Angle.Windows.Natives` runtime (BSD-3-Clause, shipped as a licence file). `tools/contracts/check_nuget_licenses.py` records an exact-version, reviewed exception. No other dependency policy change. |
+| 3 | InternalsVisibleTo includes `Mocassin.App` and `Mocassin.App.Views` | Required for the composition root to construct internal view-model/view implementations and for compiled XAML bindings to internal types. The public-surface rule is unchanged: only `App` is a new public application type; module markers and `Program` are pre-existing. |
+| 4 | Feature 2 deferred New/Open/Recent and JSON export | Feature 4 implemented New/Open/Recent recording. **Project JSON “Save a copy…” export remains deferred**; the document supports copy only. |
+| 5 | Tab keyboard and drag support | `Ctrl+1`–`Ctrl+9`, `Ctrl+Tab`/`Ctrl+Shift+Tab`, `Ctrl+W`, middle-click close, the close button, and the tab context menu are implemented and tested. **Drag-reorder is not wired**: the Avalonia `TabControl` has no built-in drag-reorder gesture, and adding a custom tab-strip control (with accessible keyboard equivalent) is later GUI polish. `DocumentCollectionViewModel.Move` exists for that follow-up. |
+| 6 | New existing-target outcome | The original implementation reused `ProjectSessionOutcome.Locked` because the enum lacked an existing-target value. Feature 5 adds internal `ExistingTarget`, returns it from New, and tests the message/code preservation. |
+| 7 | Audit-round follow-up commits landed directly on the step branch | **Accepted by the human owner 2026-11-21 as a recorded exception, not a precedent.** After the `fix-audit-round-1` squash (`657bc5f`), the platform-gate follow-ups (`b15e83c`, `e0e897b`, `008b133`) were committed on the step branch instead of a new feature branch. They are covered by the replacement local gate and the three green runs at `008b133`; history was not rewritten. All round-2 fixes use the `fix-audit-round-2` feature branch. |
+| 8 | Save As to the current path | A Save As to the session’s current path is treated as a lock conflict rather than a plain save; the picker normally prevents this. |
+| 9 | External-change filter | The session compares length + last-write UTC (the design’s cheap filter), not a fresh content hash. Save refuses a modified/deleted file; Reload and Save As are the recovery paths. |
+| 10 | `CreateAsync` path meaning | The session service `CreateAsync(kind, name, directory)` takes a target **directory**; the design did not distinguish a directory from a full file path. |
+| 11 | Workspace seam | `ProjectWorkspaceEntry` now wraps a `ProjectSession`; the feature-2 standalone constructor is retained for tests. The session is the live owner of project/load/lock state. |
+| 12 | Layout width feedback | Region visibility and stored widths are applied from settings; manual GridSplitter resizing does not feed back into settings yet. |
+| 13 | Application diagnostics report | The crash boundary and structured log exist; the “Help → Application diagnostics” report is deferred to a later diagnostics/UI step. |
+| 14 | Step 07 validation pass | The design originally said 23A never calls `ProjectValidationPipeline`; feature 4 performs exactly one internal load-validation pass with the store diagnostics. See §5.1. No validation UI is added; 23B owns the surface. |
 
 ### Approved feature list (owner-approved 2026-11-20)
 
@@ -54,6 +82,49 @@ depends only on the features above it and on the merged 01/03–07/12 libraries;
 
 The owner approves this list once at the start gate; individual features are then squash-merged without further
 approval. 23B is not part of this list and must not appear in a 23A branch.
+
+### Audit round 1 fixes (2026-11-21)
+
+| Finding | Resolution |
+| --- | --- |
+| F-1 | Platform jobs now run the Avalonia headless suite; Ubuntu 44849296444, Windows 44848841598, and macOS 44849147125 are green at `008b133`, recorded in the closeout evidence. |
+| F-2 | A fatal settings load now blocks persistence, preserves the file, updates only in-memory state, and reports the rejection. |
+| F-3 | Added `HighContrast.axaml` and `Density.axaml`, real brush/control styles, and reduce-motion transitions. |
+| F-4 | Recent projects are openable, missing entries disabled, removable, and Save As records the new path; welcome/documentation updated. |
+| F-5 | Added the correct two-parameter shell key handler, `Ctrl+1..9` activation, and a real-key headless regression test. |
+| F-6 | Added light/dark/high-contrast screenshot baselines with a 5 % Linux pixel tolerance, the accessibility-name sweep, and the manual platform checklist. Windows/macOS do not pixel-compare. |
+| F-7 | Declared PR-fast/PR-medium tiers across the App test classes. |
+| F-8 | Added choose/prompt/error/focus dialog tests, stale-lock and duplicate-provider tests, and a real I/O settings-write test. |
+| F-9 | Removed the dead `WindowPlacementResolver` and its tests; placement persistence is no longer claimed. |
+| F-10 | Added the read-only banner, lock acquisition text, and switcher lock/active-document display. |
+| F-11 | Guarded `GetFullPath` in New and surfaced the error dialog; added an invalid-directory test. |
+| F-12 | Recorded as an accepted note: crash log keeps exception/source; active-project/last-command context is deferred until a stable crash-context contract exists. |
+| F-13 | Removed unused App `Results`/`Rendering` references; the composition-root IVT remains the recorded exception. |
+| F-14 | Recorded as an accepted note: AOT is CLI-only pre-existing evidence, not a GUI publication claim. |
+| F-15 | Fixed platform recents comparison; added a Linux case-distinct test. |
+
+### Audit round 2 fixes (2026-11-21)
+
+| Finding | Resolution |
+| --- | --- |
+| R2-1 | `HeadlessSession.DispatchAsync(Func<Task>)` now awaits the inner task through the `Func<Task<T>>` dispatch overload. Two meta-tests prove a throw and an `Assert.Fail` after `await` are observed. The seven tests exposed by the fix were corrected: dialog tests pump the realised overlay, the welcome test asserts the real `ItemsControl`/`TreeView`/console filter, the `Ctrl+2` expectation now asserts the JSON document and also checks `Ctrl+1`, and the rapid-toggle test asserts the final layout. |
+| R2-2 | Rapid toggles are last-write-wins: the target layout is captured when the toggle is scheduled, and the shell suppresses re-applying the settings change produced by its own layout write. The regression test asserts `True` → `False` → `True`, the persisted `LeftVisible`, and no temporary file. |
+| R2-3 | Current `main` (`eadfe13`) is merged at `a584b20`; the replacement local gate and the new Ubuntu/Windows/macOS runs at the audited commit rebind the closeout evidence with `main_sha_at_freeze = eadfe13`. |
+| R2-4 | Added an automated Xvfb harness that runs the real desktop shell on X11 and captures light/dark/high-contrast, workspace, dialog, and lifecycle evidence with assertions. `platform-checklist.md` records the command, environment, date, steps, and image hashes and states explicitly that this is automated Xvfb evidence, not a manual checklist. |
+| R2-5 | The owner accepted deviation 7 as a recorded exception, not a precedent. All round-2 fixes use the `fix-audit-round-2` feature branch. |
+| R2-6 | Removed the stale placement-resolver references from `code-structure.md`; `Startup/` and `Shell/` describe the real files. |
+| R2-7 | Removed the five flag-only theme resources and the unused shell-foreground key; the effect is carried by the merged dictionaries, padding/min-height/border keys, `Mocassin.Transitions`, and `SystemAccentColor`. Accessibility tests now assert automation roles for the menu, tabs, project list, explorer, and console filter and a deterministic Tab order. The settings dialog gained an error/status banner with `HasErrorMessage`/`HasStatusMessage`; Save-as-new is recorded as not implemented (the console and banner report a rejected write). |
+| R2-8 | Recorded that the round-1 reviewer record was bundled into the `657bc5f` fix commit; the record was not altered and round 2 re-ran the verdict, so history was not rewritten. |
+
+Platform stabilization after the first Windows run:
+
+- Layout persistence is serialized through a single pending task and reports write failures to the console, so
+  rapid region toggles cannot interleave and the last layout wins.
+- `TempWorkspace` retries recursive deletion for a bounded time because asynchronous persistence can still hold
+  a temporary file on Windows; the regression test asserts the last layout is persisted and no `.tmp` file
+  remains.
+- The Windows run exposed a cross-platform assertion in `ProjectPathRulesTests`; it now compares against
+  `Path.GetFullPath`.
 
 ## Goal
 
@@ -92,9 +163,10 @@ prompt, no validation panel, and no autosave or recovery.
   use from the UI, no `ProjectEditCoordinator`, no undo/redo (Step 23B and Steps 24–25).
 - **No dirty state, unsaved-changes prompt, autosave, or crash recovery.** A 23A document cannot be modified, so
   closing never prompts; `ProjectDocument` is only the value holder and the save-point bookkeeper (Step 23B).
-- **No validation surface.** No `ProjectValidationPipeline` registration, no status-bar validity indicator, no
-  Problems channel, no statistics panel, no diagnostic navigation targets (Step 23B). Step 07's pipeline is
-  consumed in 23B.
+- **No validation surface.** No status-bar validity indicator, no Problems channel, no statistics panel, and no
+  diagnostic navigation targets (Step 23B). *Original design only:* no `ProjectValidationPipeline` construction.
+  The implemented feature-4 session performs one internal load-validation pass; see the recorded post-design
+  deviation in §5.1. No validation UI is added.
 - **No recovery types.** `IRecoveryStore`, `RecoveryStore`, `CrashRecoveryWriter`, and the `recovery/` writes are
   23B (n-14 resolved by scoping). 23A's app-data layout reserves the directory but writes nothing to it.
 - **No model, parameterization, job-template, build, deploy, 3D, run-monitoring, results, or analysis UI**
@@ -170,7 +242,8 @@ public sealed class App : Application
   - singleton library service: one `ProjectStore` constructed with
     `new ProjectStoreOptions { ValidateOnLoad = false }`, constructor-injected into `ProjectSessionService`. The
     store is the only project persistence path; the session retains `ProjectLoadResult.Diagnostics` for 23B.
-    23B registers the `ProjectValidationPipeline`; 23A does not construct it.
+    *Original design only:* 23A does not construct the pipeline. The implemented feature-4 session registers it
+    for the single internal load-validation pass described in §5.1; 23B owns every validation surface.
   - created per project by `ProjectSessionService` with explicit constructor arguments (not a DI scope):
     `ProjectSession`, `ProjectDocument`, the project-scoped view models. 23B adds the edit coordinator.
 - Dependency direction (enforced by the architecture test, §15):
@@ -258,9 +331,10 @@ proposed. The only ApiCompat-checked App assemblies remain the pre-existing `Moc
   cannot produce an unusable window; an invalid value falls back to the default and is repaired on the next
   save.
 - Window title binds `"<project name> — MOCASSIN"` for the active document, or `"MOCASSIN"` with no project
-  (the `*` dirty marker is added by 23B). Minimum size 900×600. Size/state are restored from settings; a saved
-  placement whose bounds intersect no current screen falls back to the primary screen (pure
-  `WindowPlacementResolver`, test in §15).
+  (the `*` dirty marker is added by 23B). Minimum size 900×600. Window size/placement persistence was removed
+  from 23A during the audit fix: the v1 settings schema has no window-bounds block, the dead pure resolver was
+  deleted, and the shell uses the platform default placement. This is recorded as F-9 resolution; adding
+  persisted placement requires a settings-schema change in a later step.
 - The status bar in 23A shows the active document, the project path and lock state, the theme/density, and the
   version. It reserves the validity/progress/autosave slots for 23B and later steps; it shows no placeholder
   text for them.
@@ -389,8 +463,11 @@ internal enum ProjectSessionOutcome
   owns every dialog. There is no second store abstraction.
 - **Store configuration.** The single `ProjectStore` is constructed with
   `new ProjectStoreOptions { ValidateOnLoad = false }`. The load result's `ProjectLoadResult.Diagnostics` are
-  retained on the session as `LoadDiagnostics` and handed to 23B's validation pipeline; 23A runs no validation
-  and never calls `ProjectValidationPipeline` (the M-1 double-validation contract is completed in 23B).
+  retained on the session as `LoadDiagnostics` and handed to 23B's validation surface. *Original design:* 23A
+  runs no validation and never calls `ProjectValidationPipeline`. **Implemented feature-4 deviation:** the session
+  calls the in-memory pipeline exactly once with the store load diagnostics (the M-1 contract), which makes the
+  `Load` stage `Skipped` for a clean load and `Completed`/`Failed` when diagnostics exist. No second validation
+  occurs and no validation surface is added; see §5.1.
 - **New**: `ProjectTemplateFactory.CreateProject(kind, name, utcNow)` — the same factory as `mocassin new` —
   after validating the name **and target path** with the shared `ProjectPathRules` (§12). Step 23A ships exactly
   the kinds `ProjectTemplateKind` defines today (`blank`, `ceria`) with the CLI's display names. For **New
@@ -426,6 +503,25 @@ internal enum ProjectSessionOutcome
   unsaved-changes flow and no `cleanExit`/session block in 23A; 23B adds both with its dirty-state work.
 - **`--project` at startup**: a missing, unreadable, or invalid path does not prevent startup; the shell
   reports the failure in the Application console and a notification and continues with the welcome flow.
+
+### 5.1 Post-design implementation deviation — one internal load-validation pass
+
+**Recorded 2026-11-20 for feature 4.** The original design text in §1, §5, §13, and the non-goals says that 23A
+does not construct or call `ProjectValidationPipeline` and that 23B owns the M-1 contract. During feature 4 the
+owner required the Step 07 contract to be exercised in the session lifecycle, so the implementation does the
+following instead:
+
+- `ProjectStore` is still registered with `ValidateOnLoad = false`, so the store never validates.
+- `ProjectSessionService` loads the file once, retains `ProjectLoadResult.Diagnostics` as
+  `ProjectSession.LoadDiagnostics`, and calls `ProjectValidationPipeline.Validate(project, loadDiagnostics)`
+  exactly once on open, create, and reload.
+- The `Load` stage is therefore `Skipped` (count 0) for a clean load and `Completed` or `Failed` when the store
+  produced diagnostics. There is no second validation and no skipped `Load` stage.
+- The result is retained on the session as `Validation` for 23B to consume. No status-bar validity item, Problems
+  channel, statistics panel, or editable diagnostics surface is added in 23A.
+
+This deviation is intentional and tested; it does not add 23B UI scope. Feature 5 records it in the audit request
+and the final step page. The original design rationale above is retained rather than silently rewritten.
 
 ### 6. Settings, theming, density, and accessibility
 
@@ -653,7 +749,7 @@ src/dotnet/Mocassin.App/
   Composition/     AppHost.cs  AppServiceRegistration.cs  AppStartupOptions.cs  AppPaths.cs  LoggingSetup.cs  LogRetention.cs
   Settings/        AppSettingsStore.cs  SettingsWritePolicy.cs
   Files/           ProjectFileProbe.cs
-  Startup/         StartupCoordinator.cs  CrashHandler.cs  WindowPlacementResolver.cs
+  Startup/         StartupCoordinator.cs  CrashHandler.cs
 
 src/dotnet/Mocassin.App.ViewModels/
   AppViewModelsModule.cs   # existing public marker (PublicAPI.Shipped.txt); retained unchanged
@@ -759,12 +855,14 @@ completeness even though the CLI never produces it:
 
 The CLI continues to call `File.Exists`/`Directory.Exists`/`Directory.CreateDirectory` itself and passes only
 the resulting `ProjectTargetState` into the pure helper; the GUI does the same through its picker. The CLI's
-**empty or syntactically invalid output directory** keeps its existing behaviour — `CLI002` I/O, exit `3`, pinned
-by `AnEmptyOutputDirectoryIsCli002AndExitThree` — because the CLI validates and normalises its output path before
-it calls the helper. The helper's `InvalidTargetPath` is therefore reserved for the GUI and never changes a CLI
-code, exit code, or message. `GetMessage` owns the text for the failures the helper produces, and new
-`Mocassin.Cli.Tests` cases pin each of those messages so the extraction cannot reword the CLI; the CLI's existing
-empty-output-directory message stays unchanged and stays pinned by `AnEmptyOutputDirectoryIsCli002AndExitThree`.
+**empty or syntactically invalid output directory** keeps its existing behaviour — `CLI002` I/O, exit `3` —
+because the CLI validates and normalises its output path before it calls the helper.
+`AnEmptyOutputDirectoryIsCli002AndExitThree` pins that code and exit, not the message text. The message is produced
+by the CLI's own path-parse catch outside the helper, so the extraction leaves it untouched; the n-13 correction
+records that limitation instead of claiming the test pins the text. `GetMessage` owns the text for the failures
+the helper produces, and new `Mocassin.Cli.Tests` cases pin each of those messages so the extraction cannot
+reword the CLI. The helper's `InvalidTargetPath` is reserved for the GUI and never changes a CLI code, exit code,
+or message.
 The helper is listed in `Mocassin.Packages'` `PublicAPI.Unshipped.txt`; no baseline refresh is expected. No other
 library change is allowed in 23A; if one appears necessary, the step agent stops and records an amendment.
 
@@ -778,8 +876,9 @@ library change is allowed in 23A; if one appears necessary, the step agent stops
 | Settings/logging | `TimeProvider`, `Microsoft.Extensions.*`, Serilog | the whole settings and logging policy |
 
 The shell does not re-implement these: no second JSON reader/writer, no second template definition, no second
-lock, no second hash, no second `ProjectStore` wrapper interface. 23A **does not** construct or call
-`ProjectValidationPipeline`; that is 23B's contract (M-1).
+lock, no second hash, no second `ProjectStore` wrapper interface. *Original design only:* 23A does not construct
+or call `ProjectValidationPipeline`. The implemented feature-4 session performs exactly one internal load
+validation pass; the validation *surface* remains 23B's contract (M-1). See §5.1.
 
 **23B is the only successor step for the 23A seams; Steps 24–28 consume them too.**
 
@@ -926,7 +1025,7 @@ unusable alone, so the extra step would add overhead without reducing the audit 
 | V-2 | Whether Avalonia 12.1.6 exposes a platform high-contrast variant/resource dictionary | 3 | Ship the app-owned `HighContrast.axaml` and select it from settings only |
 | V-3 | Whether the pinned `Serilog.Sinks.File` supports `retainedFileSizeLimitBytes` | 1 | Implement `LogRetention` as an explicit startup sweep |
 | V-4 | `IStorageProvider` "save as" behaviour per OS (filter, overwrite confirmation) | 4 | Own filtering and confirmation in `IStorageService` and document the per-OS behaviour |
-| V-5 | Whether a saved window placement can be validated headlessly against a real monitor topology | 1 | Test the pure `WindowPlacementResolver` with synthetic screen rectangles; record the real multi-monitor check as manual platform evidence |
+| V-5 | Whether a saved window placement can be validated headlessly against a real monitor topology | — | Removed with the dead resolver (F-9); window placement is not persisted in 23A |
 
 **New ADRs:** none. ADR 0003/0006/0008 stand. **Owner input required at the start gate:** the complexity-class
 acceptance (§18), the five-feature list, and acknowledgement of the two test-only Avalonia headless packages,
@@ -946,9 +1045,10 @@ CLI contract changes.
 - **Closeout identity (M-1).** The evidence file is `docs/planning/closeout/step-23a.json` and its `step` field is
   exactly `"step-23a"`; the tag is `step-23a` and the audit record is `docs/planning/audits/step-23a.md`. There is
   **no** `step-23` alias, and the superseded unsplit `step-23` identity stays unused.
-- **Tooling prerequisite (M-1).** `tools/check_closeout_evidence.py` currently accepts only `^step-\d{2}$`
-  (`STEP_RE`) and rejects a letter suffix. A separate tooling change extends the checker, its tests, and the
-  closeout README/template to `^step-\d{2}[a-z]$` with a letter-suffix positive case. That change must land
+- **Tooling prerequisite (M-1).** `tools/check_closeout_evidence.py` accepts `^step-\d{2}[a-z]?$`, the
+  optional single lowercase suffix that keeps every existing unsuffixed `step-NN` ID valid. The checker, its
+  tests, and the closeout README/template landed before this closeout; the exact pattern is the optional suffix,
+  not a required one. This change must land
   **before either 23A or 23B closeout**; until it does, `python tools/check_closeout_evidence.py` cannot accept
   `step-23a` and the closeout gate must not be claimed. The design does not work around it.
 - **Evidence:** `docs/planning/closeout/step-23a.json`, created from the template, binds the audited commit, the
@@ -995,8 +1095,9 @@ CLI contract changes.
       reopening yields identical content through the real store.
 - [ ] Save-as works and migrates the lock; an already-open path activates its session; **New** refuses an
       existing target with the CLI's message, while Save As to an existing file follows the picker confirmation.
-- [ ] The composed `ProjectStore` has `ValidateOnLoad = false` and retains `ProjectLoadResult.Diagnostics`; no
-      validation pipeline is registered or called in 23A.
+- [ ] The composed `ProjectStore` has `ValidateOnLoad = false` and retains `ProjectLoadResult.Diagnostics`; the
+      session performs exactly one internal load-validation pass (see step page §5.1), and no validation UI is
+      registered or shown in 23A.
 - [ ] Reload and external-change detection behave as designed; no silent overwrite is possible.
 - [ ] Recent files, locks, read-only mode, and the project switcher behave as designed.
 - [ ] Settings round-trip through the real store, validate, migrate, ignore unknown fields, reject a future

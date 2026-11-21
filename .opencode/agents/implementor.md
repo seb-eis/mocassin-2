@@ -25,5 +25,10 @@ Never merge into `main` or create a tag without explicit owner approval. The own
 an implementor or the owner then performs them. Never review your own work. If the plan, a public contract, or a
 dependency is ambiguous, stop and report the question.
 
+Worktrees and scratch state live under `/home/node/worktrees` and `/home/node/tmp`; `/tmp` is wiped when the
+container restarts. Commit and push durable work before leaving it idle. On an unexpected error or restart, verify
+the branch, worktree, and any CI/merge/tag state before retrying; never repeat an irreversible step on assumption.
+See [`orchestration.md`](../../docs/development/orchestration.md) §9.
+
 Finish with the output contract in `docs/development/agent-workflow.md`: branch, commits, commands and results,
 docs/parity updated, known limitations, and what approval you are asking for.

@@ -110,6 +110,43 @@ or SQLite. Prefer real temporary directories and real files produced by the real
 - Tests use real files, real SQLite, and the real checked-in packages. There are no mocks in the reader; the only
   process boundary is the CLI exit-code test, which runs the built binary.
 
+## Avalonia workspace (Step 23A)
+
+- `Mocassin.App.Tests` references the app, view models, and views and uses the first-party `Avalonia.Headless`
+  package for UI-thread dispatch and rendering. The repository uses xunit 2; `Avalonia.Headless.XUnit` 12.1.6
+  depends on xunit v3, so it is not referenced. Tests drive `HeadlessUnitTestSession` directly and run without a
+  display.
+- Real objects are used wherever possible: real temporary directories, the real `ProjectStore` with
+  `ValidateOnLoad = false`, the real validation pipeline, real `Project` values, the real settings store, and
+  the real in-shell dialog overlay. Test doubles are limited to the true boundaries: dialogs in view-model tests,
+  pickers, clipboard, dispatcher, `TimeProvider`, and in-memory settings stores for non-persistence tests.
+- Composition tests resolve every registered service and prove the composed `ProjectStore` has
+  `ValidateOnLoad == false`; the session test proves one validation call with store diagnostics (clean load
+  `Skipped`, diagnostics `Completed`/`Failed`).
+- Project lifecycle tests use real files and locks: create/open/save/save-as/close/reload, existing-target refusal
+  for New, read-only lock handling, lock migration on Save As, external modification/deletion, recents and last
+  directories, `--project` startup, and undo→redo across a save point.
+- Settings tests cover the source-generated round-trip, defaults, unknown/missing/wrong-type/future-major,
+  migration idempotence, the 4 MiB cap, atomic/failed writes, theme resources, settings-dialog validation, log
+  level at startup, and recent/last-directory persistence.
+- The architecture test checks direct project references and runs the view-model I/O token tripwire with a
+  positive control. Headless a11y assertions check automation names on the primary shell controls, their
+  automation control types, and a deterministic Tab order across two fresh windows.
+- Tab drag-reorder is not wired in the Avalonia tab strip; `Ctrl+1..9`, `Ctrl+Tab`/`Ctrl+Shift+Tab`, `Ctrl+W`,
+  middle-click close, the close button, and the context menu are tested. The drag limitation is recorded in the
+  step page.
+- Screenshot baselines are checked in at `src/dotnet/Mocassin.App.Tests/Visual/Baselines/` for light, dark, and
+  high contrast. Linux compares them with a documented 5 % pixel tolerance; Windows/macOS do not pixel-compare.
+  Regenerate with `MOCASSIN_REGENERATE_VISUAL_BASELINES=1` on the Linux reference environment.
+- The accessibility sweep asserts an accessible name on every primary interactive control type in the real
+  shell, the expected automation role for the menu, tabs, project lists, explorer, and console filter, and a
+  deterministic Tab order. The Xvfb harness captures the real X11 window for light, dark, high-contrast,
+  workspace, dialog, and lifecycle steps; see [Platform checklist](platform-checklist.md) for the command and
+  the recorded run. That is automated evidence, not a manual checklist.
+- Appearance resources carry their effect through the merged `HighContrast.axaml`/`Density.axaml`
+  dictionaries, the padding/min-height/border keys, the `Mocassin.Transitions` resource (empty when reduce
+  motion is on), and `SystemAccentColor`. Redundant flag-only resources were removed rather than left dead.
+
 ## Test tiers
 
 | Tier | Contents | Target |

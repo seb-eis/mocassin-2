@@ -100,6 +100,27 @@ an auditor directly. The spawner must not be the auditor.
 13. Merge the step branch into `main` with `--no-ff`, wait for the automatic `main` CI run, tag `step-NN` only
     when it is green, push, and delete the step branch.
 
+### 3.1 Post-merge amendment audits
+
+A **post-merge amendment** (`step-NN-amend-M`, integrated and tagged after the parent step is merged) is not a
+step and has no step branch closeout. Its audit follows the same independent-auditor rules, with this evidence
+rule:
+
+- The audit record `docs/planning/audits/step-NN-amend-M.md` is the **single evidence source** for the audited
+  commit, the closeout CI run and `head_sha`, the `main` SHA at freeze, the merge commit, the merge-tree CI (if
+  required), the platform CI status, and the suffixed tag (`step-NN.M`). Do not create or rewrite a
+  `closeout/step-NN.json` for the amendment; the parent step's evidence file is historical and stays unchanged.
+- `tools/check_closeout_evidence.py` accepts `step-NN` and `step-NN[a-z]` only. It is **not run** for a
+  post-merge amendment; the audit record carries the fields instead. Extending the checker to `step-NN.M` is a
+  separate future process/tooling change, not a requirement of an amendment audit.
+- The amendment is audited at its maintenance-branch freeze commit, merged with `--no-ff`, and tagged only after
+  the automatic `main` CI run is green. The parent `step-NN` tag is never moved.
+- The amendment audit uses the same status vocabulary (`Ready for audit`, `Fixes required`,
+  `Re-audit required`, `Passed`, `Passed with notes`, `Waived`) and the same finding severities as a step audit.
+
+This rule applies from `step-11-amend-2` (A2-07) and was **owner-approved 2026-11-21**. See also
+[`../closeout/README.md`](../closeout/README.md) and the [audit template](step-audit-template.md).
+
 CI is intentionally minimal: automatic CI runs only on `main`, on Ubuntu, with path filters. Windows and macOS
 are manual and only required when platform-specific code appears. Documentation uses its own manual workflow.
 See [`AGENTS.md` §3.13](../../../AGENTS.md) and [`docs/planning/ci-policy.md`](../ci-policy.md).
@@ -111,7 +132,8 @@ See [`AGENTS.md` §3.13](../../../AGENTS.md) and [`docs/planning/ci-policy.md`](
 - Public/protected XML documentation policy.
 - Status dashboard, step page, parity matrix, and feature log accuracy.
 - CI configuration and actual CI result.
-- The closeout CI `head_sha` equals the audited commit, and the closeout evidence file is current.
+- The closeout CI `head_sha` equals the audited commit, and the closeout evidence file is current (for a
+  post-merge amendment, the audit record is the evidence source).
 - If `main` moved after the freeze, a merge-tree CI run or a re-audit is recorded.
 - Format/version changes, fixtures, and migration behavior.
 - Security, dependency, licence, and secret-scan gates.

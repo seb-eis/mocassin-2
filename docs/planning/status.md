@@ -70,7 +70,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 20 | [State Reader, Result Collection, and Evaluation API](steps/step-20-state-reader-and-evaluation-api.md) | E. Results | Not started | — | — | — | — | — | Not requested | Not requested |
 | 21 | [Analysis, Plots, and Reports](steps/step-21-analysis-plots-and-reports.md) | E. Results | Not started | — | — | — | — | — | Not requested | Not requested |
 | 22 | [Python Analysis API](steps/step-22-python-analysis-api.md) | E. Results | Not started | — | — | — | — | — | Not requested | Not requested |
-| 23a | [Workspace and Project Lifecycle](steps/step-23a-workspace-and-project-lifecycle.md) | F. GUI | In progress | `step/23a-workspace-and-project-lifecycle` | — | — | — | — | Not requested | Ready with notes — **accepted by the human owner 2026-11-20** at `b9c56fe` ([record](reviews/step-23a.md), round 3 `b6a472c`); class High accepted; five features approved |
+| 23a | [Workspace and Project Lifecycle](steps/step-23a-workspace-and-project-lifecycle.md) | F. GUI | Done | `step/23a-workspace-and-project-lifecycle` (merged and deleted) | — | [Ubuntu 44889193801](https://github.com/seb-eis/mocassin-2/actions/runs/44889193801), Windows 44889462922, macOS 44889646766 green at `30dcf3e`; [main green](https://github.com/seb-eis/mocassin-2/actions/runs/44892961809) at `9f4d186` | `9f4d186` | `step-23a` | [Passed with notes](audits/step-23a.md) at `30dcf3e` — accepted by the human owner 2026-11-21; R3-1…R3-3 fixed, R3-4/R3-5 accepted | Ready with notes — **accepted by the human owner 2026-11-20** at `b9c56fe` ([record](reviews/step-23a.md), round 3 `b6a472c`); class High accepted; five features approved |
 | 23b | [Editing, Diagnostics, and Recovery](steps/step-23b-editing-diagnostics-and-recovery.md) | F. GUI | Not started | — | — | — | — | — | Not requested | Not requested |
 | 24 | [Particle, Structure, and Transition Editors](steps/step-24-model-editors-particle-structure-transitions.md) | F. GUI | Not started | — | — | — | — | — | Not requested | Not requested |
 | 25 | [Energy, Lattice, and Simulation Editors](steps/step-25-model-editors-energy-lattice-simulations.md) | F. GUI | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -157,7 +157,10 @@ Notes N-1 (directory-fsync order), N-4 (`AGENTS.md` §1 drift), and N-6 (Step 29
 2026-11-16 and approved the merge and tag. The step merged into `main` with `--no-ff` as
 `84ceb76eaa3e14c7cbe42c7ccbdc9842611891bc`; automatic main CI
 [`43948410478`](https://github.com/seb-eis/mocassin-2/actions/runs/43948410478) is green at that merge commit;
-the annotated `step-11` tag is pushed; and the step branch is deleted locally and remotely.
+the annotated `step-11` tag is pushed; and the step branch is deleted locally and remotely. Post-merge amendment
+2 ([`step-11-amend-2`](amendments/step-11-amend-2-cluster-code-expansion.md), cluster occupation code expansion
+map) is **Re-review required** after round 1 returned `Changes required` (A2-01 Major); it does not change the
+step's Done/tagged state and proposes a `step-11.1` tag without moving `step-11`.
 
 Step 12 — Build Orchestration and the `mocassin` CLI is **Done**. The design was accepted at `1b6af90`; seven
 features are squash-merged, and the round-1 audit fixes are `07851d8`. Audit round 2 returned `Passed with

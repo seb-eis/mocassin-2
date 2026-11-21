@@ -127,13 +127,52 @@ The full field list is in `contracts/generated/schema/package-payloads-v1.schema
 
 | Payload | Contents |
 | --- | --- |
-| Model | `format_version`, `signature` (parameterization), `model_signature` (compiled identity), particles, structure (positions, sites, cell vectors, environments with **one pair entry per periodic image** and its relative integer `offset`), energy (pair/cluster tables, site energies, defect background), transitions (jump collections, rules with variable-length `tracker_order` and `0xFF` sentinels), simulations |
+| Model | `format_version`, `signature` (parameterization), `model_signature` (compiled identity), particles, structure (positions, sites, cell vectors, environments with **one pair entry per periodic image** and its relative integer `offset`), energy (pair/cluster tables with the optional cluster `code_expansions` map, site energies, defect background), transitions (jump collections, rules with variable-length `tracker_order` and `0xFF` sentinels), simulations |
 | Lattice | `format_version`, `lattice_size` (`[a,b,c]`), `position_count`, and the particle array (`a·b·c·position_count` bytes, row-major per the index rule; a MessagePack array of `u8` in v1, not `bin`) |
 | Job | `format_version`, simulation index, kind, resolved settings (temperature, field modulus and Cartesian unit direction, MCSP targets, sampling, attempt frequency, normalization energy, tolerances, time limits), the composed `flags` word, compiled selection optimizers, canonical extension JSON, and `doping_info` |
 
 `flags` has exactly one kind bit (KMC or MMC); the remaining bits encode `usePrerun` and
 `useDualDofCorrection` as composed by `SolverJobFlagsMapper`. The bit assignments are in the manifest; do not
 hand-write the word.
+
+### Cluster occupation code expansion map
+
+A cluster table stores one canonical 6-bit occupation code per symmetry-reduced orbit, and the applied energy
+per canonical code. The solver, however, builds the **raw** slot tuple of the current lattice (slot 0 = the
+centre particle, slots `1..n` = the resolved members) and must find that tuple's orbit energy. Each
+`cluster_tables[i]` therefore carries an optional `code_expansions` member:
+
+```text
+code_expansions = null
+                | { "expanded_codes": [u64, ...], "canonical_indices": [u32, ...] }
+```
+
+- `expanded_codes` is strictly ascending and covers every raw slot-tuple code the writer enumerated for the
+  table. It is a **superset**: it may also contain orbit codes whose particles are not allowed at a member slot;
+  those are never produced by a valid lattice and are harmless. `canonical_indices[j]` is the index into
+  `occupation_codes`/`energies`; the raw tuple's energy is `energies[canonical_indices[j]]`.
+- `null` (or an absent key in a package written before this member existed) means every orbit is a singleton,
+  so `occupation_codes` is already complete. A package with a non-singleton orbit and no map fails closed if a
+  raw tuple is not canonical; rebuild the package.
+- The canonical code is the lexicographically smallest tuple in **site order starting at the centre**, not the
+  numerically smallest code. Never derive it by sorting the slot particles or taking the minimum code.
+- The map is validated before use: equal array lengths, strict ascending, indices in range, zero bits above
+  slot 9, 6-bit fields below `particle_count`, and a canonical self-entry for every `occupation_codes[i]`.
+- It is not a signature input. `signatures.model` already projects every canonical code and expansion;
+  `signatures.parameterization` contains only applied values. `package-summary-v1` has no code-level fields, so
+  it is unchanged.
+- **Read budget.** Smallest-width MessagePack lets a 512 MiB payload declare tens of millions of entries while
+  the typed arrays cost `8E + 4I` (`E = len(expanded_codes)`, `I = len(canonical_indices)`), so the payload
+  guard alone does not bound the typed map. Readers reject `E != I` and duplicate keys at scan time, then apply
+  an explicit cumulative `Σ(8E + 4I)` budget **before** allocating: Rust
+  `ReaderLimits.max_cluster_expansion_bytes` and .NET
+  `PackageVerificationOptions.MaxClusterExpansionBytes`, both defaulting to 128 MiB (≈11.18M entries for a valid
+  `E == I` map). Over budget or malformed is a fail-closed error (`PayloadTooLarge`/exit 11, or `PKG004` on the
+  .NET decode path); the limit is raisable for a writer-valid package that needs it.
+
+The exact contract and the writer coverage argument are in
+[`02-data-contracts.md` §3.3](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/02-data-contracts.md#33-compiled-model-payload)
+and [Step 11 amendment 2](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/amendments/step-11-amend-2-cluster-code-expansion.md).
 
 ## Canonical summary (`package-summary-v1`)
 
@@ -157,6 +196,10 @@ must never be generated from a hand-edited package.
 
 - `.msl` v1 has never been released. Pre-release shape changes are finalized at `format_version = 1` with the
   contract artifacts regenerated in the same change (ADR 0009's pre-release exception).
+- Optional payload members may be added within a major version when every existing field keeps its meaning,
+  absence has a defined safe behaviour, readers ignore unknown fields, and no canonical signature projection
+  changes (ADR 0013 addendum). A new required field or a changed meaning is a major change with a
+  previous-major reader. The cluster `code_expansions` member follows this rule.
 - The first released major starts ADR 0013's current + previous-major read policy. `.mcs` is current-major only;
   `.msl` readers accept the current and the immediately previous major once a release exists.
 - A codec or runtime change does not bump the format: frames are standard Zstd and the logical payloads,
@@ -184,7 +227,8 @@ verifier; `mocassin verify` remains the full structural check.
    into typed structures.
 4. **Validate.** Every particle/position/site/environment/pair/cluster/collection/direction/rule/tracker index
    and length; state-code node values; `tracker_order` length; jump-count prefix sums; kind and flag
-   consistency; finite values; normalized field direction; lattice length and particle indices.
+   consistency; finite values; normalized field direction; lattice length and particle indices; the cluster
+   `code_expansions` structure and coverage when present.
 5. **Signatures.** The reader re-encodes the six-field parameterization projection and the five-field lattice
    projection with the ADR 0010 fixed-width writer, the C# 12-decimal quantization expression, and the domain
    prefix. It compares both to the stored signatures. `model_signature` is an identity string and is not

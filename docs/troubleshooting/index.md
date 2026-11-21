@@ -1,8 +1,9 @@
 # Troubleshooting
 
-Troubleshooting pages are added with the features they describe. Validation problems are covered by
-[validation errors](errors.md); the full diagnostic catalog and CLI exit codes are in the
-[reference](../reference/index.md) section.
+Troubleshooting pages are added with the features they describe. Installation, startup, data-directory,
+settings, lock, and external-change problems are covered by [installation and startup](installation.md).
+Validation problems are covered by [validation errors](errors.md); the full diagnostic catalog and CLI exit
+codes are in the [reference](../reference/index.md) section.
 
 ## General checks
 

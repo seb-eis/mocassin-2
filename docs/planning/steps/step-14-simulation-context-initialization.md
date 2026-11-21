@@ -18,9 +18,14 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
 - **Audit:** Not requested
 - **Design review:** `Re-review required` at the corrected freeze commit recorded in
   [`docs/planning/reviews/step-14.md`](../reviews/step-14.md)
+- **Cross-step dependency:** F-29 (cluster-code expansion) is resolved at the format level by
+  [`step-11-amend-2`](../amendments/step-11-amend-2-cluster-code-expansion.md), approved and merged
+  (`2f3a6fe`, design freeze `bf273ff`). Step 14 consumes `ClusterTable::lookup` and the three-way
+  `Canonical`/`MissingFromMap`/`ExpansionMapAbsent` result; the format is implemented by `step-11.1`, so the
+  Step 14 feature 2 has a documented fallback until it lands. F-29's formal closure is a Step 14 gate.
 - **Sizing:** Complexity class **High**; owner acceptance as one High unit is requested at the start gate (no
   split proposed). See §4.
-- **Last updated:** 2026-11-21 (design corrections after review round 2)
+- **Last updated:** 2026-11-21 (design corrections after review round 3)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |

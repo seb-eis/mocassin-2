@@ -1,0 +1,21 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:overlay="using:Mocassin.App.ViewModels.Dialogs"
+             x:Class="Mocassin.App.Views.Dialogs.CrashDialogView"
+             x:DataType="overlay:CrashDialogViewModel">
+  <StackPanel Spacing="12">
+    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="16" TextWrapping="Wrap" />
+    <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+    <TextBlock Text="{Binding LogFilePath}" Classes="caption" TextWrapping="Wrap" />
+    <Expander Header="Crash details" IsVisible="{Binding HasDetails}">
+      <ScrollViewer MaxHeight="220">
+        <SelectableTextBlock Text="{Binding Details}" TextWrapping="Wrap" />
+      </ScrollViewer>
+    </Expander>
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+      <Button Content="Open log folder" Command="{Binding OpenLogFolderCommand}"
+              IsVisible="{Binding CanOpenLogFolder}" />
+      <Button Content="Exit" Command="{Binding ExitCommand}" IsDefault="True" />
+    </StackPanel>
+  </StackPanel>
+</UserControl>

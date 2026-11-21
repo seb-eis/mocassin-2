@@ -34,6 +34,97 @@ mocassin/
 schema; `package-payloads-v1.schema.json` separately describes the top-level model, job, and lattice payloads and
 uses the manifest's payload unknown-key policy.
 
+
+## Application data layout
+
+The desktop application owns an application-local data root; it is separate from project, package, results, and
+job-folder paths.
+
+| Platform | Default root |
+| --- | --- |
+| Windows | `%LOCALAPPDATA%\Mocassin` |
+| Linux | `~/.local/share/Mocassin` |
+| macOS | `~/Library/Application Support/Mocassin` |
+
+`--data-dir <path>` overrides the root for one run. `MOCASSIN_DATA_DIR` provides an environment override; the
+command-line value wins. The directory contains:
+
+```text
+<app-data>/
+├── Mocassin.Settings.json  # versioned application settings
+├── logs/                   # rolling Serilog files
+├── cache/                  # disposable application cache
+└── recovery/               # reserved for Step 23B; no 23A writer
+```
+
+The settings document is application-local. It is **not** part of `contracts/manifest.json`, has no
+cross-language fixtures, and has no compatibility guarantee with any project/package/results format. Unknown
+properties are ignored and dropped on the next write. A missing key takes its documented default.
+
+## `mocassin.settings` v1
+
+```json
+{
+  "format": "mocassin.settings",
+  "schemaVersion": 1,
+  "theme": "system",
+  "accent": null,
+  "density": "comfortable",
+  "fontScale": 1.0,
+  "highContrast": false,
+  "reduceMotion": false,
+  "culture": "en",
+  "logging": { "level": "information" },
+  "ui": { "confirmOnExternalChange": true, "showWelcomeOnStart": true },
+  "paths": {
+    "lastOpenDirectory": null,
+    "lastSaveDirectory": null,
+    "lastFolderDirectory": null
+  },
+  "recentFiles": [],
+  "layout": {
+    "leftWidth": 260,
+    "rightWidth": 320,
+    "consoleHeight": 180,
+    "leftVisible": true,
+    "rightVisible": true,
+    "consoleVisible": true,
+    "activeConsoleChannel": "application"
+  }
+}
+```
+
+| Key | Type | Default | Rule |
+| --- | --- | --- | --- |
+| `format` | string | — (required) | Must equal `"mocassin.settings"`; any other value makes the document invalid and it is not loaded or overwritten |
+| `schemaVersion` | integer | `1` | Current major is `1`; a value above the current major is rejected without overwriting; a lower value is migrated |
+| `theme` | string enum | `"system"` | `system` / `light` / `dark` |
+| `accent` | string or null | `null` | `blue`, `teal`, `green`, `amber`, `violet`, `rose`, or null for the Fluent default |
+| `density` | string enum | `"comfortable"` | `comfortable` / `compact` |
+| `fontScale` | number | `1.0` | 0.85–1.5 inclusive; outside the range falls back to `1.0` with a warning |
+| `highContrast` | boolean | `false` | High-contrast selection |
+| `reduceMotion` | boolean | `false` | Disables non-essential transitions |
+| `culture` | string | `"en"` | BCP-47 tag for number/date formatting; UI text remains invariant English |
+| `logging.level` | string enum | `"information"` | `trace` / `debug` / `information` / `warning` / `error` / `fatal` |
+| `ui.confirmOnExternalChange` | boolean | `true` | Confirm before reloading an externally modified project |
+| `ui.showWelcomeOnStart` | boolean | `true` | Open the welcome document on a fresh start |
+| `paths.lastOpenDirectory` | string or null | `null` | Last accepted open-picker directory |
+| `paths.lastSaveDirectory` | string or null | `null` | Last accepted save-picker directory |
+| `paths.lastFolderDirectory` | string or null | `null` | Last accepted folder-picker directory |
+| `recentFiles` | array | `[]` | At most 10 `{ "path", "lastOpenedUtc" }` entries, de-duplicated by path |
+| `layout.leftWidth` / `rightWidth` / `consoleHeight` | integer (px) | `260` / `320` / `180` | Valid ranges 160–600 / 160–800 / 80–600; an out-of-range value falls back to the default |
+| `layout.leftVisible` / `rightVisible` / `consoleVisible` | boolean | `true` | Panel visibility |
+| `layout.activeConsoleChannel` | string | `"application"` | Channel id; an unknown id falls back to the first available channel |
+
+A wrong type, unknown enum, or out-of-range value falls back to that field's default and records a warning. A
+malformed or unreadable document loads all defaults, reports a banner/console warning, and is not overwritten.
+Migrations are pure functions keyed by `schemaVersion`; version 1 is the first version, so its migration is the
+identity. Step 23B adds `autosave` and `session` objects additively without a schema bump.
+
+Writes are serialized through the source-generated `AppSettingsJsonContext` to UTF-8 without a BOM, written to a
+sibling temporary file, flushed with `Flush(flushToDisk: true)`, and atomically replaced. The document is capped
+at 4 MiB; a failed or oversized write leaves the previous file intact.
+
 ## Simulation packages
 
 A `.msl` package is a single immutable SQLite file, written wherever the user chooses (there is no reserved

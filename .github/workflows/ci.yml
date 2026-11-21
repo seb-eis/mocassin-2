@@ -240,6 +240,12 @@ jobs:
           dotnet test src/dotnet/Mocassin.Cli.Tests/Mocassin.Cli.Tests.csproj
           -c Release --no-build
 
+      - name: Platform tests - Avalonia headless workspace
+        if: matrix.os != 'ubuntu-latest'
+        run: >
+          dotnet test src/dotnet/Mocassin.App.Tests/Mocassin.App.Tests.csproj
+          -c Release --no-build
+
       - name: Format
         if: matrix.os == 'ubuntu-latest'
         run: dotnet format Mocassin.slnx --verify-no-changes --no-restore

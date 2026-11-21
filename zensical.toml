@@ -24,9 +24,17 @@ planning/
 
 nav = [
   { "Home" = "index.md" },
-  { "Getting started" = "getting-started/index.md" },
+  { "Getting started" = [
+      { "Overview" = "getting-started/index.md" },
+      { "Installation" = "getting-started/installation.md" },
+      { "Quickstart" = "getting-started/quickstart.md" },
+      { "Your first project" = "getting-started/first-project.md" },
+    ] },
   { "User guide" = [
       { "Overview" = "user-guide/index.md" },
+      { "Workspace, tabs, and commands" = "user-guide/workspace.md" },
+      { "Projects and lifecycle" = "user-guide/projects.md" },
+      { "Settings and appearance" = "user-guide/settings.md" },
       { "Particles and particle sets" = "user-guide/particles.md" },
       { "Crystal structure" = "user-guide/structure.md" },
       { "Transitions" = "user-guide/transitions.md" },
@@ -59,6 +67,7 @@ nav = [
   { "Development" = [
       { "Overview" = "development/index.md" },
       { "Architecture" = "development/architecture.md" },
+      { "UI architecture" = "development/ui-architecture.md" },
       { "Code structure" = "development/code-structure.md" },
       { "Compilation pipeline" = "development/compilation-pipeline.md" },
       { "Solver architecture" = "development/solver-architecture.md" },
@@ -70,10 +79,12 @@ nav = [
       { "Drift checks" = "development/drift-checks.md" },
       { "Incident and rollback" = "development/incident-and-rollback.md" },
       { "Testing and parity" = "development/testing-and-parity.md" },
+      { "Platform checklist" = "development/platform-checklist.md" },
     ] },
   { "Performance and HPC" = "performance/index.md" },
   { "Troubleshooting" = [
       { "Overview" = "troubleshooting/index.md" },
+      { "Installation and startup" = "troubleshooting/installation.md" },
       { "Validation errors" = "troubleshooting/errors.md" },
     ] },
   { "Migration" = "migration/index.md" },
