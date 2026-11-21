@@ -1,0 +1,73 @@
+{
+  "format": "mocassin.package-summary",
+  "formatVersion": 1,
+  "schema": {
+    "formatVersion": 1,
+    "projectId": "018f4c9a-7f6b-7c3a-9d2e-0000000011a0",
+    "jobSelection": "all",
+    "symmetryContractVersion": "symmetry-1",
+    "spaceGroupDataVersion": "spglib-2.8.0/catalog-1",
+    "spaceGroupDataSha256": "1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395"
+  },
+  "models": [
+    {
+      "signature": "90d4101a2ff594f353c4b3850079f1343fac71a5f3bac438589655c0204b0885",
+      "modelSignature": "af2efa6298044cbafe39d62eac3140e241cdef5f5c4195fb61f4f14de841d610",
+      "payloadFormatVersion": 1,
+      "particleCount": 4,
+      "positionCount": 5,
+      "siteCount": 3,
+      "environmentCount": 5,
+      "pairTableCount": 5,
+      "clusterTableCount": 1,
+      "collectionCount": 1,
+      "ruleCount": 4
+    }
+  ],
+  "lattices": [
+    {
+      "signature": "0fc4c8dd72c5d6159872f21e7a447f2b50bff859931d15b0e87955df75ea9032",
+      "latticeSize": [
+        2,
+        2,
+        2
+      ],
+      "positionCount": 5,
+      "latticeLength": 40
+    }
+  ],
+  "jobs": [
+    {
+      "jobId": 1,
+      "modelSignature": "af2efa6298044cbafe39d62eac3140e241cdef5f5c4195fb61f4f14de841d610",
+      "latticeSignature": "0fc4c8dd72c5d6159872f21e7a447f2b50bff859931d15b0e87955df75ea9032",
+      "kind": "kmc",
+      "collectionName": "kmc",
+      "configName": "c1",
+      "collectionIndex": 0,
+      "configIndex": 0,
+      "jobIndex": 0,
+      "temperatureK": 773,
+      "electricFieldVm": 10000000,
+      "targetMcsp": 100,
+      "writeOutCount": 10,
+      "preRunMcsp": 50,
+      "timeLimitS": 31536000,
+      "minSuccessRate": null,
+      "latticeSize": [
+        2,
+        2,
+        2
+      ],
+      "dopingInfo": "",
+      "flags": 112,
+      "seedHex": "6bed2c8c7f0f1f239d9d38a1952b1c8ce94e0e96c5f68f443b29021eee177417"
+    }
+  ],
+  "counts": {
+    "modelCount": 1,
+    "latticeCount": 1,
+    "jobCount": 1,
+    "latticeReuseFactor": 1
+  }
+}

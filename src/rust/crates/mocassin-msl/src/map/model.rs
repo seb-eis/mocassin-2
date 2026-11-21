@@ -2,10 +2,13 @@
 
 //! The model-payload mapping: particles, structure, energy, and the section cross-checks.
 
-use mocassin_types::payload::{EnergyPayload, ModelPayload, ParticlePayload, StructurePayload};
+use mocassin_types::payload::{
+    ClusterTablePayload, EnergyPayload, ModelPayload, ParticlePayload, StructurePayload,
+};
 use mocassin_types::{
-    ClusterLink, ClusterTable, EnergyModel, EnvironmentModel, ModelCounts, PairLink, PairTable,
-    ParameterizedModel, ParticleTable, Position, PositionId, ReaderLimits, StructureModel,
+    ClusterExpansions, ClusterLink, ClusterTable, EnergyModel, EnvironmentModel, ModelCounts,
+    PairLink, PairTable, ParameterizedModel, ParticleTable, Position, PositionId, ReaderLimits,
+    StructureModel,
 };
 
 use crate::error::PackageError;
@@ -54,6 +57,7 @@ pub(crate) fn model_from_payload(
         &payload.energy,
         particle_count,
         payload.structure.position_count,
+        limits,
     )?;
     let pair_table_count = u32_len(energy.pair_tables.len())?;
     let cluster_table_count = u32_len(energy.cluster_tables.len())?;
@@ -184,6 +188,7 @@ fn map_energy(
     payload: &EnergyPayload,
     particle_count: u32,
     position_count: u32,
+    limits: &ReaderLimits,
 ) -> Result<EnergyModel, PackageError> {
     let particle_count_usize = usize::try_from(particle_count).expect("at most 64");
     let pair_length = particle_count_usize * particle_count_usize;
@@ -208,6 +213,7 @@ fn map_energy(
     }
 
     let mut cluster_tables = Vec::with_capacity(payload.cluster_tables.len());
+    let mut expansion_bytes = 0_u64;
     for table in &payload.cluster_tables {
         require_hex64("energy.cluster_tables.object_id", &table.object_id)?;
         require_strictly_ascending(
@@ -255,11 +261,14 @@ fn map_energy(
                 });
             }
         }
+        let expansions =
+            map_cluster_expansions(table, particle_count, &mut expansion_bytes, limits)?;
         cluster_tables.push(ClusterTable {
             object_id: table.object_id.clone(),
             occupation_codes: table.occupation_codes.clone(),
             energies: table.energies.clone(),
             particle_table_mapping: table.particle_table_mapping.clone(),
+            expansions,
         });
     }
 
@@ -285,6 +294,106 @@ fn map_energy(
         cluster_tables,
         defect_background: payload.defect_background.clone(),
     })
+}
+
+fn map_cluster_expansions(
+    table: &ClusterTablePayload,
+    particle_count: u32,
+    total: &mut u64,
+    limits: &ReaderLimits,
+) -> Result<Option<ClusterExpansions>, PackageError> {
+    let Some(expansion) = &table.code_expansions else {
+        return Ok(None);
+    };
+
+    if expansion.expanded_codes.len() != expansion.canonical_indices.len() {
+        return Err(cluster_expansion_error(format!(
+            "expanded_codes has {} entries but canonical_indices has {}",
+            expansion.expanded_codes.len(),
+            expansion.canonical_indices.len()
+        )));
+    }
+
+    if !expansion
+        .expanded_codes
+        .windows(2)
+        .all(|window| window[0] < window[1])
+    {
+        return Err(cluster_expansion_error(
+            "expanded_codes is not strictly ascending".to_owned(),
+        ));
+    }
+
+    let occupation_count = table.occupation_codes.len() as u64;
+    if expansion
+        .canonical_indices
+        .iter()
+        .any(|index| u64::from(*index) >= occupation_count)
+    {
+        return Err(cluster_expansion_error(
+            "a canonical index is out of range".to_owned(),
+        ));
+    }
+
+    for code in &expansion.expanded_codes {
+        if code >> 60 != 0 {
+            return Err(cluster_expansion_error(
+                "a code has bits above the ten six-bit slots".to_owned(),
+            ));
+        }
+        for slot in 0..10_u32 {
+            let particle = ((code >> (6 * slot)) & 0x3F) as u32;
+            if particle >= particle_count {
+                return Err(cluster_expansion_error(format!(
+                    "a code has particle {particle} at slot {slot}, above the {particle_count} particles"
+                )));
+            }
+        }
+    }
+
+    for (index, canonical_code) in table.occupation_codes.iter().enumerate() {
+        let Ok(position) = expansion.expanded_codes.binary_search(canonical_code) else {
+            return Err(cluster_expansion_error(format!(
+                "the canonical code {canonical_code} is missing from expanded_codes"
+            )));
+        };
+        if u32::try_from(index).ok() != expansion.canonical_indices.get(position).copied() {
+            return Err(cluster_expansion_error(format!(
+                "the canonical code {canonical_code} does not map to its own index {index}"
+            )));
+        }
+    }
+
+    let cost = (expansion.expanded_codes.len() as u64)
+        .checked_mul(8)
+        .and_then(|code_bytes| {
+            (expansion.canonical_indices.len() as u64)
+                .checked_mul(4)
+                .and_then(|index_bytes| code_bytes.checked_add(index_bytes))
+        })
+        .ok_or_else(|| cluster_expansion_error("the typed size overflows".to_owned()))?;
+    *total = total
+        .checked_add(cost)
+        .ok_or_else(|| cluster_expansion_error("the cumulative typed size overflows".to_owned()))?;
+    if *total > limits.max_cluster_expansion_bytes {
+        return Err(PackageError::PayloadTooLarge {
+            section: "model cluster expansion",
+            declared: *total,
+            limit: limits.max_cluster_expansion_bytes,
+        });
+    }
+
+    Ok(Some(ClusterExpansions {
+        expanded_codes: expansion.expanded_codes.clone(),
+        canonical_indices: expansion.canonical_indices.clone(),
+    }))
+}
+
+fn cluster_expansion_error(detail: String) -> PackageError {
+    PackageError::Scan {
+        section: "model",
+        detail: format!("energy.cluster_tables.code_expansions: {detail}"),
+    }
 }
 
 fn map_structure(

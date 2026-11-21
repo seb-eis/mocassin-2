@@ -33,4 +33,67 @@ pub struct ClusterTable {
     pub energies: Vec<f64>,
     /// One row per allowed centre particle, ascending.
     pub particle_table_mapping: Vec<u8>,
+    /// The optional raw-code expansion map.
+    ///
+    /// This is an implementation detail of [`ClusterTable::lookup`], not the supported semantic API. It is
+    /// public because the table has no constructor and is built by struct literal in the workspace.
+    #[doc(hidden)]
+    pub expansions: Option<ClusterExpansions>,
+}
+
+/// The raw slot-tuple code resolution map of one cluster table.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ClusterExpansions {
+    /// Every raw slot-tuple code the writer enumerated, strictly ascending.
+    pub expanded_codes: Vec<u64>,
+    /// The canonical occupation index for the code at the same position.
+    pub canonical_indices: Vec<u32>,
+}
+
+/// The result of resolving a raw cluster slot-tuple code.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ClusterCodeLookup {
+    /// The raw code resolves to a canonical occupation index.
+    Canonical(u32),
+    /// A map is present but does not contain the raw code; the package is corrupt.
+    MissingFromMap(u64),
+    /// No map is present and the raw code is not canonical; the package predates the map and must be rebuilt.
+    ExpansionMapAbsent(u64),
+}
+
+impl ClusterCodeLookup {
+    /// Returns the canonical occupation index when the raw code resolves.
+    #[must_use]
+    pub const fn index(self) -> Option<u32> {
+        match self {
+            Self::Canonical(index) => Some(index),
+            Self::MissingFromMap(_) | Self::ExpansionMapAbsent(_) => None,
+        }
+    }
+}
+
+impl ClusterTable {
+    /// Resolves a raw slot-tuple code to its canonical occupation index.
+    ///
+    /// A present map is authoritative: a code absent from it is [`ClusterCodeLookup::MissingFromMap`]. Without
+    /// a map the code must be canonical; otherwise the package predates the expansion map and the lookup
+    /// returns [`ClusterCodeLookup::ExpansionMapAbsent`] rather than guessing a neighbour.
+    #[must_use]
+    pub fn lookup(&self, raw_code: u64) -> ClusterCodeLookup {
+        if let Some(expansions) = &self.expansions {
+            return match expansions.expanded_codes.binary_search(&raw_code) {
+                Ok(position) => {
+                    ClusterCodeLookup::Canonical(expansions.canonical_indices[position])
+                }
+                Err(_) => ClusterCodeLookup::MissingFromMap(raw_code),
+            };
+        }
+
+        match self.occupation_codes.binary_search(&raw_code) {
+            Ok(position) => {
+                ClusterCodeLookup::Canonical(u32::try_from(position).unwrap_or(u32::MAX))
+            }
+            Err(_) => ClusterCodeLookup::ExpansionMapAbsent(raw_code),
+        }
+    }
 }

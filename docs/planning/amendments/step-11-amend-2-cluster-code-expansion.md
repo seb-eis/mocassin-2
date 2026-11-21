@@ -6,12 +6,12 @@
 | --- | --- |
 | Amendment ID | `step-11-amend-2` |
 | Parent step | 11 — Simulation Package and `.msl` Writer |
-| Status | Re-review required — round 3 `Ready with notes`; owner directed A2-R3-01 + the two Notes, refreeze, and round 4 on 2026-11-21; the A2-07 process change and the `step-11.1` implementation path are approved |
-| Branch | `docs/step-11-amend-2` (design); implementation branch created after approval |
+| Status | Ready for audit — implementation branch frozen; design review round 4 `Ready for implementation` at `bf273ff`; A2-07 process change and the `step-11.1` path owner-approved 2026-11-21 |
+| Branch | `fix/step-11.1-cluster-code-expansion` (implementation); `docs/step-11-amend-2` design merged into `main` as `2f3a6fe` |
 | Design review | `docs/planning/reviews/step-11-amend-2.md` |
-| Parent audit | Step 11 audit is historical (`docs/planning/audits/step-11.md`); the post-merge amendment audit is `docs/planning/audits/step-11-amend-2.md` (to be created) |
-| Integration commit | — (planned: `--no-ff` merge into `main`) |
-| Combined audit commit | — |
+| Parent audit | Step 11 audit is historical (`docs/planning/audits/step-11.md`); the post-merge amendment audit is `docs/planning/audits/step-11-amend-2.md` |
+| Integration commit | — (pending `--no-ff` merge into `main` after audit and owner approval) |
+| Combined audit commit | — (the maintenance branch head at freeze) |
 | Tag | `step-11.1` (proposed; `step-11` is never moved) |
 | Date | 2026-11-21 |
 | Owner | Human owner |
@@ -726,6 +726,42 @@ one-time forward read.
   not a completed acceptance criterion (A2-08).
 - No released `.msl` (pre-release condition, §7).
 - `contracts/manifest.json` is unchanged; `verify.sh contracts` must show no diff.
+
+## Implementation
+
+- **Branch:** `fix/step-11.1-cluster-code-expansion`, from `main` at the design merge `2f3a6fe`.
+- **`.NET`:** `CodeExpansionPayload` and the five-argument `ClusterTablePayload` (the four-argument
+  constructor and `Deconstruct` stay); `EnergyPayloadMapper.MapCodeExpansions` flattens
+  `CompiledClusterOccupation.Expansions` with a global sort, same-code/different-orbit rejection, a
+  canonical self-entry assertion, and `nil` iff every orbit is a singleton; the cluster-stage byte estimate
+  adds `12 × Σ|Expansions|`; `PackageVerificationOptions.MaxClusterExpansionBytes` (128 MiB) and the
+  non-allocating `ClusterExpansionScan` run before `MessagePackSerializer.Deserialize<ModelPayload>`;
+  `PackageVerificationChecks.ValidateModel` applies the structural rules under `PKG010`.
+- **Rust:** `ClusterTablePayload.code_expansions` with `#[serde(default)]`; `ClusterExpansions` and the
+  `#[doc(hidden)] pub` runtime field; `ClusterTable::lookup` and `ClusterCodeLookup`; `scan_map_optional` so
+  `code_expansions` is optional but participates in the duplicate mask; the cumulative `Σ(8E + 4I)` budget
+  (`ReaderLimits::max_cluster_expansion_bytes`, 128 MiB) and the `E != I`/duplicate checks reject before the
+  typed arrays allocate; `map/model.rs` re-checks lengths, ascending order, indices, slots, particles, the
+  canonical self-entry, and the cumulative budget.
+- **Fixtures:** `tests/contracts/packages/step-11-amend-2/` (real writer; 8 raw → 6 canonical, `8386 → 12418`
+  and `8387 → 12419`); `tests/contracts/packages/amend-2-pre-map/` (byte-fixed, non-singleton, no map);
+  regenerated `step-13-populated` (singleton table → `code_expansions: nil`, summary and signatures unchanged,
+  README size/SHA refreshed); `msl-v1`, `step-13-centered`, `amend-1-net10`, and the codec goldens are
+  untouched. The new sample is `samples/step-11-cluster-expansion/`.
+- **Sample deviation:** the fixture uses a **P-1 (space group 2) origin-shifted** form of the ceria primary
+  cluster, with the centre at the inversion origin. The P-1 inversion fixes the centre and swaps the two member
+  slots, so the eight raw tuples still reduce to the six canonical codes in the design table. The full
+  space-group-225 cell generates multiple symmetry-equivalent KMC paths from one start and trips `CMP004`
+  ambiguity; the translated P-1 representation keeps the cluster geometry, identities, offsets, and codes
+  while making the KMC path unambiguous and the fixture compact. It is recorded in the sample and fixture
+  READMEs.
+- **Forward read (one-time evidence):** the pre-amendment `.NET` verifier and Rust reader at `bbc2d08`:
+  `dotnet run --project src/dotnet/Mocassin.Cli -c Release --no-build -- verify <new fixture>` → all ten checks
+  pass, exit 0; `cargo run -p mocassin-cli -- --db <new fixture> --job 1 --dry-run` → `validation: ok`. Both
+  ignore the unknown `code_expansions` key.
+- **Gates:** `./tools/verify.sh all --require` exit 0 (1,989 .NET tests, format/ApiCompat/contracts/docs/AOT),
+  Rust `fmt`/`clippy`/`test` plus release build, Python, and the single Ubuntu closeout CI recorded in the audit
+  record.
 
 ## Integration
 

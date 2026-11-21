@@ -67,6 +67,8 @@ Mocassin.Results.Packages.PackageVerificationOptions.AdvisorySizeBytes.init -> v
 Mocassin.Results.Packages.PackageVerificationOptions.MaxModelPayloadBytes.init -> void
 Mocassin.Results.Packages.PackageVerificationOptions.MaxLatticePayloadBytes.get -> long
 Mocassin.Results.Packages.PackageVerificationOptions.MaxLatticePayloadBytes.init -> void
+Mocassin.Results.Packages.PackageVerificationOptions.MaxClusterExpansionBytes.get -> long
+Mocassin.Results.Packages.PackageVerificationOptions.MaxClusterExpansionBytes.init -> void
 Mocassin.Results.Packages.PackageVerificationReport.Checks.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Results.Packages.PackageVerificationCheck!>
 Mocassin.Results.Packages.PackageVerificationReport.Checks.init -> void
 Mocassin.Results.Packages.PackageVerificationReport.Diagnostics.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>

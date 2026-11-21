@@ -206,7 +206,16 @@ internal sealed class ClusterCompilationStage : ICompilationStage
             occupations.Sort(static (left, right) => left.CanonicalCode.CompareTo(right.CanonicalCode));
             var sitePIndexArray = sitePIndices.MoveToImmutable();
             var geometryEncodingArray = geometryEncodings.MoveToImmutable();
-            var estimatedBytes = SaturatingMath.Multiply(occupations.Count, sizeof(double));
+            var expansionCount = 0L;
+            foreach (var occupation in occupations)
+            {
+                expansionCount = SaturatingMath.Add(expansionCount, occupation.Expansions.Length);
+            }
+
+            // The encoded map is one u64 code and one u32 index per enumerated tuple.
+            var estimatedBytes = SaturatingMath.Add(
+                SaturatingMath.Multiply(occupations.Count, sizeof(double)),
+                SaturatingMath.Multiply(expansionCount, 12));
             var totalBytes = tables.Aggregate(
                 0L,
                 static (current, table) => SaturatingMath.Add(

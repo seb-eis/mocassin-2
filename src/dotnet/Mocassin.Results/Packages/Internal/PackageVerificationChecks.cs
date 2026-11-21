@@ -159,6 +159,11 @@ internal static class PackageVerificationChecks
             {
                 errors.Add("A cluster particle-table mapping is out of range.");
             }
+
+            if (table.CodeExpansions is { } expansions)
+            {
+                ValidateCodeExpansions(table, expansions, particleCount, errors);
+            }
         }
 
         if (payload.Energy.DefectBackground.Length != positionCount * particleCount)
@@ -340,5 +345,90 @@ internal static class PackageVerificationChecks
         }
 
         return true;
+    }
+
+    private static bool IsStrictlyAscending(ImmutableArray<ulong> values)
+    {
+        for (var index = 1; index < values.Length; index++)
+        {
+            if (values[index] <= values[index - 1])
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static void ValidateCodeExpansions(
+        ClusterTablePayload table,
+        CodeExpansionPayload expansions,
+        int particleCount,
+        List<string> errors)
+    {
+        if (expansions.ExpandedCodes.IsDefault || expansions.CanonicalIndices.IsDefault)
+        {
+            errors.Add("A cluster code_expansions member has a missing array.");
+            return;
+        }
+
+        var codes = expansions.ExpandedCodes;
+        var indices = expansions.CanonicalIndices;
+        if (codes.Length != indices.Length)
+        {
+            errors.Add("A cluster code_expansions member has unequal expanded_codes and canonical_indices lengths.");
+        }
+
+        var ascending = IsStrictlyAscending(codes);
+        if (!ascending)
+        {
+            errors.Add("A cluster code_expansions expanded_codes sequence is not strictly ascending.");
+        }
+
+        if (indices.Any(index => index >= table.OccupationCodes.Length))
+        {
+            errors.Add("A cluster code_expansions canonical index is out of range.");
+        }
+
+        foreach (var code in codes)
+        {
+            if (code >> 60 != 0)
+            {
+                errors.Add("A cluster code_expansions code has bits above the ten six-bit slots.");
+                break;
+            }
+
+            var outsideRange = false;
+            for (var slot = 0; slot < 10; slot++)
+            {
+                if ((int)((code >> (6 * slot)) & 0x3F) >= particleCount)
+                {
+                    outsideRange = true;
+                    break;
+                }
+            }
+
+            if (outsideRange)
+            {
+                errors.Add("A cluster code_expansions code has a particle outside the declared particle count.");
+                break;
+            }
+        }
+
+        if (!ascending)
+        {
+            return;
+        }
+
+        for (var index = 0; index < table.OccupationCodes.Length; index++)
+        {
+            var canonical = table.OccupationCodes[index];
+            var position = codes.AsSpan().BinarySearch(canonical);
+            if (position < 0 || position >= indices.Length || indices[position] != (uint)index)
+            {
+                errors.Add("A cluster code_expansions member is missing a canonical self-entry.");
+                break;
+            }
+        }
     }
 }
