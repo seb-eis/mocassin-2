@@ -1,7 +1,9 @@
 # GUI shell interaction fix (2026-11-21)
 
-An out-of-step maintenance change under `AGENTS.md` §3.5. It is not a new step and has no step branch, step
-tag, or design-review gate beyond the owner's merge approval.
+An out-of-step maintenance change under `AGENTS.md` §3.5. It is not a new step and has no step branch or step
+tag. The owner recorded the decisions on 2026-11-21 and declined an independent design review; the contract is
+developer guidance for this fix. Merge approval follows §3.5 after the local gates and the two manual platform
+runs.
 
 | Field | Value |
 | --- | --- |
@@ -9,9 +11,9 @@ tag, or design-review gate beyond the owner's merge approval.
 | Branch | `fix/gui-shell-interactions` |
 | Base | `main` at `542d569` |
 | Worktree | `/workspace` (clean, in place) |
-| Owner decision | Proportional panels; focus and `Escape` for overlays; `Enter` confirms with a multiline opt-out |
-| Tracking | One branch, one implementor, one owner `--no-ff` merge approval |
-| Status | Design complete — awaiting owner start decision |
+| Owner decisions | Recorded 2026-11-21 — see §11 |
+| Tracking | One branch, one implementor, both manual platform runs, then one owner `--no-ff` merge approval under §3.5 |
+| Status | Ready for implementation — no independent design review |
 | Normative behaviour | [`docs/development/ui-interaction-contract.md`](../../development/ui-interaction-contract.md) |
 
 The interaction contract is the durable design. This record holds the defect evidence, the implementation
@@ -159,6 +161,8 @@ clipboard, dispatcher, and time, as in 23A/23B.
 - Resize to 1000 × 700 after a drag: the new ratio is preserved within 0.005.
 - Toggle projects off: `ActualWidth` is zero, the splitter is not visible, the centre expands; toggle on: the
   fraction returns within 0.005.
+- Projects panel rows: the explorer tree occupies the star row and "Open selected" is pinned at the bottom; no
+  empty star row remains.
 - Keyboard: splitters are focusable, named, arrow keys resize by 16 px, and a focus indicator is present.
 - Persistence: drag → `PendingLayoutPersist` → reload the settings file; fractions match; a legacy document
   with pixel fields loads as a fraction and rewrites without the pixel keys; a second load is idempotent.
@@ -185,6 +189,8 @@ clipboard, dispatcher, and time, as in 23A/23B.
 - Explorer `Enter`, Problems `Enter`, and ProjectOverview field `Enter` get explicit regression tests.
 - The three screenshot baselines are regenerated once because the default panel sizes change at the 1000 × 700
   capture size. No other visual change is intended.
+- The manual Windows and macOS runs execute `Mocassin.App.Tests` through the focused platform job, which covers
+  the headless shell, layout, focus, and interaction tests. Their run IDs and conclusions are recorded in §11.
 
 ## 7. Acceptance criteria
 
@@ -197,10 +203,13 @@ clipboard, dispatcher, and time, as in 23A/23B.
 4. No two layers are interactive at once; a lower layer's default/cancel button cannot fire.
 5. Splitter and overlay accessible names, focus indicators, and the deterministic Tab order pass the headless
    accessibility tests.
-6. `./tools/verify.sh dotnet`, `./tools/verify.sh docs`, and `./tools/verify.sh policy` pass locally. No CI is
-   dispatched for the branch.
+6. `./tools/verify.sh dotnet`, `./tools/verify.sh docs`, and `./tools/verify.sh policy` pass locally. No
+   per-feature CI is dispatched; the only CI runs on this branch are the two manual platform runs in item 9.
 7. The screenshot baselines are updated and the diff is recorded in the commit message.
 8. No new dependency, theme restyle, `contracts/manifest.json` change, or frozen-record edit.
+9. The manual **Windows** and **macOS** platform runs are dispatched on this fix branch, one at a time, and both
+   pass. Both run IDs, `head_sha` values, and conclusions are recorded in §11. A failing or missing platform
+   run blocks the merge approval.
 
 ## 8. Risks
 
@@ -213,7 +222,8 @@ clipboard, dispatcher, and time, as in 23A/23B.
 | Focus restore to a detached element (document closed while an overlay is open) | Null/attachment/enabled guard; fall back to the document tabs, then the menu |
 | Two overlays in one top-level fire both defaults | Layer disabling plus the catalog-gesture gate; explicit test with settings + dialog |
 | Screenshot churn from the default fraction change | One regeneration; PR-medium; document the change in the commit |
-| No Windows/macOS visual pass | Headless tests cover behaviour; platform runs stay manual and are recorded as residual risk. This branch touches no platform-specific API |
+| A required platform run is missing or red | The merge is blocked. Dispatch the missing run with `platforms=windows` or `platforms=macos` and `force_all=true`, record both run IDs, and re-run the local gate after any fix |
+| No human visual pass on Windows/macOS | The platform runs execute the headless shell, layout, and interaction tests; screenshot comparison stays Ubuntu-only. A manual keyboard spot-check is optional evidence, not a substitute for the required runs |
 
 ## 9. Out of scope
 
@@ -285,19 +295,40 @@ product decision.
 The in-scope list is one coherent change: the three reported defects plus the layer gate and the projects row
 that share the same root cause. The expected diff is one view pair, one view-model pair, the settings layout
 model, four overlay views, two dialog views, tests, and docs. It is still readable in one sitting; no split is
-recommended. If the owner wants a smaller first merge, L-3 (projects rows) and L-17 (gesture gate) can move to
-a follow-up without affecting the three defects; they are the only optional in-scope items.
+recommended. The owner confirmed on 2026-11-21 that L-3 (projects rows) and L-17 (gesture gate) are included in
+this branch; they are no longer optional.
 
-## 11. Owner decisions required
+## 11. Owner decisions (2026-11-21)
 
-| ID | Question | Recommendation |
+The owner resolved every open question. The contract is developer guidance for this §3.5 fix; no independent
+design review is required.
+
+| ID | Decision | Consequence |
 | --- | --- | --- |
-| Q1 | Confirmation dialogs start with focus on Cancel, so plain `Enter` cancels a destructive action. Keep this safe default, or make plain `Enter` confirm? | Keep Cancel focus. Confirming requires Tab + `Enter`, which is still mouse-free |
-| Q2 | Settings `Escape` discards unapplied edits with no prompt. Keep the owner's "`Escape` always cancels" rule, or add a dirty-state prompt? | Keep the rule. Nothing is persisted until Save and Cancel is visible; a prompt is a separate feature |
-| Q3 | Progress dialogs: initial focus on the container so `Enter` cannot cancel; `Escape` does not close; cancellation stays an explicit button | Adopt. A stray `Enter` must not abort a running job |
-| Q4 | The interaction contract is normative for Steps 24–28. Does it need a fresh independent design review before implementation? | Treat it as developer guidance for this fix. If the owner wants a design gate, spawn a fresh reviewer on the docs commit before the implementor starts |
-| Q5 | Legacy layout migration converts pixel sizes with the 1200 × 800 reference, then rewrites fractions. Accept the one-time few-pixel shift, or reset old layouts to defaults? | Convert; it preserves the user's intent and is testable |
-| Q6 | Include L-3 (projects rows) and L-17 (gesture gate) in this branch? | Include. They are small and close the empty-space and double-default paths |
+| Q1 | Keep Cancel initial focus. Plain `Enter` cancels a confirmation dialog; Tab + `Enter` confirms. | Matches the contract. Destructive confirmations stay safe by default and remain keyboard-only. |
+| Q2 | Accept both safe defaults: settings `Escape` silently discards unapplied edits; the progress dialog focuses its container, `Enter` cannot cancel, `Escape` does not close, and cancellation stays the explicit button. | No dirty-settings prompt and no keyboard cancellation of a running operation in this fix. |
+| Q3 | Include L-3 (projects rows) and L-17 (gesture gate) in this branch. | Both are required scope; see §10.1 and §10.2. |
+| Q4 | No independent design review. The contract is developer guidance for this §3.5 fix. | No review record is created and no reviewer verdict is pending. Harness limitation recorded: the reviewer binding permits only `step-*`/`xc-*` record paths, so a `fix/` branch cannot host a reviewer record under the current binding. |
+| Q5 | Legacy pixel layout conversion uses the 1200 × 800 reference and accepts the one-time shift; do not reset old layouts to defaults. | Migration is exactly the contract's §6.4. |
+| Q6 | Dispatch the manual **Windows** and **macOS** platform runs on this fix branch and record both run IDs. A failing or missing platform run blocks the merge approval. | Added to §7 item 9 and §12. The owner approves the merge only after both runs are green, under the normal §3.5 approval. |
+
+Owner numbering is the 2026-11-21 message. In the earlier draft, the settings-`Escape` and progress-focus
+questions were separate (draft Q2/Q3) and the include-L-3/L-17 question was draft Q6; they are consolidated
+above as Q2 and Q3. The owner's new Q6 is the platform-run gate.
+
+### Platform run record
+
+Dispatch `CI` → `Run workflow` on `fix/gui-shell-interactions`, one platform at a time (the workflow's
+concurrency group cancels a second run for the same ref). Use `platforms=windows` and `platforms=macos` with
+`force_all=true` so the focused .NET job cannot be path-filtered away. Windows and macOS do not pixel-compare
+screenshots; they run `Mocassin.App.Tests` and the other platform-sensitive test projects.
+
+| Platform | Run ID | `head_sha` | Conclusion | Recorded by |
+| --- | --- | --- | --- | --- |
+| Windows | _pending_ | _pending_ | _pending_ | implementor |
+| macOS | _pending_ | _pending_ | _pending_ | implementor |
+
+The merge approval request must quote both rows. `_pending_` is not a passing state.
 
 ## 12. Done when
 
@@ -305,4 +336,8 @@ a follow-up without affecting the three defects; they are the only optional in-s
 - The contract page is linked from `ui-architecture.md` and the development index, and the nav entry is added by
   the implementor (the planner does not edit configuration).
 - The local gates named in §7.6 pass and the branch is pushed for owner review.
-- This record is updated with the commit, the exact commands/results, and any deviation.
+- Both manual platform runs in §7 item 9 are green and both rows in §11's platform run record contain the run
+  ID, `head_sha`, and conclusion. No design review is pending; Q4 records that none is required.
+- The owner approves the merge only after those runs, under the normal §3.5 approval; the merge is `--no-ff`.
+- This record is updated with the commit, the exact commands/results, the platform run evidence, and any
+  deviation.
