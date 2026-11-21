@@ -10,12 +10,12 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
 
 ## Implementation status
 
-- **Status:** In progress — feature 6 implementation complete; squash and closeout pending
+- **Status:** In progress — feature 6 squashed at `00fceab`; closeout CI and audit request in progress
 - **Step branch:** `step/14-simulation-context-initialization`
-- **Step CI:** — (one closeout `workflow_dispatch`; no per-feature CI)
+- **Step CI:** Closeout run pending (single Ubuntu `workflow_dispatch`; no per-feature CI)
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Not requested
+- **Audit:** Ready for audit — request at [`docs/planning/audits/step-14.md`](../audits/step-14.md)
 - **Design review:** `Ready with notes` — accepted by the human owner 2026-11-21. Round 4 at record `620f20a`
   (freeze `a430d64`) closed F-29 and F-30–F-38; F-39–F-43 are minor/note corrections the step agent records
   with the start-gate status. Rounds 1–3 returned `Changes required` (F-1–F-38). Record:
@@ -31,7 +31,7 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
   gate.
 - **Sizing:** Complexity class **High** — accepted by the human owner at the start gate 2026-11-21 as one
   unit; no split proposed. See §4.
-- **Last updated:** 2026-11-21 (feature 6 implementation complete; squash and closeout pending)
+- **Last updated:** 2026-11-21 (feature 6 squashed; closeout CI and audit request in progress)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
@@ -40,7 +40,7 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
 | 3 Energy runtime and initial lattice energy | `feature/step-14-simulation-context-initialization/energy-runtime-and-initial-energy` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (38 lib + 8 energy + 16 cluster + 15 link + 9 skeleton acceptance tests, 1 `Send` + 1 `!Sync` doctest), `cargo build --release`, `structure` (7 passed), `docs --require` all exit 0 | Not run (no per-feature CI) | `2f284cce2f65532007a9be883eaaea83ae4500b5` |
 | 4 Selection pools and jump status | `feature/step-14-simulation-context-initialization/selection-pools-and-jump-status` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (38 lib + 10 pools + 10 jump + 8 energy + 16 cluster + 13 link + 9 skeleton acceptance tests, 1 `Send` + 1 `!Sync` doctest), `cargo build --release`, `structure` (7 passed), `docs --require` all exit 0 | Not run (no per-feature CI) | `1613cfc6da1832fc4faacba0b0073e001cd30f1f` |
 | 5 Goals, counters, normalization, time step, resume | `feature/step-14-simulation-context-initialization/goals-normalization-and-resume` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (38 lib + 15 goals + 7 resume + 10 pools + 10 jump + 8 energy + 17 cluster + 13 link + 9 skeleton acceptance tests, 1 `Send` + 1 `!Sync` doctest), `cargo build --release`, `structure` (7 passed), `docs --require` all exit 0 | Not run (no per-feature CI) | `6500055d6cf14e544a85d09db02dd27b1e2f9e5f` |
-| 6 Fixtures, benchmarks, documentation, and closeout | `feature/step-14-simulation-context-initialization/fixtures-benchmarks-and-closeout` | In progress (squash pending) | Targeted Rust/`.NET`/docs gates and the Criterion `context` bench pass; the full `./tools/verify.sh all --require` and the closeout CI are recorded in the closeout commit | One closeout discharge (recorded in closeout evidence) | Recorded in the closeout commit |
+| 6 Fixtures, benchmarks, documentation, and closeout | `feature/step-14-simulation-context-initialization/fixtures-benchmarks-and-closeout` | Squashed | `./tools/verify.sh all --require` exit 0 at `8c09a8c` (all .NET tests, Rust, Python, docs strict, contracts/policy, AOT evidence); the only later delta to the audited commit is the benchmark-evidence provenance string | Closeout run pending | `00fceabce7fa6d910cb79f701f175aa4b681bf5f` |
 
 ### Feature list (scope and outcomes)
 
@@ -340,8 +340,8 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
 
 ### Feature 6 evidence — fixtures-benchmarks-and-closeout
 
-- **Branch:** `feature/step-14-simulation-context-initialization/fixtures-benchmarks-and-closeout` (squashed;
-  squash commit recorded in the closeout commit).
+- **Branch:** `feature/step-14-simulation-context-initialization/fixtures-benchmarks-and-closeout` (squashed as
+  `00fceabce7fa6d910cb79f701f175aa4b681bf5f`).
 - **Local gates (feature branch, exact commands):** `cargo fmt --manifest-path src/rust/Cargo.toml --all
   --check` → OK; `cargo clippy --manifest-path src/rust/Cargo.toml --workspace --all-targets -- -D warnings` →
   OK; `cargo test --manifest-path src/rust/Cargo.toml --workspace` → all test binaries pass (including
@@ -392,9 +392,12 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
   numbers), `troubleshooting/errors.md` (context failures, exit 12/13/15 vs 14), `testing-and-parity.md`
   (fixtures/tiers/allocation/snapshot), and `msl-format.md` (cluster geometry and void-member rule). The parity
   matrix and status dashboard are updated; the Step 15 void-member rule is recorded.
-- **Closeout:** merged current `main`; `./tools/verify.sh all --require` exit 0; closeout evidence/audit record
-  and the single Ubuntu closeout CI are recorded in `docs/planning/closeout/step-14.json` and
-  `docs/planning/audits/step-14.md`.
+- **Closeout:** merged current `main` (`929327e`) as `8c09a8c`; `./tools/verify.sh all --require` exited **0** at
+  `8c09a8c` (2,007 .NET tests, the Rust workspace tests including `context_fixtures`/`allocation`, Python 3
+  passed and sdist/wheel built, docs links 196 files + Zensical strict + DocFX 0 errors + rustdoc clean,
+  contracts/policy, and the AOT evidence: the real CLI publish fails 62 IL2xxx/IL3xxx diagnostics and is
+  recorded as non-gating). The single Ubuntu closeout run and the audited commit are recorded in
+  `docs/planning/closeout/step-14.json`; the audit request is `docs/planning/audits/step-14.md`.
 
 ## Goal
 
