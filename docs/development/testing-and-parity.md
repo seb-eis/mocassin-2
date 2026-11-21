@@ -130,7 +130,8 @@ or SQLite. Prefer real temporary directories and real files produced by the real
   migration idempotence, the 4 MiB cap, atomic/failed writes, theme resources, settings-dialog validation, log
   level at startup, and recent/last-directory persistence.
 - The architecture test checks direct project references and runs the view-model I/O token tripwire with a
-  positive control. Headless a11y assertions check automation names on the primary shell controls.
+  positive control. Headless a11y assertions check automation names on the primary shell controls, their
+  automation control types, and a deterministic Tab order across two fresh windows.
 - Tab drag-reorder is not wired in the Avalonia tab strip; `Ctrl+1..9`, `Ctrl+Tab`/`Ctrl+Shift+Tab`, `Ctrl+W`,
   middle-click close, the close button, and the context menu are tested. The drag limitation is recorded in the
   step page.
@@ -138,8 +139,13 @@ or SQLite. Prefer real temporary directories and real files produced by the real
   high contrast. Linux compares them with a documented 5 % pixel tolerance; Windows/macOS do not pixel-compare.
   Regenerate with `MOCASSIN_REGENERATE_VISUAL_BASELINES=1` on the Linux reference environment.
 - The accessibility sweep asserts an accessible name on every primary interactive control type in the real
-  shell. The manual checklist in [Platform checklist](platform-checklist.md) records the platform-specific
-  real-window steps.
+  shell, the expected automation role for the menu, tabs, project lists, explorer, and console filter, and a
+  deterministic Tab order. The Xvfb harness captures the real X11 window for light, dark, high-contrast,
+  workspace, dialog, and lifecycle steps; see [Platform checklist](platform-checklist.md) for the command and
+  the recorded run. That is automated evidence, not a manual checklist.
+- Appearance resources carry their effect through the merged `HighContrast.axaml`/`Density.axaml`
+  dictionaries, the padding/min-height/border keys, the `Mocassin.Transitions` resource (empty when reduce
+  motion is on), and `SystemAccentColor`. Redundant flag-only resources were removed rather than left dead.
 
 ## Test tiers
 

@@ -4,5 +4,4 @@
   <av:Thickness x:Key="Mocassin.ControlPadding">4</av:Thickness>
   <av:Thickness x:Key="Mocassin.ItemPadding">2,1</av:Thickness>
   <x:Double x:Key="Mocassin.ControlMinHeight">26</x:Double>
-  <x:Double x:Key="Mocassin.RowSpacing">2</x:Double>
 </ResourceDictionary>

@@ -39,6 +39,7 @@ internal sealed partial class ShellViewModel : ObservableObject
     private readonly IDialogService dialogs;
     private readonly string? startupProjectPath;
     private Task pendingLayoutPersist = Task.CompletedTask;
+    private bool suppressSettingsApply;
 
     [ObservableProperty]
     private string windowTitle = "MOCASSIN";
@@ -495,7 +496,11 @@ internal sealed partial class ShellViewModel : ObservableObject
 
     private void OnSettingsChanged(object? sender, AppSettings updated)
     {
-        ApplySettings(updated);
+        if (!suppressSettingsApply)
+        {
+            ApplySettings(updated);
+        }
+
         RecentProjects.Refresh();
     }
 
@@ -525,15 +530,26 @@ internal sealed partial class ShellViewModel : ObservableObject
     private void ScheduleLayoutPersist()
     {
         var previous = pendingLayoutPersist;
-        pendingLayoutPersist = PersistLayoutAfterAsync(previous);
+        pendingLayoutPersist = PersistLayoutAfterAsync(previous, CaptureLayout());
     }
 
-    private async Task PersistLayoutAfterAsync(Task previous)
+    private LayoutSettings CaptureLayout() => new()
+    {
+        LeftVisible = Regions.IsProjectsVisible,
+        RightVisible = Regions.IsInspectorVisible,
+        ConsoleVisible = Regions.IsConsoleVisible,
+        LeftWidth = (int)Math.Round(Regions.LeftWidth),
+        RightWidth = (int)Math.Round(Regions.RightWidth),
+        ConsoleHeight = (int)Math.Round(Regions.ConsoleHeight),
+        ActiveConsoleChannel = Console.ActiveChannel?.Id ?? SettingsDefaults.DefaultConsoleChannel,
+    };
+
+    private async Task PersistLayoutAfterAsync(Task previous, LayoutSettings layout)
     {
         await previous.ConfigureAwait(true);
         try
         {
-            await PersistLayoutAsync().ConfigureAwait(true);
+            await PersistLayoutAsync(layout).ConfigureAwait(true);
         }
         catch (Exception exception) when (
             exception is IOException or UnauthorizedAccessException or InvalidOperationException)
@@ -564,19 +580,19 @@ internal sealed partial class ShellViewModel : ObservableObject
         applyingLayout = false;
     }
 
-    private async Task PersistLayoutAsync()
+    private async Task PersistLayoutAsync(LayoutSettings layout)
     {
-        var layout = new LayoutSettings
+        AppSettingsSaveResult result;
+        suppressSettingsApply = true;
+        try
         {
-            LeftVisible = Regions.IsProjectsVisible,
-            RightVisible = Regions.IsInspectorVisible,
-            ConsoleVisible = Regions.IsConsoleVisible,
-            LeftWidth = (int)Math.Round(Regions.LeftWidth),
-            RightWidth = (int)Math.Round(Regions.RightWidth),
-            ConsoleHeight = (int)Math.Round(Regions.ConsoleHeight),
-            ActiveConsoleChannel = Console.ActiveChannel?.Id ?? SettingsDefaults.DefaultConsoleChannel,
-        };
-        var result = await settings.UpdateAsync(settings.Current with { Layout = layout });
+            result = await settings.UpdateAsync(settings.Current with { Layout = layout });
+        }
+        finally
+        {
+            suppressSettingsApply = false;
+        }
+
         if (!result.IsSuccess)
         {
             consoleService.Write(

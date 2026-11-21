@@ -32,9 +32,37 @@ internal static class HeadlessSession
             CancellationToken.None);
 
     /// <summary>
-    /// Dispatches an asynchronous action onto the headless UI thread.
+    /// Dispatches an asynchronous action onto the headless UI thread and awaits its body.
     /// </summary>
     /// <param name="action">The action to run.</param>
-    /// <returns>A task that completes when the action has run.</returns>
-    public static Task DispatchAsync(Func<Task> action) => session.Value.Dispatch(action, CancellationToken.None);
+    /// <returns>A task that completes when the action's body has completed.</returns>
+    /// <remarks>
+    /// The delegate must be passed to the <c>Dispatch&lt;T&gt;(Func&lt;Task&lt;T&gt;&gt;)</c> overload. Passing it
+    /// to the plain <c>Dispatch(Func&lt;Task&gt;)</c> path would expose a <see cref="Task{Task}"/> as a
+    /// <see cref="Task"/> and silently drop the inner task's exceptions and assertions.
+    /// </remarks>
+    public static Task DispatchAsync(Func<Task> action) =>
+        session.Value.Dispatch(
+            async () =>
+            {
+                await action().ConfigureAwait(true);
+                return true;
+            },
+            CancellationToken.None);
+
+    /// <summary>
+    /// Runs pending dispatcher jobs and forces a layout/render pass so freshly attached controls are realized.
+    /// </summary>
+    /// <param name="topLevel">The window whose visual tree is pumped.</param>
+    public static void Pump(Avalonia.Controls.TopLevel topLevel)
+    {
+        for (var pass = 0; pass < 3; pass++)
+        {
+            AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+            Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+            using var frame = topLevel.CaptureRenderedFrame();
+        }
+
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+    }
 }

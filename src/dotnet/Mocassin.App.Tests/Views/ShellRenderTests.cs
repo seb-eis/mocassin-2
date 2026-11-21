@@ -92,10 +92,16 @@ public sealed class ShellRenderTests
                 try
                 {
                     var shell = Assert.IsType<ShellViewModel>(window.DataContext);
+                    Assert.True(shell.Regions.IsProjectsVisible);
+
                     shell.Regions.ToggleProjectsCommand.Execute(null);
+                    Assert.False(shell.Regions.IsProjectsVisible);
+
                     shell.Regions.ToggleProjectsCommand.Execute(null);
+                    Assert.True(shell.Regions.IsProjectsVisible);
                     await shell.PendingLayoutPersist;
 
+                    Assert.True(shell.Regions.IsProjectsVisible);
                     var loaded = new Mocassin.App.Settings.AppSettingsStore(host.Paths).Load();
                     Assert.True(loaded.Settings.Layout.LeftVisible);
                     Assert.Empty(

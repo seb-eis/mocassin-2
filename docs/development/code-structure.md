@@ -159,11 +159,11 @@ src/dotnet/Mocassin.App/                 # composition root + app-local I/O
   Composition/     # 23A: AppHost, service registration, startup options, app paths, logging setup, log retention
   Settings/        # 23A: AppSettingsStore, settings write policy (atomic + fsync + size cap)
   Files/           # 23A: ProjectFileProbe, file-stamp provider
-  Startup/         # 23A: startup coordination, crash handler, placement resolver
+  Startup/         # 23A: startup coordination and crash handler
   Recovery/        # 23B: RecoveryStore, CrashRecoveryWriter, recovery scan
 
 src/dotnet/Mocassin.App.ViewModels/      # no Avalonia, no System.IO
-  Shell/           # 23A: shell/region/status-bar view models, window state, placement resolver
+  Shell/           # 23A: shell/region/status-bar view models, window state, layout persistence
   Documents/       # 23A: document model, keys, tab collection, welcome
   Documents/Project/  # 23A: project overview, project JSON; 23B: metadata editor
   Projects/        # 23A: project session, session service, outcomes, stamps, external change, recents

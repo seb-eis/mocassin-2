@@ -43,7 +43,6 @@ internal sealed class AvaloniaThemeApplier : IThemeApplier
 
         application.Resources["Mocassin.FontScale"] = settings.FontScale;
         application.Resources["Mocassin.BodyFontSize"] = 14d * settings.FontScale;
-        application.Resources["Mocassin.Density"] = settings.Density == Density.Compact ? "compact" : "comfortable";
         var compact = settings.Density == Density.Compact;
         application.Resources["Mocassin.ControlPadding"] = new Thickness(compact ? 4 : 8);
         application.Resources["Mocassin.ItemPadding"] = compact
@@ -51,9 +50,6 @@ internal sealed class AvaloniaThemeApplier : IThemeApplier
             : new Thickness(4, 2);
         application.Resources["Mocassin.ControlMinHeight"] = compact ? 26d : 34d;
         application.Resources["Mocassin.BorderThickness"] = new Thickness(settings.HighContrast ? 2 : 1);
-        application.Resources["Mocassin.HighContrast"] = settings.HighContrast;
-        application.Resources["Mocassin.ReduceMotion"] = settings.ReduceMotion;
-        application.Resources["Mocassin.Accent"] = settings.Accent ?? "default";
         application.Resources["Mocassin.Transitions"] = CreateTransitions(settings.ReduceMotion);
 
         if (AccentColor(settings.Accent) is { } color)

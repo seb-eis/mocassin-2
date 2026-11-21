@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT
 
 using Avalonia.Automation;
+using Avalonia.Automation.Peers;
 using Avalonia.Controls;
+using Avalonia.Headless;
+using Avalonia.Input;
 using Avalonia.VisualTree;
 using Microsoft.Extensions.DependencyInjection;
 using Mocassin.App.Composition;
@@ -50,5 +53,82 @@ public sealed class AccessibilityTests
                 {
                     window.Close();
                 }
+            });
+
+    [Fact]
+    public Task PrimaryControlsExposeAutomationRoles() =>
+        HeadlessSession.DispatchAsync(
+            () =>
+            {
+                using var workspace = new TempWorkspace();
+                using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+
+                try
+                {
+                    var expectations = new (string Name, Func<Control, bool> Match, AutomationControlType Type)[]
+                    {
+                        ("Main menu", control => control is Menu, AutomationControlType.Menu),
+                        ("Document tabs", control => control is TabControl, AutomationControlType.Tab),
+                        ("Open projects", control => control is ListBox, AutomationControlType.List),
+                        ("Project explorer", control => control is TreeView, AutomationControlType.Tree),
+                        ("Application console filter", control => control is TextBox, AutomationControlType.Edit),
+                    };
+                    foreach (var (name, match, type) in expectations)
+                    {
+                        var control = window.GetVisualDescendants()
+                            .OfType<Control>()
+                            .Single(element => AutomationProperties.GetName(element) == name && match(element));
+                        var peer = ControlAutomationPeer.CreatePeerForElement(control);
+                        Assert.NotNull(peer);
+                        Assert.Equal(type, peer.GetAutomationControlType());
+                    }
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+
+    [Fact]
+    public Task TabOrderIsDeterministic() =>
+        HeadlessSession.DispatchAsync(
+            () =>
+            {
+                static List<string> CaptureOrder()
+                {
+                    using var workspace = new TempWorkspace();
+                    using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+                    var window = host.Services.GetRequiredService<ShellWindow>();
+                    window.Show();
+                    try
+                    {
+                        var order = new List<string>();
+                        for (var step = 0; step < 8; step++)
+                        {
+                            window.KeyPress(Key.Tab, RawInputModifiers.None, PhysicalKey.Tab, null);
+                            Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+                            var focused = window.FocusManager?.GetFocusedElement() as Control;
+                            Assert.NotNull(focused);
+                            order.Add(
+                                string.Join(
+                                    ":",
+                                    focused.GetType().Name,
+                                    AutomationProperties.GetName(focused) ?? focused.Name ?? "-"));
+                        }
+
+                        Assert.True(order.Distinct(StringComparer.Ordinal).Count() >= 4, string.Join(", ", order));
+                        return order;
+                    }
+                    finally
+                    {
+                        window.Close();
+                    }
+                }
+
+                var first = CaptureOrder();
+                var second = CaptureOrder();
+                Assert.Equal(first, second);
             });
 }

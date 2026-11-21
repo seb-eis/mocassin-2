@@ -71,8 +71,27 @@
               <Button Content="Clear logs and cache" Command="{Binding ClearLogsCommand}" />
             </StackPanel>
 
-            <TextBlock Text="{Binding ErrorMessage}" Foreground="#C62828" TextWrapping="Wrap" />
-            <TextBlock Text="{Binding StatusMessage}" Classes="caption" TextWrapping="Wrap" />
+            <Border IsVisible="{Binding HasErrorMessage}"
+                    Background="#FDECEA"
+                    BorderBrush="#C62828"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="8">
+              <TextBlock Text="{Binding ErrorMessage}"
+                         Foreground="#B71C1C"
+                         TextWrapping="Wrap"
+                         automation:AutomationProperties.Name="Settings error" />
+            </Border>
+            <Border IsVisible="{Binding HasStatusMessage}"
+                    Background="#E8F5E9"
+                    BorderBrush="#2E7D32"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="8">
+              <TextBlock Text="{Binding StatusMessage}"
+                         TextWrapping="Wrap"
+                         automation:AutomationProperties.Name="Settings status" />
+            </Border>
           </StackPanel>
         </ScrollViewer>
 

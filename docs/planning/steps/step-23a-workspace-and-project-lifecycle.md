@@ -57,14 +57,14 @@ are recorded here rather than left implicit.
 | 4 | Feature 2 deferred New/Open/Recent and JSON export | Feature 4 implemented New/Open/Recent recording. **Project JSON “Save a copy…” export remains deferred**; the document supports copy only. |
 | 5 | Tab keyboard and drag support | `Ctrl+1`–`Ctrl+9`, `Ctrl+Tab`/`Ctrl+Shift+Tab`, `Ctrl+W`, middle-click close, the close button, and the tab context menu are implemented and tested. **Drag-reorder is not wired**: the Avalonia `TabControl` has no built-in drag-reorder gesture, and adding a custom tab-strip control (with accessible keyboard equivalent) is later GUI polish. `DocumentCollectionViewModel.Move` exists for that follow-up. |
 | 6 | New existing-target outcome | The original implementation reused `ProjectSessionOutcome.Locked` because the enum lacked an existing-target value. Feature 5 adds internal `ExistingTarget`, returns it from New, and tests the message/code preservation. |
-| 7 | Audit-round follow-up commits landed directly on the step branch | After the `fix-audit-round-1` squash (`657bc5f`), the platform-gate follow-ups (`b15e83c`, `e0e897b`, `008b133`) were committed on the step branch instead of a new feature branch. They are covered by the replacement local gate and the three green runs at `008b133`; the process deviation is recorded rather than rewriting the pushed step branch. |
-| 7 | Save As to the current path | A Save As to the session’s current path is treated as a lock conflict rather than a plain save; the picker normally prevents this. |
-| 8 | External-change filter | The session compares length + last-write UTC (the design’s cheap filter), not a fresh content hash. Save refuses a modified/deleted file; Reload and Save As are the recovery paths. |
-| 9 | `CreateAsync` path meaning | The session service `CreateAsync(kind, name, directory)` takes a target **directory**; the design did not distinguish a directory from a full file path. |
-| 10 | Workspace seam | `ProjectWorkspaceEntry` now wraps a `ProjectSession`; the feature-2 standalone constructor is retained for tests. The session is the live owner of project/load/lock state. |
-| 11 | Layout width feedback | Region visibility and stored widths are applied from settings; manual GridSplitter resizing does not feed back into settings yet. |
-| 12 | Application diagnostics report | The crash boundary and structured log exist; the “Help → Application diagnostics” report is deferred to a later diagnostics/UI step. |
-| 13 | Step 07 validation pass | The design originally said 23A never calls `ProjectValidationPipeline`; feature 4 performs exactly one internal load-validation pass with the store diagnostics. See §5.1. No validation UI is added; 23B owns the surface. |
+| 7 | Audit-round follow-up commits landed directly on the step branch | **Accepted by the human owner 2026-11-21 as a recorded exception, not a precedent.** After the `fix-audit-round-1` squash (`657bc5f`), the platform-gate follow-ups (`b15e83c`, `e0e897b`, `008b133`) were committed on the step branch instead of a new feature branch. They are covered by the replacement local gate and the three green runs at `008b133`; history was not rewritten. All round-2 fixes use the `fix-audit-round-2` feature branch. |
+| 8 | Save As to the current path | A Save As to the session’s current path is treated as a lock conflict rather than a plain save; the picker normally prevents this. |
+| 9 | External-change filter | The session compares length + last-write UTC (the design’s cheap filter), not a fresh content hash. Save refuses a modified/deleted file; Reload and Save As are the recovery paths. |
+| 10 | `CreateAsync` path meaning | The session service `CreateAsync(kind, name, directory)` takes a target **directory**; the design did not distinguish a directory from a full file path. |
+| 11 | Workspace seam | `ProjectWorkspaceEntry` now wraps a `ProjectSession`; the feature-2 standalone constructor is retained for tests. The session is the live owner of project/load/lock state. |
+| 12 | Layout width feedback | Region visibility and stored widths are applied from settings; manual GridSplitter resizing does not feed back into settings yet. |
+| 13 | Application diagnostics report | The crash boundary and structured log exist; the “Help → Application diagnostics” report is deferred to a later diagnostics/UI step. |
+| 14 | Step 07 validation pass | The design originally said 23A never calls `ProjectValidationPipeline`; feature 4 performs exactly one internal load-validation pass with the store diagnostics. See §5.1. No validation UI is added; 23B owns the surface. |
 
 ### Approved feature list (owner-approved 2026-11-20)
 
@@ -101,6 +101,19 @@ approval. 23B is not part of this list and must not appear in a 23A branch.
 | F-13 | Removed unused App `Results`/`Rendering` references; the composition-root IVT remains the recorded exception. |
 | F-14 | Recorded as an accepted note: AOT is CLI-only pre-existing evidence, not a GUI publication claim. |
 | F-15 | Fixed platform recents comparison; added a Linux case-distinct test. |
+
+### Audit round 2 fixes (2026-11-21)
+
+| Finding | Resolution |
+| --- | --- |
+| R2-1 | `HeadlessSession.DispatchAsync(Func<Task>)` now awaits the inner task through the `Func<Task<T>>` dispatch overload. Two meta-tests prove a throw and an `Assert.Fail` after `await` are observed. The seven tests exposed by the fix were corrected: dialog tests pump the realised overlay, the welcome test asserts the real `ItemsControl`/`TreeView`/console filter, the `Ctrl+2` expectation now asserts the JSON document and also checks `Ctrl+1`, and the rapid-toggle test asserts the final layout. |
+| R2-2 | Rapid toggles are last-write-wins: the target layout is captured when the toggle is scheduled, and the shell suppresses re-applying the settings change produced by its own layout write. The regression test asserts `True` → `False` → `True`, the persisted `LeftVisible`, and no temporary file. |
+| R2-3 | Current `main` (`eadfe13`) is merged at `a584b20`; the replacement local gate and the new Ubuntu/Windows/macOS runs at the audited commit rebind the closeout evidence with `main_sha_at_freeze = eadfe13`. |
+| R2-4 | Added an automated Xvfb harness that runs the real desktop shell on X11 and captures light/dark/high-contrast, workspace, dialog, and lifecycle evidence with assertions. `platform-checklist.md` records the command, environment, date, steps, and image hashes and states explicitly that this is automated Xvfb evidence, not a manual checklist. |
+| R2-5 | The owner accepted deviation 7 as a recorded exception, not a precedent. All round-2 fixes use the `fix-audit-round-2` feature branch. |
+| R2-6 | Removed the stale placement-resolver references from `code-structure.md`; `Startup/` and `Shell/` describe the real files. |
+| R2-7 | Removed the five flag-only theme resources and the unused shell-foreground key; the effect is carried by the merged dictionaries, padding/min-height/border keys, `Mocassin.Transitions`, and `SystemAccentColor`. Accessibility tests now assert automation roles for the menu, tabs, project list, explorer, and console filter and a deterministic Tab order. The settings dialog gained an error/status banner with `HasErrorMessage`/`HasStatusMessage`; Save-as-new is recorded as not implemented (the console and banner report a rejected write). |
+| R2-8 | Recorded that the round-1 reviewer record was bundled into the `657bc5f` fix commit; the record was not altered and round 2 re-ran the verdict, so history was not rewritten. |
 
 Platform stabilization after the first Windows run:
 

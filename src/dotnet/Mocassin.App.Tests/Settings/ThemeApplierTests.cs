@@ -36,13 +36,9 @@ public sealed class ThemeApplierTests
                 Assert.Equal(ThemeVariant.Dark, Application.Current!.RequestedThemeVariant);
                 Assert.Equal(1.25, Assert.IsType<double>(Application.Current.Resources["Mocassin.FontScale"]));
                 Assert.Equal(17.5d, Assert.IsType<double>(Application.Current.Resources["Mocassin.BodyFontSize"]));
-                Assert.Equal("compact", Assert.IsType<string>(Application.Current.Resources["Mocassin.Density"]));
-                Assert.True(Assert.IsType<bool>(Application.Current.Resources["Mocassin.HighContrast"]));
-                Assert.True(Assert.IsType<bool>(Application.Current.Resources["Mocassin.ReduceMotion"]));
-                Assert.Equal("teal", Assert.IsType<string>(Application.Current.Resources["Mocassin.Accent"]));
-                Assert.IsType<Color>(Application.Current.Resources["SystemAccentColor"]);
                 Assert.Equal(new Thickness(4), Application.Current.Resources["Mocassin.ControlPadding"]);
-                Assert.IsType<Transitions>(Application.Current.Resources["Mocassin.Transitions"]);
+                Assert.IsType<Color>(Application.Current.Resources["SystemAccentColor"]);
+                Assert.Empty(Assert.IsType<Transitions>(Application.Current.Resources["Mocassin.Transitions"]));
                 Assert.True(
                     Application.Current.Resources.TryGetResource(
                         "SystemControlBackgroundAltHighBrush",
@@ -60,9 +56,8 @@ public sealed class ThemeApplierTests
                 applier.Apply(AppSettings.Default with { Theme = ThemeSelection.Light, Accent = null });
 
                 Assert.Equal(ThemeVariant.Light, Application.Current!.RequestedThemeVariant);
-                Assert.Equal("comfortable", Assert.IsType<string>(Application.Current.Resources["Mocassin.Density"]));
-                Assert.False(Assert.IsType<bool>(Application.Current.Resources["Mocassin.HighContrast"]));
                 Assert.False(Application.Current.Resources.ContainsKey("SystemAccentColor"));
                 Assert.Equal(new Thickness(8), Application.Current.Resources["Mocassin.ControlPadding"]);
+                Assert.NotEmpty(Assert.IsType<Transitions>(Application.Current.Resources["Mocassin.Transitions"]));
             });
 }

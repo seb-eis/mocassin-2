@@ -51,6 +51,16 @@ internal sealed partial class SettingsViewModel : ObservableObject
     private string? statusMessage;
 
     /// <summary>
+    /// Gets a value indicating whether the error banner is visible.
+    /// </summary>
+    public bool HasErrorMessage => !string.IsNullOrWhiteSpace(ErrorMessage);
+
+    /// <summary>
+    /// Gets a value indicating whether the status banner is visible.
+    /// </summary>
+    public bool HasStatusMessage => !string.IsNullOrWhiteSpace(StatusMessage);
+
+    /// <summary>
     /// Initializes a settings dialog.
     /// </summary>
     /// <param name="settings">The settings service.</param>
@@ -117,6 +127,10 @@ internal sealed partial class SettingsViewModel : ObservableObject
             : null;
         IsOpen = true;
     }
+
+    partial void OnErrorMessageChanged(string? value) => OnPropertyChanged(nameof(HasErrorMessage));
+
+    partial void OnStatusMessageChanged(string? value) => OnPropertyChanged(nameof(HasStatusMessage));
 
     /// <summary>
     /// Loads a settings value into the editable state.

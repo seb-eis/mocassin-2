@@ -33,6 +33,7 @@ public sealed class DialogOverlayTests
                 {
                     var dialogs = host.Services.GetRequiredService<IDialogService>();
                     var confirmation = dialogs.ConfirmAsync(new ConfirmDialogRequest("Delete", "Delete the item?"));
+                    HeadlessSession.Pump(window);
 
                     var confirmButton = window.GetVisualDescendants()
                         .OfType<Button>()
@@ -62,6 +63,7 @@ public sealed class DialogOverlayTests
                 {
                     var dialogs = host.Services.GetRequiredService<IDialogService>();
                     var prompt = dialogs.PromptAsync(new TextPromptRequest("Name", "Project name", "Initial"));
+                    HeadlessSession.Pump(window);
                     var textBox = window.GetVisualDescendants().OfType<TextBox>()
                         .First(control => control.Text == "Initial");
                     textBox.Text = "Typed";
@@ -74,6 +76,7 @@ public sealed class DialogOverlayTests
                             "Template",
                             "Choose",
                             [new DialogChoice("blank", "Blank", IsDefault: true), new DialogChoice("ceria", "Ceria")]));
+                    HeadlessSession.Pump(window);
                     var choiceButton = window.GetVisualDescendants().OfType<Button>().Single(button => button.IsDefault);
                     choiceButton.Command!.Execute(null);
                     Assert.Equal("blank", (await choice).ChoiceId);
@@ -102,6 +105,7 @@ public sealed class DialogOverlayTests
                             "Failure",
                             "Something failed.",
                             [new ErrorDialogDetail("TST001", "Detail")]));
+                    HeadlessSession.Pump(window);
                     var close = window.GetVisualDescendants().OfType<Button>().Single(button => button.IsDefault);
                     close.Command!.Execute(null);
                     await error;
@@ -131,9 +135,11 @@ public sealed class DialogOverlayTests
 
                     var dialogs = host.Services.GetRequiredService<IDialogService>();
                     var confirmation = dialogs.ConfirmAsync(new ConfirmDialogRequest("Focus", "Restore"));
+                    HeadlessSession.Pump(window);
                     var confirm = window.GetVisualDescendants().OfType<Button>().Single(button => button.IsDefault);
                     confirm.Command!.Execute(null);
                     await confirmation;
+                    HeadlessSession.Pump(window);
 
                     Assert.Same(focusTarget, window.FocusManager?.GetFocusedElement());
                 }

@@ -33,6 +33,7 @@ public sealed class WorkspaceRenderTests
                 using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
                 var window = host.Services.GetRequiredService<ShellWindow>();
                 window.Show();
+                HeadlessSession.Pump(window);
 
                 try
                 {
@@ -42,17 +43,14 @@ public sealed class WorkspaceRenderTests
                     Assert.NotEmpty(window.GetVisualDescendants().OfType<TabControl>());
                     Assert.NotEmpty(window.GetVisualDescendants().OfType<WelcomeDocumentView>());
                     Assert.Contains(
-                        window.GetVisualDescendants().OfType<ListBox>(),
-                        control => AutomationProperties.GetName(control) == "Open projects");
+                        window.GetVisualDescendants().OfType<ItemsControl>(),
+                        control => AutomationProperties.GetName(control) == "Recent projects");
                     Assert.Contains(
                         window.GetVisualDescendants().OfType<TreeView>(),
                         control => AutomationProperties.GetName(control) == "Project explorer");
                     Assert.Contains(
                         window.GetVisualDescendants().OfType<TextBox>(),
                         control => AutomationProperties.GetName(control) == "Application console filter");
-                    Assert.Contains(
-                        window.GetVisualDescendants().OfType<ComboBox>(),
-                        control => AutomationProperties.GetName(control) == "Theme");
 
                     var entry = await ProjectFixtures.LoadCeriaAsync();
                     shell.Workspace.Add(entry);
@@ -105,6 +103,10 @@ public sealed class WorkspaceRenderTests
 
                     window.KeyPress(Key.Tab, RawInputModifiers.None, PhysicalKey.Tab, null);
                     window.KeyPress(Key.D2, RawInputModifiers.Control, PhysicalKey.Digit2, "2");
+
+                    Assert.Equal(DocumentKinds.ProjectJson, shell.Documents.ActiveDocument!.Key.Kind);
+
+                    window.KeyPress(Key.D1, RawInputModifiers.Control, PhysicalKey.Digit1, "1");
 
                     Assert.Equal(DocumentKinds.ProjectOverview, shell.Documents.ActiveDocument!.Key.Kind);
                 }

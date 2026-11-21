@@ -34,15 +34,15 @@ and settings; `recovery/` is reserved for Step 23B.
 
 **Reset to defaults** changes the dialog state; **Save** validates, writes atomically, and applies the theme,
 accent, density, font scale, contrast, and motion resources without restarting. A failed write leaves the previous
-file intact and keeps the dialog open.
+file intact, keeps the dialog open, and shows an error banner; a successful save shows a short status banner.
 
 ## Read and write policy
 
 - Unknown properties are ignored and dropped on the next write.
 - A missing key takes its documented default.
 - A wrong type, unknown enum, or out-of-range value falls back to that field's default and records a warning.
-- A wrong `format` or a future major is rejected without overwriting the file; the shell uses defaults and reports
-  the rejection in the Application console.
+- A wrong `format` or a future major is rejected without overwriting the file; the shell uses defaults, reports
+  the rejection in the Application console, and shows the preserved-file status in the settings dialog.
 - Migrations are pure functions keyed by `schemaVersion`; version 1 is the current identity migration.
 - The document is capped at 4 MiB and the recent list at ten entries.
 - Writes use a sibling temporary file, flush to disk, and replace the target. A failed or oversized write leaves

@@ -68,6 +68,28 @@ public sealed class SettingsViewModelTests
     }
 
     [Fact]
+    public async Task TheBannerStateFollowsTheMessages()
+    {
+        var store = new InMemorySettingsStore();
+        var service = new SettingsService(store, AppSettingsLoadResult.Missing());
+        var dialog = new SettingsViewModel(service, new RecordingSettingsEnvironment())
+        {
+            IsOpen = true,
+            FontScale = 2.0,
+        };
+        Assert.False(dialog.HasErrorMessage);
+
+        await dialog.SaveCommand.ExecuteAsync(null);
+        Assert.True(dialog.HasErrorMessage);
+
+        dialog.CloseCommand.Execute(null);
+        Assert.False(dialog.HasErrorMessage);
+
+        dialog.ResetCommand.Execute(null);
+        Assert.True(dialog.HasStatusMessage);
+    }
+
+    [Fact]
     public void ResetRestoresDefaultsWithoutWriting()
     {
         var store = new InMemorySettingsStore();
