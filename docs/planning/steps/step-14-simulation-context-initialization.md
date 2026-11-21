@@ -10,11 +10,12 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
 
 ## Implementation status
 
-- **Status:** In audit — `Passed with notes` accepted by the owner 2026-11-21; merge/tag in progress
-- **Step branch:** `step/14-simulation-context-initialization`
+- **Status:** Done — merged into `main` as `dd5a811` (2026-11-21); tagged `step-14`
+- **Step branch:** `step/14-simulation-context-initialization` (merged and deleted)
 - **Step CI:** [44922414484](https://github.com/seb-eis/mocassin-2/actions/runs/44922414484) — Ubuntu closeout, green at `3fd4516` (no per-feature CI)
-- **Main merge:** —
-- **Step tag:** —
+- **Main CI:** [44924317743](https://github.com/seb-eis/mocassin-2/actions/runs/44924317743) — green at `dd5a811`
+- **Main merge:** `dd5a811` (`--no-ff`)
+- **Step tag:** `step-14` (annotated, on `dd5a811`)
 - **Audit:** `Passed with notes` — accepted by the owner 2026-11-21; F-1–F-3/N-1–N-3 deferred to `fix/step-14-structure-and-tests` ([record](../audits/step-14.md))
 - **Design review:** `Ready with notes` — accepted by the human owner 2026-11-21. Round 4 at record `620f20a`
   (freeze `a430d64`) closed F-29 and F-30–F-38; F-39–F-43 are minor/note corrections the step agent records
@@ -31,7 +32,7 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
   gate.
 - **Sizing:** Complexity class **High** — accepted by the human owner at the start gate 2026-11-21 as one
   unit; no split proposed. See §4.
-- **Last updated:** 2026-11-21 (closeout CI green at `3fd4516`; audit requested)
+- **Last updated:** 2026-11-21 (merged as `dd5a811`, main CI green, tagged `step-14`)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
@@ -399,7 +400,10 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
   recorded as non-gating). The single Ubuntu closeout run
   [44922414484](https://github.com/seb-eis/mocassin-2/actions/runs/44922414484) is green at `3fd4516`; the
   audited commit and run are recorded in `docs/planning/closeout/step-14.json`; the audit request is
-  `docs/planning/audits/step-14.md`.
+  `docs/planning/audits/step-14.md`. The audit returned `Passed with notes` (accepted 2026-11-21; F-1–F-3/N-1–N-3
+  deferred to `fix/step-14-structure-and-tests`). The step branch was merged into `main` as `dd5a811` and tagged
+  `step-14`; automatic main CI [44924317743](https://github.com/seb-eis/mocassin-2/actions/runs/44924317743) is
+  green at `dd5a811`.
 
 ## Goal
 

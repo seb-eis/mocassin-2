@@ -12,7 +12,7 @@
     "head_sha": ""
   },
   "platform_ci": "not run",
-  "tag": "",
+  "tag": "step-14",
   "notes": [
     "Closeout CI is the single Ubuntu workflow_dispatch run 44922414484 at 3fd45161d5683405955f806196ca61b295066479 (platforms=ubuntu, force_all=false). It is the only step-branch CI run; no per-feature or per-push CI was used. The .NET, Rust, Contracts/policy, and Public API jobs ran; Python is skipped by its path filter (no src/python change).",
     "The full local gate ./tools/verify.sh all --require exited 0 at 8c09a8c38dd7b1dc4a01f7fc85dc7708ff760ebe ('Closeout gate completed with required checks enabled.'): 2,007 .NET tests passed (Contracts 38, Symmetry 223, Results 91, Core 685, Compilation 99, Cli 203, Packages 536, Architecture 7, App 125), the Rust workspace tests and doctests passed (including context_fixtures 3 and allocation 1), Python 3 passed with sdist/wheel built, documentation links 196 files + Zensical strict + DocFX 0 errors + rustdoc clean, contracts/policy green, and the AOT strict smoke/positive control passed. The real Mocassin.Cli AOT publish fails with 62 IL2026/IL3050 diagnostics; it is recorded as non-gating evidence, and Step 31 owns the AOT decision. The only delta from 8c09a8c to the audited commit 3fd4516 is the benchmark-evidence sourceCommit string and docs/planning (step page, status, audit request); the code and fixtures are identical.",
@@ -25,6 +25,7 @@
     "Platform CI not run: Step 14 adds Rust library/test/benchmark code and Markdown/JSON fixtures. It adds no P/Invoke, LibraryImport, native library, RID-specific package, Windows/macOS path/case/locking behaviour, or GUI code. Ubuntu is the only affected platform; the absence of Windows/macOS runs is an accepted risk recorded for the audit.",
     "Void-member rule for Step 15: a cluster cell with a void centre or member has no canonical occupation row and contributes zero (the empty cluster). Step 15 must use the zero energy row / absent cluster_code_id instead of cluster_lookup; the non-canonical non-void code_expansions fail-closed behaviour is unchanged. Recorded in docs/reference/msl-format.md, docs/physics/energies.md, docs/development/solver-architecture.md, and docs/development/testing-and-parity.md.",
     "Feature 6 squash is 00fceabce7fa6d910cb79f701f175aa4b681bf5f; the closeout feature also includes the real-writer fixtures, the .NET rebuild tests, the context-summary snapshot, the allocation proof, the Criterion benchmark and rustContext baseline, and the implementation documentation. The audit request is docs/planning/audits/step-14.md.",
-    "The step is not merged or tagged. The human owner approves the audit verdict, the step-to-main merge, and the step-14 tag. The main merge must wait for a green automatic main CI run, and the tag points to the --no-ff merge commit."
+    "The step is not merged or tagged. The human owner approves the audit verdict, the step-to-main merge, and the step-14 tag. The main merge must wait for a green automatic main CI run, and the tag points to the --no-ff merge commit.",
+    "Merged into main as dd5a811d9b993452385807bc2cfada2249542891 (--no-ff, 2026-11-21) and tagged step-14 on that merge commit. The automatic main CI run 44924317743 is green at dd5a811 (head_sha dd5a811d9b993452385807bc2cfada2249542891); the step branch step/14-simulation-context-initialization was deleted locally and remotely. The audited commit remains 3fd4516 and the closeout evidence is unchanged except for this tag/merge record."
   ]
 }
