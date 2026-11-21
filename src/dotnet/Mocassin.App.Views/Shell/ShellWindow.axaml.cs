@@ -74,6 +74,7 @@ internal sealed partial class ShellWindow : Window
         {
             if (await shell.RequestCloseAsync())
             {
+                await shell.PendingLayoutPersist;
                 closeApproved = true;
                 Close();
             }
