@@ -15,7 +15,7 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — created from the reviewed `main` commit after the start-gate approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `a55fd61755f830dbb879984877a8bf04320aed0a` |
+| Reviewed commit | `a33711dbf9fb35bd782f5bd88eba111e461634d6` |
 | Docs branch | `docs/step-23b-design` |
 | Review date | 2026-11-21 |
 | Reviewer | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh planning auditor |
@@ -40,6 +40,16 @@ rejection, the per-session gate for close/reload, and the n-1–n-5 clarificatio
 (Evidence, Findings, Verdict, and the round-1 body) is byte-identical to `3efae49`**; only request-owned
 fields (this note, the `Reviewed commit` cell, `Record state`, the approval-summary history, and `Resolution
 status`) changed.
+
+**Refreeze note (round 4, 2026-11-21).** The owner relayed two round-3 findings on `a55fd61` and instructed a
+refreeze for round 4: **m-13** (clean-close cleanup could delete a deferred `PendingRecovery` candidate) and
+**n-10** (the §2.1 consumer table omitted the `ProjectSessionService` cleanup handler and its non-reentrant gate
+rule). The design was refrozen at `a33711d` after the step-page status pointer was aligned. Clean-close/return-
+to-clean cleanup is skipped while a deferred candidate exists, the first edit clears it, and the cleanup handler
+ignores `Saved`/`Replaced` and queues `Edited`/`Undo`/`Redo` cleanup outside the non-reentrant gate. The owner
+also recorded the class, feature-list, and §17.1 scope approvals on 2026-11-21 (see `Human approval`). **Round 1
+and round 2 reviewer text is byte-identical to `362aa75`**; only request-owned fields and the new owner decisions
+changed.
 
 **Refreeze note (round 3, 2026-11-21).** Round 2 returned `Changes required` on `022132e` for M-2 and m-11/m-12,
 with n-6–n-9. The design was refrozen at `a55fd61`. The refreeze keeps `RecoveryComparison` in the ViewModels
@@ -287,9 +297,9 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-review required — round 2 returned `Changes required` on `022132e24e38ca4b90a3df37d7f37140c4313cd1`
-for M-2, m-11/m-12, and n-6–n-9. The design was refrozen at `a55fd61755f830dbb879984877a8bf04320aed0a`; the
-resolutions are in `Resolution status` below. Round 1 and round 2 reviewer text is unchanged.
+**State:** Re-review required — the owner-relayed round-3 findings m-13/n-10 were resolved on
+`a33711dbf9fb35bd782f5bd88eba111e461634d6`, and the owner approved the class, the four features, and the §17.1
+scope decisions on 2026-11-21. Round 4 is requested. Round 1 and round 2 reviewer text is unchanged.
 
 `Re-review required` is a record state, not a verdict.
 
@@ -329,7 +339,8 @@ Round history:
 | --- | --- | --- | --- | --- |
 | 1 | 2026-11-21 | `f629dd5` | DeepSeek V4.1 Flash 1017 (fresh planning auditor) | Changes required |
 | 2 | 2026-11-21 | `022132e` | DeepSeek V4.1 Flash 1017 (fresh planning auditor) | Changes required |
-| 3 | 2026-11-21 | `a55fd61` | Pending re-review | Pending |
+| 3 | 2026-11-21 | `a55fd61` | Owner-relayed findings (no reviewer record committed) | Changes required (m-13/n-10) |
+| 4 | 2026-11-21 | `a33711d` | Pending re-review | Pending |
 
 Findings and resolutions:
 
@@ -358,8 +369,24 @@ Findings and resolutions:
 | n-7 | Note | `Validation` assigned after `Replaced` | Assign `LoadDiagnostics`/`Validation` before `ReplaceDocument` | `a55fd61` | Fixed in design |
 | n-8 | Note | `IsClosing` not cleared on `UnsavedChanges`/Cancel | Set only after the guard; clear on non-closing returns | `a55fd61` | Fixed in design |
 | n-9 | Note | No numbered owner-question list | §17.1 lists seven questions | `a55fd61` | Fixed in design |
+| m-13 | Minor | Clean-close cleanup could delete a deferred recovery candidate | Cleanup skipped while `PendingRecovery` is non-null; first edit clears it | `a33711d` | Fixed |
+| n-10 | Note | §2.1 omitted the cleanup handler/lifetime | Cleanup handler row added; ignores `Saved`/`Replaced`, no gate re-entry | `a33711d` | Fixed in design |
 
 ## Human approval
+
+**Owner decisions recorded 2026-11-21 (before the round-4 refreeze).** These are scope/class approvals; they do
+not approve a design verdict.
+
+| Decision | Status |
+| --- | --- |
+| Class **High** as one unit, no further split | **Approved** |
+| Four-feature list and order | **Approved** |
+| Two additive Core APIs (`MaxUndoDepth`, `CreateRecovered`); GUI depth 200, library default `0` | **Confirmed** |
+| App-level read-only refusal (`EditApplyOutcome.ReadOnly`, no `PROJ031`) | **Confirmed** |
+| §11 seam fills, including the console selector, autosave control, and status glyph/severity | **Confirmed** |
+| No untitled-project model; `recovery/` is the crash/fallback snapshot store | **Confirmed** |
+| Missing-file and dead-UI recovery limitations | **Accepted** |
+| Fix m-13/n-10, refreeze, and request round 4 | **Instructed** |
 
 - [ ] Accepted: Ready for implementation
 - [ ] Accepted: Ready with notes
@@ -396,6 +423,8 @@ Date:
 | **n-7** | Fixed in design | Planner | `a55fd61` | `LoadDiagnostics`/`Validation` are assigned before `ReplaceDocument` raises `Replaced`, so the validation coordinator seeds the recovered result. |
 | **n-8** | Fixed in design | Planner | `a55fd61` | `CloseAsync` sets `IsClosing` only after the `discardChanges` guard and clears it on `UnsavedChanges`/Cancel; shell Cancel leaves autosave running. |
 | **n-9** | Fixed in design | Planner | `a55fd61` | §17.1 lists the seven start-gate owner questions explicitly. |
+| **m-13** | Fixed | Planner | `a33711d` | Clean-close and return-to-clean cleanup is skipped while `PendingRecovery` is non-null; the candidate survives close and is re-offered. The first accepted edit clears `PendingRecovery`, after which cleanup removes the sidecar. A save with a pending candidate preserves it. §4/§5/§11/§13 and `05-open-decisions` are aligned; the test covers close-preserve, first-edit-clear, and later cleanup. |
+| **n-10** | Fixed in design | Planner | `a33711d` | §2.1 adds the `ProjectSessionService` cleanup consumer with session lifetime. It handles `Edited`/`Undo`/`Redo`, ignores `Saved`/`Replaced` (raised while the non-reentrant gate is held), clears `PendingRecovery` on the first edit, and queues cleanup through the gate without blocking the event thread. The test asserts no deadlock/re-entry. |
 
 ## Review rounds
 
