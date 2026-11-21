@@ -478,10 +478,10 @@ against `#000000` (about 15:1). They are tested separately.
 ## 12. Provenance and boundary
 
 - Visual Studio Code is a **visual reference only**: its workbench hierarchy of chrome, workspace, cards,
-  borders, and one accent. The owner approved the dark surface set and the VS Code-like structure on
-  2026-11-21. The light values are the Light+ equivalent defined in this page. The reference is the role
-  structure and the owner's review, not a snapshot of any particular VS Code release; a future VS Code release
-  does not change this contract.
+  borders, and one accent. The reference themes are the default **Dark+** and **Light+** role hierarchy as
+  reviewed by the owner on 2026-11-21; the dark values are the owner-approved set and the light values are the
+  Light+ equivalent defined in this page. The reference snapshot is that review, not a pinned VS Code build; a
+  future VS Code release does not change this contract.
 - No Visual Studio Code asset, icon, font, trademark, screenshot, theme file, or stylesheet content is copied
   into the repository. The implementation uses Avalonia Fluent 12.1.6 control templates and the token values
   above.
