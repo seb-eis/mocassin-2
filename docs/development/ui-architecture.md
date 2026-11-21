@@ -70,6 +70,13 @@ real document opens. The application `ViewLocator` claims only classes named `*V
 assembly and maps them to the matching view; enums, settings records, and other model objects keep their ordinary
 content rendering.
 
+## Interaction contract
+
+Panel proportions, overlay focus, and the `Enter`/`Escape` mapping are normative in
+[UI interaction contract](ui-interaction-contract.md). The shell stores panel fractions rather than pixels,
+only one overlay layer is interactive at a time, and every overlay captures and restores focus. Editors added
+in Steps 24–28 must follow that page.
+
 ## Navigation and commands
 
 `INavigationService` opens documents and navigates `ModelPath` targets through registered
