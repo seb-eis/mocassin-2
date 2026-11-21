@@ -352,7 +352,8 @@ Implementor: step agent, branch `fix/gui-shell-interactions`, based on `542d569`
 | Commit | Message |
 | --- | --- |
 | `95fee4475c6972510723560f2f9c787807bffc87` | `app: fix shell splitters, overlay focus, and enter/escape routing` |
-| the docs commit that adds this section | `docs: record GUI shell interaction fix implementation evidence [skip ci]` |
+| `a7a8a5c825bd60ed9b518e93406ccf1df8e5c576` | `docs: record GUI shell interaction fix implementation evidence [skip ci]` |
+| `17b128f706d1817815a231b9b35f8bc76e478fc9` | `docs: record passing GUI shell platform runs [skip ci]` |
 
 The code commit changes 48 files: the fraction model and migration, the shell layout and layer coordinator,
 the overlay and dialog views, the settings reader/validator, the new and extended tests, the regenerated
