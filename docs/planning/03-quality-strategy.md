@@ -644,14 +644,18 @@ Step 23A establishes the harness that 23B and Steps 24–28 extend; 23B adds the
 recovery fixtures.
 
 - **Projects.** `Mocassin.App.Tests` references the app, view models, and views. It adds the first-party
-  `Avalonia.Headless` and `Avalonia.Headless.XUnit` packages at the pinned Avalonia 12.1.6 version (test-only,
-  no product dependency, no new licence surface). No other package is added; a `ManualTimeProvider` and an
-  inline UI dispatcher are written in test support rather than adopting a fake-clock package.
+  `Avalonia.Headless` package at the pinned Avalonia 12.1.6 version and, as a test-only rendering reference,
+  `Avalonia.Skia` (test-only, no product dependency, no new licence surface beyond the 23A ANGLE exception).
+  `Avalonia.Headless.XUnit` is **not** referenced: the repository uses xunit 2 and the package requires xunit v3.
+  Tests drive `HeadlessUnitTestSession` directly through the 23A `HeadlessSession`. No other package is added; a
+  `ManualTimeProvider` and an inline UI dispatcher are written in test support rather than adopting a fake-clock
+  package.
 - **Real objects everywhere.** Tests use the real `ProjectStore` (with `ValidateOnLoad = false` and the load
   diagnostics seeded into the validation pipeline), real temporary directories, real `Project` values, the real
   validation pipeline, the real dialog overlay, and the real App-layer settings/recovery stores when the test is
-  about persistence. Fakes are limited to the true boundaries: `IDialogService` (view-model-level tests only —
-  the view-level tests drive the real overlay), `IStorageService` (the OS picker), `IUiDispatcher` (the
+  about persistence. 23B tests start from the retained `ProjectSession.Validation` and assert that opening does
+  not run a second validation. Fakes are limited to the true boundaries: `IDialogService` (view-model-level tests
+  only — the view-level tests drive the real overlay), `IStorageService` (the OS picker), `IUiDispatcher` (the
   UI-thread boundary), `TimeProvider`, and in-memory `IAppSettingsStore`/`IRecoveryStore` for non-persistence
   tests only.
 - **Architecture guards.** The App-project architecture test checks direct `.csproj` references and runs the I/O
@@ -674,8 +678,10 @@ recovery fixtures.
   permanent false failure. Screenshots stay out of the wall-clock gate and never block a PR-fast run.
 - **Accessibility.** Primary shell controls are asserted in the PR-fast set (names, roles, help text, no
   icon-only control without a name, tab order). The full visual-tree sweep is PR-medium.
-- **Timers.** No `Task.Delay` and no real sleeps in tests; autosave and recovery are driven by `ManualTimeProvider`
-  and the scheduler's injectable interval.
+- **Timers.** No `Task.Delay` and no real sleeps in tests; autosave and recovery are driven by
+  `ManualTimeProvider` and the scheduler's injectable tick. `AutosaveScheduler.RunOnceAsync(now)` is called
+  directly after advancing the clock; the host `AutosaveTimer` is a thin `TimeProvider` timer and owns no
+  scheduling policy. The validation debounce uses an injectable delay so a test never waits 300 ms.
 - **Determinism.** Headless tests run with invariant culture, a fixed render scale, and no network. A test that
   needs a time zone, case-sensitivity rule, or path separator states it explicitly instead of relying on the
   host.

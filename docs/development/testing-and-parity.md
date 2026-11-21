@@ -125,7 +125,8 @@ or SQLite. Prefer real temporary directories and real files produced by the real
   `Skipped`, diagnostics `Completed`/`Failed`).
 - Project lifecycle tests use real files and locks: create/open/save/save-as/close/reload, existing-target refusal
   for New, read-only lock handling, lock migration on Save As, external modification/deletion, recents and last
-  directories, `--project` startup, and undo→redo across a save point.
+  directories, and `--project` startup. Undo/redo and save-point coverage arrives with Step 23B; 23A has no
+  writer.
 - Settings tests cover the source-generated round-trip, defaults, unknown/missing/wrong-type/future-major,
   migration idempotence, the 4 MiB cap, atomic/failed writes, theme resources, settings-dialog validation, log
   level at startup, and recent/last-directory persistence.
@@ -146,6 +147,15 @@ or SQLite. Prefer real temporary directories and real files produced by the real
 - Appearance resources carry their effect through the merged `HighContrast.axaml`/`Density.axaml`
   dictionaries, the padding/min-height/border keys, the `Mocassin.Transitions` resource (empty when reduce
   motion is on), and `SystemAccentColor`. Redundant flag-only resources were removed rather than left dead.
+
+## Avalonia editing, diagnostics, and recovery (Step 23B, planned)
+
+Step 23B is design-frozen but not implemented. Its tests extend the 23A harness: the edit pipeline and
+save-point matrix, the retained `ProjectSession.Validation`/`Load`-stage fixtures, the Problems surface, dirty
+markers and prompts, the autosave tick, the `recovery/` crash snapshot and manifest, unclean-exit restore, and
+the 2 s crash-path budget. Tests use `ManualTimeProvider` and the scheduler's injectable tick instead of real
+sleeps, and the crash dialog's dead-UI path is asserted to write no recovery files. Screenshots and
+accessibility checks for the Problems channel, recovery prompt, and metadata form are PR-medium on Ubuntu only.
 
 ## Test tiers
 

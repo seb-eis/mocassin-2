@@ -206,6 +206,13 @@ Rules:
 - One writer per project: Step 23B's `ProjectEditCoordinator` over the Step 01 `ProjectDocument`. View models
   never mutate a `Project` or a domain object, never compute a project hash, and never build a `ProjectChange`.
   23A has no writer because nothing is editable.
+- Validation handoff: 23A performs one internal load-validation pass and retains `ProjectSession.Validation`;
+  23B consumes that result as its initial state and does not revalidate on open. Revalidation after an edit is
+  debounced, runs off-thread over an immutable snapshot, and is applied only when its document hash is current.
+- Recovery sources: 23A's New writes the project file immediately, so there is no untitled session. 23B uses the
+  Step 01 `<file>.autosave` sidecar as the primary snapshot and `<app-data>/recovery/` (manifest plus snapshot)
+  as the location-independent crash/fallback snapshot; it introduces no second project store or untitled
+  lifecycle.
 - App-scoped UI state (theme, density, layout, recent files, session) is stored in the application settings
   file; document-scoped view state (camera, visibility, per-object style) is stored in the project
   `viewSettings`. There are no ad-hoc UI state files.

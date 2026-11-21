@@ -160,7 +160,7 @@ src/dotnet/Mocassin.App/                 # composition root + app-local I/O
   Settings/        # 23A: AppSettingsStore, settings write policy (atomic + fsync + size cap)
   Files/           # 23A: ProjectFileProbe, file-stamp provider
   Startup/         # 23A: startup coordination and crash handler
-  Recovery/        # 23B: RecoveryStore, CrashRecoveryWriter, recovery scan
+  Recovery/        # 23B: RecoveryStore, recovery manifest, CrashRecoveryWriter, recovery scan
 
 src/dotnet/Mocassin.App.ViewModels/      # no Avalonia, no System.IO
   Shell/           # 23A: shell/region/status-bar view models, window state, layout persistence
@@ -170,11 +170,11 @@ src/dotnet/Mocassin.App.ViewModels/      # no Avalonia, no System.IO
   Navigation/      # 23A: navigation service/contracts, history, target provider, explorer/inspector seams
   Settings/        # 23A: settings model, validator, migrations, JSON context, store/theme contracts, state
   Editing/         # 23B: project edit coordinator, edit diagnostics, project-changed event
-  Diagnostics/     # 23B: validation coordinator, problems, diagnostic items, validation state
-  Recovery/        # 23B: recovery store contract, candidates, retention policy (pure)
+  Diagnostics/     # 23B: validation coordinator, problems, diagnostic items, validation state, help links
+  Recovery/        # 23B: recovery store contract, candidates, sources, retention policy (pure)
   Scheduling/      # 23B: autosave scheduler and debouncer
   Commands/        # command catalog, shell command, gesture descriptors, contribution seams, palette
-  Consoles/        # console channels, entries, console service
+  Consoles/        # console channels, entries, console service; 23B Problems channel
   Dialogs/         # dialog/picker/dispatcher/progress contracts and view models
 
 src/dotnet/Mocassin.App.Views/
