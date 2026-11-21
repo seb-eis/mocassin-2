@@ -285,9 +285,11 @@ contract and licence gates pass.
 - `ProjectWorkspaceEntry` wraps `ProjectSession`; the feature-2 constructor remains for standalone documents/tests.
 - The AOT gate records the CLI publish diagnostics as evidence, not a hard failure; `./tools/verify.sh all
   --require` exits 0. The auditor should inspect `artifacts/aot/mocassin-cli.log`.
-- The Ubuntu closeout run is the only CI dispatch for this step. Windows/macOS platform gates are recorded as
-  not run in the closeout evidence, with the manual acceptance rationale in the step page; this is a residual
-  risk for the auditor and owner.
+- The step closeout has three green runs at the audited commit: Ubuntu closeout 44889193801, Windows
+  44889462922, and macOS 44889646766. The closeout evidence records both platform runs. The manual real-window
+  checklist was replaced by owner-accepted automated Xvfb evidence
+  (`docs/development/platform-checklist.md`), not a human checklist; the Linux-only real-window coverage remains
+  residual risk R3-5.
 
 ## Findings
 
@@ -376,11 +378,11 @@ evidence, dispatch one replacement closeout CI run, add resolutions, and request
 
 ## Step agent re-audit status
 
-**State:** Re-audit required — round-1 and round-2 fixes are integrated and frozen at `30dcf3e`. Ubuntu
-closeout run 44889193801, Windows gate run 44889462922, and macOS gate run 44889646766 are all green at that
-commit; the values are recorded in `docs/planning/closeout/step-23a.json`. `./tools/verify.sh all --require`
-exited 0 on the frozen tree. The reviewer-authored `Record state` and the round-2 findings above remain the
-reviewer record.
+**State:** Audit complete — round 3 returned `Passed with notes`; the human owner accepted it on 2026-11-21
+and approved the merge and tag. The audited commit is `30dcf3e`; Ubuntu closeout run 44889193801, Windows gate
+run 44889462922, and macOS gate run 44889646766 are green at that commit. R3-1…R3-3 are fixed in the
+documentation-only resolution commit; R3-4 and R3-5 are accepted notes. The reviewer-authored `Record state`
+and findings remain the reviewer record.
 
 ### Step agent round-2 resolutions
 
@@ -425,12 +427,12 @@ Findings and resolutions:
 ## Human approval
 
 - [ ] Accepted: Passed
-- [ ] Accepted: Passed with notes
+- [x] Accepted: Passed with notes
 - [ ] Fixes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Human owner
+Date: 2026-11-21
 
 ## Audit rounds
 
@@ -747,3 +749,15 @@ Notes (R3-4 uncommitted Xvfb hashes, R3-5 Linux-only real-window evidence). None
 acceptance failure: the code, tests, CI, closeout evidence, and gates are sound. This record is evidence, not
 authorization; the owner still decides the merge, and a resolution/status commit may correct the three minor text
 items without changing code.
+
+## Step agent round-3 resolutions
+
+These entries are step-agent-authored; the reviewer's findings, evidence, and verdict are unchanged.
+
+| Finding | Resolution |
+| --- | --- |
+| R3-1 | Fixed — the audit request's known notes now record the three green runs (Ubuntu 44889193801, Windows 44889462922, macOS 44889646766) and the owner-accepted automated Xvfb substitution instead of "not run". |
+| R3-2 | Fixed — the parity matrix's GUI platform rows now record the green Windows/macOS gates at `30dcf3e` and the automated Xvfb capture; the stale "manual platform gate not yet run" and "manual smoke checklist" text is gone. |
+| R3-3 | Fixed — the step page's Main merge bullet now names `main` `eadfe13`, merged at `a584b20`. |
+| R3-4 | Accepted note — the Xvfb image hashes are a one-run record because `artifacts/` is not committed; the run command, structure, and invariant assertions are recorded and reproducible, but the exact hashes are not independently re-derivable. |
+| R3-5 | Accepted note — the automated real-window capture covers Linux X11; Windows/macOS have green headless platform gates but no human or captured real-window pass. This is the residual risk of the owner-accepted R2-4 substitution. |

@@ -219,7 +219,7 @@ Status legend:
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
-| Cross-platform app | Y | Partial | 23A | Windows/Linux/macOS; Ubuntu automated, Windows/macOS platform gate and manual smoke checklist |
+| Cross-platform app | Y | Partial | 23A | Windows/Linux/macOS; Ubuntu automated; Windows/macOS platform gates green at `30dcf3e`; automated Xvfb real-window capture on Linux X11 |
 | Shell/tree/tabs/console/status | Y | Implemented | 23A | Regions, document tabs, project switcher/explorer, Application console, populated status bar; Problems channel in 23B |
 | Project lifecycle | Y | Implemented | 23A | New/open/save/save-as/close/reload, recents, locks, read-only, external-change detection |
 | Undo/redo | N | Improvement | 23B | Single per-project stack over `ProjectDocument`, bounded, save-point correct |
@@ -255,7 +255,7 @@ Status legend:
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
 | .NET 11 | Y | Implemented | 00/11 | Retargeted by amendment 1 |
-| Avalonia cross-platform | Y | Partial | 23A | Ubuntu automated; Windows/macOS manual platform gate not yet run |
+| Avalonia cross-platform | Y | Partial | 23A | Ubuntu automated; Windows/macOS platform gates green at `30dcf3e`; automated Xvfb evidence on Linux X11 |
 | Rust solver | Y | Partial | 13–19 | Step 13 delivers the workspace, read-only package reader, validated runtime model/job, ChaCha12 RNG, signatures, the real populated/C-centered fixtures, and `mocassin-sim --dry-run`; engines, tracking, state, and the production CLI remain in 14–19 |
 | Windows support | Y | Planned | 31 | |
 | Linux support | Y | Planned | 31 | |

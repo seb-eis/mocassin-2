@@ -22,7 +22,7 @@ those are Step 23B.
 - **Status:** Re-audit required — round-1 and round-2 fixes frozen at `30dcf3e`; Ubuntu, Windows, and macOS gates green
 - **Step branch:** `step/23a-workspace-and-project-lifecycle`
 - **Step CI:** Ubuntu closeout [44889193801](https://github.com/seb-eis/mocassin-2/actions/runs/44889193801), Windows gate [44889462922](https://github.com/seb-eis/mocassin-2/actions/runs/44889462922), macOS gate [44889646766](https://github.com/seb-eis/mocassin-2/actions/runs/44889646766) — all green at `30dcf3e`
-- **Main merge:** — (`bbc2d08` is merged into the step branch; merge is after a passing audit)
+- **Main merge:** — (`main` `eadfe13` is merged into the step branch at `a584b20`; the step merge follows the passed audit)
 - **Step tag:** —
 - **Audit:** Re-audit required — [record](../audits/step-23a.md), [evidence](../closeout/step-23a.json)
 - **Design review:** Ready with notes — **accepted by the human owner 2026-11-20** at `b9c56fe`
