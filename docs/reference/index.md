@@ -4,7 +4,8 @@ Reference material for the CLI, file formats, diagnostics, and repository toolin
 
 ## Sections
 
-- [Repository and file layout](file-layout.md) — source trees, generated artifacts, package immutability, and the planning exclusion.
+- [Repository and file layout](file-layout.md) — source trees, generated artifacts, package immutability, the
+  application-data layout, and the normative `mocassin.settings` v1 document.
 - [Simulation package format](msl-format.md) — `.msl` v1 schema, content addressing, payloads, `package-summary-v1`, versioning, verification, and fixtures.
 - [Project format](project-format.md) — `.mocprj` envelope, IDs, units, canonicalization, migrations, atomic save,
   including the Step 06 lattice/doping and simulation sections.

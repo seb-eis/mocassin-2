@@ -1,0 +1,60 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Mocassin.App.ViewModels.Shell"
+             xmlns:projects="using:Mocassin.App.ViewModels.Projects"
+             xmlns:navigation="using:Mocassin.App.ViewModels.Navigation"
+             xmlns:automation="using:Avalonia.Automation"
+             x:Class="Mocassin.App.Views.Shell.ProjectsRegionView"
+             x:DataType="vm:ShellViewModel">
+  <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+          BorderThickness="0,0,1,0"
+          Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+    <Grid RowDefinitions="Auto,Auto,*,Auto,*">
+      <TextBlock Text="Projects" FontWeight="SemiBold" Margin="12,10,12,4" />
+      <ListBox Grid.Row="1"
+               automation:AutomationProperties.Name="Open projects"
+               ItemsSource="{Binding Workspace.ProjectsInternal}"
+               SelectedItem="{Binding Workspace.ActiveProject}"
+               MaxHeight="180"
+               Margin="4,0,4,8">
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="projects:ProjectWorkspaceEntry">
+            <StackPanel>
+              <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+              <TextBlock Text="{Binding Path}"
+                         Classes="caption"
+                         TextTrimming="CharacterEllipsis" />
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="{Binding LockStateText}" Classes="caption" />
+                <TextBlock Text="{Binding LastDocumentTitle}" Classes="caption" />
+              </StackPanel>
+            </StackPanel>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+
+      <TextBlock Grid.Row="2" Text="Explorer" FontWeight="SemiBold" Margin="12,4,12,4" />
+      <TreeView Grid.Row="3"
+                automation:AutomationProperties.Name="Project explorer"
+                x:Name="ExplorerTree"
+                ItemsSource="{Binding Explorer.Nodes}"
+                SelectedItem="{Binding Explorer.SelectedNode}"
+                Margin="4,0"
+                DoubleTapped="OnExplorerDoubleTapped"
+                KeyDown="OnExplorerKeyDown">
+        <TreeView.ItemTemplate>
+          <TreeDataTemplate x:DataType="navigation:ExplorerNode" ItemsSource="{Binding ChildNodes}">
+            <TextBlock Text="{Binding Label}" />
+          </TreeDataTemplate>
+        </TreeView.ItemTemplate>
+      </TreeView>
+
+      <Button Grid.Row="4"
+              automation:AutomationProperties.Name="Open selected project node"
+              Content="Open selected"
+              Command="{Binding Explorer.OpenSelectedCommand}"
+              HorizontalAlignment="Left"
+              Margin="12,8,12,12" />
+    </Grid>
+  </Border>
+</UserControl>

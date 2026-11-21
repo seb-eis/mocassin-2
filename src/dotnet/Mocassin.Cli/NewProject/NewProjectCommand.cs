@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
 using System.Collections.Immutable;
-using System.Globalization;
 using Mocassin.Cli.CommandLine;
 using Mocassin.Cli.CommandLine.Reports;
 using Mocassin.Cli.Diagnostics;
@@ -77,14 +76,17 @@ internal sealed class NewProjectCommand
         }
 
         var templateName = templateKind == ProjectTemplateKind.Ceria ? "ceria" : "blank";
-        if (!TryNormalizeName(request.Name, out var name, out var nameError))
+        var nameResult = ProjectPathRules.NormalizeName(request.Name);
+        if (!nameResult.IsSuccess)
         {
             return Task.FromResult(WriteUsageError(
                 request,
                 stdout,
                 stderr,
-                [CliDiagnosticFactory.Usage(nameError!)]));
+                [CliDiagnosticFactory.Usage(nameResult.Message!)]));
         }
+
+        var name = nameResult.Name;
 
         try
         {
@@ -130,8 +132,15 @@ internal sealed class NewProjectCommand
                 diagnosticsRendered: false));
         }
 
-        if (File.Exists(targetPath))
+        var targetState = File.Exists(targetPath)
+            ? ProjectTargetState.File
+            : Directory.Exists(targetPath) ? ProjectTargetState.Directory : ProjectTargetState.Absent;
+        var target = ProjectPathRules.ValidateTarget(directory, nameResult, targetState);
+        if (!target.IsSuccess)
         {
+            var diagnostic = target.Failure == ProjectPathFailure.ExistingTarget
+                ? CliDiagnosticFactory.OutputExists(target.Message!)
+                : CliDiagnosticFactory.Io(target.Message!);
             return Task.FromResult(WriteReport(
                 request,
                 stdout,
@@ -141,24 +150,7 @@ internal sealed class NewProjectCommand
                     targetPath,
                     null,
                     templateName,
-                    [CliDiagnosticFactory.OutputExists(
-                        $"The project '{targetPath}' already exists. Choose another name or directory.")]),
-                diagnosticsRendered: false));
-        }
-
-        if (Directory.Exists(targetPath))
-        {
-            return Task.FromResult(WriteReport(
-                request,
-                stdout,
-                stderr,
-                Failure(
-                    CliExitCode.Io,
-                    targetPath,
-                    null,
-                    templateName,
-                    [CliDiagnosticFactory.Io(
-                        $"The project path '{targetPath}' is an existing directory.")]),
+                    [diagnostic]),
                 diagnosticsRendered: false));
         }
 
@@ -349,51 +341,4 @@ internal sealed class NewProjectCommand
         }
     }
 
-    private static bool TryNormalizeName(string raw, out string name, out string? error)
-    {
-        ArgumentNullException.ThrowIfNull(raw);
-        name = raw.Trim();
-        if (name.EndsWith(".mocprj", StringComparison.OrdinalIgnoreCase))
-        {
-            name = name[..^".mocprj".Length].Trim();
-        }
-
-        if (name.Length == 0)
-        {
-            error = "A project name is required.";
-            return false;
-        }
-
-        if (name.Length > 128)
-        {
-            error = "The project name must not exceed 128 characters.";
-            return false;
-        }
-
-        if (name.Contains('/') || name.Contains('\\') || name.Contains("..", StringComparison.Ordinal))
-        {
-            error = "The project name must not contain path separators or '..'.";
-            return false;
-        }
-
-        if (name.Any(char.IsControl))
-        {
-            error = "The project name must not contain control characters.";
-            return false;
-        }
-
-        foreach (var invalid in ":*?\"<>|")
-        {
-            if (name.Contains(invalid, StringComparison.Ordinal))
-            {
-                error = string.Create(
-                    CultureInfo.InvariantCulture,
-                    $"The project name must not contain the character '{invalid}'.");
-                return false;
-            }
-        }
-
-        error = null;
-        return true;
-    }
 }

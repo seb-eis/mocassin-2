@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:overlay="using:Mocassin.App.ViewModels.Dialogs"
+             xmlns:dialogs="using:Mocassin.App.ViewModels.Dialogs.Requests"
+             x:Class="Mocassin.App.Views.Dialogs.ErrorDialogView"
+             x:DataType="overlay:ErrorDialogViewModel">
+  <StackPanel Spacing="12">
+    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="16" TextWrapping="Wrap" />
+    <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+    <Expander Header="Details" IsVisible="{Binding HasDetails}">
+      <ItemsControl ItemsSource="{Binding Details}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="dialogs:ErrorDialogDetail">
+            <TextBlock Text="{Binding Code, StringFormat='{}{0}: '}" />
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </Expander>
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+      <Button Content="Close" Command="{Binding DismissCommand}" IsDefault="True" IsCancel="True" />
+    </StackPanel>
+  </StackPanel>
+</UserControl>

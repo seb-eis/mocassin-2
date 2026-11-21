@@ -16,7 +16,13 @@ land.
 7. **Collect.** Read job folders and write a separate `.msr` results store.
 8. **Analyse.** Evaluate particle statistics, transport, tracking, and energy data in the GUI, CLI, or Python.
 
-## Planned sections
+## Workspace and projects
+
+- [Workspace, tabs, and commands](workspace.md)
+- [Projects and lifecycle](projects.md)
+- [Settings and appearance](settings.md)
+
+## Model sections
 
 - [Particles and particle sets](particles.md)
 - [Crystal structure](structure.md)

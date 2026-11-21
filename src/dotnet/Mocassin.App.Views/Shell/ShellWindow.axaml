@@ -1,0 +1,34 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="using:Mocassin.App.Views.Shell"
+        xmlns:dialogs="using:Mocassin.App.Views.Dialogs"
+        xmlns:notifications="using:Mocassin.App.Views.Notifications"
+        xmlns:commands="using:Mocassin.App.Views.Commands"
+        xmlns:settings="using:Mocassin.App.Views.Settings"
+        xmlns:vm="using:Mocassin.App.ViewModels.Shell"
+        x:Class="Mocassin.App.Views.Shell.ShellWindow"
+        x:DataType="vm:ShellViewModel"
+        Title="{Binding WindowTitle}"
+        Width="1200"
+        Height="800"
+        MinWidth="900"
+        MinHeight="600"
+        WindowStartupLocation="CenterScreen">
+  <Grid>
+    <shell:ShellView />
+    <Grid IsVisible="{Binding IsPaletteOpen}">
+      <commands:CommandPaletteView DataContext="{Binding Palette}" />
+    </Grid>
+    <Grid IsVisible="{Binding IsCheatSheetOpen}">
+      <commands:ShortcutCheatSheetView DataContext="{Binding Shortcuts}" />
+    </Grid>
+    <Grid IsVisible="{Binding Settings.IsOpen}">
+      <settings:SettingsDialogView DataContext="{Binding Settings}" />
+    </Grid>
+    <dialogs:DialogHost x:Name="DialogOverlay" />
+    <notifications:NotificationHostView x:Name="NotificationOverlay"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Bottom"
+                                       Margin="16" />
+  </Grid>
+</Window>

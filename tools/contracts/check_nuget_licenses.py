@@ -44,6 +44,10 @@ KNOWN_PACKAGE_LICENSES = {
 KNOWN_FILE_LICENSES = {
     ("CommandLineParser", "2.9.1"): "MIT",
     ("Microsoft.DotNet.PlatformAbstractions", "3.1.6"): "MIT",
+    # Avalonia.Desktop pulls the ANGLE native runtime on Windows. Its LICENSE file
+    # is the BSD-3-Clause ANGLE licence (Google/TransGaming/3DLabs). Pinned to the
+    # exact version so a dependency change forces a new review.
+    ("Avalonia.Angle.Windows.Natives", "2.1.27548.20260419"): "BSD-3-Clause",
 }
 
 KNOWN_LICENSE_URLS = {

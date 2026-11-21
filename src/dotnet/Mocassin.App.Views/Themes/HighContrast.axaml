@@ -1,0 +1,12 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:av="using:Avalonia">
+  <SolidColorBrush x:Key="Mocassin.ShellBackground" Color="#000000" />
+  <SolidColorBrush x:Key="Mocassin.BorderBrush" Color="#FFD700" />
+  <av:Thickness x:Key="Mocassin.BorderThickness">2</av:Thickness>
+  <SolidColorBrush x:Key="SystemControlBackgroundAltHighBrush" Color="#000000" />
+  <SolidColorBrush x:Key="SystemControlBackgroundChromeMediumLowBrush" Color="#000000" />
+  <SolidColorBrush x:Key="SystemControlForegroundBaseHighBrush" Color="#FFFFFF" />
+  <SolidColorBrush x:Key="SystemControlForegroundBaseMediumBrush" Color="#E0E0E0" />
+  <SolidColorBrush x:Key="SystemControlForegroundBaseLowBrush" Color="#FFD700" />
+</ResourceDictionary>
