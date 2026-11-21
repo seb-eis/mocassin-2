@@ -40,7 +40,7 @@ branch is `step/23b-editing-diagnostics-and-recovery`. The review record is
 | # | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Edit pipeline and undo/redo | `feature/step-23b-editing-diagnostics-and-recovery/edit-pipeline-and-undo-redo` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `bb048ad`; test fix `90d9f73` |
-| 2 | Validation surface | `feature/step-23b-editing-diagnostics-and-recovery/validation-surface` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `77c1b9c`; refresh fix `d4badd0` |
+| 2 | Validation surface | `feature/step-23b-editing-diagnostics-and-recovery/validation-surface` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `77c1b9c`; refresh fix `d4badd0`; undo/redo commands `eb50095` |
 | 3 | Dirty state, autosave, crash recovery | — | Planned | — | — | — |
 | 4 | 23B tests, documentation, and closeout | — | Planned | — | — | — |
 
@@ -89,6 +89,8 @@ seam fills in §1.
 - **Branch:** `feature/step-23b-editing-diagnostics-and-recovery/validation-surface`; deleted after the squash.
   Feature commit `dc5c909`, squash `77c1b9c`. A `fix-overview-refresh` follow-up (deleted) is squashed as
   `d4badd0`; it raises change notifications for every project-derived Overview property after an edit/reload.
+  A `fix-shell-undo-redo` follow-up (deleted) is squashed as `eb50095`; it adds the Edit-menu Undo/Redo commands
+  and extracts `ShellEditCommands`/`ShellMenuFactory` to keep the shell view model under the 800-line limit.
 - **Local gates:** `./tools/verify.sh dotnet` exit 0 (all solution tests, 0 warnings, `dotnet format` clean);
   `./tools/verify.sh structure` exit 0 (9 architecture tests); `./tools/verify.sh api` exit 0 (no baseline
   break); `./tools/verify.sh docs` exit 0 (link/math checks, DocFX, rustdoc, strict Zensical build). **No CI run**
@@ -101,7 +103,8 @@ seam fills in §1.
   severity; `DiagnosticHelpLinks` and `IShellLauncher.OpenUriAsync`; the Overview metadata form
   (name/description/author/notes) through `ProjectEditCoordinator.Apply`, name rules, inline errors, read-only
   refusal, save-point dirty text, focus requests, and the explicit statistics panel; `ProjectJsonViewModel`
-  refreshes on content changes. Tests cover the initial-result/no-open-validation contract, debounce, stale
+  refreshes on content changes; Edit-menu Undo/Redo commands follow the active project and are disabled for
+  read-only or empty stacks. Tests cover the initial-result/no-open-validation contract, debounce, stale
   discard, statistics caching, the `Load` stage fixtures, filters/sort/edit diagnostics/navigation/help, metadata
   apply/reject/read-only, one undo entry per field, save-point text, focus, and headless rendering.
 - **Metadata-form scope move:** the owner moved the Project Overview metadata form from feature 1 to feature 2;

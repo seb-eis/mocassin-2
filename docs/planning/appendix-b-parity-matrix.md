@@ -223,7 +223,7 @@ Status legend:
 | Cross-platform app | Y | Partial | 23A | Windows/Linux/macOS; Ubuntu automated; Windows/macOS platform gates green at `30dcf3e`; automated Xvfb real-window capture on Linux X11 |
 | Shell/tree/tabs/console/status | Y | Implemented | 23A | Regions, document tabs, project switcher/explorer, Application console, populated status bar; Problems channel in 23B |
 | Project lifecycle | Y | Implemented | 23A | New/open/save/save-as/close/reload, recents, locks, read-only, external-change detection |
-| Undo/redo | N | Improvement | 23B | Single per-project stack over `ProjectDocument`, bounded, save-point correct |
+| Undo/redo | N | Improvement | 23B | Single per-project stack over `ProjectDocument`, bounded, save-point correct; Edit-menu Undo/Redo commands follow the active project |
 | Model validator/problems | Y | Partial | 23B/07 | Status indicator, Problems channel (including the load/migration diagnostics on open, conditional `Load` stage), filters, help anchors, revalidate, and navigable `ModelPath` targets in 23B; domain providers and full stats panels in 24/25 |
 | Command palette and shortcut cheat sheet | N | Implemented | 23A | Searchable command catalog with platform gestures |
 | Application settings and logging | N | Implemented | 23A/23B | Versioned `mocassin.settings` v1 with migration and retention in 23A; `autosave`/`session` additive fields in 23B; structured rolling logs replace the original XML settings file |
