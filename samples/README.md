@@ -10,6 +10,7 @@ Canonical example projects used by tutorials, CLI checks, and parity tests.
 | [`transitions/`](transitions/README.md) | Ceria KMC/MMC, polaron hop, 5-site vehicle, and 5-site interstitialcy transition samples |
 | [`lattice/`](lattice/README.md) | Ceria reduction/hydration and barium-zirconate doping samples |
 | [`jobs/`](jobs/README.md) | Ceria temperature/doping sweep with a Step 10 job template |
+| [`step-11-cluster-expansion/`](step-11-cluster-expansion/README.md) | P-1 origin-shifted ceria two-member cluster for the amendment-2 expansion-map fixture |
 | [`simulations/`](simulations/README.md) | KMC/MMC samples with documented defaults and non-default configurations |
 
 Transition samples are added with Step 04. Step 05 adds energy environments, clusters, and site energies to

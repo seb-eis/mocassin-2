@@ -116,4 +116,16 @@ public sealed record PackageVerificationOptions(
     /// unreferenced (orphan) lattice row has no dimension source and uses this cap directly.
     /// </remarks>
     public long MaxLatticePayloadBytes { get; init; } = 512L * 1024 * 1024;
+
+    /// <summary>
+    /// Gets the cumulative budget on the typed cluster code-expansion arrays of one model payload,
+    /// <c>Σ(8E + 4I)</c> across every cluster table.
+    /// </summary>
+    /// <remarks>
+    /// The stored integers use MessagePack's smallest-width encoding, so the decompressed byte guard does not
+    /// bound the typed <c>u64</c>+<c>u32</c> arrays. The bound is checked by the decode pre-scan before the
+    /// arrays are allocated; it is raisable for a writer-valid package. The default is 128 MiB
+    /// (11,184,810 entries for a valid map).
+    /// </remarks>
+    public long MaxClusterExpansionBytes { get; init; } = 128L * 1024 * 1024;
 }

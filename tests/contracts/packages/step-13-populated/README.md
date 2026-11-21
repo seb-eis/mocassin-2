@@ -7,10 +7,10 @@ kinds. It is the populated/MMC acceptance fixture for the Rust reader and mappin
 
 | File | Size | Notes |
 | --- | ---: | --- |
-| `step-13-populated.msl` | 98,304 bytes | immutable SQLite package; SHA-256 `3e870f87303320c510ba6eba2d0eb70f0daa7412ae6db123a3fbbc392174ee50` |
+| `step-13-populated.msl` | 98,304 bytes | immutable SQLite package; SHA-256 `7a9cb8085733a9975c891d43da39f7b9946d3c222f13fd3f3efe2c12dde92fbf` |
 | `step-13-populated.sha256` | — | `sha256sum` line for the package |
-| `package-summary-v1.json` | 2,710 bytes | canonical inspector projection (data contracts §3.5) |
-| `payloads/model-1.bin` | 6,518 bytes | raw model MessagePack |
+| `package-summary-v1.json` | 2,710 bytes | canonical inspector projection (data contracts §3.5); unchanged by amendment 2 |
+| `payloads/model-1.bin` | 7,026 bytes | raw model MessagePack; the singleton cluster table carries `code_expansions: nil` |
 | `payloads/lattice-1.bin` | 85 bytes | raw lattice MessagePack (both jobs share it) |
 | `payloads/job-1.bin` | 446 bytes | raw KMC job MessagePack |
 | `payloads/job-2.bin` | 447 bytes | raw MMC job MessagePack |
@@ -27,6 +27,9 @@ the same difference at nodes 0 and 1.
 - **Model signature:** `abbd7062c53dd66a42009c52ffd7169e75645d78dac3c4cf7d5f94f7bddb2e79`
 - **Model identity:** `f0dd41980d90e803a00f726e588f2895852d15f9fa7f658965b5c91495b94ba0`
 - **Lattice signature:** `eee85b1aa92041b00cba7362acf930627a75becf077eb8dc9c4d90a7f3993475`
+
+The cluster table has twelve singleton orbits, so the amendment-2 writer emits `code_expansions: nil`; the
+canonical summary and both signatures are unchanged from the pre-amendment fixture.
 
 ## Provenance
 

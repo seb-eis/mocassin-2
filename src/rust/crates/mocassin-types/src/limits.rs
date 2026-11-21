@@ -83,6 +83,14 @@ pub struct ReaderLimits {
     /// Maximum number of cluster-interaction tables. Default 1,000,000. Solver allocation cap.
     pub max_cluster_tables: u32,
 
+    /// Cumulative typed-bytes budget for the cluster `code_expansions` arrays, `Σ(8E + 4I)`. Default 128 MiB.
+    ///
+    /// The stored integers use MessagePack's smallest-width encoding, so the model payload byte guard does not
+    /// bound the typed `u64`+`u32` arrays. The scan checks this budget before the arrays are allocated; a
+    /// writer-valid package above it needs a raised limit. For a valid map (`E == I = N`) the derived entry cap
+    /// is 11,184,810.
+    pub max_cluster_expansion_bytes: u64,
+
     /// Maximum total number of environment pair links. Default 16,000,000. Solver allocation cap.
     pub max_pair_links: u32,
 
@@ -120,6 +128,7 @@ impl ReaderLimits {
         max_collections: 4_096,
         max_pair_tables: 1_000_000,
         max_cluster_tables: 1_000_000,
+        max_cluster_expansion_bytes: 128 * 1024 * 1024,
         max_pair_links: 16_000_000,
         max_pair_links_per_position: 65_536,
         max_cluster_links_per_position: 4_096,
@@ -156,6 +165,7 @@ mod tests {
         assert_eq!(limits.max_collections, 4_096);
         assert_eq!(limits.max_pair_tables, 1_000_000);
         assert_eq!(limits.max_cluster_tables, 1_000_000);
+        assert_eq!(limits.max_cluster_expansion_bytes, 134_217_728);
         assert_eq!(limits.max_pair_links, 16_000_000);
         assert_eq!(limits.max_pair_links_per_position, 65_536);
         assert_eq!(limits.max_cluster_links_per_position, 4_096);

@@ -43,8 +43,12 @@ fn schema() -> SchemaInfo {
 }
 
 fn model_dto() -> ModelPayload {
+    fixture_model("msl-v1/payloads/model-1.bin")
+}
+
+fn fixture_model(relative: &str) -> ModelPayload {
     decode_model_payload(
-        &fs::read(fixture_path("msl-v1/payloads/model-1.bin")).expect("read the model payload"),
+        &fs::read(fixture_path(relative)).expect("read the model payload"),
         &limits(),
     )
     .expect("decode the model payload")
@@ -76,6 +80,7 @@ fn add_cluster_table(payload: &mut ModelPayload, codes: Vec<u64>, mapping: Vec<u
     payload.energy.cluster_tables.push(ClusterTablePayload {
         object_id: "b".repeat(64),
         occupation_codes: codes,
+        code_expansions: None,
         energies,
         particle_table_mapping: mapping,
     });
@@ -106,5 +111,6 @@ fn make_mmc(payload: &mut ModelPayload) {
     }
 }
 
+mod cluster_expansions;
 mod job;
 mod model;

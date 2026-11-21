@@ -21,6 +21,58 @@ public sealed class PackagePayloadDtoTests
     }
 
     [Fact]
+    public void ClusterTablePayloadPreservesTheFourAndFiveArgumentSurface()
+    {
+        var expansions = new CodeExpansionPayload(
+            ImmutableArray.Create(1UL, 2UL),
+            ImmutableArray.Create(0U, 1U));
+        var five = new ClusterTablePayload(
+            "cluster",
+            ImmutableArray.Create(1UL, 2UL),
+            expansions,
+            ImmutableArray.Create(0.0, 0.5),
+            ImmutableArray.Create<byte>(0, 1));
+
+        five.Deconstruct(
+            out string objectId,
+            out ImmutableArray<ulong> codes,
+            out CodeExpansionPayload? map,
+            out ImmutableArray<double> energies,
+            out ImmutableArray<byte> mapping);
+        Assert.Equal("cluster", objectId);
+        Assert.Equal(2, codes.Length);
+        Assert.Same(expansions, map);
+        Assert.Equal(2, energies.Length);
+        Assert.Equal(2, mapping.Length);
+
+        var four = new ClusterTablePayload(
+            "cluster",
+            ImmutableArray.Create(1UL, 2UL),
+            ImmutableArray.Create(0.0, 0.5),
+            ImmutableArray.Create<byte>(0, 1));
+        four.Deconstruct(
+            out string fourObjectId,
+            out ImmutableArray<ulong> fourCodes,
+            out ImmutableArray<double> fourEnergies,
+            out ImmutableArray<byte> fourMapping);
+        Assert.Equal("cluster", fourObjectId);
+        Assert.Equal(2, fourCodes.Length);
+        Assert.Equal(2, fourEnergies.Length);
+        Assert.Equal(2, fourMapping.Length);
+        Assert.Null(four.CodeExpansions);
+
+        var decoded = MessagePackSerializer.Deserialize<ClusterTablePayload>(
+            MessagePackSerializer.Serialize(five));
+        Assert.Equal(five.ObjectId, decoded.ObjectId);
+        Assert.Equal(five.OccupationCodes.ToArray(), decoded.OccupationCodes.ToArray());
+        Assert.NotNull(decoded.CodeExpansions);
+        Assert.Equal(expansions.ExpandedCodes.ToArray(), decoded.CodeExpansions.ExpandedCodes.ToArray());
+        Assert.Equal(expansions.CanonicalIndices.ToArray(), decoded.CodeExpansions.CanonicalIndices.ToArray());
+        Assert.Equal(five.Energies.ToArray(), decoded.Energies.ToArray());
+        Assert.Equal(five.ParticleTableMapping.ToArray(), decoded.ParticleTableMapping.ToArray());
+    }
+
+    [Fact]
     public void ModelPayloadExposesEveryDocumentedSection()
     {
         var pairLink = new PairLinkPayload(3, ImmutableArray.Create(-1, 0, 2), 4);

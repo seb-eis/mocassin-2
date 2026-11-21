@@ -13,6 +13,8 @@ pub(crate) struct ClusterFacts {
     pub energies: u64,
     /// The number of particle-table mapping rows.
     pub mapping: u64,
+    /// The `(expanded_codes, canonical_indices)` lengths when a map is present.
+    pub expansions: Option<(u64, u64)>,
 }
 
 /// Structural facts recorded while scanning a model payload.
@@ -30,6 +32,7 @@ pub(crate) struct ScanFacts {
     pub pair_table_energy_lengths: Vec<u64>,
     pub cluster_table_count: Option<u64>,
     pub cluster_table_lengths: Vec<ClusterFacts>,
+    pub cluster_expansion_bytes: u64,
     pub defect_background_len: Option<u64>,
     pub collection_count: Option<u64>,
     pub collection_kinds: Vec<Option<&'static str>>,

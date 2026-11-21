@@ -34,8 +34,21 @@ pub struct ClusterTablePayload {
     pub object_id: String,
     /// The canonical occupation codes, sorted ascending.
     pub occupation_codes: Vec<u64>,
+    /// The optional raw slot-tuple code resolution map.
+    #[serde(default)]
+    pub code_expansions: Option<CodeExpansionPayload>,
     /// The applied energy per occupation code.
     pub energies: Vec<f64>,
     /// One row per allowed centre particle in ascending compiled particle index.
     pub particle_table_mapping: Vec<u8>,
+}
+
+/// The raw slot-tuple code resolution map of one cluster table.
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub struct CodeExpansionPayload {
+    /// Every raw slot-tuple code the writer enumerated, strictly ascending.
+    pub expanded_codes: Vec<u64>,
+    /// The canonical occupation index for the code at the same position.
+    pub canonical_indices: Vec<u32>,
 }

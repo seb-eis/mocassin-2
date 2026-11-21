@@ -5,7 +5,9 @@
 use mocassin_types::ReaderLimits;
 
 use super::facts::{ClusterFacts, ScanFacts, validate_model};
-use super::{Cursor, check_cap, kind_name, scan_fixed_matrix, scan_map, skip_array};
+use super::{
+    Cursor, check_cap, kind_name, scan_fixed_matrix, scan_map, scan_map_optional, skip_array,
+};
 use crate::error::PackageError;
 
 const MODEL_KEYS: &[&str] = &[
@@ -58,6 +60,10 @@ const CLUSTER_TABLE_KEYS: &[&str] = &[
     "energies",
     "particle_table_mapping",
 ];
+
+const CLUSTER_TABLE_OPTIONAL_KEYS: &[&str] = &["code_expansions"];
+
+const CODE_EXPANSION_KEYS: &[&str] = &["expanded_codes", "canonical_indices"];
 
 const TRANSITION_KEYS: &[&str] = &[
     "jump_collections",
@@ -388,27 +394,40 @@ fn scan_energy(
                 length,
                 u64::from(limits.max_cluster_tables),
             )?;
-            for _ in 0..length {
+            for table_index in 0..length {
                 let mut table = ClusterFacts::default();
-                scan_map(cursor, CLUSTER_TABLE_KEYS, |cursor, key| match key {
-                    "object_id" => {
-                        let _ = cursor.read_str()?;
-                        Ok(())
-                    }
-                    "occupation_codes" => {
-                        table.codes = skip_array(cursor)?;
-                        Ok(())
-                    }
-                    "energies" => {
-                        table.energies = skip_array(cursor)?;
-                        Ok(())
-                    }
-                    "particle_table_mapping" => {
-                        table.mapping = skip_array(cursor)?;
-                        Ok(())
-                    }
-                    _ => unreachable!(),
-                })?;
+                let result = scan_map_optional(
+                    cursor,
+                    CLUSTER_TABLE_KEYS,
+                    CLUSTER_TABLE_OPTIONAL_KEYS,
+                    |cursor, key| match key {
+                        "object_id" => {
+                            let _ = cursor.read_str()?;
+                            Ok(())
+                        }
+                        "occupation_codes" => {
+                            table.codes = skip_array(cursor)?;
+                            Ok(())
+                        }
+                        "energies" => {
+                            table.energies = skip_array(cursor)?;
+                            Ok(())
+                        }
+                        "particle_table_mapping" => {
+                            table.mapping = skip_array(cursor)?;
+                            Ok(())
+                        }
+                        "code_expansions" => scan_code_expansions(
+                            cursor,
+                            table_index,
+                            &mut table,
+                            &mut facts.cluster_expansion_bytes,
+                            limits,
+                        ),
+                        _ => unreachable!(),
+                    },
+                );
+                result?;
                 facts.cluster_table_lengths.push(table);
             }
             cursor.leave();
@@ -421,6 +440,86 @@ fn scan_energy(
         }
         _ => unreachable!(),
     })
+}
+
+fn scan_code_expansions(
+    cursor: &mut Cursor<'_>,
+    table: u64,
+    cluster: &mut ClusterFacts,
+    total: &mut u64,
+    limits: &ReaderLimits,
+) -> Result<(), PackageError> {
+    if cursor.read_nil_marker()? {
+        cluster.expansions = None;
+        return Ok(());
+    }
+
+    let mut expanded_codes = None;
+    let mut canonical_indices = None;
+    let result = scan_map(cursor, CODE_EXPANSION_KEYS, |cursor, key| match key {
+        "expanded_codes" => {
+            expanded_codes = Some(skip_array(cursor)?);
+            Ok(())
+        }
+        "canonical_indices" => {
+            canonical_indices = Some(skip_array(cursor)?);
+            Ok(())
+        }
+        _ => unreachable!(),
+    });
+    result.map_err(|error| annotate_expansion_error(error, table))?;
+
+    let expanded_codes = expanded_codes.expect("scan_map requires expanded_codes");
+    let canonical_indices = canonical_indices.expect("scan_map requires canonical_indices");
+    if expanded_codes != canonical_indices {
+        return Err(expansion_field_error(
+            table,
+            format!(
+                "expanded_codes has {expanded_codes} entries but canonical_indices has {canonical_indices}"
+            ),
+        ));
+    }
+
+    let cost = expanded_codes
+        .checked_mul(8)
+        .and_then(|code_bytes| {
+            canonical_indices
+                .checked_mul(4)
+                .and_then(|index_bytes| code_bytes.checked_add(index_bytes))
+        })
+        .ok_or_else(|| {
+            expansion_field_error(table, "the typed size overflows a 64-bit value".to_owned())
+        })?;
+    *total = total.checked_add(cost).ok_or_else(|| {
+        expansion_field_error(table, "the cumulative typed size overflows".to_owned())
+    })?;
+    if *total > limits.max_cluster_expansion_bytes {
+        return Err(PackageError::PayloadTooLarge {
+            section: "model cluster expansion",
+            declared: *total,
+            limit: limits.max_cluster_expansion_bytes,
+        });
+    }
+
+    cluster.expansions = Some((expanded_codes, canonical_indices));
+    Ok(())
+}
+
+fn expansion_field_error(table: u64, detail: String) -> PackageError {
+    PackageError::Scan {
+        section: "model",
+        detail: format!("energy.cluster_tables[{table}].code_expansions: {detail}"),
+    }
+}
+
+fn annotate_expansion_error(error: PackageError, table: u64) -> PackageError {
+    match error {
+        PackageError::Scan { section, detail } => PackageError::Scan {
+            section,
+            detail: format!("energy.cluster_tables[{table}].code_expansions: {detail}"),
+        },
+        other => other,
+    }
 }
 
 fn scan_transitions(

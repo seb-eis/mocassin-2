@@ -6,12 +6,12 @@
 | --- | --- |
 | Amendment ID | `step-11-amend-2` |
 | Parent step | 11 — Simulation Package and `.msl` Writer |
-| Status | Re-review required — round 3 `Ready with notes`; owner directed A2-R3-01 + the two Notes, refreeze, and round 4 on 2026-11-21; the A2-07 process change and the `step-11.1` implementation path are approved |
-| Branch | `docs/step-11-amend-2` (design); implementation branch created after approval |
+| Status | Ready for audit — implementation branch frozen; design review round 4 `Ready for implementation` at `bf273ff`; A2-07 process change and the `step-11.1` path owner-approved 2026-11-21 |
+| Branch | `fix/step-11.1-cluster-code-expansion` (implementation); `docs/step-11-amend-2` design merged into `main` as `2f3a6fe` |
 | Design review | `docs/planning/reviews/step-11-amend-2.md` |
-| Parent audit | Step 11 audit is historical (`docs/planning/audits/step-11.md`); the post-merge amendment audit is `docs/planning/audits/step-11-amend-2.md` (to be created) |
-| Integration commit | — (planned: `--no-ff` merge into `main`) |
-| Combined audit commit | — |
+| Parent audit | Step 11 audit is historical (`docs/planning/audits/step-11.md`); the post-merge amendment audit is `docs/planning/audits/step-11-amend-2.md` |
+| Integration commit | — (pending `--no-ff` merge into `main` after audit and owner approval) |
+| Combined audit commit | — (the maintenance branch head at freeze) |
 | Tag | `step-11.1` (proposed; `step-11` is never moved) |
 | Date | 2026-11-21 |
 | Owner | Human owner |
@@ -639,46 +639,45 @@ one maintenance delivery plus its audit.
 
 ## Acceptance criteria
 
-- [ ] `EnergyPayloadMapper` emits a complete, strictly ascending `code_expansions` map for the ceria two-member
+- [x] `EnergyPayloadMapper` emits a complete, strictly ascending `code_expansions` map for the ceria two-member
       table; every enumerated raw tuple resolves; the two non-canonical codes map to their canonical indices and
       energies.
-- [ ] Singleton tables emit `nil`; the writer never emits a partial, duplicate, or non-ascending map; a
+- [x] Singleton tables emit `nil`; the writer never emits a partial, duplicate, or non-ascending map; a
       violation throws an internal invariant error.
-- [ ] The property test proves `GroupLookupCodes` **completeness** against the reduction oracle for random small
+- [x] The property test proves `GroupLookupCodes` **completeness** against the reduction oracle for random small
       clusters, accepts superset orbit codes, and includes an asymmetric-allowed-set case (A2-05).
-- [ ] The `.NET` verifier applies the structural rules and reports `PKG010` for every violation; a valid map
+- [x] The `.NET` verifier applies the structural rules and reports `PKG010` for every violation; a valid map
       verifies.
-- [ ] The .NET decode pre-scan and the Rust scan enforce the cumulative `128 MiB` expansion budget before the
+- [x] The .NET decode pre-scan and the Rust scan enforce the cumulative `128 MiB` expansion budget before the
       typed arrays are allocated, with fail-closed errors and hostile-payload tests; the limit is raisable
       (A2-01).
-- [ ] The Rust scan supports `code_expansions` as an **optional** key; a pre-map package passes the scan, and a
+- [x] The Rust scan supports `code_expansions` as an **optional** key; a pre-map package passes the scan, and a
       malformed present map is rejected with the field path (A2-02).
-- [ ] The Rust reader validates the same rules, exposes `ClusterTable::lookup` with the three-way
+- [x] The Rust reader validates the same rules, exposes `ClusterTable::lookup` with the three-way
       `ClusterCodeLookup` result, and rejects hostile maps with a field-specific `PackageError` (A2-R2-02).
-- [ ] The `.NET` four-argument `ClusterTablePayload` constructor and `Deconstruct` are preserved alongside the
+- [x] The `.NET` four-argument `ClusterTablePayload` constructor and `Deconstruct` are preserved alongside the
       five-argument forms; ApiCompat/`PublicAPI.Unshipped.txt` are clean (A2-03).
-- [ ] The new fixture is deterministic, carries the documented expectation, and its `package-summary-v1` and
+- [x] The new fixture is deterministic, carries the documented expectation, and its `package-summary-v1` and
       signatures are the logical values from before the change.
-- [ ] The regenerated `step-13-populated` fixture's summary is unchanged and its README size/SHA table is
+- [x] The regenerated `step-13-populated` fixture's summary is unchanged and its README size/SHA table is
       refreshed; the no-cluster fixtures' extracted payloads/summaries are unchanged (package bytes are a
       same-host observation) (A2-12/A2-15).
-- [ ] A byte-fixed **non-singleton pre-map** package built by the parent writer loads, resolves its six
+- [x] A byte-fixed **non-singleton pre-map** package built by the parent writer loads, resolves its six
       canonical codes, and returns the recompile-required result for the two non-canonical codes (A2-06).
-- [ ] The pre-amendment reader reads the new fixture in the one-time forward check (recorded as evidence, not a
+- [x] The pre-amendment reader reads the new fixture in the one-time forward check (recorded as evidence, not a
       PR tier) (A2-13).
-- [ ] `signatures.model`, `signatures.parameterization`, `signatures.lattice`, `signature-vectors.json`,
+- [x] `signatures.model`, `signatures.parameterization`, `signatures.lattice`, `signature-vectors.json`,
       `tests/contracts/projections/**`, and `contracts/**` are unchanged; `verify.sh contracts` is green.
-- [ ] `.NET` and Rust public API additions are recorded (`PublicAPI.Unshipped.txt`, ApiCompat, §5/§6.1 of this
+- [x] `.NET` and Rust public API additions are recorded (`PublicAPI.Unshipped.txt`, ApiCompat, §5/§6.1 of this
       page); the old `ClusterTablePayload` constructor and `Deconstruct` still exist (A2-09).
-- [ ] The audit/closeout pages and template define the post-merge amendment evidence rule; no page claims a
+- [x] The audit/closeout pages and template define the post-merge amendment evidence rule; no page claims a
       `step-11.1` JSON evidence file (A2-07).
-- [ ] `samples/README.md` and `samples/step-11-cluster-expansion/README.md` are added (A2-10).
+- [x] `samples/README.md` and `samples/step-11-cluster-expansion/README.md` are added (A2-10).
 - [ ] `./tools/verify.sh all --require` is green at the audit commit; the single closeout CI run is green; the
       main CI run is green before `step-11.1` is tagged.
-- [ ] Documentation is updated (§8) and `./tools/verify.sh docs --require` passes.
-- [ ] The Step 14 pointer names `87be9de`/`1ea8090` and records F-29's formal closure as a Step 14 gate; the
+- [x] Documentation is updated (§8) and `./tools/verify.sh docs --require` passes.
+- [x] The Step 14 pointer names `87be9de`/`1ea8090` and records F-29's formal closure as a Step 14 gate; the
       parity row's evidence is updated after implementation (A2-08).
-
 ## Tests
 
 The full matrix is in §9.3. The gate rows are: writer coverage/duplicate, `GroupLookupCodes` property,
@@ -687,17 +686,17 @@ one-time forward read.
 
 ## Documentation
 
-- [ ] `02-data-contracts.md` §3.3/§3.4 updated with the field, superset coverage, absence, signature, and budget rules.
-- [ ] `01-target-architecture.md` §3.1/§7.6 updated.
-- [ ] ADR 0013 addendum records additive-within-a-major payload fields and **fail-closed** absence.
-- [ ] `05-open-decisions.md` resolved/gated rows and the post-merge evidence item updated.
-- [ ] Step 11 page, amendment index, `status.md`, and Step 14 cross-step note updated (commits `87be9de`/`1ea8090`, closure gate).
-- [ ] `msl-format.md` updated.
-- [ ] Fixture READMEs, `tests/contracts/README.md`, and the `step-13-populated` size/SHA table updated.
-- [ ] `samples/README.md` and `samples/step-11-cluster-expansion/README.md` added.
-- [ ] `audits/README.md` §3.1, `closeout/README.md`, and `step-audit-template.md` define the post-merge evidence rule.
-- [ ] `PKG010` help wording noted for a later diagnostics pass.
-- [ ] Parity matrix evidence updated after implementation.
+- [x] `02-data-contracts.md` §3.3/§3.4 updated with the field, superset coverage, absence, signature, and budget rules.
+- [x] `01-target-architecture.md` §3.1/§7.6 updated.
+- [x] ADR 0013 addendum records additive-within-a-major payload fields and **fail-closed** absence.
+- [x] `05-open-decisions.md` resolved/gated rows and the post-merge evidence item updated.
+- [x] Step 11 page, amendment index, `status.md`, and Step 14 cross-step note updated (commits `87be9de`/`1ea8090`, closure gate).
+- [x] `msl-format.md` updated.
+- [x] Fixture READMEs, `tests/contracts/README.md`, and the `step-13-populated` size/SHA table updated.
+- [x] `samples/README.md` and `samples/step-11-cluster-expansion/README.md` added.
+- [x] `audits/README.md` §3.1, `closeout/README.md`, and `step-audit-template.md` define the post-merge evidence rule.
+- [x] `PKG010` help wording noted for a later diagnostics pass.
+- [x] Parity matrix evidence updated after implementation.
 
 ## Risks and mitigations
 
@@ -726,6 +725,43 @@ one-time forward read.
   not a completed acceptance criterion (A2-08).
 - No released `.msl` (pre-release condition, §7).
 - `contracts/manifest.json` is unchanged; `verify.sh contracts` must show no diff.
+
+## Implementation
+
+- **Branch:** `fix/step-11.1-cluster-code-expansion`, from `main` at the design merge `2f3a6fe`.
+- **`.NET`:** `CodeExpansionPayload` and the five-argument `ClusterTablePayload` (the four-argument
+  constructor and `Deconstruct` stay); `EnergyPayloadMapper.MapCodeExpansions` flattens
+  `CompiledClusterOccupation.Expansions` with a global sort, same-code/different-orbit rejection, a
+  canonical self-entry assertion, and `nil` iff every orbit is a singleton; the cluster-stage byte estimate
+  adds `12 × Σ|Expansions|`; `PackageVerificationOptions.MaxClusterExpansionBytes` (128 MiB) and the
+  non-allocating `ClusterExpansionScan` run before `MessagePackSerializer.Deserialize<ModelPayload>`;
+  `PackageVerificationChecks.ValidateModel` applies the structural rules under `PKG010`.
+- **Rust:** `ClusterTablePayload.code_expansions` with `#[serde(default)]`; `ClusterExpansions` and the
+  `#[doc(hidden)] pub` runtime field; `ClusterTable::lookup` and `ClusterCodeLookup`; `scan_map_optional` so
+  `code_expansions` is optional but participates in the duplicate mask; the cumulative `Σ(8E + 4I)` budget
+  (`ReaderLimits::max_cluster_expansion_bytes`, 128 MiB) and the `E != I`/duplicate checks reject before the
+  typed arrays allocate; `map/model.rs` re-checks lengths, ascending order, indices, slots, particles, the
+  canonical self-entry, and the cumulative budget.
+- **Fixtures:** `tests/contracts/packages/step-11-amend-2/` (real writer; 8 raw → 6 canonical, `8386 → 12418`
+  and `8387 → 12419`); `tests/contracts/packages/amend-2-pre-map/` (byte-fixed, non-singleton, no map);
+  regenerated `step-13-populated` (singleton table → `code_expansions: nil`, summary and signatures unchanged,
+  README size/SHA refreshed); `msl-v1`, `step-13-centered`, `amend-1-net10`, and the codec goldens are
+  untouched. The new sample is `samples/step-11-cluster-expansion/`.
+- **Sample deviation:** the fixture uses a **P-1 (space group 2) origin-shifted** form of the ceria primary
+  cluster, with the centre at the inversion origin. The P-1 inversion fixes the centre and swaps the two member
+  slots, so the eight raw tuples still reduce to the six canonical codes in the design table. The full
+  space-group-225 cell generates multiple symmetry-equivalent KMC paths from one start and trips `CMP004`
+  ambiguity; the translated P-1 representation keeps the cluster geometry, identities, offsets, and codes
+  while making the KMC path unambiguous and the fixture compact. It is recorded in the sample and fixture
+  READMEs.
+- **Forward read (one-time evidence):** the pre-amendment `.NET` verifier and Rust reader at `bbc2d08`:
+  `dotnet run --project src/dotnet/Mocassin.Cli -c Release --no-build -- verify <new fixture>` → all ten checks
+  pass, exit 0; `cargo run -p mocassin-cli -- --db <new fixture> --job 1 --dry-run` → `validation: ok`. Both
+  ignore the unknown `code_expansions` key.
+- **Gates:** `./tools/verify.sh all --require` exit 0 (1,991 .NET tests including the reduction-oracle property
+  test, format/ApiCompat/contracts/docs/AOT), Rust `fmt`/`clippy`/`test` plus release build, Python, and the
+  single Ubuntu closeout CI [`44896189617`](https://github.com/seb-eis/mocassin-2/actions/runs/44896189617)
+  green at `ef568beca62f6f51559460d01ba5627219e90345`.
 
 ## Integration
 
