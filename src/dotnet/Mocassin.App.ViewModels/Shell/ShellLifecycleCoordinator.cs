@@ -5,6 +5,7 @@ using Mocassin.App.ViewModels.Dialogs;
 using Mocassin.App.ViewModels.Dialogs.Requests;
 using Mocassin.App.ViewModels.Projects;
 using Mocassin.App.ViewModels.Settings;
+using Mocassin.App.ViewModels.Settings.Blocks;
 
 namespace Mocassin.App.ViewModels.Shell;
 
@@ -69,33 +70,49 @@ internal sealed class ShellLifecycleCoordinator
         CancellationToken cancellationToken = default)
     {
         await startupProjectTask.ConfigureAwait(true);
+
+        // Phase 1: collect every decision before touching a session. A Cancel in any later prompt must leave
+        // every earlier project open, dirty, and with its sidecars intact.
+        var decisions = new List<(ProjectSession Session, ShellUnsavedDecision? Decision)>();
         foreach (var session in sessions.Sessions.ToArray())
         {
-            var discard = false;
+            ShellUnsavedDecision? decision = null;
             if (session.IsDirty && !session.IsReadOnly)
             {
-                var decision = await PromptUnsavedChangesAsync(session, cancellationToken).ConfigureAwait(true);
+                decision = await PromptUnsavedChangesAsync(session, cancellationToken).ConfigureAwait(true);
                 if (decision == ShellUnsavedDecision.Cancel)
                 {
                     return false;
                 }
-
-                if (decision == ShellUnsavedDecision.Save)
-                {
-                    var saved = await sessions.SaveAsync(session, cancellationToken).ConfigureAwait(true);
-                    if (!saved.IsSuccess)
-                    {
-                        ReportFailure(saved);
-                        return false;
-                    }
-                }
-                else
-                {
-                    discard = true;
-                }
             }
 
-            var closed = await sessions.CloseAsync(session, discard, cancellationToken).ConfigureAwait(true);
+            decisions.Add((session, decision));
+        }
+
+        // Phase 2: apply the saves only after every prompt has passed.
+        foreach (var (session, decision) in decisions)
+        {
+            if (decision != ShellUnsavedDecision.Save)
+            {
+                continue;
+            }
+
+            var saved = await sessions.SaveAsync(session, cancellationToken).ConfigureAwait(true);
+            if (!saved.IsSuccess)
+            {
+                ReportFailure(saved);
+                return false;
+            }
+        }
+
+        // Phase 3: close the sessions. No prompt can cancel from here on.
+        foreach (var (session, decision) in decisions)
+        {
+            var closed = await sessions.CloseAsync(
+                    session,
+                    decision == ShellUnsavedDecision.Discard,
+                    cancellationToken)
+                .ConfigureAwait(true);
             if (!closed.IsSuccess && closed.Outcome != ProjectSessionOutcome.Closed)
             {
                 ReportFailure(closed);
@@ -111,15 +128,21 @@ internal sealed class ShellLifecycleCoordinator
     /// Offers the unclean-exit restore after the window is shown.
     /// </summary>
     /// <param name="startupProjectTask">The startup project-open task.</param>
+    /// <param name="frozenSession">
+    /// The session block captured before the startup project open, or <see langword="null"/> to read the current
+    /// settings. A <c>--project</c> open records its own session state, so the restore offer must use the state
+    /// that existed before that open or it would falsely report an unclean exit and lose the prior list.
+    /// </param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that completes after the restore offer.</returns>
     public async Task RestoreSessionAsync(
         Task startupProjectTask,
+        SessionSettings? frozenSession = null,
         CancellationToken cancellationToken = default)
     {
         await startupProjectTask.ConfigureAwait(true);
         await sessions.SweepRecoveryAsync(cancellationToken).ConfigureAwait(true);
-        var state = settings.Current.Session;
+        var state = frozenSession ?? settings.Current.Session;
         if (state.CleanExit || state.OpenProjects.IsDefaultOrEmpty)
         {
             return;

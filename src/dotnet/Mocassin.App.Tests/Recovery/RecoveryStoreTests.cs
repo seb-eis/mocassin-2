@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 
+using Microsoft.Extensions.Logging;
 using Mocassin.App.Composition;
 using Mocassin.App.Recovery;
 using Mocassin.App.Tests.TestSupport;
@@ -96,6 +97,10 @@ public sealed class RecoveryStoreTests
         Assert.True(File.Exists(malformed));
         Assert.True(File.Exists(oversized));
         Assert.True(File.Exists(manifestWithoutSnapshot));
+        Assert.Contains(
+            context.LoggerProvider.Entries,
+            entry => entry.Level == LogLevel.Warning
+                     && entry.Message.Contains("recovery manifest", StringComparison.Ordinal));
     }
 
     private static async Task<RecoveryCandidate> WriteOne(RecoveryContext context)
@@ -119,7 +124,14 @@ public sealed class RecoveryStoreTests
             Directory.CreateDirectory(Paths.RecoveryDirectory);
             Time = new ManualTimeProvider();
             ProjectStore = new ProjectStore(Time, new ProjectStoreOptions { ValidateOnLoad = false });
-            Store = new RecoveryStore(Paths, ProjectStore, Time);
+            LoggerProvider = new RecordingLoggerProvider();
+            LoggerFactory = Microsoft.Extensions.Logging.LoggerFactory.Create(
+                builder => builder.AddProvider(LoggerProvider));
+            Store = new RecoveryStore(
+                Paths,
+                ProjectStore,
+                Time,
+                LoggerFactory.CreateLogger<RecoveryStore>());
         }
 
         public AppPaths Paths { get; }
@@ -128,8 +140,16 @@ public sealed class RecoveryStoreTests
 
         public ProjectStore ProjectStore { get; }
 
+        public RecordingLoggerProvider LoggerProvider { get; }
+
+        public ILoggerFactory LoggerFactory { get; }
+
         public RecoveryStore Store { get; }
 
-        public void Dispose() => workspace.Dispose();
+        public void Dispose()
+        {
+            LoggerFactory.Dispose();
+            workspace.Dispose();
+        }
     }
 }

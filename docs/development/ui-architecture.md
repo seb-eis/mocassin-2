@@ -128,23 +128,34 @@ not been confirmed; `IsClosing` is cleared on cancel, `UnsavedChanges`, and fail
 
 `AutosaveScheduler` is tick-driven through `TimeProvider`; `AutosaveTimer` in `Mocassin.App` owns the timer and
 the UI dispatch. A due writable dirty session writes the `<file>.autosave` sidecar; a failed sidecar write falls
-back to `IRecoveryStore` in `recovery/`. Autosave never clears dirty state or moves the save point. A
+back to `IRecoveryStore` in `recovery/`, and both the failure and the fallback are logged. The scheduler returns
+to the UI context after each asynchronous write and marshals the status item and `MarkAutosaved` through
+`IUiDispatcher`, so no view-bound state or document mutation runs on a thread-pool continuation. Autosave never
+clears dirty state or moves the save point. A
 content change that returns to the save point, a clean close, and an explicit discard remove the sidecar and
 recovery snapshot; a deferred `PendingRecovery` candidate is preserved across a clean close until Recover or
 Discard. A successful save removes the snapshots only when no candidate is pending. The first accepted content
-edit clears a deferred candidate; a no-op same-hash edit does not.
+edit clears a deferred candidate; a no-op same-hash edit does not. Snapshot cleanup is triggered on the UI
+thread and keeps its state checks on that thread; the file deletion itself stays asynchronous.
 
 `IRecoveryStore`/`RecoveryStore` own the `recovery/` snapshots and `mocassin.recovery` manifests. Recovery
 candidates are compared with the saved file using `ProjectDocument.IsDirty` after normalizing `modifiedUtc`
 (no ViewModels hashing), so a timestamp-only snapshot is not offered. The newest content-different sidecar or
-manifest candidate wins. The seven-day retention sweep applies only to `recovery/`; a `.autosave` sidecar next to
-a user project is never swept (m-14 accepts that a deferred `recovery/` candidate can expire).
+manifest candidate wins. A timestamp tie is deterministic: the adjacent `.autosave` sidecar is preferred over a
+`recovery/` manifest, then the ordinal snapshot path breaks any remaining tie. The seven-day retention sweep
+applies only to `recovery/`; a `.autosave` sidecar next to a user project is never swept (m-14 accepts that a
+deferred `recovery/` candidate can expire).
 
 `ShellLifecycleCoordinator` owns the Save/Discard/Cancel decisions, clean-exit session state, and the unclean-exit
-restore offer. `ShellProjectOperations` owns open/close/reload result handling, recovery prompts, and navigation.
-A clean window close closes sessions, writes the `session` settings block, and sets `cleanExit = true`; a cancel
-leaves it false. The crash path captures dirty sessions on the UI thread and `CrashRecoveryWriter` writes them
-asynchronously with a 2 s budget; the dead-UI path writes no recovery files.
+restore offer. A window close is two-phase: it first collects a decision for every dirty project and aborts
+before saving or closing anything if any prompt returns Cancel; only then does it apply saves and close the
+sessions. Cancel therefore closes no project and deletes no sidecar. `ShellProjectOperations` owns
+open/close/reload result handling, recovery prompts, and navigation. A clean window close closes sessions,
+writes the `session` settings block, and sets `cleanExit = true`; a cancel leaves it false. The restore offer
+reads the session block captured before a `--project` startup open, so that open cannot manufacture an
+"unexpected exit" prompt or replace the list being offered. The crash path captures dirty sessions on the UI
+thread and `CrashRecoveryWriter` writes them asynchronously with a 2 s budget; the dead-UI path writes no
+recovery files.
 
 ## Settings and logging
 

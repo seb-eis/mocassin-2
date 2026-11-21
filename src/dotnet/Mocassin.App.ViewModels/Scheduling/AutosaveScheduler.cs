@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.Extensions.Logging;
 using Mocassin.App.ViewModels.Projects;
 using Mocassin.App.ViewModels.Recovery;
 using Mocassin.App.ViewModels.Settings;
@@ -18,6 +19,8 @@ internal sealed partial class AutosaveScheduler : ObservableObject
     private readonly ISettingsService settings;
     private readonly ProjectStore store;
     private readonly IRecoveryStore recovery;
+    private readonly IUiDispatcher dispatcher;
+    private readonly ILogger<AutosaveScheduler> logger;
 
     [ObservableProperty]
     private string statusText = "Autosave idle";
@@ -36,17 +39,23 @@ internal sealed partial class AutosaveScheduler : ObservableObject
     /// <param name="store">The project store used for sidecar writes.</param>
     /// <param name="recovery">The recovery store used for failed-sidecar fallback.</param>
     /// <param name="timeProvider">The clock.</param>
+    /// <param name="dispatcher">The UI dispatcher that owns the status item and the document timestamps.</param>
+    /// <param name="logger">The logger for autosave and fallback failures.</param>
     public AutosaveScheduler(
         IProjectSessionService sessions,
         ISettingsService settings,
         ProjectStore store,
         IRecoveryStore recovery,
-        TimeProvider timeProvider)
+        TimeProvider timeProvider,
+        IUiDispatcher dispatcher,
+        ILogger<AutosaveScheduler> logger)
     {
         this.sessions = sessions ?? throw new ArgumentNullException(nameof(sessions));
         this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
         this.store = store ?? throw new ArgumentNullException(nameof(store));
         this.recovery = recovery ?? throw new ArgumentNullException(nameof(recovery));
+        this.dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
+        this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         ArgumentNullException.ThrowIfNull(timeProvider);
     }
 
@@ -100,37 +109,65 @@ internal sealed partial class AutosaveScheduler : ObservableObject
                     continue;
                 }
 
-                StatusText = "Auto-saving…";
-                StatusGlyph = "…";
-                Severity = StatusBarSeverity.Information;
+                await UpdateUiAsync(
+                        () =>
+                        {
+                            StatusText = "Auto-saving…";
+                            StatusGlyph = "…";
+                            Severity = StatusBarSeverity.Information;
+                        },
+                        cancellationToken)
+                    .ConfigureAwait(true);
                 WriteAttempts++;
                 var snapshot = session.Project;
                 var result = await store.WriteAutosaveAsync(snapshot, session.Path, cancellationToken)
-                    .ConfigureAwait(false);
+                    .ConfigureAwait(true);
                 if (!result.IsSuccess)
                 {
+                    LogAutosaveFailure(
+                        logger,
+                        session.Path,
+                        string.Join("; ", result.Diagnostics.Select(diagnostic => diagnostic.Message)));
                     var fallback = await recovery.WriteAsync(
                             snapshot,
                             session.Path,
                             RecoverySource.AutosaveFallback,
                             cancellationToken)
-                        .ConfigureAwait(false);
+                        .ConfigureAwait(true);
                     if (!fallback.IsSuccess)
                     {
-                        StatusText = "Autosave failed";
-                        StatusGlyph = "⚠";
-                        Severity = StatusBarSeverity.Warning;
+                        LogFallbackFailure(
+                            logger,
+                            session.Path,
+                            string.Join("; ", fallback.Diagnostics.Select(diagnostic => diagnostic.Message)));
+                        await UpdateUiAsync(
+                                () =>
+                                {
+                                    StatusText = "Autosave failed";
+                                    StatusGlyph = "⚠";
+                                    Severity = StatusBarSeverity.Warning;
+                                },
+                                cancellationToken)
+                            .ConfigureAwait(true);
                         continue;
                     }
+
+                    LogFallbackWritten(logger, session.Path);
                 }
 
-                session.Document.MarkAutosaved(now);
-                SuccessfulWrites++;
-                StatusText = string.Create(
-                    System.Globalization.CultureInfo.InvariantCulture,
-                    $"Auto-saved {now.ToLocalTime():HH:mm}");
-                StatusGlyph = "✔";
-                Severity = StatusBarSeverity.Success;
+                await UpdateUiAsync(
+                        () =>
+                        {
+                            session.Document.MarkAutosaved(now);
+                            SuccessfulWrites++;
+                            StatusText = string.Create(
+                                System.Globalization.CultureInfo.InvariantCulture,
+                                $"Auto-saved {now.ToLocalTime():HH:mm}");
+                            StatusGlyph = "✔";
+                            Severity = StatusBarSeverity.Success;
+                        },
+                        cancellationToken)
+                    .ConfigureAwait(true);
             }
             finally
             {
@@ -138,4 +175,22 @@ internal sealed partial class AutosaveScheduler : ObservableObject
             }
         }
     }
+
+    private Task UpdateUiAsync(Action action, CancellationToken cancellationToken) =>
+        dispatcher.InvokeAsync(action, cancellationToken);
+
+    [LoggerMessage(
+        Level = LogLevel.Warning,
+        Message = "Autosave for '{ProjectPath}' failed: {Message}")]
+    private static partial void LogAutosaveFailure(ILogger logger, string projectPath, string message);
+
+    [LoggerMessage(
+        Level = LogLevel.Warning,
+        Message = "The recovery fallback for '{ProjectPath}' failed: {Message}")]
+    private static partial void LogFallbackFailure(ILogger logger, string projectPath, string message);
+
+    [LoggerMessage(
+        Level = LogLevel.Information,
+        Message = "The autosave for '{ProjectPath}' failed; wrote a recovery/ fallback snapshot instead.")]
+    private static partial void LogFallbackWritten(ILogger logger, string projectPath);
 }

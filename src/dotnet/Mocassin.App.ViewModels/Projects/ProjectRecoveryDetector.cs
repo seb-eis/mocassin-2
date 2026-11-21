@@ -93,6 +93,19 @@ internal sealed class ProjectRecoveryDetector
             candidates.Add(sidecar);
         }
 
-        return candidates.OrderByDescending(candidate => candidate.SavedUtc).FirstOrDefault();
+        return SelectNewest(candidates);
     }
+
+    /// <summary>
+    /// Selects the newest valid candidate with a deterministic tie-break: the adjacent sidecar wins over a
+    /// manifest at the same timestamp, and the snapshot path breaks any remaining tie.
+    /// </summary>
+    /// <param name="candidates">The valid candidates.</param>
+    /// <returns>The preferred candidate, or <see langword="null"/>.</returns>
+    internal static RecoveryCandidate? SelectNewest(IEnumerable<RecoveryCandidate> candidates) =>
+        candidates
+            .OrderByDescending(candidate => candidate.SavedUtc)
+            .ThenByDescending(candidate => candidate.Source == RecoverySource.Sidecar)
+            .ThenBy(candidate => candidate.SnapshotPath, StringComparer.Ordinal)
+            .FirstOrDefault();
 }

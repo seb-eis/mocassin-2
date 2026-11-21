@@ -62,7 +62,9 @@ removed by a successful save, a return to the save point, a clean close, or an e
 swept by the recovery retention policy. A `recovery/` entry is a `<projectId>.mocprj.autosave` snapshot plus a
 `<projectId>.json` manifest (`format: "mocassin.recovery"`, `version: 1`, project id/path, `savedUtc`, source).
 Recovery files older than seven days are swept at startup; sidecars are exempt. The accepted limitation is that a
-deferred `recovery/` candidate can expire (m-14).
+deferred `recovery/` candidate can expire (m-14). When candidates have the same timestamp, the adjacent
+`.autosave` sidecar is offered before a `recovery/` manifest, and the ordinal snapshot path breaks any remaining
+tie.
 
 The settings document is application-local. It is **not** part of `contracts/manifest.json`, has no
 cross-language fixtures, and has no compatibility guarantee with any project/package/results format. Unknown

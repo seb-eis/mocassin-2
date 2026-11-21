@@ -74,6 +74,99 @@ public sealed class ShellLifecycleTests
     }
 
     [Fact]
+    public async Task CloseCancelWithTwoDirtySessionsClosesNothing()
+    {
+        using var host = new ShellTestHost();
+        var first = await CreateProjectAsync(host, "First");
+        var second = await CreateProjectAsync(host, "Second");
+        Rename(first);
+        Rename(second);
+        var firstSidecar = ProjectStore.GetAutosavePath(first.Path);
+        var secondSidecar = ProjectStore.GetAutosavePath(second.Path);
+        var firstAutosave = await host.ProjectStore.WriteAutosaveAsync(first.Project, first.Path);
+        var secondAutosave = await host.ProjectStore.WriteAutosaveAsync(second.Project, second.Path);
+        Assert.True(firstAutosave.IsSuccess && secondAutosave.IsSuccess);
+        var prompts = 0;
+        host.Dialogs.ChoiceHandler = _ => new DialogResult(
+            DialogResultKind.ChoiceSelected,
+            ChoiceId: ++prompts == 1 ? "save" : "cancel");
+
+        var closed = await host.Shell.RequestCloseAsync();
+
+        Assert.False(closed);
+        Assert.Equal(2, prompts);
+        Assert.Equal(2, host.Sessions.Sessions.Count);
+        Assert.False(first.IsClosing);
+        Assert.False(second.IsClosing);
+        Assert.True(File.Exists(firstSidecar));
+        Assert.True(File.Exists(secondSidecar));
+        var firstOnDisk = await host.ProjectStore.LoadAsync(first.Path);
+        Assert.Equal("First", firstOnDisk.Project!.Metadata.Name);
+        Assert.False(host.Settings.Current.Session.CleanExit);
+
+        host.Dialogs.ChoiceHandler = _ => new DialogResult(
+            DialogResultKind.ChoiceSelected,
+            ChoiceId: "discard");
+        Assert.True(await host.Shell.RequestCloseAsync());
+        Assert.Empty(host.Sessions.Sessions);
+    }
+
+    [Fact]
+    public async Task StartupProjectDoesNotOverwriteTheSessionBeforeRestore()
+    {
+        using var projects = new TempWorkspace();
+        var time = new ManualTimeProvider();
+        var store = new ProjectStore(time, new ProjectStoreOptions { ValidateOnLoad = false });
+        var priorPath = projects.Combine("Prior.mocprj");
+        var startupPath = projects.Combine("Startup.mocprj");
+        var prior = await store.SaveAsync(
+            ProjectTemplateFactory.CreateProject(ProjectTemplateKind.Blank, "Prior", time.GetUtcNow()),
+            priorPath);
+        var startup = await store.SaveAsync(
+            ProjectTemplateFactory.CreateProject(ProjectTemplateKind.Blank, "Startup", time.GetUtcNow()),
+            startupPath);
+        Assert.True(prior.IsSuccess && startup.IsSuccess);
+
+        // A clean exit plus --project must not produce an "unexpected exit" prompt: the open records its own
+        // unclean session block before the restore offer reads the state.
+        using (var cleanHost = new ShellTestHost(startupProjectPath: startupPath))
+        {
+            await cleanHost.Shell.StartupProjectTask;
+            cleanHost.Shell.BeginStartupRestore();
+            await cleanHost.Shell.StartupRestoreTask;
+
+            Assert.Empty(cleanHost.Dialogs.ChoiceRequests);
+            Assert.Equal("Startup", Assert.Single(cleanHost.Sessions.Sessions).Name);
+            Assert.True(await cleanHost.Shell.RequestCloseAsync());
+        }
+
+        // An actually unclean prior session must still be offered and its prior project list restored alongside
+        // the --project startup open.
+        var settings = new AppSettings
+        {
+            Session = new SessionSettings
+            {
+                OpenProjects = [priorPath],
+                ActiveProject = priorPath,
+                CleanExit = false,
+                SavedUtc = time.GetUtcNow(),
+            },
+        };
+        using (var uncleanHost = new ShellTestHost(settings, startupProjectPath: startupPath))
+        {
+            await uncleanHost.Shell.StartupProjectTask;
+            uncleanHost.Shell.BeginStartupRestore();
+            await uncleanHost.Shell.StartupRestoreTask;
+
+            Assert.Single(uncleanHost.Dialogs.ChoiceRequests);
+            var names = uncleanHost.Sessions.Sessions.Select(session => Path.GetFileName(session.Path)).ToArray();
+            Assert.Contains("Startup.mocprj", names);
+            Assert.Contains("Prior.mocprj", names);
+            Assert.True(await uncleanHost.Shell.RequestCloseAsync());
+        }
+    }
+
+    [Fact]
     public async Task CloseSaveWritesTheProjectAndClearsTheSidecar()
     {
         using var host = new ShellTestHost();

@@ -3,6 +3,8 @@
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Mocassin.App.Composition;
 using Mocassin.App.ViewModels.Recovery;
 using Mocassin.Core.Diagnostics;
@@ -15,7 +17,7 @@ namespace Mocassin.App.Recovery;
 /// <summary>
 /// Application-local recovery snapshots and manifests in the app-data <c>recovery/</c> directory.
 /// </summary>
-internal sealed class RecoveryStore : IRecoveryStore
+internal sealed partial class RecoveryStore : IRecoveryStore
 {
     private const string format = "mocassin.recovery";
     private const int version = 1;
@@ -25,6 +27,7 @@ internal sealed class RecoveryStore : IRecoveryStore
     private readonly AppPaths paths;
     private readonly ProjectStore store;
     private readonly TimeProvider timeProvider;
+    private readonly ILogger<RecoveryStore> logger;
 
     /// <summary>
     /// Initializes the recovery store.
@@ -32,11 +35,17 @@ internal sealed class RecoveryStore : IRecoveryStore
     /// <param name="paths">The application-data paths.</param>
     /// <param name="store">The project store used for the atomic snapshot write.</param>
     /// <param name="timeProvider">The clock used for the manifest timestamp.</param>
-    public RecoveryStore(AppPaths paths, ProjectStore store, TimeProvider timeProvider)
+    /// <param name="logger">The optional logger for ignored or unreadable recovery files.</param>
+    public RecoveryStore(
+        AppPaths paths,
+        ProjectStore store,
+        TimeProvider timeProvider,
+        ILogger<RecoveryStore>? logger = null)
     {
         this.paths = paths;
         this.store = store;
         this.timeProvider = timeProvider;
+        this.logger = logger ?? NullLogger<RecoveryStore>.Instance;
     }
 
     /// <inheritdoc />
@@ -53,6 +62,7 @@ internal sealed class RecoveryStore : IRecoveryStore
                 var info = new FileInfo(manifestPath);
                 if (info.Length is <= 0 or > maxManifestBytes)
                 {
+                    LogIgnoredManifest(logger, manifestPath, "its size is outside the accepted range");
                     continue;
                 }
 
@@ -65,12 +75,14 @@ internal sealed class RecoveryStore : IRecoveryStore
                     || string.IsNullOrWhiteSpace(manifest.ProjectPath)
                     || !Enum.TryParse<RecoverySource>(manifest.Source, ignoreCase: true, out var source))
                 {
+                    LogIgnoredManifest(logger, manifestPath, "its manifest fields are invalid");
                     continue;
                 }
 
                 var snapshotPath = GetSnapshotPath(manifest.ProjectId);
                 if (!File.Exists(snapshotPath))
                 {
+                    LogIgnoredManifest(logger, manifestPath, "its snapshot is missing");
                     continue;
                 }
 
@@ -81,17 +93,20 @@ internal sealed class RecoveryStore : IRecoveryStore
                     manifest.SavedUtc.ToUniversalTime(),
                     source));
             }
-            catch (IOException)
+            catch (IOException exception)
             {
-                // A malformed or locked manifest is ignored; the sweep leaves it alone.
+                // A locked manifest is ignored; the sweep leaves it alone.
+                LogUnreadableManifest(logger, manifestPath, exception);
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException exception)
             {
                 // Leave files the process cannot read.
+                LogUnreadableManifest(logger, manifestPath, exception);
             }
-            catch (JsonException)
+            catch (JsonException exception)
             {
                 // A malformed manifest is ignored.
+                LogUnreadableManifest(logger, manifestPath, exception);
             }
         }
 
@@ -155,6 +170,7 @@ internal sealed class RecoveryStore : IRecoveryStore
         {
             DeleteQuietly(temporary);
             DeleteQuietly(snapshotPath);
+            LogWriteFailure(logger, projectPath, exception);
             return new RecoveryWriteResult(
                 false,
                 null,
@@ -219,7 +235,7 @@ internal sealed class RecoveryStore : IRecoveryStore
         return fullPath.StartsWith(root, StringComparison.OrdinalIgnoreCase);
     }
 
-    private static bool DeleteQuietly(string path)
+    private bool DeleteQuietly(string path)
     {
         try
         {
@@ -231,13 +247,35 @@ internal sealed class RecoveryStore : IRecoveryStore
             File.Delete(path);
             return true;
         }
-        catch (IOException)
+        catch (IOException exception)
         {
+            LogDeleteFailure(logger, path, exception);
             return false;
         }
-        catch (UnauthorizedAccessException)
+        catch (UnauthorizedAccessException exception)
         {
+            LogDeleteFailure(logger, path, exception);
             return false;
         }
     }
+
+    [LoggerMessage(
+        Level = LogLevel.Warning,
+        Message = "Skipping recovery manifest '{ManifestPath}': {Reason}.")]
+    private static partial void LogIgnoredManifest(ILogger logger, string manifestPath, string reason);
+
+    [LoggerMessage(
+        Level = LogLevel.Warning,
+        Message = "Could not read recovery manifest '{ManifestPath}'.")]
+    private static partial void LogUnreadableManifest(ILogger logger, string manifestPath, Exception exception);
+
+    [LoggerMessage(
+        Level = LogLevel.Warning,
+        Message = "Could not write the recovery snapshot for '{ProjectPath}'.")]
+    private static partial void LogWriteFailure(ILogger logger, string projectPath, Exception exception);
+
+    [LoggerMessage(
+        Level = LogLevel.Warning,
+        Message = "Could not delete the recovery files at '{SnapshotPath}'.")]
+    private static partial void LogDeleteFailure(ILogger logger, string snapshotPath, Exception exception);
 }

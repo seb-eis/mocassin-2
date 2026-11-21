@@ -190,7 +190,7 @@ auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Fixes required
+**State:** Re-audit required
 
 ## Reviewer independence
 
@@ -213,7 +213,13 @@ after a new squash, current `main` merge, local gate, and replacement closeout C
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| F1 | Fixed — pending re-audit | Step agent | Audit-round-1 squash (see step page) |
+| F2 | Fixed — pending re-audit | Step agent | Audit-round-1 squash (see step page) |
+| F3 | Fixed — pending re-audit | Step agent | Audit-round-1 squash (see step page) |
+| F4 | Fixed — pending re-audit | Step agent | Audit-round-1 squash (see step page) |
+| F5 | Fixed — pending re-audit | Step agent | Audit-round-1 squash (see step page) |
+| F6 | Fixed — pending re-audit | Step agent | Audit-round-1 squash (see step page) |
+| F7 | Fixed — pending re-audit | Step agent | Audit-round-1 squash (see step page) |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.

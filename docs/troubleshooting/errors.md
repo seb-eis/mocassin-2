@@ -29,7 +29,7 @@ invent codes or reword messages. The read-only edit refusal is an app-level mess
 | Recovery prompt on startup | The previous session ended uncleanly (`cleanExit = false`) | Restore the remembered projects, or choose **Not now**; missing paths are reported and skipped. |
 | The project file is missing but a recovery snapshot exists | The main file was moved/deleted | The restore/Problems flow reports the missing path; a `.autosave` sidecar is preserved, while a `recovery/` entry remains subject to retention. |
 | Crash dialog shows recovery results | The crash action ran with its 2 s budget | Saved sessions are under `<app-data>/recovery/`; timed-out sessions were not claimed saved. If the UI thread is dead, no recovery files are written. |
-| Closing the window does not close | A dirty-project Save/Discard/Cancel prompt was cancelled | Choose Save or Discard; Cancel keeps the window and sessions open and autosave running. |
+| Closing the window does not close | A dirty-project Save/Discard/Cancel prompt was cancelled | Choose Save or Discard; Cancel keeps every session open with its sidecar and autosave running. |
 
 Recovery files are untrusted input: manifests are size/count bounded (64 KiB/100 entries), snapshots go through
 the normal project load path (64 MiB), and the seven-day sweep deletes only known recovery snapshot/manifest

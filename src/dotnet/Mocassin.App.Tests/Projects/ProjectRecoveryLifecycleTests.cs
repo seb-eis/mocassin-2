@@ -90,6 +90,7 @@ public sealed class ProjectRecoveryLifecycleTests
         var write = await context.Recovery.WriteAsync(session.Project, session.Path, RecoverySource.Crash);
         Assert.True(write.IsSuccess);
         var candidate = Assert.Single(await context.Recovery.ListAsync());
+        var snapshotLoad = await context.ProjectStore.LoadAsync(candidate.SnapshotPath);
         session.PendingRecovery = candidate;
         session.AvailableRecovery = candidate;
 
@@ -103,6 +104,7 @@ public sealed class ProjectRecoveryLifecycleTests
         Assert.Null(session.AvailableRecovery);
         Assert.NotNull(session.Validation);
         Assert.Same(session.Validation, session.ValidationCoordinator.Result);
+        Assert.Equal(snapshotLoad.Diagnostics, session.LoadDiagnostics);
         Assert.Empty(session.Document.UndoStack);
 
         var saved = await context.Service.SaveAsync(session);
@@ -128,6 +130,85 @@ public sealed class ProjectRecoveryLifecycleTests
         Assert.Equal(ProjectSessionOutcome.Discarded, discarded.Outcome);
         Assert.Null(session.PendingRecovery);
         Assert.Empty(await context.Recovery.ListAsync());
+    }
+
+    [Fact]
+    public async Task SaveAsWithADeferredSidecarThenDiscardDeletesTheCandidateSnapshot()
+    {
+        using var context = new LifecycleContext();
+        var session = await context.CreateAsync("DeferredSaveAs");
+        Rename(session);
+        await context.WriteSidecarAsync(session);
+        var sidecar = ProjectStore.GetAutosavePath(session.Path);
+        var candidate = new RecoveryCandidate(
+            session.Id,
+            session.Path,
+            sidecar,
+            context.Time.GetUtcNow(),
+            RecoverySource.Sidecar);
+        session.PendingRecovery = candidate;
+        session.AvailableRecovery = candidate;
+        var movedPath = context.Workspace.Combine("DeferredSaveAs-moved.mocprj");
+
+        var savedAs = await context.Service.SaveAsAsync(session, movedPath);
+
+        Assert.Equal(ProjectSessionOutcome.Saved, savedAs.Outcome);
+        Assert.Equal(movedPath, session.Path);
+        Assert.True(File.Exists(sidecar));
+
+        var discarded = await context.Service.DiscardRecoveryAsync(session, candidate);
+
+        Assert.Equal(ProjectSessionOutcome.Discarded, discarded.Outcome);
+        Assert.False(File.Exists(sidecar));
+        Assert.False(File.Exists(ProjectStore.GetAutosavePath(session.Path)));
+    }
+
+    [Fact]
+    public async Task DiscardingAForeignCandidateIsRejectedAndDeletesNothing()
+    {
+        using var context = new LifecycleContext();
+        var session = await context.CreateAsync("Foreign");
+        Rename(session);
+        await context.WriteSidecarAsync(session);
+        var sidecar = ProjectStore.GetAutosavePath(session.Path);
+        var foreign = new RecoveryCandidate(
+            Guid.NewGuid(),
+            session.Path,
+            sidecar,
+            context.Time.GetUtcNow(),
+            RecoverySource.Sidecar);
+
+        var discarded = await context.Service.DiscardRecoveryAsync(session, foreign);
+
+        Assert.Equal(ProjectSessionOutcome.InvalidContent, discarded.Outcome);
+        Assert.True(File.Exists(sidecar));
+    }
+
+    [Fact]
+    public void NewestCandidateTiePrefersTheAdjacentSidecarAndThenTheSnapshotPath()
+    {
+        var saved = DateTimeOffset.UnixEpoch;
+        var projectId = Guid.NewGuid();
+        var manifest = new RecoveryCandidate(
+            projectId,
+            "project.mocprj",
+            "/recovery/b.mocprj.autosave",
+            saved,
+            RecoverySource.Crash);
+        var sidecar = new RecoveryCandidate(
+            projectId,
+            "project.mocprj",
+            "/projects/project.mocprj.autosave",
+            saved,
+            RecoverySource.Sidecar);
+
+        Assert.Same(sidecar, ProjectRecoveryDetector.SelectNewest([manifest, sidecar]));
+
+        var firstPath = manifest with { SnapshotPath = "/recovery/a.mocprj.autosave" };
+        var secondPath = manifest with { SnapshotPath = "/recovery/b.mocprj.autosave" };
+        Assert.Equal(
+            "/recovery/a.mocprj.autosave",
+            ProjectRecoveryDetector.SelectNewest([secondPath, firstPath])!.SnapshotPath);
     }
 
     [Fact]

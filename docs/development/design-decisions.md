@@ -167,6 +167,15 @@ format change, while older readers still round-trip it unchanged. Nested style v
   candidate can expire (accepted m-14 limitation).
 - The crash dialog captures dirty sessions on the UI thread and writes them asynchronously through
   `CrashRecoveryWriter` with a 2 s budget. The dead-UI path writes no recovery files.
+- A window close is two-phase: every dirty project is prompted first, and no save, close, or sidecar deletion
+  happens until every prompt has passed. Cancel in any prompt therefore closes nothing.
+- The restore offer uses the `session` block captured before the `--project` startup open; the startup open's own
+  unclean record cannot manufacture a false restore prompt or hide the prior list.
+- `AutosaveScheduler` returns to the UI context after each write and marshals its status item and
+  `MarkAutosaved` through `IUiDispatcher`; autosave/fallback failures are logged. Recovery-manifest read
+  failures are logged by `RecoveryStore`.
+- `DiscardRecoveryAsync` deletes the candidate's exact `SnapshotPath` (the old sidecar after Save As) and rejects
+  a candidate with a different `ProjectId`. Candidate ties are broken by source (sidecar first) and then path.
 - `autosave`/`session` are additive v1 settings blocks with no schema bump and no contract-manifest entry.
 
 ## Synchronous, pure compiler (Step 08)

@@ -34,7 +34,8 @@ unreadable, or invalid file produces a typed outcome (`NotFound`, `TooLarge`, `I
 diagnostic; the shell does not crash.
 
 `--project <path>` opens a project at startup. A missing or invalid startup path is reported in the Application
-console and the shell continues with the welcome flow.
+console and the shell continues with the welcome flow. The unclean-exit restore offer still uses the session
+state from before this open, so a clean exit stays silent and a genuine prior session remains restorable.
 
 ## Save and save-as
 
@@ -94,7 +95,8 @@ dirty project prompts Save / Discard / Cancel:
 - **Discard** closes it and deletes its sidecar/recovery snapshot;
 - **Cancel** aborts the close and leaves autosave running.
 
-The prompt is per project. Closing the window uses the same per-project decisions; Cancel keeps the window open.
+The prompt is per project. Closing the window uses the same per-project decisions, but collects all of them
+before it saves or closes anything: **Cancel** in any prompt keeps every project open and its sidecar intact.
 A clean window close writes `cleanExit = true`; a cancel or failed shutdown leaves it `false`.
 
 ## Autosave and recovery

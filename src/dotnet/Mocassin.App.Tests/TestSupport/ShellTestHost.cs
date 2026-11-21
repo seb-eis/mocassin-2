@@ -18,7 +18,7 @@ internal sealed class ShellTestHost : IDisposable
     private readonly TempWorkspace workspace = new();
     private readonly ServiceProvider provider;
 
-    public ShellTestHost(AppSettings? initialSettings = null)
+    public ShellTestHost(AppSettings? initialSettings = null, string? startupProjectPath = null)
     {
         Time = new ManualTimeProvider();
         SettingsStore = new InMemorySettingsStore();
@@ -27,11 +27,16 @@ internal sealed class ShellTestHost : IDisposable
             : new AppSettingsLoadResult(initialSettings, [], IsFatal: false, LoadedFromFile: true, FatalMessage: null);
         Settings = new SettingsService(SettingsStore, load);
         Dialogs = new RecordingDialogService();
-        var options = new AppStartupOptions { DataDirectory = workspace.Path };
+        var options = new AppStartupOptions
+        {
+            DataDirectory = workspace.Path,
+            ProjectPath = startupProjectPath,
+        };
         var paths = new AppPaths(workspace.Path);
         paths.EnsureDirectories();
 
         var services = new ServiceCollection();
+        services.AddLogging();
         services.AddSingleton(options);
         services.AddSingleton(paths);
         services.AddSingleton<TimeProvider>(Time);

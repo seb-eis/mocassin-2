@@ -200,23 +200,29 @@ validation result, or fake project store. `ShellTestHost` composes the productio
   `Load`-stage fixtures, Problems filters/sort/edit diagnostics/navigation/help/`Related`, and the status item.
 - **Dirty, autosave, and the gate.** Dirty-only sidecar writes, interval/due gating, save cleanup, read-only/
   closing/busy skipping, return-to-clean and clean-close cleanup, and saved `IsClosing` cancellation. The
-  scheduler is called directly after advancing `ManualTimeProvider`; no real sleep is used.
+  scheduler is called directly after advancing `ManualTimeProvider`; no real sleep is used. The dispatcher and
+  `MarkAutosaved` path is covered from a thread-pool start, and a failing sidecar is failure-injected to prove
+  the `recovery/` fallback and its warning log.
 - **Recovery.** Sidecar and manifest detection, content-different comparison (timestamp-only snapshots are not
-  offered), newest candidate composition, Recover/Discard/later, validation and `LoadDiagnostics` set before
-  `Replaced`, deferred `PendingRecovery` preservation and first-edit clear, no-op preservation, sidecar/manifest
-  deletion, missing-project reporting, clean-exit restore, and the seven-day sweep. Sidecars are never swept.
+  offered), newest candidate composition and its timestamp tie-break, Recover/Discard/later, validation and
+  `LoadDiagnostics` set before `Replaced`, deferred `PendingRecovery` preservation and first-edit clear, no-op
+  preservation, sidecar/manifest deletion, Save As with a deferred sidecar then Discard, foreign-project
+  candidate rejection, missing-project reporting, clean-exit restore, and the seven-day sweep. Sidecars are
+  never swept. Malformed recovery manifests are logged and ignored.
 - **Crash path.** Capture of dirty sessions, real recovery writes, the 2 s budget timeout, per-session dialog
   status, and the disabled Exit action while writing. The dead-UI path writes no recovery files (document
   snapshots are UI-thread-confined).
+- **Window lifecycle and startup.** A two-session close where the second prompt is cancelled proves that no
+  earlier project was closed, saved, or stripped of its sidecar; `--project` combined with a clean and an
+  unclean prior session proves the startup open neither invents a restore prompt nor loses the prior list.
 - **Settings.** `autosave`/`session` round-trip, defaults for a 23A document, interval clamping, open-project
   cap/dedupe/normalisation, and the settings-dialog autosave control.
 - **UI.** Headless dirty markers on the tab/project switcher, Problems rendering, the Overview metadata form,
   and the settings autosave controls are PR-fast; screenshot/a11y checks for the new views are PR-medium on
   Ubuntu only. Windows/macOS recovery, autosave, and crash prompts remain a manual platform gate.
 
-Known test limitations: the autosave failure-to-`recovery/` fallback is implemented but not failure-injected in
-a PR-fast test; the dead-UI path is documented rather than automated; and Windows/macOS recovery prompts are
-manual.
+Known test limitations: the dead-UI path is documented rather than automated; and Windows/macOS recovery,
+autosave, crash, and close prompts are covered by the manual platform gate.
 
 ## Test tiers
 

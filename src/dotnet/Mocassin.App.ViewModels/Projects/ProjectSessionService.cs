@@ -491,12 +491,19 @@ internal sealed class ProjectSessionService : IProjectSessionService
     {
         ArgumentNullException.ThrowIfNull(session);
         ArgumentNullException.ThrowIfNull(candidate);
+        if (candidate.ProjectId != session.Id)
+        {
+            return Failure(ProjectSessionOutcome.InvalidContent, "The recovery snapshot belongs to a different project.");
+        }
+
         await session.Gate.WaitAsync(cancellationToken);
         try
         {
             if (candidate.Source == RecoverySource.Sidecar)
             {
-                ProjectStore.DeleteAutosave(session.Path);
+                // A Save As with a deferred candidate leaves the sidecar at the candidate's old snapshot path,
+                // so delete exactly that file rather than deriving one from the new session path.
+                ProjectStore.DeleteAutosaveFile(candidate.SnapshotPath);
             }
             else
             {
@@ -561,7 +568,9 @@ internal sealed class ProjectSessionService : IProjectSessionService
             return;
         }
 
-        await session.Gate.WaitAsync().ConfigureAwait(false);
+        // The trigger runs on the UI thread. Keep the continuation there so the workspace/document reads in
+        // this method stay UI-thread-confined; the snapshot deletes below are asynchronous file I/O.
+        await session.Gate.WaitAsync().ConfigureAwait(true);
         try
         {
             if (!session.Document.IsDirty

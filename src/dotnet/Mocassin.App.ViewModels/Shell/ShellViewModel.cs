@@ -13,6 +13,7 @@ using Mocassin.App.ViewModels.Navigation;
 using Mocassin.App.ViewModels.Projects;
 using Mocassin.Packages.Projects.Templates;
 using Mocassin.App.ViewModels.Settings;
+using Mocassin.App.ViewModels.Settings.Blocks;
 using Mocassin.App.ViewModels.Settings.Dialog;
 
 namespace Mocassin.App.ViewModels.Shell;
@@ -24,6 +25,7 @@ internal sealed partial class ShellViewModel : ObservableObject
 {
     private readonly IShellLifetime lifetime;
     private readonly ISettingsService settings;
+    private readonly SessionSettings startupSessionSnapshot;
     private readonly IConsoleService consoleService;
     private ProjectEditCoordinator? subscribedEditor;
     private bool startupRestoreStarted;
@@ -119,6 +121,7 @@ internal sealed partial class ShellViewModel : ObservableObject
         Commands = commands;
         Platform = platform;
         this.settings = settings;
+        startupSessionSnapshot = settings.Current.Session;
         this.consoleService = consoleService;
         this.sessions = sessions;
         this.storage = storage;
@@ -292,7 +295,7 @@ internal sealed partial class ShellViewModel : ObservableObject
         }
 
         startupRestoreStarted = true;
-        StartupRestoreTask = lifecycle.RestoreSessionAsync(StartupProjectTask);
+        StartupRestoreTask = lifecycle.RestoreSessionAsync(StartupProjectTask, startupSessionSnapshot);
     }
 
     /// <summary>

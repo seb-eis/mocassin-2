@@ -5,9 +5,10 @@
 Not dependent on Steps 08–11 or 13–22.
 **Delivers:** The single-project edit pipeline with undo/redo, the validation and Problems surface, dirty state
 and save-point handling, autosave, crash recovery, and unclean-exit session restore — on top of the 23A shell.
-**Status:** **In progress.** The design was accepted by the human owner on 2026-11-21 as `Ready with notes`
-(round-4 freeze `a33711d`, record `c4ded0e`), class High and the four features were approved, and the step
-branch is `step/23b-editing-diagnostics-and-recovery`. The review record is
+**Status:** **In audit — re-audit required.** The design was accepted by the human owner on 2026-11-21 as
+`Ready with notes` (round-4 freeze `a33711d`, record `c4ded0e`), class High and the four features were approved,
+and the step branch is `step/23b-editing-diagnostics-and-recovery`. Audit round 1 returned `Fixes required`
+(F1–F7); the fixes and their tests are recorded in the feature log and the audit record. The review record is
 [`reviews/step-23b.md`](../reviews/step-23b.md).
 
 > **Split note.** Step 23 was split into **23A** and **23B** by the owner on 2026-11-20 (complexity class High,
@@ -18,12 +19,12 @@ branch is `step/23b-editing-diagnostics-and-recovery`. The review record is
 
 ## Implementation status
 
-- **Status:** **In audit** — all four features squashed; closeout CI and Windows/macOS gates green at `eb120e1`; audit request `Ready for audit`
+- **Status:** **In audit** — audit round 1 returned `Fixes required` (F1–F7); fixes applied on the audit-round-1 feature branch; replacement closeout and re-audit pending
 - **Step branch:** `step/23b-editing-diagnostics-and-recovery`
 - **Step CI:** Ubuntu closeout [44929014836](https://github.com/seb-eis/mocassin-2/actions/runs/44929014836); Windows [44929276522](https://github.com/seb-eis/mocassin-2/actions/runs/44929276522); macOS [44929582584](https://github.com/seb-eis/mocassin-2/actions/runs/44929582584) green at `eb120e1`
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Ready for audit — [`audits/step-23b.md`](../audits/step-23b.md); closeout evidence [`closeout/step-23b.json`](../closeout/step-23b.json)
+- **Audit:** Re-audit required — [`audits/step-23b.md`](../audits/step-23b.md) records the round-1 findings; resolutions are recorded there and in the feature log below; closeout evidence [`closeout/step-23b.json`](../closeout/step-23b.json) is rebound at the replacement audited commit
 - **Design review:** **Accepted `Ready with notes` by the human owner 2026-11-21** at the round-4 freeze
   `a33711d` (record `c4ded0e`, round-4 verdict `Ready with notes`) — see
   [`reviews/step-23b.md`](../reviews/step-23b.md).
@@ -159,7 +160,7 @@ seam fills in §1.
     reports per-session results and disables Exit while writing.
   - Recovery detection loads manifest snapshots to enforce the m-5 content comparison; this is bounded and only
     runs on open.
-  - The autosave failure-to-`recovery/` fallback is implemented but not failure-injected in a PR-fast test.
+  - The autosave failure-to-`recovery/` fallback is failure-injected in a PR-fast test (autosave failure, recovery write, and warning log).
   - `autosave`/`session` live in `Settings/Blocks/` and remain application-local with no schema bump.
 - **Known limitations:** the platform recovery/autosave prompt is a manual Windows/macOS gate; the documentation
   column, parity/status closeout, fixtures, and audit request are feature 4.
@@ -195,6 +196,33 @@ seam fills in §1.
   `recovery/` candidate may expire under the accepted m-14 seven-day sweep.
 - **Evidence:** [`closeout/step-23b.json`](../closeout/step-23b.json); audit request
   [`audits/step-23b.md`](../audits/step-23b.md) (`Ready for audit`).
+
+#### Audit round 1 fixes (F1–F7)
+
+- **Branch:** `feature/step-23b-editing-diagnostics-and-recovery/fix-audit-round-1`, from the step branch at the
+  audit record commit `39c450d` (folded unchanged from the auditor).
+- **F1 (Major):** the shell captures the `session` settings block before a `--project` startup open and passes
+  that frozen state to `RestoreSessionAsync`, so the startup open cannot manufacture a false unclean-exit prompt
+  or replace the prior list. Covered by the clean and unclean `--project` + restore test.
+- **F2 (Major):** `ShellLifecycleCoordinator.RequestCloseAsync` is two-phase: it collects every dirty-project
+  decision before saving or closing anything, then applies the saves and closes only after no prompt cancelled.
+  The two-session cancel test proves no session closes, no save is applied, and both sidecars survive.
+- **F3 (Major):** `AutosaveScheduler` returns to the UI context after its asynchronous writes and marshals the
+  status item and `MarkAutosaved` through `IUiDispatcher`; file writes stay asynchronous. A thread-pool-start
+  test asserts the dispatcher path and the updated timestamp.
+- **F4 (Minor):** `DiscardRecoveryAsync` rejects a candidate whose `ProjectId` differs and deletes the
+  candidate's exact `SnapshotPath`. The Save As + deferred sidecar + Discard test proves the old sidecar is
+  removed and the new path is untouched; the foreign-candidate test proves nothing is deleted.
+- **F5 (Minor):** autosave failure, recovery fallback success/failure, and recovery-manifest read/size/delete
+  failures are logged. The failure-injected sidecar test asserts the fallback and warning log; the malformed
+  recovery-manifest test asserts the warning.
+- **F6 (Note):** `CleanupAsync` keeps its continuation on the captured UI context; the file deletions remain
+  asynchronous. The trigger is the UI-thread `ProjectChanged` handler.
+- **F7 (Note):** added the `--project` + restore, two-session cancel, `LoadDiagnostics` recovery assertion, and
+  timestamp-tie tests; the tie-break is sidecar first, then ordinal snapshot path.
+- **Gates:** `./tools/verify.sh all --require`, the focused App/Recovery/Scheduling tests, and the docs checks
+  run on the integrated tree; the replacement Ubuntu closeout and Windows/macOS platform runs are recorded at
+  the new audited commit.
 
 ### Inherited 23A deviations and how 23B respects them
 

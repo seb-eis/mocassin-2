@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 
+using Microsoft.Extensions.Logging;
 using Mocassin.App.Composition;
 using Mocassin.App.Files;
 using Mocassin.App.Recovery;
@@ -7,6 +8,7 @@ using Mocassin.App.Tests.TestSupport;
 using Mocassin.App.ViewModels.Projects;
 using Mocassin.App.ViewModels.Scheduling;
 using Mocassin.App.ViewModels.Settings;
+using Mocassin.App.ViewModels.Shell;
 using Mocassin.Packages.Projects;
 using Mocassin.Packages.Projects.Templates;
 using Mocassin.Packages.Projects.Validation;
@@ -155,6 +157,39 @@ public sealed class AutosaveSchedulerTests
         Assert.True(File.Exists(sidecar));
     }
 
+    [Fact]
+    public async Task AutosaveMarshalsStatusAndMarkAutosavedThroughTheDispatcher()
+    {
+        using var context = new AutosaveContext();
+        var session = await context.CreateAsync("Marshalled");
+        Rename(session);
+
+        await Task.Run(() => context.Scheduler.RunOnceAsync(context.Time.GetUtcNow()));
+
+        Assert.True(context.Dispatcher.InvokeCount >= 2);
+        Assert.True(session.Document.LastAutosaveUtc is not null);
+        Assert.Equal(StatusBarSeverity.Success, context.Scheduler.Severity);
+    }
+
+    [Fact]
+    public async Task AFailedSidecarWriteFallsBackToRecoveryAndIsLogged()
+    {
+        using var context = new AutosaveContext();
+        var session = await context.CreateAsync("Fallback");
+        Rename(session);
+        Directory.CreateDirectory(ProjectStore.GetAutosavePath(session.Path));
+
+        await context.Scheduler.RunOnceAsync(context.Time.GetUtcNow());
+
+        Assert.Contains(
+            context.LoggerProvider.Entries,
+            entry => entry.Level == LogLevel.Warning
+                     && entry.Message.Contains("Autosave", StringComparison.Ordinal));
+        Assert.Single(await context.Recovery.ListAsync());
+        Assert.True(session.Document.LastAutosaveUtc is not null);
+        Assert.Equal(StatusBarSeverity.Success, context.Scheduler.Severity);
+    }
+
     private static void Rename(ProjectSession session, string name = "Renamed") =>
         session.EditCoordinator.Apply(
             "Rename project",
@@ -172,6 +207,10 @@ public sealed class AutosaveSchedulerTests
             ProjectStore = new ProjectStore(Time, new ProjectStoreOptions { ValidateOnLoad = false });
             var paths = new AppPaths(workspace.Path);
             Recovery = new RecoveryStore(paths, ProjectStore, Time);
+            Dispatcher = new RecordingUiDispatcher();
+            LoggerProvider = new RecordingLoggerProvider();
+            LoggerFactory = Microsoft.Extensions.Logging.LoggerFactory.Create(
+                builder => builder.AddProvider(LoggerProvider));
             Service = new ProjectSessionService(
                 ProjectStore,
                 new ProjectValidationPipeline(),
@@ -180,7 +219,14 @@ public sealed class AutosaveSchedulerTests
                 Settings,
                 Time,
                 Recovery);
-            Scheduler = new AutosaveScheduler(Service, Settings, ProjectStore, Recovery, Time);
+            Scheduler = new AutosaveScheduler(
+                Service,
+                Settings,
+                ProjectStore,
+                Recovery,
+                Time,
+                Dispatcher,
+                LoggerFactory.CreateLogger<AutosaveScheduler>());
         }
 
         public ManualTimeProvider Time { get; }
@@ -192,6 +238,12 @@ public sealed class AutosaveSchedulerTests
         public ProjectStore ProjectStore { get; }
 
         public RecoveryStore Recovery { get; }
+
+        public RecordingUiDispatcher Dispatcher { get; }
+
+        public RecordingLoggerProvider LoggerProvider { get; }
+
+        public ILoggerFactory LoggerFactory { get; }
 
         public ProjectSessionService Service { get; }
 
@@ -206,6 +258,10 @@ public sealed class AutosaveSchedulerTests
             return created.Session!;
         }
 
-        public void Dispose() => workspace.Dispose();
+        public void Dispose()
+        {
+            LoggerFactory.Dispose();
+            workspace.Dispose();
+        }
     }
 }
