@@ -344,12 +344,19 @@ auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Passed with notes — pending human-owner acceptance of F-1–F-3 and N-1–N-3
+**State:** Passed with notes — accepted by the human owner 2026-11-21; F-1–F-3/N-1–N-3 deferred to `fix/step-14-structure-and-tests` before Step 15
 
 The step branch is frozen at `3fd45161d5683405955f806196ca61b295066479`; the reviewer record commit is the
 documentation-only child of `af434f1` that touches only this file. No Blocker or Major remains. The minor
 findings are test/evidence-claim and file-length issues; the notes are status wording and hand-built-package
 robustness. The human owner still approves the verdict, the step-to-main merge, and the `step-14` tag.
+
+**Owner acceptance (2026-11-21).** The human owner accepted `Passed with notes`, approved the step-to-main merge
+and the `step-14` tag, and assigned F-1–F-3 and N-1–N-3 to the maintenance branch
+`fix/step-14-structure-and-tests` before Step 15 starts. The residual limitations (the `ENM008` two-member-site
+fixture deviation, the table-free 10×10×10 real-writer fixture with the populated clone as the pair/cluster
+measurement, the non-gating real-CLI AOT publish failure, and the absence of Windows/macOS platform runs) are
+accepted.
 
 ## Reviewer independence
 
@@ -372,7 +379,12 @@ the mechanical Rust layout check and the same-class benchmark/context regression
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| F-1 | Deferred — owner-accepted | Step agent on `fix/step-14-structure-and-tests` before Step 15 | — |
+| F-2 | Deferred — owner-accepted (Step 15 owns the delta itself) | Step agent on `fix/step-14-structure-and-tests` before Step 15 | — |
+| F-3 | Deferred — owner-accepted | Step agent on `fix/step-14-structure-and-tests` before Step 15 | — |
+| N-1 | Deferred — owner-accepted (the Done commit makes the dashboard parity state consistent) | Step agent on `fix/step-14-structure-and-tests` before Step 15 | — |
+| N-2 | Deferred — owner-accepted | Step agent on `fix/step-14-structure-and-tests` before Step 15 | — |
+| N-3 | Deferred — owner-accepted | Step agent on `fix/step-14-structure-and-tests` before Step 15 | — |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
@@ -382,35 +394,63 @@ verdict.
 The step agent completes this section before a merge, tag, or Blocker/Major waiver request. It must cover the
 full history, not only the latest round.
 
-- [ ] Requested decision and frozen commit recorded
-- [ ] Every review/audit round recorded (round, date, commit, reviewer, verdict)
-- [ ] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
-- [ ] Accepted notes and waivers recorded with rationale
-- [ ] Residual risks, deferred items, and follow-up owners recorded
-- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
-- [ ] Final CI and documentation-build results recorded
+- [x] Requested decision and frozen commit recorded — merge `step-14` at
+      `3fd45161d5683405955f806196ca61b295066479` into `main` with `--no-ff` and tag `step-14`.
+- [x] Every review/audit round recorded (round, date, commit, reviewer, verdict) — four design-review rounds and
+      audit round 1 below; earlier findings and closures are in
+      [`docs/planning/reviews/step-14.md`](../reviews/step-14.md).
+- [x] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status) — the audit
+      findings F-1–F-3/N-1–N-3 are below; the design-review findings F-1–F-43 are closed in the review record,
+      with F-39–F-43 corrected in the start-gate/step-page update.
+- [x] Accepted notes and waivers recorded with rationale — F-1–F-3/N-1–N-3 are deferred by the human owner to
+      `fix/step-14-structure-and-tests` before Step 15; the ENM008 fixture deviation, table-free 10×10×10,
+      non-gating AOT, and platform-CI absence are accepted residual limitations.
+- [x] Residual risks, deferred items, and follow-up owners recorded — see the audit findings and step page §21;
+      the maintenance branch owns F-1–F-3/N-1–N-3, Step 15 owns the delta implementation (F-2), and Step 29 owns
+      the mechanical Rust layout check and the same-class benchmark job.
+- [x] Explicit no-Blocker/no-Major statement — no Blocker or Major remains in any round; F-1–F-3 are Minor and
+      N-1–N-3 are Notes, explicitly accepted by the human owner.
+- [x] Final CI and documentation-build results recorded — closeout CI `44922414484` green at `3fd4516`;
+      `./tools/verify.sh all --require` exit 0 at `8c09a8c`; documentation strict green at `af434f1`; the Done
+      commit re-runs the docs gate and the closeout checker.
 
 Round history:
 
 | Round | Date | Commit | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| Design review 1 | 2026-11-20 | `7c7ff0d` | DeepSeek V4.1 Flash 1017 (fresh planning auditor) | Changes required |
+| Design review 2 | 2026-11-21 | `b6dc503` | Fresh planning auditor | Changes required |
+| Design review 3 | 2026-11-21 | `87be9de` | Fresh planning auditor | Changes required |
+| Design review 4 | 2026-11-21 | `a430d64` (record `620f20a`) | Fresh planning auditor | Ready with notes — owner accepted 2026-11-21 |
+| Audit 1 | 2026-11-21 | `3fd4516` (record `f57314d`) | DeepSeek V4.1 Flash 1017 (fresh) | Passed with notes — owner accepted 2026-11-21 |
 
 Findings and resolutions:
 
 | Finding | Severity | Issue | Resolution | Commit | Status |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| Design F-1…F-43 | Major/Minor/Note | Pool representation, owner-major orientation, memory plan, cluster instance/code contract, fixtures, status/doc drift | Closed across design rounds 2–4; F-39–F-43 corrected in the start-gate/step-page update | `b6dc503`, `87be9de`, `a430d64` | Closed |
+| F-1 | Minor | `amend-1-net10` not opened by a Step 14 test | Deferred to `fix/step-14-structure-and-tests` | — | Owner-accepted |
+| F-2 | Minor | Owner-major delta criterion not exercised (Step 15 owns the delta) | Deferred to `fix/step-14-structure-and-tests`/Step 15 | — | Owner-accepted |
+| F-3 | Minor | `context/mod.rs` and `context/limits.rs` exceed 800 lines | Deferred to `fix/step-14-structure-and-tests` | — | Owner-accepted |
+| N-1 | Note | Parity `Done` vs dashboard `In progress` | Done commit makes the dashboard consistent; wording follow-up on the maintenance branch | — | Owner-accepted |
+| N-2 | Note | Caller-raised `max_path_nodes > 10` vs fixed scratch | Deferred to `fix/step-14-structure-and-tests` | — | Owner-accepted |
+| N-3 | Note | Phase-0 length reads before phase-1 validation | Deferred to `fix/step-14-structure-and-tests` | — | Owner-accepted |
 
 ## Human approval
 
 - [ ] Accepted: Passed
-- [ ] Accepted: Passed with notes
+- [x] Accepted: Passed with notes
 - [ ] Fixes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Human owner
+Date: 2026-11-21
+
+F-1–F-3 and N-1–N-3 are assigned to `fix/step-14-structure-and-tests` before Step 15 starts; no code, test,
+configuration, contract, or design change is required before this merge and tag. Accepted residual limitations:
+the ENM008 two-member-site fixture deviation, the table-free 10×10×10 real-writer fixture (with the populated
+clone as the pair/cluster measurement), the non-gating real-CLI AOT publish failure, and the absence of
+Windows/macOS platform runs.
 
 ## Audit rounds
 

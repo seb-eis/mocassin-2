@@ -10,12 +10,12 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
 
 ## Implementation status
 
-- **Status:** In audit — frozen at `3fd4516`; closeout CI 44922414484 green; audit requested
+- **Status:** In audit — `Passed with notes` accepted by the owner 2026-11-21; merge/tag in progress
 - **Step branch:** `step/14-simulation-context-initialization`
 - **Step CI:** [44922414484](https://github.com/seb-eis/mocassin-2/actions/runs/44922414484) — Ubuntu closeout, green at `3fd4516` (no per-feature CI)
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** In audit — request at [`docs/planning/audits/step-14.md`](../audits/step-14.md)
+- **Audit:** `Passed with notes` — accepted by the owner 2026-11-21; F-1–F-3/N-1–N-3 deferred to `fix/step-14-structure-and-tests` ([record](../audits/step-14.md))
 - **Design review:** `Ready with notes` — accepted by the human owner 2026-11-21. Round 4 at record `620f20a`
   (freeze `a430d64`) closed F-29 and F-30–F-38; F-39–F-43 are minor/note corrections the step agent records
   with the start-gate status. Rounds 1–3 returned `Changes required` (F-1–F-38). Record:
