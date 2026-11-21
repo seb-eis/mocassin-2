@@ -190,7 +190,10 @@ auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-audit required
+**State:** Passed with notes
+
+> Round 2 supersedes the round-1 `Fixes required` verdict; the round-1 text and verdict below remain historical.
+> The round-2 evidence and its Minor/Note findings are in `### Audit round 2`.
 
 ## Reviewer independence
 
@@ -304,3 +307,117 @@ Core APIs were verified against code and tests. The m-14 retention limitation is
 fixed or explicitly accepted; F6/F7 may remain as notes). The step branch should move to `Re-audit required`
 only after the step agent records resolutions, applies the fixes on a new feature branch, merges current
 `main`, re-runs the full local gate, dispatches one replacement closeout CI run, and appends the new evidence.
+
+### Audit round 2
+
+#### Independence and frozen state
+
+I am a fresh context. I did not author or implement this work and have no shared conversation with the step
+agent, planner, design reviewers, the round-1 auditor, or the orchestrator. I read `AGENTS.md` §3.8–§3.13 and
+§7–§16, the audits README and closeout README, the 23B step page and closeout evidence, the 23B audit record
+including round 1, the 23B design-review record and its owner approvals, the 23A audit context, the relevant
+ADRs/architecture/quality/code-structure pages, and the changed App, ViewModels, Packages, and test code at the
+frozen tree.
+
+Frozen state: audited commit `fe79552585690fb9d552e58aad558df0ca96ced8`; branch head
+`d7fda7e4d8eff98a10f88f9615628396b1d56b1e`; `git diff --name-status fe79552..d7fda7e` is exactly
+`M docs/planning/closeout/step-23b.json`, `M docs/planning/status.md`, and
+`M docs/planning/steps/step-23b-editing-diagnostics-and-recovery.md`. `git diff --name-only fe79552..HEAD`
+contains no non-doc path, so the audited code/test tree is exactly `fe79552`. `main` is
+`3a2048150488e6b14f3cc4f3da59aa44bae93908` and has not moved; the step branch merged it at
+`7a2f463e1726f3d4fc7d28d426626ef35360af26` (parents `9010784` and `3a20481`); no `step-23b` tag exists. The
+closeout evidence at HEAD binds `audit_commit` = `closeout_ci.head_sha` = `merge_candidate` = `fe79552` and
+`main_sha_at_freeze` = `3a20481`, and the checker passes. The audit-request table still names the round-1
+commit `eb120e1` (see N1); the closeout evidence and the orchestrator bind this round to `fe79552`.
+
+#### Commands and results
+
+Run in this worktree at branch head `d7fda7e`; the code and test tree is identical to the audited commit:
+
+```text
+./tools/verify.sh all --require
+    EXIT:0
+dotnet test src/dotnet/Mocassin.App.Tests/Mocassin.App.Tests.csproj -c Release --no-build \
+    --filter "FullyQualifiedName~ShellLifecycleTests|FullyQualifiedName~AutosaveSchedulerTests|FullyQualifiedName~ProjectRecoveryLifecycleTests|FullyQualifiedName~RecoveryStoreTests"
+    Passed: 36, Failed: 0, Skipped: 0
+python tools/check_closeout_evidence.py docs/planning/closeout/step-23b.json
+    Closeout evidence: OK
+git diff --check fe79552..HEAD
+    clean
+git merge-base --is-ancestor 3a20481 HEAD
+    true
+```
+
+`./tools/verify.sh all --require` results: 2,106 tests passed with 0 failed — Contracts 38, Symmetry 223,
+Results 91, Core 689, Compilation 99, Cli 203, Packages 536, Architecture 9, App 218; `dotnet format` clean;
+Rust fmt/clippy/tests/build green; Python tests/build green; documentation math OK (195 files), links OK
+(198 files), Zensical strict, DocFX, and rustdoc green; contracts current (26 artifacts), process consistency
+OK, 60 policy tests OK, SPDX 1,096 source files, secret scan 1,607 tracked files, cargo-deny OK; structure
+policy 9/9; ApiCompat found no breaking change in any project; the AOT evidence gate passed with the documented
+62 IL diagnostics; `Closeout gate completed with required checks enabled.`
+
+Closeout and platform CI (GitHub API `actions/runs`):
+
+- Ubuntu closeout `44932597523`: `workflow_dispatch`, `head_sha` `fe79552`, conclusion `success`; Detect
+  changes, .NET (ubuntu-latest), Contracts and policy, and Public API compatibility succeeded; Rust and Python
+  were path-filtered.
+- Windows platform gate `44932918537`: same `head_sha`, `success`; .NET (windows-latest) succeeded.
+- macOS platform gate `44932432910`: same `head_sha`, `success`; .NET (macos-latest) succeeded.
+- The two concurrency-cancelled duplicates `44932428742` and `44932430657` have conclusion `cancelled` at the
+  same `head_sha`; neither has a failed job. They are dispatch history, not test failures.
+
+#### Closure status per round-1 finding
+
+| Finding | Round-1 severity | Verification in round 2 | Status |
+| --- | --- | --- | --- |
+| F1 — `--project` startup open corrupts the restore state | Major | `ShellViewModel.cs:28`, `:124` capture `settings.Current.Session` before the startup open and `:298` pass it to `RestoreSessionAsync`; `ShellLifecycleCoordinator.cs:140-145` uses the frozen block. `ShellLifecycleTests.cs:115` covers a clean prior exit (no `ChoiceRequests`) and an unclean prior exit (one prompt, both `Startup.mocprj` and `Prior.mocprj` open). | **Fixed** |
+| F2 — window close is not all-or-nothing across projects | Major | `ShellLifecycleCoordinator.cs:74-115` runs three phases: collect every decision, apply saves only after all prompts pass, then close. A Cancel returns before any save or close. `ShellLifecycleTests.cs:77` prompts twice (save, cancel), then asserts both sessions are still open and not closing, both sidecars exist, the first project on disk is unchanged, and `CleanExit` is still false; a subsequent discard pass closes both. | **Fixed** |
+| F3 — autosave mutates UI state off the UI thread | Major | `AutosaveScheduler.cs:112-120`, `:143-151`, `:158-170` marshal the status item and `MarkAutosaved` through `IUiDispatcher` (`:179-180`); file writes remain awaited asynchronous calls. `AutosaveSchedulerTests.cs:161` starts the tick on `Task.Run` and asserts the dispatcher was used and `LastAutosaveUtc` was updated. | **Fixed** |
+| F4 — deferred-sidecar discard uses the wrong path and accepts a foreign candidate | Minor | `ProjectSessionService.cs:494-497` rejects a foreign `ProjectId`; `:506` deletes `candidate.SnapshotPath` through `ProjectStore.DeleteAutosaveFile`. `ProjectRecoveryLifecycleTests.cs:136` covers Save As plus deferred sidecar plus Discard (old sidecar removed, new path untouched); `:167` covers a foreign candidate (rejected, nothing deleted). | **Fixed** |
+| F5 — autosave/fallback/recovery failures are not logged | Minor | `AutosaveScheduler.cs:127-155` logs the sidecar failure, fallback failure, and fallback success; `RecoveryStore.cs:65`, `:78`, `:85`, `:99`, `:104`, `:109`, `:173`, `:252`, and `:257` log ignored/unreadable manifests, write failures, and delete failures. `AutosaveSchedulerTests.cs:175` failure-injects the sidecar, asserts the recovery fallback and its warning; `RecoveryStoreTests.cs:80` asserts the malformed-manifest warning. | **Fixed** |
+| F6 — `CleanupAsync` reads UI state off the UI thread | Note | `ProjectSessionService.cs:573` awaits the gate with `ConfigureAwait(true)` so the `Sessions`/`Document` checks stay on the captured context; the trigger is the UI-thread `ProjectChanged` handler (`:544-582`). Verified by inspection; no dedicated thread test was added. | **Fixed** |
+| F7 — shell-lifecycle test gaps | Note | `ShellLifecycleTests.cs:77` (two-session cancel) and `:115` (`--project` plus restore), `ProjectRecoveryLifecycleTests.cs:85` (`LoadDiagnostics`), and `:188` (timestamp tie, sidecar first then ordinal path; implementation at `ProjectRecoveryDetector.cs:105-110`) are present and pass. The `LoadDiagnostics` assertion is weak; see F10. | **Fixed, with F10 note** |
+
+#### Regression and surface checks
+
+- The fix squash `ca64c9a` touches 23 files; the behavioural changes are confined to the shell close/restore
+  path, autosave, recovery cleanup/detection, logging, and one additive `ProjectStore` helper. The validation
+  coordinator/Problems surface, metadata editor, dirty/save-point rules, settings blocks, and 23A seams are
+  unchanged. The full suite, including 218 App tests, is green; the focused lifecycle/autosave/recovery classes
+  pass 36/36.
+- No contract or format change: `git diff --name-only 3a20481..HEAD -- contracts tests/contracts` is empty, and
+  there is no `contracts/manifest.json`, fixture, or version change. The only public-surface delta in the step
+  is additive: `ProjectDocument.MaxUndoDepth` and `ProjectDocument.CreateRecovered` in Core, plus
+  `ProjectStore.DeleteAutosaveFile` in Packages added by the F4 fix. `PublicAPI.Unshipped.txt` is current and
+  ApiCompat reports no breaking change. The Packages addition is not recorded in the step page; see F8.
+- Licensing and structure: the new `RecordingUiDispatcher.cs` has the MIT SPDX header; SPDX covers 1,096 source
+  files; the structure policy (9 tests) and secret scan (1,607 files) pass. No legacy/GPL code, no new
+  dependency, and no unsafe code were introduced.
+- Repository hygiene: `main` did not move, no tag exists, and no non-doc commit follows the audited commit.
+
+#### Findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Minor** | **F8 — F4 added a public Packages API that the step page still denies.** `ProjectStore.DeleteAutosaveFile` was added in `ca64c9a` and tracked in `Mocassin.Packages/PublicAPI.Unshipped.txt`; the step page still says the library delta is two APIs and "no Packages API change" (`docs/planning/steps/step-23b-editing-diagnostics-and-recovery.md:741`, `:917`, `:952`) and the start-gate owner decision names only the two Core APIs. The API is additive, documented, and ApiCompat-compatible, so this is a decision/documentation-recording defect, not a compatibility break. Record the third additive API (and update the §10/§17 statements), or obtain owner acceptance; treat it as an amendment-level decision if the owner considers the public surface part of the approved design. | `ProjectStore.cs:261`; `Mocassin.Packages/PublicAPI.Unshipped.txt`; step page §10 and §17; audit round 1 notes at lines 167-168 |
+| **Minor** | **F9 — the parity matrix still says the autosave fallback is not failure-injected.** The live 23A/23B parity row says "the autosave fallback is not failure-injected in PR-fast tests", while the F5 fix adds exactly that test and the step page/testing pages now say it is failure-injected. This is a stale live planning claim, not a code defect. | `docs/planning/appendix-b-parity-matrix.md:231`; `AutosaveSchedulerTests.cs:175`; step page §5/§18; `docs/development/testing-and-parity.md:203-210` |
+| **Note** | **F10 — the new `LoadDiagnostics` recovery assertion is effectively vacuous.** `ProjectRecoveryLifecycleTests.cs:85-105` compares `snapshotLoad.Diagnostics` with `session.LoadDiagnostics`, but both are empty for a valid snapshot written from a valid project, so the assertion would also pass if `RecoverAsync` never assigned the field. The assignment is present and correct at `ProjectSessionService.cs:464`; a sentinel initial value or a fixture with a load diagnostic would make the test prove the update. | `ProjectRecoveryLifecycleTests.cs:85-105`; `ProjectSessionService.cs:464` |
+| **Note** | **N1 — the audit-request table still names the round-1 commit.** The request field says `step/23b-editing-diagnostics-and-recovery` at `eb120e1`, while the closeout evidence and this round bind `fe79552`. The closeout README treats the evidence file as the single source from Step 11, so this is record hygiene rather than a missing gate artifact. | `docs/planning/audits/step-23b.md` Request table; `docs/planning/closeout/step-23b.json` |
+
+#### Verdict
+
+**Passed with notes.** Every round-1 finding F1–F7 is functionally closed: the startup restore uses the prior
+session snapshot, the multi-project close is cancel-safe, autosave status/`MarkAutosaved` are marshalled to the
+dispatcher, discard uses the candidate path and rejects a foreign project, failures are logged, the cleanup
+reads stay on the UI context, and the lifecycle tests are present. No Blocker or Major finding remains. F8 and
+F9 are documentation/decision-record corrections: the step page must record the third additive public API (or
+the owner must accept it) and the parity row must stop claiming the fallback is not failure-injected. F10 and
+N1 are notes: the `LoadDiagnostics` test can be strengthened, and the request table can be rebound to
+`fe79552`. None of these requires a code or format change.
+
+The human owner must explicitly accept the notes for `Passed with notes` to close; otherwise the step agent
+should correct the two live documentation statements and the request metadata on a docs-only follow-up commit
+and request a final check. The `Record state` above is set to `Passed with notes` for round 2; the round-1
+`Fixes required` text remains historical.
+
+Follow-up owner: Step agent (implementor) for F8, F9, F10, and N1; human owner for the final note acceptance.
