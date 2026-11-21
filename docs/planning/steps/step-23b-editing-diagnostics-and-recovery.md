@@ -40,7 +40,7 @@ branch is `step/23b-editing-diagnostics-and-recovery`. The review record is
 | # | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Edit pipeline and undo/redo | `feature/step-23b-editing-diagnostics-and-recovery/edit-pipeline-and-undo-redo` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `bb048ad`; test fix `90d9f73` |
-| 2 | Validation surface | `feature/step-23b-editing-diagnostics-and-recovery/validation-surface` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `77c1b9c` |
+| 2 | Validation surface | `feature/step-23b-editing-diagnostics-and-recovery/validation-surface` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `77c1b9c`; refresh fix `d4badd0` |
 | 3 | Dirty state, autosave, crash recovery | — | Planned | — | — | — |
 | 4 | 23B tests, documentation, and closeout | — | Planned | — | — | — |
 
@@ -87,7 +87,8 @@ seam fills in §1.
 #### Feature 2 — validation surface and metadata editor (squashed `77c1b9c`)
 
 - **Branch:** `feature/step-23b-editing-diagnostics-and-recovery/validation-surface`; deleted after the squash.
-  Feature commit `dc5c909`, squash `77c1b9c`.
+  Feature commit `dc5c909`, squash `77c1b9c`. A `fix-overview-refresh` follow-up (deleted) is squashed as
+  `d4badd0`; it raises change notifications for every project-derived Overview property after an edit/reload.
 - **Local gates:** `./tools/verify.sh dotnet` exit 0 (all solution tests, 0 warnings, `dotnet format` clean);
   `./tools/verify.sh structure` exit 0 (9 architecture tests); `./tools/verify.sh api` exit 0 (no baseline
   break); `./tools/verify.sh docs` exit 0 (link/math checks, DocFX, rustdoc, strict Zensical build). **No CI run**
