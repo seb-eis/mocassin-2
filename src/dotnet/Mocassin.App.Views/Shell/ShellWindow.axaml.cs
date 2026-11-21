@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Mocassin.App.ViewModels.Commands;
 using Mocassin.App.ViewModels.Notifications;
@@ -52,5 +53,21 @@ internal sealed partial class ShellWindow : Window
             clipboard.Clipboard = null;
             dialogs.Host = null;
         };
+    }
+
+    private void OnKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (DataContext is not ShellViewModel shell
+            || !e.KeyModifiers.HasFlag(KeyModifiers.Control)
+            || e.Key is < Key.D1 or > Key.D9)
+        {
+            return;
+        }
+
+        var index = e.Key - Key.D1;
+        if (shell.Documents.ActivateIndex(index))
+        {
+            e.Handled = true;
+        }
     }
 }

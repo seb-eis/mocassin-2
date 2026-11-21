@@ -8,6 +8,7 @@ namespace Mocassin.App.Tests.Composition;
 /// <summary>
 /// Verifies the explicit log-size retention sweep.
 /// </summary>
+[Trait("Tier", "PR-fast")]
 public sealed class LogRetentionTests
 {
     [Fact]

@@ -123,7 +123,8 @@ internal static class AppServiceRegistration
             provider.GetRequiredService<IProjectSessionService>(),
             provider.GetRequiredService<IStorageService>(),
             provider.GetRequiredService<IDialogService>(),
-            provider.GetRequiredService<AppStartupOptions>().ProjectPath));
+            provider.GetRequiredService<AppStartupOptions>().ProjectPath,
+            provider.GetRequiredService<IProjectFileProbe>()));
         services.AddSingleton<ShellWindow>();
         return services;
     }

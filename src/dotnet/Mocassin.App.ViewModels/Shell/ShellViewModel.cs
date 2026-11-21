@@ -54,6 +54,9 @@ internal sealed partial class ShellViewModel : ObservableObject
     [ObservableProperty]
     private bool hasInspectorContent;
 
+    [ObservableProperty]
+    private string? readOnlyBannerText;
+
     /// <summary>
     /// Initializes a new shell view model.
     /// </summary>
@@ -76,6 +79,7 @@ internal sealed partial class ShellViewModel : ObservableObject
     /// <param name="storage">The picker service.</param>
     /// <param name="dialogs">The dialog service.</param>
     /// <param name="startupProjectPath">The optional project path from the startup options.</param>
+    /// <param name="probe">The project file probe used by the recent list.</param>
     public ShellViewModel(
         IConsoleService consoleService,
         IEnumerable<IConsoleChannelProvider> consoleChannels,
@@ -95,7 +99,8 @@ internal sealed partial class ShellViewModel : ObservableObject
         IProjectSessionService sessions,
         IStorageService storage,
         IDialogService dialogs,
-        string? startupProjectPath)
+        string? startupProjectPath,
+        IProjectFileProbe probe)
     {
         Regions = regions;
         StatusBar = statusBar;
@@ -114,6 +119,7 @@ internal sealed partial class ShellViewModel : ObservableObject
         this.dialogs = dialogs;
         this.startupProjectPath = startupProjectPath;
         Settings = settingsDialog;
+        RecentProjects = new RecentProjectsViewModel(settings, probe, OpenProjectPathAsync);
         Console = new ConsoleViewModel(consoleService, consoleChannels);
 
         backCommand = new AsyncRelayCommand(() => Navigation.GoBackAsync(), () => Navigation.CanGoBack);
@@ -152,7 +158,12 @@ internal sealed partial class ShellViewModel : ObservableObject
         consoleService.Write(ConsoleSeverity.Information, "shell", "MOCASSIN shell started.");
         if (settings.Current.Ui.ShowWelcomeOnStart)
         {
-            documents.OpenOrActivate(new WelcomeDocumentViewModel(ShowShortcutsCommand, NewProjectCommand, OpenProjectCommand));
+            documents.OpenOrActivate(
+                new WelcomeDocumentViewModel(
+                    ShowShortcutsCommand,
+                    NewProjectCommand,
+                    OpenProjectCommand,
+                    RecentProjects));
         }
 
         if (!string.IsNullOrWhiteSpace(startupProjectPath))
@@ -232,6 +243,11 @@ internal sealed partial class ShellViewModel : ObservableObject
     /// Gets the settings dialog state.
     /// </summary>
     public SettingsViewModel Settings { get; }
+
+    /// <summary>
+    /// Gets the recent-project list shown by the welcome document.
+    /// </summary>
+    public RecentProjectsViewModel RecentProjects { get; }
 
     /// <summary>
     /// Gets the startup project-open task. It is completed when no project was supplied.
@@ -476,7 +492,11 @@ internal sealed partial class ShellViewModel : ObservableObject
         reloadProjectCommand.NotifyCanExecuteChanged();
     }
 
-    private void OnSettingsChanged(object? sender, AppSettings updated) => ApplySettings(updated);
+    private void OnSettingsChanged(object? sender, AppSettings updated)
+    {
+        ApplySettings(updated);
+        RecentProjects.Refresh();
+    }
 
     private void OnRegionPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
@@ -574,9 +594,18 @@ internal sealed partial class ShellViewModel : ObservableObject
         var kind = string.Equals(template.ChoiceId, "ceria", StringComparison.Ordinal)
             ? ProjectTemplateKind.Ceria
             : ProjectTemplateKind.Blank;
-        await ApplySessionResultAsync(
-            await sessions.CreateAsync(kind, name, directory, cancellationToken),
-            cancellationToken);
+        var result = await sessions.CreateAsync(kind, name, directory, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            await dialogs.ShowErrorAsync(
+                new ErrorDialogRequest(
+                    "New project",
+                    result.Message ?? "The project could not be created."),
+                cancellationToken);
+            return;
+        }
+
+        await ApplySessionResultAsync(result, cancellationToken);
     }
 
     /// <summary>
@@ -701,6 +730,7 @@ internal sealed partial class ShellViewModel : ObservableObject
             if (project is not null)
             {
                 project.LastDocumentKey = active.Key;
+                project.LastDocumentTitle = active.Title;
             }
         }
     }
@@ -712,6 +742,9 @@ internal sealed partial class ShellViewModel : ObservableObject
             project is null
                 ? "No project"
                 : $"{project.Name} — {project.Path}{(project.IsReadOnly ? " (read-only)" : string.Empty)}");
+        ReadOnlyBannerText = project?.IsReadOnly == true
+            ? $"This project is open read-only. Lock: {project.LockPath ?? "held by another session"}."
+            : null;
         if (project?.LastDocumentKey is { } key)
         {
             _ = Navigation.ActivateAsync(key);

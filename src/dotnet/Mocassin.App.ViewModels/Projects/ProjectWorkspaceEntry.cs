@@ -79,6 +79,16 @@ internal sealed class ProjectWorkspaceEntry
     public string? LockPath => Session.LockPath;
 
     /// <summary>
+    /// Gets a display string for the lock/read-only state.
+    /// </summary>
+    public string LockStateText => Session.IsReadOnly ? "Read-only" : "Writable";
+
+    /// <summary>
+    /// Gets or sets the last active document title.
+    /// </summary>
+    public string? LastDocumentTitle { get; set; }
+
+    /// <summary>
     /// Gets or sets the last document that was active in this project.
     /// </summary>
     public DocumentKey? LastDocumentKey

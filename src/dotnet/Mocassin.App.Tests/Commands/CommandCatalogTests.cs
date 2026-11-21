@@ -8,6 +8,7 @@ namespace Mocassin.App.Tests.Commands;
 /// <summary>
 /// Verifies the command catalog, gestures, palette, and menus.
 /// </summary>
+[Trait("Tier", "PR-fast")]
 public sealed class CommandCatalogTests
 {
     [Fact]

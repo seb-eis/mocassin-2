@@ -49,6 +49,8 @@ The detailed architecture is in the internal plan; the repository layout is summ
 - [Agent security](agent-security.md) — threat model, permissions, secrets, and prompt injection.
 - [Incident and rollback](incident-and-rollback.md) — severity, rollback, hotfix, and postmortem rules.
 - [Testing and parity](testing-and-parity.md) — testing trophy, mocks/fakes policy, fixtures, and test tiers.
+- [Platform checklist](platform-checklist.md) — automated Windows/macOS headless gates and the manual
+  real-window checklist.
 
 ## Current phase
 

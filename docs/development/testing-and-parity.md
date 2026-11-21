@@ -131,10 +131,15 @@ or SQLite. Prefer real temporary directories and real files produced by the real
   level at startup, and recent/last-directory persistence.
 - The architecture test checks direct project references and runs the view-model I/O token tripwire with a
   positive control. Headless a11y assertions check automation names on the primary shell controls.
-- Tab drag-reorder is not wired in the Avalonia tab strip; the document collection's `Move` API and the
-  keyboard, middle-click, and context-menu close paths are tested. The limitation is recorded in the step page.
-- Screenshot baselines, the full accessibility-tree sweep, and the Windows/macOS platform checklist remain
-  PR-medium/closeout platform evidence; no pixel comparison runs on Windows/macOS.
+- Tab drag-reorder is not wired in the Avalonia tab strip; `Ctrl+1..9`, `Ctrl+Tab`/`Ctrl+Shift+Tab`, `Ctrl+W`,
+  middle-click close, the close button, and the context menu are tested. The drag limitation is recorded in the
+  step page.
+- Screenshot baselines are checked in at `src/dotnet/Mocassin.App.Tests/Visual/Baselines/` for light, dark, and
+  high contrast. Linux compares them with a documented 5 % pixel tolerance; Windows/macOS do not pixel-compare.
+  Regenerate with `MOCASSIN_REGENERATE_VISUAL_BASELINES=1` on the Linux reference environment.
+- The accessibility sweep asserts an accessible name on every primary interactive control type in the real
+  shell. The manual checklist in [Platform checklist](platform-checklist.md) records the platform-specific
+  real-window steps.
 
 ## Test tiers
 

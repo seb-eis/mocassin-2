@@ -8,6 +8,7 @@ namespace Mocassin.App.Tests.Boundaries;
 /// <summary>
 /// Verifies the public-surface rule: only App is a new public application type.
 /// </summary>
+[Trait("Tier", "PR-fast")]
 public sealed class PublicSurfaceTests
 {
     private static readonly string[] viewModelTypes = ["Mocassin.App.ViewModels.AppViewModelsModule"];

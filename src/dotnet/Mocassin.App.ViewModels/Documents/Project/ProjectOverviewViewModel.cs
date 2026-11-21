@@ -114,8 +114,12 @@ internal sealed partial class ProjectOverviewViewModel : DocumentViewModel, IIns
     /// Gets the lock and read-only state text.
     /// </summary>
     public string LockStateText => entry.IsReadOnly
-        ? entry.LockPath is null ? "Read-only" : $"Read-only (locked at {entry.LockPath})"
-        : "Writable";
+        ? entry.LockPath is null
+            ? "Read-only (another session owns the lock)"
+            : $"Read-only (locked at {entry.LockPath}; acquisition time unavailable)"
+        : entry.Session.LockAcquiredUtc is { } acquired
+            ? $"Writable (lock acquired {FormatUtc(acquired)})"
+            : "Writable";
 
     /// <inheritdoc />
     public object? CreateInspector(InspectorSelection selection) =>

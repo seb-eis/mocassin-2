@@ -9,6 +9,7 @@ namespace Mocassin.App.Tests.Views;
 /// <summary>
 /// Verifies the Avalonia translation of framework-neutral gestures.
 /// </summary>
+[Trait("Tier", "PR-fast")]
 public sealed class GestureTranslatorTests
 {
     [Fact]

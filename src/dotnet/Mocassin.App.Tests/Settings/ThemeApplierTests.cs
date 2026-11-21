@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 using Avalonia;
+using Avalonia.Animation;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Mocassin.App.Tests.TestSupport;
@@ -12,6 +13,7 @@ namespace Mocassin.App.Tests.Settings;
 /// <summary>
 /// Verifies theme, density, scale, contrast, and motion propagation to Avalonia resources.
 /// </summary>
+[Trait("Tier", "PR-fast")]
 public sealed class ThemeApplierTests
 {
     [Fact]
@@ -39,6 +41,14 @@ public sealed class ThemeApplierTests
                 Assert.True(Assert.IsType<bool>(Application.Current.Resources["Mocassin.ReduceMotion"]));
                 Assert.Equal("teal", Assert.IsType<string>(Application.Current.Resources["Mocassin.Accent"]));
                 Assert.IsType<Color>(Application.Current.Resources["SystemAccentColor"]);
+                Assert.Equal(new Thickness(4), Application.Current.Resources["Mocassin.ControlPadding"]);
+                Assert.IsType<Transitions>(Application.Current.Resources["Mocassin.Transitions"]);
+                Assert.True(
+                    Application.Current.Resources.TryGetResource(
+                        "SystemControlBackgroundAltHighBrush",
+                        null,
+                        out var highContrastBackground));
+                Assert.NotNull(highContrastBackground);
             });
 
     [Fact]
@@ -53,5 +63,6 @@ public sealed class ThemeApplierTests
                 Assert.Equal("comfortable", Assert.IsType<string>(Application.Current.Resources["Mocassin.Density"]));
                 Assert.False(Assert.IsType<bool>(Application.Current.Resources["Mocassin.HighContrast"]));
                 Assert.False(Application.Current.Resources.ContainsKey("SystemAccentColor"));
+                Assert.Equal(new Thickness(8), Application.Current.Resources["Mocassin.ControlPadding"]);
             });
 }

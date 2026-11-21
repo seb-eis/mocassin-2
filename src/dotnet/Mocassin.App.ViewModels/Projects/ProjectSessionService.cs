@@ -74,7 +74,20 @@ internal sealed class ProjectSessionService : IProjectSessionService
             return Failure(ProjectSessionOutcome.InvalidContent, nameResult.Message);
         }
 
-        var fullDirectory = probe.GetFullPath(directory);
+        string fullDirectory;
+        try
+        {
+            fullDirectory = probe.GetFullPath(directory);
+        }
+        catch (Exception exception) when (exception is ArgumentException
+                                              or NotSupportedException
+                                              or PathTooLongException)
+        {
+            return Failure(
+                ProjectSessionOutcome.InvalidContent,
+                $"The selected target directory is not valid: {exception.Message}");
+        }
+
         var targetPath = probe.Combine(fullDirectory, nameResult.Name + ".mocprj");
         var target = ProjectPathRules.ValidateTarget(
             fullDirectory,
@@ -373,6 +386,8 @@ internal sealed class ProjectSessionService : IProjectSessionService
                 settings.Current with { Paths = settings.Current.Paths with { LastSaveDirectory = directory } },
                 cancellationToken);
         }
+
+        await settings.AddRecentFileAsync(session.Path, timeProvider.GetUtcNow(), cancellationToken);
     }
 
     private static ProjectSessionOutcome MapFailure(ProjectLoadFailureKind failure) =>

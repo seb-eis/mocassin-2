@@ -15,6 +15,7 @@ namespace Mocassin.App.Tests.Projects;
 /// <summary>
 /// Verifies the real project-session lifecycle over temporary files and store locks.
 /// </summary>
+[Trait("Tier", "PR-fast")]
 public sealed class ProjectSessionServiceTests
 {
     [Fact]
@@ -53,6 +54,18 @@ public sealed class ProjectSessionServiceTests
         Assert.Same(created.Session, activated.Session);
         Assert.Single(context.Service.Sessions);
         await context.Service.CloseAsync(created.Session);
+    }
+
+    [Fact]
+    public async Task AnInvalidTargetDirectoryIsRejectedWithoutThrowing()
+    {
+        var context = CreateContext(out _);
+
+        var result = await context.Service.CreateAsync(ProjectTemplateKind.Blank, "Invalid", "\0");
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal(ProjectSessionOutcome.InvalidContent, result.Outcome);
+        Assert.Contains("not valid", result.Message, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -116,7 +129,34 @@ public sealed class ProjectSessionServiceTests
         Assert.True(File.Exists(newPath));
         Assert.False(File.Exists(ProjectStore.GetLockPath(oldPath)));
         Assert.True(File.Exists(ProjectStore.GetLockPath(newPath)));
+        Assert.Contains(
+            context.Settings.Current.RecentFiles,
+            file => string.Equals(file.Path, newPath, StringComparison.Ordinal));
         await context.Service.CloseAsync(session);
+    }
+
+    [Fact]
+    public async Task AStaleLockIsReclaimedByTheNextSession()
+    {
+        var settings = new SettingsService(new InMemorySettingsStore(), AppSettingsLoadResult.Missing());
+        var firstContext = CreateContext(
+            out _,
+            settings,
+            new ManualTimeProvider(new DateTimeOffset(2020, 1, 1, 0, 0, 0, TimeSpan.Zero)));
+        var secondContext = CreateContext(out _, settings, new ManualTimeProvider());
+        using var temp = new TempWorkspace();
+        var created = await firstContext.Service.CreateAsync(ProjectTemplateKind.Blank, "Stale", temp.Path);
+        var first = created.Session!;
+        await File.WriteAllTextAsync(
+            ProjectStore.GetLockPath(first.Path),
+            """{"pid":999999,"host":"other-host","token":"foreign","acquiredUtc":"2020-01-01T00:00:00.0000000Z"}""");
+
+        var second = await secondContext.Service.OpenAsync(first.Path);
+
+        Assert.Equal(ProjectSessionOutcome.Opened, second.Outcome);
+        Assert.False(second.Session!.IsReadOnly);
+        await secondContext.Service.CloseAsync(second.Session);
+        await firstContext.Service.CloseAsync(first);
     }
 
     [Fact]
@@ -277,20 +317,22 @@ public sealed class ProjectSessionServiceTests
         return CreateContext(out workspace, settings);
     }
 
-    private static Context CreateContext(out WorkspaceViewModel workspace, SettingsService settings)
+    private static Context CreateContext(
+        out WorkspaceViewModel workspace,
+        SettingsService settings,
+        TimeProvider? timeProvider = null)
     {
         workspace = new WorkspaceViewModel();
+        var time = timeProvider ?? new ManualTimeProvider();
         var service = new ProjectSessionService(
-            new ProjectStore(
-                new ManualTimeProvider(),
-                new ProjectStoreOptions { ValidateOnLoad = false }),
+            new ProjectStore(time, new ProjectStoreOptions { ValidateOnLoad = false }),
             new ProjectValidationPipeline(),
             new ProjectFileProbe(),
             workspace,
             settings,
-            new ManualTimeProvider());
-        return new Context(service);
+            time);
+        return new Context(service, settings);
     }
 
-    private sealed record Context(ProjectSessionService Service);
+    private sealed record Context(ProjectSessionService Service, SettingsService Settings);
 }

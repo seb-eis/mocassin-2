@@ -59,8 +59,9 @@ Reload re-reads the file and replaces the project document. No file-system watch
 ## Recents and last directories
 
 The settings file stores at most ten recent project paths and the last open, save, and folder directories.
-Recent entries are de-duplicated and recorded when a project is opened. The settings dialog can clear the list;
-it never deletes a project file.
+Recent entries are de-duplicated and recorded when a project is opened or saved-as. The welcome document lists
+them with **Open** and **Remove** actions; a missing file is disabled and marked “Missing”. The settings dialog
+also provides a clear-all action. Removing an entry never deletes a project file.
 
 ## Close
 

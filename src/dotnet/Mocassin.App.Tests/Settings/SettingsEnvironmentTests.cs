@@ -9,6 +9,7 @@ namespace Mocassin.App.Tests.Settings;
 /// <summary>
 /// Verifies the settings environment's log and cache cleanup.
 /// </summary>
+[Trait("Tier", "PR-fast")]
 public sealed class SettingsEnvironmentTests
 {
     [Fact]

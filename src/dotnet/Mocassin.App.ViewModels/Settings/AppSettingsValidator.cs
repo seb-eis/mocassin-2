@@ -13,8 +13,11 @@ internal static class AppSettingsValidator
     /// Normalizes settings and reports repairs.
     /// </summary>
     /// <param name="settings">The candidate settings.</param>
+    /// <param name="ignoreCasePaths">Whether recent paths are de-duplicated case-insensitively.</param>
     /// <returns>The normalized settings and warnings.</returns>
-    public static (AppSettings Settings, IReadOnlyList<string> Warnings) Normalize(AppSettings settings)
+    public static (AppSettings Settings, IReadOnlyList<string> Warnings) Normalize(
+        AppSettings settings,
+        bool ignoreCasePaths = false)
     {
         ArgumentNullException.ThrowIfNull(settings);
         var warnings = new List<string>();
@@ -66,7 +69,7 @@ internal static class AppSettingsValidator
                 : layout.ActiveConsoleChannel,
         };
 
-        var recent = NormalizeRecentFiles(settings.RecentFiles, warnings);
+        var recent = NormalizeRecentFiles(settings.RecentFiles, warnings, ignoreCasePaths);
         var normalized = settings with
         {
             Format = SettingsDefaults.Format,
@@ -93,14 +96,15 @@ internal static class AppSettingsValidator
 
     private static ImmutableArray<RecentFile> NormalizeRecentFiles(
         ImmutableArray<RecentFile> files,
-        List<string> warnings)
+        List<string> warnings,
+        bool ignoreCasePaths)
     {
         if (files.IsDefaultOrEmpty)
         {
             return [];
         }
 
-        var comparer = StringComparer.OrdinalIgnoreCase;
+        var comparer = ignoreCasePaths ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
         var seen = new HashSet<string>(comparer);
         var builder = ImmutableArray.CreateBuilder<RecentFile>();
         foreach (var file in files)

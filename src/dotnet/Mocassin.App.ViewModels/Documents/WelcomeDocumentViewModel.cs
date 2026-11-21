@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 using System.Windows.Input;
+using Mocassin.App.ViewModels.Projects;
 
 namespace Mocassin.App.ViewModels.Documents;
 
@@ -14,7 +15,7 @@ internal sealed class WelcomeDocumentViewModel : DocumentViewModel
     /// </summary>
     /// <param name="showShortcutsCommand">The command that opens the shortcut cheat sheet.</param>
     public WelcomeDocumentViewModel(ICommand showShortcutsCommand)
-        : this(showShortcutsCommand, null, null)
+        : this(showShortcutsCommand, null, null, null)
     {
     }
 
@@ -24,15 +25,18 @@ internal sealed class WelcomeDocumentViewModel : DocumentViewModel
     /// <param name="showShortcutsCommand">The shortcut command.</param>
     /// <param name="newProjectCommand">The new-project command.</param>
     /// <param name="openProjectCommand">The open-project command.</param>
+    /// <param name="recentProjects">The recent-project list.</param>
     public WelcomeDocumentViewModel(
         ICommand showShortcutsCommand,
         ICommand? newProjectCommand,
-        ICommand? openProjectCommand)
+        ICommand? openProjectCommand,
+        RecentProjectsViewModel? recentProjects)
         : base(new DocumentKey(DocumentKinds.Welcome))
     {
         ShowShortcutsCommand = showShortcutsCommand;
         NewProjectCommand = newProjectCommand;
         OpenProjectCommand = openProjectCommand;
+        RecentProjects = recentProjects;
     }
 
     /// <inheritdoc />
@@ -52,4 +56,9 @@ internal sealed class WelcomeDocumentViewModel : DocumentViewModel
     /// Gets the open-project command, when available.
     /// </summary>
     public ICommand? OpenProjectCommand { get; }
+
+    /// <summary>
+    /// Gets the recent-project list, when available.
+    /// </summary>
+    public RecentProjectsViewModel? RecentProjects { get; }
 }

@@ -7,6 +7,25 @@
   <Style Selector="TextBlock">
     <Setter Property="FontSize" Value="{DynamicResource Mocassin.BodyFontSize}" />
   </Style>
+  <Style Selector="Button">
+    <Setter Property="Padding" Value="{DynamicResource Mocassin.ControlPadding}" />
+    <Setter Property="MinHeight" Value="{DynamicResource Mocassin.ControlMinHeight}" />
+    <Setter Property="Transitions" Value="{DynamicResource Mocassin.Transitions}" />
+  </Style>
+  <Style Selector="TextBox">
+    <Setter Property="MinHeight" Value="{DynamicResource Mocassin.ControlMinHeight}" />
+    <Setter Property="Transitions" Value="{DynamicResource Mocassin.Transitions}" />
+  </Style>
+  <Style Selector="ComboBox">
+    <Setter Property="MinHeight" Value="{DynamicResource Mocassin.ControlMinHeight}" />
+  </Style>
+  <Style Selector="ListBoxItem">
+    <Setter Property="Padding" Value="{DynamicResource Mocassin.ItemPadding}" />
+  </Style>
+  <Style Selector="Border">
+    <Setter Property="BorderBrush" Value="{DynamicResource Mocassin.BorderBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource Mocassin.BorderThickness}" />
+  </Style>
   <Style Selector="Menu">
     <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}" />
   </Style>

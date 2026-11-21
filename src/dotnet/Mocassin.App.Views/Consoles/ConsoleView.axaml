@@ -16,6 +16,7 @@
                 automation:AutomationProperties.Name="Clear application console" Command="{Binding ActiveChannel.ClearCommand}" />
     </Grid>
     <ListBox Grid.Row="1"
+             automation:AutomationProperties.Name="Application console entries"
              ItemsSource="{Binding ActiveChannel.VisibleEntries}"
              Background="Transparent"
              BorderThickness="0">

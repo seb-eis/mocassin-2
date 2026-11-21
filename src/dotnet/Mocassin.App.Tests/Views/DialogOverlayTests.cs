@@ -16,6 +16,7 @@ namespace Mocassin.App.Tests.Views;
 /// <summary>
 /// Drives the real in-shell dialog overlay headlessly.
 /// </summary>
+[Trait("Tier", "PR-fast")]
 public sealed class DialogOverlayTests
 {
     [Fact]
@@ -40,6 +41,101 @@ public sealed class DialogOverlayTests
                     confirmButton.Command.Execute(null);
 
                     Assert.True(await confirmation);
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+
+    [Fact]
+    public Task PromptAndChoiceDialogsRoundTrip() =>
+        HeadlessSession.DispatchAsync(
+            async () =>
+            {
+                using var workspace = new TempWorkspace();
+                using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+
+                try
+                {
+                    var dialogs = host.Services.GetRequiredService<IDialogService>();
+                    var prompt = dialogs.PromptAsync(new TextPromptRequest("Name", "Project name", "Initial"));
+                    var textBox = window.GetVisualDescendants().OfType<TextBox>()
+                        .First(control => control.Text == "Initial");
+                    textBox.Text = "Typed";
+                    var promptButton = window.GetVisualDescendants().OfType<Button>().Single(button => button.IsDefault);
+                    promptButton.Command!.Execute(null);
+                    Assert.Equal("Typed", await prompt);
+
+                    var choice = dialogs.ChooseAsync(
+                        new ChoiceDialogRequest(
+                            "Template",
+                            "Choose",
+                            [new DialogChoice("blank", "Blank", IsDefault: true), new DialogChoice("ceria", "Ceria")]));
+                    var choiceButton = window.GetVisualDescendants().OfType<Button>().Single(button => button.IsDefault);
+                    choiceButton.Command!.Execute(null);
+                    Assert.Equal("blank", (await choice).ChoiceId);
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+
+    [Fact]
+    public Task ErrorDialogClosesWithoutThrowing() =>
+        HeadlessSession.DispatchAsync(
+            async () =>
+            {
+                using var workspace = new TempWorkspace();
+                using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+
+                try
+                {
+                    var dialogs = host.Services.GetRequiredService<IDialogService>();
+                    var error = dialogs.ShowErrorAsync(
+                        new ErrorDialogRequest(
+                            "Failure",
+                            "Something failed.",
+                            [new ErrorDialogDetail("TST001", "Detail")]));
+                    var close = window.GetVisualDescendants().OfType<Button>().Single(button => button.IsDefault);
+                    close.Command!.Execute(null);
+                    await error;
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+
+    [Fact]
+    public Task FocusIsRestoredAfterADialog() =>
+        HeadlessSession.DispatchAsync(
+            async () =>
+            {
+                using var workspace = new TempWorkspace();
+                using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+
+                try
+                {
+                    var focusTarget = window.GetVisualDescendants().OfType<TextBox>()
+                        .First(control => control.PlaceholderText == "Filter the application console");
+                    focusTarget.Focus();
+                    Assert.True(focusTarget.IsFocused);
+
+                    var dialogs = host.Services.GetRequiredService<IDialogService>();
+                    var confirmation = dialogs.ConfirmAsync(new ConfirmDialogRequest("Focus", "Restore"));
+                    var confirm = window.GetVisualDescendants().OfType<Button>().Single(button => button.IsDefault);
+                    confirm.Command!.Execute(null);
+                    await confirmation;
+
+                    Assert.Same(focusTarget, window.FocusManager?.GetFocusedElement());
                 }
                 finally
                 {

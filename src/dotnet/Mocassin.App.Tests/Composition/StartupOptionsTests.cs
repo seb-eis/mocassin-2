@@ -8,6 +8,7 @@ namespace Mocassin.App.Tests.Composition;
 /// <summary>
 /// Verifies the startup command-line contract.
 /// </summary>
+[Trait("Tier", "PR-fast")]
 public sealed class StartupOptionsTests
 {
     [Fact]

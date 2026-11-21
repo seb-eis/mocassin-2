@@ -285,9 +285,10 @@ proposed. The only ApiCompat-checked App assemblies remain the pre-existing `Moc
   cannot produce an unusable window; an invalid value falls back to the default and is repaired on the next
   save.
 - Window title binds `"<project name> — MOCASSIN"` for the active document, or `"MOCASSIN"` with no project
-  (the `*` dirty marker is added by 23B). Minimum size 900×600. Size/state are restored from settings; a saved
-  placement whose bounds intersect no current screen falls back to the primary screen (pure
-  `WindowPlacementResolver`, test in §15).
+  (the `*` dirty marker is added by 23B). Minimum size 900×600. Window size/placement persistence was removed
+  from 23A during the audit fix: the v1 settings schema has no window-bounds block, the dead pure resolver was
+  deleted, and the shell uses the platform default placement. This is recorded as F-9 resolution; adding
+  persisted placement requires a settings-schema change in a later step.
 - The status bar in 23A shows the active document, the project path and lock state, the theme/density, and the
   version. It reserves the validity/progress/autosave slots for 23B and later steps; it shows no placeholder
   text for them.
@@ -702,7 +703,7 @@ src/dotnet/Mocassin.App/
   Composition/     AppHost.cs  AppServiceRegistration.cs  AppStartupOptions.cs  AppPaths.cs  LoggingSetup.cs  LogRetention.cs
   Settings/        AppSettingsStore.cs  SettingsWritePolicy.cs
   Files/           ProjectFileProbe.cs
-  Startup/         StartupCoordinator.cs  CrashHandler.cs  WindowPlacementResolver.cs
+  Startup/         StartupCoordinator.cs  CrashHandler.cs
 
 src/dotnet/Mocassin.App.ViewModels/
   AppViewModelsModule.cs   # existing public marker (PublicAPI.Shipped.txt); retained unchanged
@@ -978,7 +979,7 @@ unusable alone, so the extra step would add overhead without reducing the audit 
 | V-2 | Whether Avalonia 12.1.6 exposes a platform high-contrast variant/resource dictionary | 3 | Ship the app-owned `HighContrast.axaml` and select it from settings only |
 | V-3 | Whether the pinned `Serilog.Sinks.File` supports `retainedFileSizeLimitBytes` | 1 | Implement `LogRetention` as an explicit startup sweep |
 | V-4 | `IStorageProvider` "save as" behaviour per OS (filter, overwrite confirmation) | 4 | Own filtering and confirmation in `IStorageService` and document the per-OS behaviour |
-| V-5 | Whether a saved window placement can be validated headlessly against a real monitor topology | 1 | Test the pure `WindowPlacementResolver` with synthetic screen rectangles; record the real multi-monitor check as manual platform evidence |
+| V-5 | Whether a saved window placement can be validated headlessly against a real monitor topology | — | Removed with the dead resolver (F-9); window placement is not persisted in 23A |
 
 **New ADRs:** none. ADR 0003/0006/0008 stand. **Owner input required at the start gate:** the complexity-class
 acceptance (§18), the five-feature list, and acknowledgement of the two test-only Avalonia headless packages,

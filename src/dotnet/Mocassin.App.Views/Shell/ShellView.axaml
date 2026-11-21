@@ -2,12 +2,22 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:shell="using:Mocassin.App.Views.Shell"
              xmlns:vm="using:Mocassin.App.ViewModels.Shell"
+             xmlns:automation="using:Avalonia.Automation"
              x:Class="Mocassin.App.Views.Shell.ShellView"
              x:DataType="vm:ShellViewModel">
-  <Grid RowDefinitions="Auto,*,Auto">
-    <Menu Grid.Row="0" x:Name="MainMenu" />
+  <Grid RowDefinitions="Auto,Auto,*,Auto" Background="{DynamicResource Mocassin.ShellBackground}">
+    <Menu Grid.Row="0" x:Name="MainMenu" automation:AutomationProperties.Name="Main menu" />
 
-    <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+    <Border Grid.Row="1"
+            Background="#FFF3CD"
+            BorderBrush="#E0A800"
+            BorderThickness="0,0,0,1"
+            Padding="12,6"
+            IsVisible="{Binding ReadOnlyBannerText, Converter={x:Static ObjectConverters.IsNotNull}}">
+      <TextBlock Text="{Binding ReadOnlyBannerText}" TextWrapping="Wrap" />
+    </Border>
+
+    <Grid Grid.Row="2" ColumnDefinitions="Auto,Auto,*,Auto,Auto">
       <shell:ProjectsRegionView Grid.Column="0"
                                 Width="{Binding Regions.LeftWidth}"
                                 IsVisible="{Binding Regions.IsProjectsVisible}" />
@@ -36,6 +46,6 @@
                                  IsVisible="{Binding Regions.IsInspectorVisible}" />
     </Grid>
 
-    <shell:StatusBarView Grid.Row="2" />
+    <shell:StatusBarView Grid.Row="3" />
   </Grid>
 </UserControl>

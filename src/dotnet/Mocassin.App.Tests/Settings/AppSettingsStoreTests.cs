@@ -10,6 +10,7 @@ namespace Mocassin.App.Tests.Settings;
 /// <summary>
 /// Verifies the real atomic settings store.
 /// </summary>
+[Trait("Tier", "PR-fast")]
 public sealed class AppSettingsStoreTests
 {
     [Fact]
@@ -149,6 +150,73 @@ public sealed class AppSettingsStoreTests
         var reloaded = store.Load();
         Assert.Equal(ThemeSelection.Light, reloaded.Settings.Theme);
         Assert.Equal(2, reloaded.Settings.RecentFiles.Length);
+    }
+
+    [Fact]
+    public async Task ARealIoWriteFailureLeavesThePreviousFileIntact()
+    {
+        if (!OperatingSystem.IsLinux())
+        {
+            return;
+        }
+
+        using var workspace = new TempWorkspace();
+        var paths = new AppPaths(workspace.Path);
+        paths.EnsureDirectories();
+        var store = new AppSettingsStore(paths);
+        Assert.True((await store.SaveAsync(new AppSettings { Theme = ThemeSelection.Light })).IsSuccess);
+        var original = await File.ReadAllBytesAsync(paths.SettingsFile);
+        File.SetUnixFileMode(
+            paths.RootDirectory,
+            UnixFileMode.UserRead | UnixFileMode.UserExecute);
+        try
+        {
+            var result = await store.SaveAsync(new AppSettings { Theme = ThemeSelection.Dark });
+            Assert.False(result.IsSuccess);
+        }
+        finally
+        {
+            File.SetUnixFileMode(
+                paths.RootDirectory,
+                UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
+
+        Assert.Equal(original, await File.ReadAllBytesAsync(paths.SettingsFile));
+    }
+
+    [Fact]
+    public async Task AFutureMajorFileIsNotOverwrittenByServiceUpdates()
+    {
+        using var workspace = new TempWorkspace();
+        var paths = new AppPaths(workspace.Path);
+        Directory.CreateDirectory(paths.RootDirectory);
+        var original = """{"format":"mocassin.settings","schemaVersion":9,"theme":"dark"}""";
+        await File.WriteAllTextAsync(paths.SettingsFile, original);
+        var store = new AppSettingsStore(paths);
+        var load = store.Load();
+        var service = new SettingsService(store, load);
+
+        var result = await service.UpdateAsync(service.Current with { Theme = ThemeSelection.Light });
+
+        Assert.False(result.IsSuccess);
+        Assert.Contains("preserved", result.Message, StringComparison.Ordinal);
+        Assert.Equal(original, await File.ReadAllTextAsync(paths.SettingsFile));
+    }
+
+    [Fact]
+    public async Task RecentFilesUseThePlatformCaseRule()
+    {
+        var linuxStore = new InMemorySettingsStore();
+        var linux = new SettingsService(linuxStore, AppSettingsLoadResult.Missing());
+        Assert.True((await linux.AddRecentFileAsync("/tmp/A.mocprj", DateTimeOffset.UnixEpoch)).IsSuccess);
+        Assert.True((await linux.AddRecentFileAsync("/tmp/a.mocprj", DateTimeOffset.UnixEpoch)).IsSuccess);
+        Assert.Equal(2, linux.Current.RecentFiles.Length);
+
+        var windowsStore = new InMemorySettingsStore();
+        var windows = new SettingsService(windowsStore, AppSettingsLoadResult.Missing(), ignoreCasePaths: true);
+        Assert.True((await windows.AddRecentFileAsync("/tmp/A.mocprj", DateTimeOffset.UnixEpoch)).IsSuccess);
+        Assert.True((await windows.AddRecentFileAsync("/tmp/a.mocprj", DateTimeOffset.UnixEpoch)).IsSuccess);
+        Assert.Single(windows.Current.RecentFiles);
     }
 
     [Fact]

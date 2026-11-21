@@ -23,6 +23,7 @@ namespace Mocassin.App.Tests.Composition;
 /// <summary>
 /// Verifies the real dependency-injection composition.
 /// </summary>
+[Trait("Tier", "PR-fast")]
 public sealed class AppHostTests
 {
     [Fact]

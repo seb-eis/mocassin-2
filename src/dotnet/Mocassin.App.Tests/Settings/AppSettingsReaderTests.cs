@@ -9,6 +9,7 @@ namespace Mocassin.App.Tests.Settings;
 /// <summary>
 /// Verifies the tolerant settings reader, source-generated writer, and validator.
 /// </summary>
+[Trait("Tier", "PR-fast")]
 public sealed class AppSettingsReaderTests
 {
     [Fact]

@@ -8,6 +8,7 @@ namespace Mocassin.App.Tests.Navigation;
 /// <summary>
 /// Verifies the bounded navigation history.
 /// </summary>
+[Trait("Tier", "PR-fast")]
 public sealed class NavigationHistoryTests
 {
     [Fact]

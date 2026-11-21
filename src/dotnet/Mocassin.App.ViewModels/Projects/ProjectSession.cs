@@ -81,6 +81,11 @@ internal sealed class ProjectSession
     public ProjectFileLock? FileLock { get; internal set; }
 
     /// <summary>
+    /// Gets the UTC time at which this session acquired its lock.
+    /// </summary>
+    public DateTimeOffset? LockAcquiredUtc => FileLock?.AcquiredUtc;
+
+    /// <summary>
     /// Gets the load diagnostics retained for Step 23B.
     /// </summary>
     public ImmutableArray<Diagnostic> LoadDiagnostics { get; internal set; }

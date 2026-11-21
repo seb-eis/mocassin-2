@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Mocassin.App.ViewModels.Documents"
+             xmlns:projects="using:Mocassin.App.ViewModels.Projects"
              x:Class="Mocassin.App.Views.Documents.WelcomeDocumentView"
              x:DataType="vm:WelcomeDocumentViewModel">
   <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="16" MaxWidth="520">
@@ -20,5 +21,22 @@
     <Button Content="Keyboard shortcuts"
             Command="{Binding ShowShortcutsCommand}"
             HorizontalAlignment="Center" />
+
+    <StackPanel Spacing="4" Margin="0,12,0,0">
+      <TextBlock Text="Recent projects" FontWeight="SemiBold" HorizontalAlignment="Center" />
+      <ItemsControl ItemsSource="{Binding RecentProjects.Entries}" MaxWidth="560">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="projects:RecentProjectViewModel">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="4" Margin="0,2">
+              <TextBlock Text="{Binding Path}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+              <TextBlock Grid.Column="1" Text="Missing" Foreground="#C62828" VerticalAlignment="Center"
+                         IsVisible="{Binding IsMissing}" />
+              <Button Grid.Column="2" Content="Open" Command="{Binding OpenCommand}" Padding="8,2" />
+              <Button Grid.Column="3" Content="Remove" Command="{Binding RemoveCommand}" Padding="8,2" />
+            </Grid>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
   </StackPanel>
 </UserControl>

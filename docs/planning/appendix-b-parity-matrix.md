@@ -17,7 +17,7 @@ Status legend:
 | --- | :---: | --- | --- | --- |
 | Create new project | Y | Implemented | 01/12/23A | Blank, ceria, and barium-zirconate skeletons in 01/03; headless `mocassin new` with `--template blank` or `--template ceria`, fresh identity, and embedded assets in 12; creation UI in 23A using the same `ProjectTemplateFactory` and shared `ProjectPathRules` |
 | Open/save/close project | Y | Implemented | 01/23A | Atomic writes and lock store in 01; lifecycle UI, read-only lock mode, save-as lock migration, reload, and external-change detection in 23A |
-| Recent files | N | Implemented | 23A | Settings-persisted list (max 10), missing-file handling, clear action |
+| Recent files | N | Implemented | 23A | Settings-persisted list (max 10), open affordance, missing-file disabled state and removal, clear-all, Save As records the new path |
 | Multiple projects per file | N | Replaced | 23A | One project per file; workspace of open files with one tab strip and a project switcher |
 | Duplicate/delete project in a library | N | Replaced | 23A | File-level duplicate/delete; no DB library |
 | Autosave/recovery | N | Improvement | 01/23B | `.autosave` sidecar store in 01; scheduler, recovery prompt, untitled-project recovery in `recovery/`, and retention in 23B |
@@ -246,7 +246,7 @@ Status legend:
 | MMCFE UI | Y | Planned | 28 | |
 | Lattice recycle tool | Y | Planned | 28 | |
 | Remote deploy | N | Deferred | post-1.0 | Local + HPC scripts first |
-| Accessibility/high contrast | N | Partial | 23A | Automation names and theme/contrast resources in 23A; full tree sweep and visual baselines in the later accessibility/screenshot work |
+| Accessibility/high contrast | N | Partial | 23A | Automation-name sweep, light/dark/high-contrast screenshot baselines, and theme/density/contrast/motion resources in 23A; manual screen-reader checks remain release evidence |
 | Numeric expression input | Y | Planned | 24/25 | |
 | Localization | N | Deferred | post-1.0 | Invariant first; resources ready |
 

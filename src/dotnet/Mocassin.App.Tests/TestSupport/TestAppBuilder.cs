@@ -17,6 +17,7 @@ public static class TestAppBuilder
     /// <returns>The application builder.</returns>
     public static AppBuilder BuildAvaloniaApp() =>
         AppBuilder.Configure<App>(() => new App(AppStartupOptions.Default, startHost: false))
-            .UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = true })
+            .UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false })
+            .UseSkia()
             .WithInterFont();
 }

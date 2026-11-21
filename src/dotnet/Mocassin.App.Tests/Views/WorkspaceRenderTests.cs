@@ -21,6 +21,7 @@ namespace Mocassin.App.Tests.Views;
 /// <summary>
 /// Headless workspace tests for tabs, the project explorer, and the palette overlay.
 /// </summary>
+[Trait("Tier", "PR-fast")]
 public sealed class WorkspaceRenderTests
 {
     [Fact]
@@ -102,6 +103,7 @@ public sealed class WorkspaceRenderTests
                         new ModelPath("project", entry.Id, "json"),
                         NavigationIntent.Activate);
 
+                    window.KeyPress(Key.Tab, RawInputModifiers.None, PhysicalKey.Tab, null);
                     window.KeyPress(Key.D2, RawInputModifiers.Control, PhysicalKey.Digit2, "2");
 
                     Assert.Equal(DocumentKinds.ProjectOverview, shell.Documents.ActiveDocument!.Key.Kind);

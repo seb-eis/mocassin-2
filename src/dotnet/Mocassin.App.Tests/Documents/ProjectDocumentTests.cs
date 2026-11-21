@@ -10,6 +10,7 @@ namespace Mocassin.App.Tests.Documents;
 /// <summary>
 /// Verifies the read-only project documents use the real project APIs.
 /// </summary>
+[Trait("Tier", "PR-fast")]
 public sealed class ProjectDocumentTests
 {
     [Fact]

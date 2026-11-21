@@ -6,7 +6,8 @@
              x:Class="Mocassin.App.Views.Shell.DocumentsRegionView"
              x:DataType="vm:ShellViewModel">
   <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
-    <TabControl ItemsSource="{Binding Documents.Documents}"
+    <TabControl automation:AutomationProperties.Name="Document tabs"
+                ItemsSource="{Binding Documents.Documents}"
                 SelectedItem="{Binding Documents.ActiveDocument}"
                 TabStripPlacement="Top">
       <TabControl.ItemTemplate>

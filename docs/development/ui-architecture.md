@@ -55,8 +55,8 @@ checks `using static`, and has a positive control. It is a tripwire, not a compi
 ## Shell and documents
 
 `ShellViewModel` owns the document collection, workspace, navigation, explorer, console, command catalog,
-command palette, shortcut cheat sheet, status bar, progress state, and settings dialog state. The document key is
-`(Kind, ProjectScopeId)`:
+command palette, shortcut cheat sheet, status bar, progress state, and settings dialog state. The welcome document lists recent projects, including missing entries, and the shell records Save As paths.
+The document key is `(Kind, ProjectScopeId)`:
 
 - `welcome`
 - `project.overview`

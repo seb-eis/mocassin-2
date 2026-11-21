@@ -10,6 +10,7 @@ namespace Mocassin.App.Tests.Startup;
 /// <summary>
 /// Verifies the global crash boundary.
 /// </summary>
+[Trait("Tier", "PR-fast")]
 public sealed class CrashHandlerTests
 {
     [Fact]

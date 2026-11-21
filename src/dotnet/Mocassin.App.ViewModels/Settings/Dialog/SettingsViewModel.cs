@@ -112,7 +112,9 @@ internal sealed partial class SettingsViewModel : ObservableObject
     {
         LoadFrom(settings.Current);
         ErrorMessage = null;
-        StatusMessage = null;
+        StatusMessage = settings.LoadResult.IsFatal
+            ? "The existing settings file was rejected and is preserved; saving will report the same warning."
+            : null;
         IsOpen = true;
     }
 

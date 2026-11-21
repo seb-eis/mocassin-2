@@ -11,6 +11,7 @@ namespace Mocassin.App.Tests.Navigation;
 /// <summary>
 /// Verifies the project explorer nodes and opening.
 /// </summary>
+[Trait("Tier", "PR-fast")]
 public sealed class ProjectExplorerTests
 {
     [Fact]

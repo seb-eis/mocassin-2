@@ -12,6 +12,7 @@ namespace Mocassin.App.Tests.Navigation;
 /// <summary>
 /// Verifies real document navigation, provider resolution, and history.
 /// </summary>
+[Trait("Tier", "PR-fast")]
 public sealed class NavigationServiceTests
 {
     [Fact]

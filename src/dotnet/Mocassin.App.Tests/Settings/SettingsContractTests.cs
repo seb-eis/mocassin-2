@@ -7,6 +7,7 @@ namespace Mocassin.App.Tests.Settings;
 /// <summary>
 /// Verifies that the application settings stay outside the shared format manifest.
 /// </summary>
+[Trait("Tier", "PR-fast")]
 public sealed class SettingsContractTests
 {
     [Fact]

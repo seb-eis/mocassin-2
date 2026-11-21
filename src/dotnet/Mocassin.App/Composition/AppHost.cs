@@ -60,7 +60,10 @@ internal sealed class AppHost : IDisposable
         builder.Services.AddSingleton(settingsLoad);
         builder.Services.AddSingleton<IAppSettingsStore>(settingsStore);
         builder.Services.AddSingleton<ISettingsService>(
-            provider => new SettingsService(settingsStore, settingsLoad));
+            provider => new SettingsService(
+                settingsStore,
+                settingsLoad,
+                OperatingSystem.IsWindows() || OperatingSystem.IsMacOS()));
         builder.Services.AddMocassinApp();
         builder.Services.AddMocassinViewModels();
         builder.Services.AddMocassinViews();

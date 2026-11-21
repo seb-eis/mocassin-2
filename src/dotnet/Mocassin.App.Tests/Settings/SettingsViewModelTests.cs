@@ -9,6 +9,7 @@ namespace Mocassin.App.Tests.Settings;
 /// <summary>
 /// Verifies the settings dialog state and save path.
 /// </summary>
+[Trait("Tier", "PR-fast")]
 public sealed class SettingsViewModelTests
 {
     [Fact]

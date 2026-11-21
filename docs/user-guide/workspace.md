@@ -35,8 +35,8 @@ this is recorded as a Step 23A limitation rather than a silent omission.
 
 ## Project explorer and switcher
 
-The switcher lists open projects with their path, lock state, and active document. Activating a project restores
-its last active document. The explorer currently exposes project-level nodes:
+The switcher lists open projects with their path, lock state, and last active document. Activating a project
+restores its last active document. A read-only project also shows a banner above the workspace. The explorer currently exposes project-level nodes:
 
 - **Overview** — read-only project identity, metadata, seed, schema/symmetry information, file path, and lock
   state.

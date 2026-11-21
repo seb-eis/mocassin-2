@@ -14,6 +14,7 @@ namespace Mocassin.App.Tests.Views;
 /// <summary>
 /// Headless smoke tests for the real shell host.
 /// </summary>
+[Trait("Tier", "PR-fast")]
 public sealed class ShellRenderTests
 {
     [Fact]

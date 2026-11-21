@@ -8,6 +8,7 @@ namespace Mocassin.App.Tests.Composition;
 /// <summary>
 /// Verifies the application-data layout.
 /// </summary>
+[Trait("Tier", "PR-fast")]
 public sealed class AppPathsTests
 {
     [Fact]

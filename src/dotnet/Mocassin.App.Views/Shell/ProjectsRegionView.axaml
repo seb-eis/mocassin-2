@@ -24,6 +24,10 @@
               <TextBlock Text="{Binding Path}"
                          Classes="caption"
                          TextTrimming="CharacterEllipsis" />
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="{Binding LockStateText}" Classes="caption" />
+                <TextBlock Text="{Binding LastDocumentTitle}" Classes="caption" />
+              </StackPanel>
             </StackPanel>
           </DataTemplate>
         </ListBox.ItemTemplate>

@@ -10,6 +10,7 @@ namespace Mocassin.App.Tests.Documents;
 /// <summary>
 /// Verifies document identity, reuse, activation, and closing.
 /// </summary>
+[Trait("Tier", "PR-fast")]
 public sealed class DocumentCollectionTests
 {
     [Fact]
