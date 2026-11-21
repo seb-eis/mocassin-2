@@ -15,8 +15,9 @@ The application-data root is the platform local-application-data directory plus 
 | macOS | `~/Library/Application Support/Mocassin` |
 
 `--data-dir` overrides the root for one run; `MOCASSIN_DATA_DIR` provides an environment override, and the
-command-line value wins. Subdirectories are `logs/`, `cache/`, and the reserved `recovery/`. Step 23A writes logs
-and settings; `recovery/` is reserved for Step 23B.
+command-line value wins. Subdirectories are `logs/`, `cache/`, and `recovery/`. The application writes logs,
+settings, and the `recovery/` crash/fallback snapshots; logs and cache are disposable, while a `.autosave`
+sidecar next to a user project and the settings document are user state.
 
 ## The settings dialog
 
@@ -29,12 +30,36 @@ and settings; `recovery/` is reserved for Step 23B.
 - high contrast and reduce motion;
 - the minimum log level;
 - external-change confirmation and welcome-on-start;
+- **Enable autosave** and the interval in minutes (1–60);
 - the recent-file list (clear all);
 - **Open config folder** and **Clear logs and cache**.
 
 **Reset to defaults** changes the dialog state; **Save** validates, writes atomically, and applies the theme,
 accent, density, font scale, contrast, and motion resources without restarting. A failed write leaves the previous
 file intact, keeps the dialog open, and shows an error banner; a successful save shows a short status banner.
+
+## Autosave and session blocks
+
+The settings document gains two additive top-level objects, with **no schema bump**:
+
+```json
+{
+  "autosave": { "enabled": true, "intervalMinutes": 5 },
+  "session": {
+    "openProjects": ["/work/ceria.mocprj"],
+    "activeProject": "/work/ceria.mocprj",
+    "cleanExit": true,
+    "savedUtc": "2026-11-21T10:00:00Z"
+  }
+}
+```
+
+`autosave.enabled` toggles periodic sidecar writes; `autosave.intervalMinutes` is 1–60 (out of range falls back
+to 5 with a warning). `session.openProjects` is capped at 20, de-duplicated with the platform path comparison, and
+`session.activeProject` is normalized to one of those entries or null. `cleanExit` is written false while the
+application is running and true by a clean window close; a stale false produces the restore offer at the next
+startup. `savedUtc` records the write time. These fields are application-local, are not in
+`contracts/manifest.json`, and have no cross-language fixtures.
 
 ## Read and write policy
 

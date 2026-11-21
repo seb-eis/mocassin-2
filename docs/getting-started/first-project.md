@@ -1,7 +1,7 @@
 # Your First Project
 
-This page walks through the workspace that Step 23A provides. It is deliberately read-only: the model editors,
-validation surface, undo/redo, autosave, and recovery belong to later steps.
+This page walks through the workspace delivered through Step 23B. The project-level Overview is editable and
+undoable; model editors, full statistics panels, and result views belong to later steps.
 
 ## Starters
 
@@ -33,7 +33,9 @@ Menu
 - `Alt+1`, `Alt+2`, and `Alt+0` toggle the Projects, Inspector, and Console regions. Visibility is persisted in
   the layout settings.
 - The project switcher activates an open project and its last document.
-- The explorer opens the project-level Overview and Data nodes; later steps contribute model nodes.
+- The explorer opens the project-level Overview and Data nodes; later steps contribute model nodes. The
+  Overview metadata form and Problems channel are available now, and the title/tabs/switcher mark unsaved
+  projects.
 
 ## Tabs
 

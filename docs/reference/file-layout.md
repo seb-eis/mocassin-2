@@ -54,8 +54,15 @@ command-line value wins. The directory contains:
 ├── Mocassin.Settings.json  # versioned application settings
 ├── logs/                   # rolling Serilog files
 ├── cache/                  # disposable application cache
-└── recovery/               # reserved for Step 23B; no 23A writer
+└── recovery/               # crash/fallback snapshots and manifests
 ```
+
+A saved project may also have an `<file>.autosave` sidecar next to it. The sidecar is written by autosave and
+removed by a successful save, a return to the save point, a clean close, or an explicit discard; it is never
+swept by the recovery retention policy. A `recovery/` entry is a `<projectId>.mocprj.autosave` snapshot plus a
+`<projectId>.json` manifest (`format: "mocassin.recovery"`, `version: 1`, project id/path, `savedUtc`, source).
+Recovery files older than seven days are swept at startup; sidecars are exempt. The accepted limitation is that a
+deferred `recovery/` candidate can expire (m-14).
 
 The settings document is application-local. It is **not** part of `contracts/manifest.json`, has no
 cross-language fixtures, and has no compatibility guarantee with any project/package/results format. Unknown
@@ -90,6 +97,13 @@ properties are ignored and dropped on the next write. A missing key takes its do
     "rightVisible": true,
     "consoleVisible": true,
     "activeConsoleChannel": "application"
+  },
+  "autosave": { "enabled": true, "intervalMinutes": 5 },
+  "session": {
+    "openProjects": [],
+    "activeProject": null,
+    "cleanExit": true,
+    "savedUtc": null
   }
 }
 ```
@@ -114,12 +128,20 @@ properties are ignored and dropped on the next write. A missing key takes its do
 | `recentFiles` | array | `[]` | At most 10 `{ "path", "lastOpenedUtc" }` entries, de-duplicated by path |
 | `layout.leftWidth` / `rightWidth` / `consoleHeight` | integer (px) | `260` / `320` / `180` | Valid ranges 160–600 / 160–800 / 80–600; an out-of-range value falls back to the default |
 | `layout.leftVisible` / `rightVisible` / `consoleVisible` | boolean | `true` | Panel visibility |
-| `layout.activeConsoleChannel` | string | `"application"` | Channel id; an unknown id falls back to the first available channel |
+| `layout.activeConsoleChannel` | string | `"application"` | Channel id (`application`/`problems`); an unknown id falls back to the first available channel |
+| `autosave.enabled` | boolean | `true` | Periodic sidecar autosave on/off |
+| `autosave.intervalMinutes` | integer | `5` | 1–60 inclusive; out of range falls back to `5` with a warning |
+| `session.openProjects` | array of string | `[]` | Paths open at the last exit, capped at 20 and de-duplicated |
+| `session.activeProject` | string or null | `null` | Must be one of `openProjects` after normalization |
+| `session.cleanExit` | boolean | `true` | False while running; true after a clean window close |
+| `session.savedUtc` | string or null | `null` | ISO-8601 UTC time the block was written |
 
 A wrong type, unknown enum, or out-of-range value falls back to that field's default and records a warning. A
 malformed or unreadable document loads all defaults, reports a banner/console warning, and is not overwritten.
 Migrations are pure functions keyed by `schemaVersion`; version 1 is the first version, so its migration is the
-identity. Step 23B adds `autosave` and `session` objects additively without a schema bump.
+identity. The added `autosave` and `session` objects are additive: no schema bump, and a 23A document without
+them loads with the defaults above. They remain application-local and are not contract-manifest or
+cross-language fixtures.
 
 Writes are serialized through the source-generated `AppSettingsJsonContext` to UTF-8 without a BOM, written to a
 sibling temporary file, flushed with `Flush(flushToDisk: true)`, and atomically replaced. The document is capped

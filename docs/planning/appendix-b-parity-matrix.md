@@ -20,7 +20,8 @@ Status legend:
 | Recent files | N | Implemented | 23A | Settings-persisted list (max 10), open affordance, missing-file disabled state and removal, clear-all, Save As records the new path |
 | Multiple projects per file | N | Replaced | 23A | One project per file; workspace of open files with one tab strip and a project switcher |
 | Duplicate/delete project in a library | N | Replaced | 23A | File-level duplicate/delete; no DB library |
-| Autosave/recovery | N | Improvement | 01/23B | `.autosave` sidecar store in 01; scheduler, sidecar and `recovery/` crash snapshot, recovery prompt, clean-exit restore, and seven-day retention in 23B; sidecars are sweep-exempt, a deferred `recovery/` candidate can expire (m-14) |
+| Autosave/recovery | N | Improvement | 01/23B | `.autosave` sidecar store in 01; dirty-only scheduler, sidecar and `recovery/` crash/fallback snapshot, Recover/Discard/Decide later, seven-day retention, and clean-exit restore in 23B; sidecars are sweep-exempt, a deferred `recovery/` candidate can expire (m-14) |
+| Session restore after unclean exit | N | Improvement | 23B | `session.openProjects`/`activeProject`/`cleanExit` in settings; startup restores existing paths, auto-applies recovery candidates, reports missing paths, and restores the active project |
 | Dirty tracking/unsaved prompt | Y | Implemented | 01/23B | Document hash and dirty state in 01; content-based save point, window/tab/project-switcher/status markers, and per-project Save/Discard/Cancel close/reload/exit prompts in 23B; clean-exit session restore; no apply-to-all batch prompt |
 | Undo/redo | N | Improvement | 01/23B | Core stacks in 01; shell commands, save-point handling, bounded depth, and per-project isolation in 23B |
 | Project schema versioning/migration | Y | Planned | 01 | v1 pipeline implemented; migration fixtures added per version |
@@ -224,10 +225,10 @@ Status legend:
 | Shell/tree/tabs/console/status | Y | Implemented | 23A | Regions, document tabs, project switcher/explorer, Application console, populated status bar; Problems channel in 23B |
 | Project lifecycle | Y | Implemented | 23A | New/open/save/save-as/close/reload, recents, locks, read-only, external-change detection |
 | Undo/redo | N | Improvement | 23B | Single per-project stack over `ProjectDocument`, bounded, save-point correct; Edit-menu Undo/Redo commands follow the active project |
-| Model validator/problems | Y | Partial | 23B/07 | Status indicator, Problems channel (including the load/migration diagnostics on open, conditional `Load` stage), filters, help anchors, revalidate, and navigable `ModelPath` targets in 23B; domain providers and full stats panels in 24/25 |
+| Model validator/problems | Y | Partial | 23B/07 | Validity status item, Problems channel seeded from the retained load result (conditional `Load` stage), severity/code/text/source filters, sorting, help anchors, revalidate, edit diagnostics, and navigable `ModelPath` targets in 23B; domain providers and full statistics panels in 24/25 |
 | Command palette and shortcut cheat sheet | N | Implemented | 23A | Searchable command catalog with platform gestures |
 | Application settings and logging | N | Implemented | 23A/23B | Versioned `mocassin.settings` v1 with migration and retention in 23A; `autosave`/`session` additive fields in 23B; structured rolling logs replace the original XML settings file |
-| Crash recovery dialog | N | Improvement | 23A/23B | Global exception boundary, log entry, and "open log folder" in 23A; captured dirty-session snapshots, the 2 s bounded async recovery writer, per-session status, and the recovery action in 23B; the dead-UI path writes no snapshots |
+| Crash recovery dialog | N | Improvement | 23A/23B | Global exception boundary, log entry, and "open log folder" in 23A; captured dirty-session snapshots, the 2 s bounded async recovery writer, per-session status, and the recovery action in 23B; the dead-UI path writes no snapshots, and the autosave fallback is not failure-injected in PR-fast tests |
 | Application diagnostics | N | Deferred | 23A/23B | App-side environment report (distinct from CLI `doctor`) |
 | Particle/set editor | Y | Planned | 24 | |
 | Structure editor | Y | Planned | 24 | |

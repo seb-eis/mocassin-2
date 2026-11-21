@@ -143,8 +143,31 @@ format change, while older readers still round-trip it unchanged. Nested style v
   reclaimed; active locks are reported as `PROJ031`.
 - Lock release checks the token before deleting, so a session cannot remove another session's lock.
 - Autosave is an explicit `ProjectStore.WriteAutosaveAsync` operation. `ProjectDocument` exposes
-  `IsAutosaveDue` and `MarkAutosaved`; the UI timer is added in Step 23B.
+  `IsAutosaveDue` and `MarkAutosaved`; Step 23B's `AutosaveScheduler`/`AutosaveTimer` owns the UI tick.
 - Autosave does not update `modifiedUtc`; only a real save does.
+
+## Desktop editing, validation, and recovery (Step 23B)
+
+- `ProjectEditCoordinator` is the only writer. It delegates to `ProjectDocument`/`ProjectEditor`, exposes
+  `Apply`/`Undo`/`Redo`, and raises `ProjectChanged`/`EditRejected`; no Core event or second undo stack is added.
+  The GUI document uses `MaxUndoDepth = 200`; the library default remains unbounded.
+- The save point is content-based and calls the no-arg `ProjectDocument.MarkSaved()` so save → undo → redo is
+  clean. The store's returned `modifiedUtc` is not installed in the document.
+- Validation is seeded from the single retained `ProjectSession.Validation` and never re-runs on open. Edits
+  debounce 300 ms, run off-thread over an immutable snapshot, and apply only when the captured version/snapshot
+  is current. Statistics are an explicit, cached user action.
+- `ProjectSession` owns a per-session `SemaphoreSlim` gate and `IsClosing`; save/autosave/close/reload/recovery
+  serialize through it, and autosave skips busy/closing sessions. Close/reload return `UnsavedChanges` when a
+  dirty session has not been confirmed; cancel/failure clears `IsClosing`.
+- Recovery has three sources: the `<file>.autosave` sidecar, a fallback `recovery/` snapshot, and a crash
+  snapshot. A `mocassin.recovery` manifest is app-local. `RecoveryComparison` normalizes only `modifiedUtc` and
+  reads `ProjectDocument.IsDirty`, so the ViewModels layer never hashes. A deferred `PendingRecovery` candidate
+  is preserved across clean close and cleared by the first accepted content edit (not a no-op).
+- `recovery/` keeps a seven-day retention sweep; `.autosave` sidecars are never swept. A deferred `recovery/`
+  candidate can expire (accepted m-14 limitation).
+- The crash dialog captures dirty sessions on the UI thread and writes them asynchronously through
+  `CrashRecoveryWriter` with a 2 s budget. The dead-UI path writes no recovery files.
+- `autosave`/`session` are additive v1 settings blocks with no schema bump and no contract-manifest entry.
 
 ## Synchronous, pure compiler (Step 08)
 

@@ -7,6 +7,11 @@ the Step 08 compilation descriptors; the Step 07 descriptors; and the Step 12 CL
 page and the catalog disagree.
 Per-instance `hint` values are supplied by the producing rule and may be more specific.
 
+The desktop Problems channel renders the same catalog entries; a known code links to its anchor below and an
+unknown/unregistered code is intentionally unlinked. Edit-time structural rejections are transient `edit`
+entries with the same code/message; the read-only edit refusal is an app-level session message and deliberately
+has no diagnostic code. No GUI-specific codes are added.
+
 | Code | Severity | Owner | Title | Help |
 | --- | --- | --- | --- | --- |
 | [`CMP001`](#cmp001) | error | Step 08 — model compilation pipeline | A required compilation precondition failed | Correct the referenced model object or the compiler input, then compile again. |
