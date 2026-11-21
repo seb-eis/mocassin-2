@@ -278,27 +278,28 @@ evidence, dispatch one replacement closeout CI run, add resolutions, and request
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| F-1 | Fixed — Windows and macOS platform gates plus App.Tests were added to the workflow; run IDs recorded in closeout evidence | Step agent | `657bc5f` |
-| F-2 | Fixed — a fatal load blocks persistence; future-major file bytes are preserved and the user is told | Step agent | `657bc5f` |
-| F-3 | Fixed — HighContrast/Density resource dictionaries, motion transitions, and real brush/control consumers | Step agent | `657bc5f` |
-| F-4 | Fixed — recent projects are openable, missing entries disabled, removable, and Save As records the new path | Step agent | `657bc5f` |
-| F-5 | Fixed — shell key handler has the correct routed-event signature; Ctrl+1..9 and a generic key event are tested | Step agent | `657bc5f` |
-| F-6 | Fixed — light/dark/high-contrast screenshot baselines, accessibility-name sweep, and platform checklist | Step agent | `657bc5f` |
-| F-7 | Fixed — every App test class declares PR-fast or PR-medium; visual tests are PR-medium | Step agent | `657bc5f` |
-| F-8 | Fixed — choose/prompt/error/focus dialog tests, stale-lock test, duplicate-provider test, and real I/O settings-write test | Step agent | `657bc5f` |
-| F-9 | Fixed — dead WindowPlacementResolver and its test were removed; window placement is not claimed as persisted | Step agent | `657bc5f` |
-| F-10 | Fixed — read-only banner, lock acquisition text, and switcher lock/active-document display | Step agent | `657bc5f` |
-| F-11 | Fixed — guarded GetFullPath, New error dialog, and invalid-directory test | Step agent | `657bc5f` |
-| F-12 | Accepted note — crash log keeps exception/source; active-project and last-command context are deferred until the shell has a stable crash-context contract | Step agent | `657bc5f` |
-| F-13 | Fixed/recorded — unused App Results/Rendering references removed; IVT widening remains the recorded composition-root exception | Step agent | `657bc5f` |
-| F-14 | Accepted note — AOT evidence remains CLI-only and is documented as pre-existing evidence, not a GUI publication claim | Step agent | `657bc5f` |
-| F-15 | Fixed — SettingsService/validator use the platform path comparison; Linux case-distinct recents test added | Step agent | `657bc5f` |
+| F-1 | Fixed — platform jobs now run the Avalonia headless suite; Ubuntu 44849296444, Windows 44848841598, and macOS 44849147125 are green at `008b133` | Step agent | `008b133` |
+| F-2 | Fixed — a fatal load blocks persistence; future-major file bytes are preserved and the user is told | Step agent | `008b133` |
+| F-3 | Fixed — HighContrast/Density resource dictionaries, motion transitions, and real brush/control consumers | Step agent | `008b133` |
+| F-4 | Fixed — recent projects are openable, missing entries disabled, removable, and Save As records the new path | Step agent | `008b133` |
+| F-5 | Fixed — shell key handler has the correct routed-event signature; Ctrl+1..9 and a generic key event are tested | Step agent | `008b133` |
+| F-6 | Fixed — light/dark/high-contrast screenshot baselines (5 % Linux tolerance), accessibility-name sweep, and the manual platform checklist | Step agent | `008b133` |
+| F-7 | Fixed — every App test class declares PR-fast or PR-medium; visual tests are PR-medium | Step agent | `008b133` |
+| F-8 | Fixed — choose/prompt/error/focus dialog tests, stale-lock test, duplicate-provider test, and real I/O settings-write test | Step agent | `008b133` |
+| F-9 | Fixed — dead WindowPlacementResolver and its test were removed; window placement is not claimed as persisted | Step agent | `008b133` |
+| F-10 | Fixed — read-only banner, lock acquisition text, and switcher lock/active-document display | Step agent | `008b133` |
+| F-11 | Fixed — guarded GetFullPath, New error dialog, and invalid-directory test | Step agent | `008b133` |
+| F-12 | Accepted note — crash log keeps exception/source; active-project and last-command context are deferred until the shell has a stable crash-context contract | Step agent | `008b133` |
+| F-13 | Fixed/recorded — unused App Results/Rendering references removed; IVT widening remains the recorded composition-root exception | Step agent | `008b133` |
+| F-14 | Accepted note — AOT evidence remains CLI-only and is documented as pre-existing evidence, not a GUI publication claim | Step agent | `008b133` |
+| F-15 | Fixed — SettingsService/validator use the platform path comparison; Linux case-distinct recents test added | Step agent | `008b133` |
 
 ## Step agent re-audit status
 
-**State:** Re-audit required — round 1 fixes are integrated at `657bc5f`; the replacement closeout and platform
-runs are recorded in `docs/planning/closeout/step-23a.json`. The reviewer-authored `Record state` above remains
-the round-1 record.
+**State:** Re-audit required — round 1 fixes are integrated and frozen at `008b133`. Ubuntu closeout run
+44849296444, Windows gate run 44848841598, and macOS gate run 44849147125 are all green at that commit; the
+values are recorded in `docs/planning/closeout/step-23a.json`. `./tools/verify.sh all --require` exited 0 on the
+frozen tree. The reviewer-authored `Record state` above remains the round-1 record.
 
 ## Approval summary
 

@@ -1,24 +1,25 @@
 {
   "step": "step-23a",
-  "audit_commit": "6901e76f7897916820ac976c8d40eea6f2c79b4d",
+  "audit_commit": "008b133fd3ec35dc2167b7fa5d5e91e738e97d0b",
   "closeout_ci": {
-    "run_id": "44841374175",
-    "head_sha": "6901e76f7897916820ac976c8d40eea6f2c79b4d"
+    "run_id": "44849296444",
+    "head_sha": "008b133fd3ec35dc2167b7fa5d5e91e738e97d0b"
   },
   "main_sha_at_freeze": "bbc2d083ed96fa6e26526e335304107b20a7fdcb",
-  "merge_candidate": "6901e76f7897916820ac976c8d40eea6f2c79b4d",
+  "merge_candidate": "008b133fd3ec35dc2167b7fa5d5e91e738e97d0b",
   "merge_tree_ci": {
     "run_id": "",
     "head_sha": ""
   },
-  "platform_ci": "not run (one Ubuntu closeout dispatch per assignment; the Windows/macOS platform gate is deferred and recorded as an accepted residual risk in the audit request)",
+  "platform_ci": "windows run 44848841598 at 008b133fd3ec35dc2167b7fa5d5e91e738e97d0b (green, https://github.com/seb-eis/mocassin-2/actions/runs/44848841598); macos run 44849147125 at 008b133fd3ec35dc2167b7fa5d5e91e738e97d0b (green, https://github.com/seb-eis/mocassin-2/actions/runs/44849147125)",
   "tag": "",
   "notes": [
-    "Closeout CI run 44841374175 is the single Ubuntu workflow_dispatch at audited commit 6901e76f7897916820ac976c8d40eea6f2c79b4d (platforms=ubuntu, force_all=false). It is green: Detect changes, .NET (ubuntu-latest), Contracts and policy, and Public API compatibility succeeded; Rust and Python were skipped by their path filters because this step changes no Rust or Python paths.",
-    "main bbc2d083ed96fa6e26526e335304107b20a7fdcb was merged into the step branch as ff06139 before this freeze; the audited commit includes that merge. main has not moved since, so no merge-tree run applies.",
-    "Local gate: ./tools/verify.sh all --require exited 0 on audited commit 6901e76f7897916820ac976c8d40eea6f2c79b4d, including the strict documentation build, DocFX, rustdoc, contracts/policy, and the AOT evidence gate. The AOT CLI publish reports 62 IL diagnostics as recorded evidence; the gate's documented policy treats that as evidence, not a failure.",
-    "The single Ubuntu dispatch is the only step-branch CI run; no per-feature CI was run. Windows/macOS platform gates are not recorded for this step and remain an accepted residual risk for the auditor and owner.",
-    "The closeout evidence commit follows the audited commit and is documentation-only (this evidence file, the audit record, the step page, and the status dashboard). No code, test, contract, or configuration file changes after 6901e76f7897916820ac976c8d40eea6f2c79b4d.",
+    "Ubuntu closeout CI run 44849296444 is the workflow_dispatch at audited commit 008b133fd3ec35dc2167b7fa5d5e91e738e97d0b (platforms=ubuntu, force_all=false). It is green: Detect changes, .NET (ubuntu-latest), Contracts and policy, Public API compatibility, Rust, and Python all succeeded.",
+    "Windows platform gate run 44848841598 and macOS platform gate run 44849147125 were dispatched at the same commit and are green. Both execute the focused platform job: Release build of Mocassin.slnx plus Mocassin.App.Tests (Avalonia headless workspace), Mocassin.Packages.Tests, Mocassin.Results.Tests, and Mocassin.Cli.Tests. Both ran .NET (windows-latest)/.NET (macos-latest) as the only jobs because the path filters skip the other jobs.",
+    "Platform dispatches for the same ref must be sequential: the ci.yml concurrency group ci-${{ github.ref }} with cancel-in-progress cancels a newer dispatch's predecessor. An earlier overlapping macos dispatch (44848581131) and the cancelled windows/macos siblings (44848573930, 44848565915) are not evidence; only the three sequential runs above count.",
+    "main bbc2d083ed96fa6e26526e335304107b20a7fdcb is an ancestor of the audited commit and has not moved since the freeze, so no merge-tree run applies.",
+    "Local gate: ./tools/verify.sh all --require exited 0 on the fixed tree at commit 008b133, including the strict documentation build, DocFX, rustdoc, contracts/policy, structure, and the AOT evidence gate. The AOT CLI publish reports 62 IL diagnostics as recorded evidence; the gate's documented policy treats that as evidence, not a failure.",
+    "No code, test, contract, or configuration file changes after 008b133fd3ec35dc2167b7fa5d5e91e738e97d0b. The closeout evidence commit, the audit-record resolutions, the step page, and the status dashboard are documentation-only.",
     "Step 23A is tagged only after an audit pass and owner approval; tag is intentionally empty at this freeze."
   ]
 }

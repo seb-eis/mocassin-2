@@ -17,6 +17,10 @@ Ubuntu runs the complete suite, including the screenshot comparison. Windows and
 screenshots because text rendering differs; their screenshot evidence is manual and recorded with the platform
 run.
 
+Dispatch the Ubuntu, Windows, and macOS runs one at a time. `ci.yml` uses the concurrency group
+`ci-${{ github.ref }}` with `cancel-in-progress: true`, so a second dispatch for the same ref cancels the run
+already in progress.
+
 | Runner | Automated headless suite | Screenshot comparison | Real-window checklist |
 | --- | --- | --- | --- |
 | Ubuntu | Yes — full suite | Yes — checked-in light/dark/high-contrast baselines with a 5 % pixel tolerance | Manual desktop session |

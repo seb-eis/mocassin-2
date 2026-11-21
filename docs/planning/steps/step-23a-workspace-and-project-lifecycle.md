@@ -19,9 +19,9 @@ those are Step 23B.
 
 ## Implementation status
 
-- **Status:** Re-audit required — round 1 fixes integrated; replacement CI/platform runs pending
+- **Status:** Re-audit required — round 1 fixes frozen at `008b133`; Ubuntu, Windows, and macOS gates green
 - **Step branch:** `step/23a-workspace-and-project-lifecycle`
-- **Step CI:** replacement Ubuntu closeout and Windows/macOS platform gates pending at the new audited commit
+- **Step CI:** Ubuntu closeout [44849296444](https://github.com/seb-eis/mocassin-2/actions/runs/44849296444), Windows gate [44848841598](https://github.com/seb-eis/mocassin-2/actions/runs/44848841598), macOS gate [44849147125](https://github.com/seb-eis/mocassin-2/actions/runs/44849147125) — all green at `008b133`
 - **Main merge:** — (`bbc2d08` is merged into the step branch; merge is after a passing audit)
 - **Step tag:** —
 - **Audit:** Re-audit required — [record](../audits/step-23a.md), [evidence](../closeout/step-23a.json)
@@ -42,7 +42,7 @@ those are Step 23B.
 | 3 | `settings-theming-and-accessibility` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0 | — (none run) | `d0bca73` |
 | 4 | `project-session-lifecycle` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0 | — (none run) | `a17482a` |
 | 5 | `tests-docs-and-closeout` | Squashed | `./tools/verify.sh all --require` 0 on the merged tree | Ubuntu [44841374175](https://github.com/seb-eis/mocassin-2/actions/runs/44841374175) green at `6901e76` | `114f31c` |
-| 5-fix | `fix-audit-round-1` | Squashed | `./tools/verify.sh all --require` on the fixed tree | replacement closeout/platform gates pending | `657bc5f` |
+| 5-fix | `fix-audit-round-1` | Squashed | `./tools/verify.sh all --require` 0 on the fixed tree at `008b133` | Ubuntu [44849296444](https://github.com/seb-eis/mocassin-2/actions/runs/44849296444), Windows [44848841598](https://github.com/seb-eis/mocassin-2/actions/runs/44848841598), macOS [44849147125](https://github.com/seb-eis/mocassin-2/actions/runs/44849147125) green at `008b133` | `657bc5f`, `008b133` |
 
 ### Recorded implementation deviations and limitations (feature 5)
 
@@ -85,12 +85,12 @@ approval. 23B is not part of this list and must not appear in a 23A branch.
 
 | Finding | Resolution |
 | --- | --- |
-| F-1 | Added macOS/Windows dispatch support for the Avalonia headless suite; replacement Ubuntu + Windows + macOS runs are recorded in closeout evidence. |
+| F-1 | Platform jobs now run the Avalonia headless suite; Ubuntu 44849296444, Windows 44848841598, and macOS 44849147125 are green at `008b133`, recorded in the closeout evidence. |
 | F-2 | A fatal settings load now blocks persistence, preserves the file, updates only in-memory state, and reports the rejection. |
 | F-3 | Added `HighContrast.axaml` and `Density.axaml`, real brush/control styles, and reduce-motion transitions. |
 | F-4 | Recent projects are openable, missing entries disabled, removable, and Save As records the new path; welcome/documentation updated. |
 | F-5 | Added the correct two-parameter shell key handler, `Ctrl+1..9` activation, and a real-key headless regression test. |
-| F-6 | Added light/dark/high-contrast screenshot baselines, the accessibility-name sweep, and the manual platform checklist. |
+| F-6 | Added light/dark/high-contrast screenshot baselines with a 5 % Linux pixel tolerance, the accessibility-name sweep, and the manual platform checklist. Windows/macOS do not pixel-compare. |
 | F-7 | Declared PR-fast/PR-medium tiers across the App test classes. |
 | F-8 | Added choose/prompt/error/focus dialog tests, stale-lock and duplicate-provider tests, and a real I/O settings-write test. |
 | F-9 | Removed the dead `WindowPlacementResolver` and its tests; placement persistence is no longer claimed. |
@@ -100,6 +100,16 @@ approval. 23B is not part of this list and must not appear in a 23A branch.
 | F-13 | Removed unused App `Results`/`Rendering` references; the composition-root IVT remains the recorded exception. |
 | F-14 | Recorded as an accepted note: AOT is CLI-only pre-existing evidence, not a GUI publication claim. |
 | F-15 | Fixed platform recents comparison; added a Linux case-distinct test. |
+
+Platform stabilization after the first Windows run:
+
+- Layout persistence is serialized through a single pending task and reports write failures to the console, so
+  rapid region toggles cannot interleave and the last layout wins.
+- `TempWorkspace` retries recursive deletion for a bounded time because asynchronous persistence can still hold
+  a temporary file on Windows; the regression test asserts the last layout is persisted and no `.tmp` file
+  remains.
+- The Windows run exposed a cross-platform assertion in `ProjectPathRulesTests`; it now compares against
+  `Path.GetFullPath`.
 
 ## Goal
 
