@@ -678,3 +678,129 @@ Follow-up owner: Human owner (accept `Ready with notes` with A2-R3-01…A2-R3-03
 correction); planner for the A2-R3-01 construction-path wording.
 Follow-up step: `step-11.1` implementation after the owner decision; `step-11` remains tagged and is not moved;
 the Step 14 design branch (`87be9de`) and the F-29 record (`1ea8090`) remain the separate consumers.
+
+### Re-review round 4
+
+#### Independence and frozen state
+
+I am a fresh context spawned by the orchestrator for this re-review. I did not author or implement the amendment
+or the parent Step 11 design, I did not participate in rounds 1–3, and I have no shared conversation with the
+planner, implementors, the earlier reviewers, or the orchestrator. I read the repository at the frozen design
+commit `bf273ff5cf9f17f66ec48669e39d010006c4d0a9`; the record HEAD
+`4e6c0b5b3d859370feccaa831838d68b8187c574` is a record-only follow-up (`git diff --name-status bf273ff 4e6c0b5`
+→ `M docs/planning/reviews/step-11-amend-2.md` only). The freeze itself
+(`git diff --name-status 5112180 bf273ff`) is five files: the amendment page, `05-open-decisions.md`,
+`audits/README.md`, `closeout/README.md`, and this record; the whole amendment branch
+(`git diff --stat bbc2d08 bf273ff`) is 14 files, all under `docs/`, with no `src/`, `tests/`, `contracts/`,
+`tools/`, or generated-artifact entry. I edited only this record; `git status --short` was empty before the edit.
+The human owner approves the verdict and the start gate; this record is evidence, not an approval.
+
+#### Commands and results
+
+| Command | Result |
+| --- | --- |
+| `./tools/verify.sh docs --require` | exit 0; .NET Release build for DocFX, Zensical strict build ("Documentation built …"), DocFX, rustdoc for all crates, "Closeout gate completed with required checks enabled." |
+| `./tools/verify.sh policy --require` | exit 0; ApiCompat clean for every project, 26 contract artifacts current, model/parameterization/lattice projection checks OK (5/4/2 fixtures), space-group catalog current (274 settings), process consistency OK, 60 process tests OK, SPDX 780 files, secrets 1218 files, advisories/bans/licenses/sources OK. |
+| `python tools/check_doc_math.py` | exit 0; 180 files scanned, conventions OK. |
+| `git diff --name-status bf273ff 4e6c0b5` | `M docs/planning/reviews/step-11-amend-2.md` only (record-only follow-up). |
+| `git diff --name-status 5112180 bf273ff` | five `docs/` files; no code, test, configuration, contract, generated artifact, or fixture. |
+| `git diff --stat bbc2d08 bf273ff` | 14 files, 1,621 insertions, 13 deletions, all under `docs/`. |
+| `git merge-base --is-ancestor bbc2d08 bf273ff` | succeeds: the pre-map fixture's parent writer is on the frozen history. |
+| `git tag --list 'v*'`; `git tag --list 'step-11*'` | no release tag; only `step-11` (annotated); no `step-11.1`. |
+| `git status --short` before the record edit | empty. |
+
+Code and page inspections (read-only, no edit):
+
+- Rust construction surface: `src/rust/crates/mocassin-types/src/runtime/energy.rs:27-36` is an all-public
+  `ClusterTable` with no `impl`/constructor; `grep -rn 'ClusterTable {' src/rust` finds exactly two literals,
+  `mocassin-msl/src/map/model.rs:258` and `mocassin-msl/tests/projections.rs:142`; `grep` finds no
+  `ClusterTable::new`. `src/rust/Cargo.toml:45` sets `missing_docs = "deny"`.
+- Rust scan/decode order: `src/rust/crates/mocassin-msl/src/decode.rs:113-125` calls `scan::scan_model` before
+  `rmp_serde::from_slice`; `package.rs:400-407` decompresses under `max_model_payload_bytes` then calls
+  `decode_model_payload`.
+- .NET decode: `src/dotnet/Mocassin.Results/Packages/Internal/PackageReader.cs:248` is the only production
+  `TryDecode<ModelPayload>` site (the other model decode is the writer's trusted
+  `Mocassin.Packages/.../PayloadEncoder.cs:63`); `PackagePayloadDecoder.cs:29-79` decompresses then calls
+  `MessagePackSerializer.Deserialize<TPayload>`, so a model-specific overload can run the scan between those two
+  steps.
+- Process pages: `docs/planning/audits/README.md:103-122` ("Post-merge amendment audits", owner-approved
+  2026-11-21), `docs/planning/closeout/README.md:12-29`, and
+  `docs/planning/audits/step-audit-template.md:19-25` carry the audit-record evidence rule; the checker's
+  `STEP_RE` remains `^step-\d{2}[a-z]?$`; `05-open-decisions.md` item 7 is resolved to it.
+- Signature/version: `contracts/manifest.json` model `energy` remains an open object, the policy gate reports 26
+  artifacts current, `signatures.model` still binds every expansion code/permutation index, the parameterization
+  projection is the six-field values-only list, `package-summary-v1` has no code-level fields, and the freeze has
+  no `contracts/**` diff.
+
+#### A2-R3 finding closure
+
+| Finding | Round-4 status | Evidence |
+| --- | --- | --- |
+| A2-R3-01 (Minor) | **Closed.** One construction path is specified: the all-public-field struct literal, with `expansions: Option<ClusterExpansions>` as `#[doc(hidden)] pub` and no constructor/builder. `map_energy` (`map/model.rs:258`) and the external integration test (`tests/projections.rs:142`) are the only two `ClusterTable` literals; the test literal is extended with `expansions: None`. A `pub` field is constructible from `mocassin-msl`, so the cross-crate path compiles as written; `missing_docs = "deny"` (`src/rust/Cargo.toml:45`) is satisfied by the required doc comment on the field, `#[doc(hidden)]` keeps it out of rustdoc, `lookup` remains the documented semantic API, and the future `ClusterTable::new`/builder private-field change is recorded as a separate public-API change. | Amendment §6.1 payload/runtime bullets and the "Construction path (A2-R3-01)" bullet; `runtime/energy.rs:27-36`; `map/model.rs:258`; `tests/projections.rs:142`; `src/rust/Cargo.toml:45`. |
+| A2-R3-02 (Note) | **Closed.** §9.2's `amend-2-pre-map` row now returns `ClusterCodeLookup::ExpansionMapAbsent` (or `canonical_index(...).is_none()` if the convenience is kept), §9.3's "Rust reader: absent map" row uses `lookup`/`ExpansionMapAbsent` and states the test does not read the hidden `expansions` field, and no remaining test row describes the absent result as `expansions == None`. | Amendment §6.1 `lookup`, §9.2 pre-map row, §9.3 absent-map row. |
+| A2-R3-03 (Note) | **Closed.** The .NET decode-budget row now includes "a raised `MaxClusterExpansionBytes` accepts the same package the default rejects", matching the Rust row's "a raised limit accepts it"; the budget matrix is complete on both readers. | Amendment §9.3 ".NET decode budget" and "Rust read budget" rows; §5 option. |
+
+#### Re-confirmed closures and unchanged claims
+
+- **A2-01 (Major)**: the false 8-byte/1.5× argument is withdrawn from the amendment, `02-data-contracts.md`
+  §3.3/§3.4, and `msl-format.md`; all three carry the explicit cumulative `Σ(8E + 4I)` budget (128 MiB default,
+  raisable) with `E != I` and duplicate-key rejection before allocation and the derived 11,184,810-entry cap.
+- **A2-02…A2-06**: the optional-key `scan_map_optional` path with `CLUSTER_TABLE_KEYS` unchanged, the preserved
+  four-argument `ClusterTablePayload` constructor plus manual four-argument `Deconstruct` (both still in
+  `PublicAPI.Unshipped.txt:55-67`), the nested-map `ignore` policy, the completeness-plus-superset coverage proof
+  with the asymmetric-allowed-set case, and the byte-fixed non-singleton pre-map fixture built by the parent
+  writer at `bbc2d08` (an ancestor of the freeze) are all intact.
+- **A2-07 page-level process amendment**: `audits/README.md` §3.1, `closeout/README.md`, and
+  `step-audit-template.md` make the amendment's audit record the single evidence source for the audited commit,
+  closeout CI run and `head_sha`, `main` SHA at freeze, merge commit, merge-tree CI, platform CI, and tag; the
+  parent `closeout/step-NN.json` stays historical and the checker is not run. The owner approvals (2026-11-21)
+  are recorded in this record's `## Human approval`, the amendment's "Owner approvals" section, and the two
+  normative pages. No page claims a machine-checkable `step-11.1` evidence file.
+- **A2-08/A2-09/A2-10/A2-11**: the Step 14 page names `87be9de`/`1ea8090`, states that the `main` page is only
+  the discoverable pointer, and keeps F-29's formal closure a Step 14 gate; the non-existent Step 13 "API note"
+  pointer is replaced by amendment §5/§6.1 (the Step 13 page has no such section); §8/§9.1 require the
+  `samples/README.md` row and the sample README; ADR 0013's addendum requires absence to fail closed with an
+  actionable error, never a wrong value, and names the pre-map non-singleton table as the first application.
+- **A2-R2-01 budget ordering**: the cost is `Σ(8E + 4I)`, both scans reject `E != I` and duplicate known keys at
+  scan time, and both run before the typed arrays are allocated. Rust `decode_model_payload` calls `scan_model`
+  before `rmp_serde::from_slice` (`decode.rs:113-125`); the .NET pre-scan is a model decode overload before
+  `MessagePackSerializer.Deserialize` at the only production model decode site (`PackageReader.cs:248`,
+  `PackagePayloadDecoder.cs:29-79`); `map/model.rs` re-checks equality and the cumulative budget as defence in
+  depth.
+- **A2-R2-02/A2-R2-03/A2-R2-04**: the single three-way `ClusterTable::lookup` remains the supported accessor;
+  `audits/README.md` says `closeout/step-NN.json`; and the request's `Reviewed commit` cell and round-4 freeze
+  note both name `bf273ff`, with the round-1 note labelled historical.
+- **Signature, version, and summary**: no signed projection changes, `format_version` stays 1 while `.msl` is
+  unreleased, the manifest model `energy` stays an open object, `package-summary-v1` is unchanged, no `v*`
+  release tag exists, and `step-11` is unchanged.
+
+#### Findings
+
+No new findings. The round-3 construction-path, test-wording, and .NET raised-limit corrections are closed, the
+earlier closures and the approved A2-07 process amendment are intact, and the design remains internally
+consistent and compile-as-written.
+
+**Severity counts:** 0 Blocker, 0 Major, 0 Minor, 0 Note.
+
+#### Verdict
+
+- [x] Ready for implementation
+- [ ] Ready with notes
+- [ ] Changes required
+- [ ] Waived
+
+**Ready for implementation.** A2-R3-01 is genuinely closed: the amendment now specifies one construction path
+(the existing all-public struct literal with a `#[doc(hidden)] pub` field), which compiles across the two
+`mocassin-msl` construction sites without a constructor, satisfies the workspace `missing_docs = "deny"` lint
+through the field's doc comment, keeps the field out of rustdoc, leaves `lookup` as the semantic API, and
+records the future private-field/builder change separately. A2-R3-02 and A2-R3-03 are closed by the §9.2/§9.3
+`lookup`/`ExpansionMapAbsent` wording and the .NET raised-limit acceptance row. All round-1 and round-2 findings
+remain closed; the `Σ(8E + 4I)` scan-before-allocation ordering holds on both read paths; the signature,
+version, summary, and unreleased-v1 claims hold; the A2-07 process amendment is owner-approved with the
+audit-record evidence rule. No Blocker, Major, Minor, or Note remains. This verdict is evidence; the human owner
+accepts it and authorizes the start gate.
+
+Follow-up owner: Human owner (accept `Ready for implementation` and authorize the implementation start).
+Follow-up step: `step-11.1` implementation on the maintenance branch after approval; `step-11` remains tagged
+and is not moved; the Step 14 design branch (`87be9de`) and the F-29 record (`1ea8090`) remain the separate
+consumers.
