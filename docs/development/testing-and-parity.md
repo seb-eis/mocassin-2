@@ -110,6 +110,41 @@ or SQLite. Prefer real temporary directories and real files produced by the real
 - Tests use real files, real SQLite, and the real checked-in packages. There are no mocks in the reader; the only
   process boundary is the CLI exit-code test, which runs the built binary.
 
+## Simulation context (Step 14)
+
+- **Fixtures.** The context consumes the existing real-writer packages unchanged (`msl-v1`, `amend-1-net10`,
+  `step-13-populated`, `step-13-centered`, `step-11-amend-2`, `amend-2-pre-map`) and adds two PR-medium
+  artifacts: `tests/contracts/packages/step-14-ceria-10x10x10/` (one KMC job on the ceria primary model at
+  10×10×10; 4,000 environments, table-free) and `tests/contracts/packages/step-14-multi-centre-cluster/` (a
+  C-centered MMC derivation with an A-centred two-member cluster; 12 P1 positions, 12 pair tables, 1 cluster
+  table). The Step 13 `step-13-centered` fixture stays byte-identical. Both fixtures have a fixed writer
+  timestamp, a canonical summary, a SHA-256 line, extracted payloads, a README with provenance/regeneration, a
+  .NET rebuild test, and a regeneration command.
+- **Context tests.** The Rust `context_skeleton`, `context_links`, `context_clusters`, `context_energy`,
+  `context_pools`, `context_jumps`, `context_goals`, `context_resume`, and `context_fixtures` tests cover the
+  dimension/index contract, limits and the checked memory plan, the owner-major link/inverse CSRs, cluster
+  geometry/codes/energies, pools and jump status, goals/normalization, resume, and the fixture acceptance. The
+  `context_fixtures` test snapshots the 10×10×10 summary (counts, link histogram, pool sizes, jump sizes,
+  goals, normalization, trackers) and asserts two initializations agree; the multi-centre test asserts four
+  one-per-slot-0-link instances and the per-instance code→energy mapping with a synthetic distinct-energy table.
+- **Allocation proof.** `tests/allocation.rs` is its own test binary with a counting global allocator. It
+  asserts the report covers the plan, the per-array capacities are at least the plan, the 10×10×10 and populated
+  builds allocate only the planned arrays plus temporary construction buffers, and the hot accessors plus 200
+  pool `set_selectable` cycles allocate nothing after construction.
+- **Benchmark.** `benches/context.rs` measures the 10×10×10 real-writer fixture and the populated clone with
+  Criterion; the medians (75.6 µs / 315.3 µs on the recorded runner class), memory plans, allocation numbers,
+  and the `rustContext` baseline entry are in
+  [`step-14-context.json`](../../tests/reference/bench/step-14-context.json). The 10 % rule is applied within
+  the recorded class only; Step 29 owns the automated same-class regression job.
+- **Void members.** A cluster cell with a void member has no canonical occupation row and contributes zero; the
+  resumed-lattice test exercises it. Step 15 must not call `cluster_lookup` for such a tuple (it uses
+  `cluster_code_id`/the zero energy row). The amendment-2 fail-closed behavior for non-canonical non-void
+  tuples is unchanged.
+- **Tiers.** The index/wrap, links/clusters, codes, energy vectors, pools, jump status, goals, resume, limits,
+  cancellation, `Send`/`!Sync`, and allocation tests are PR-fast; the real packages, the two new fixtures, and
+  the 10×10×10 acceptance are PR-medium; the Criterion benchmark and the 500k-position stress are
+  nightly/manual.
+
 ## Avalonia workspace (Step 23A)
 
 - `Mocassin.App.Tests` references the app, view models, and views and uses the first-party `Avalonia.Headless`

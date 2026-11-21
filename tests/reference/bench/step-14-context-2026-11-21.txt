@@ -1,0 +1,25 @@
+   Compiling mocassin-solver v0.1.0 (/home/node/worktrees/step-14-feature6/src/rust/crates/mocassin-solver)
+    Finished `bench` profile [optimized] target(s) in 0.86s
+     Running benches/context.rs (src/rust/target/release/deps/context-0a455d8ae6cdf293)
+Gnuplot not found, using plotters backend
+Benchmarking context/ceria_10x10x10
+Benchmarking context/ceria_10x10x10: Warming up for 3.0000 s
+Benchmarking context/ceria_10x10x10: Collecting 100 samples in estimated 5.3132 s (50k iterations)
+Benchmarking context/ceria_10x10x10: Analyzing
+context/ceria_10x10x10  time:   [74.908 µs 75.565 µs 76.269 µs]
+                        change: [+11.971% +15.616% +19.524%] (p = 0.00 < 0.05)
+                        Performance has regressed.
+Found 4 outliers among 100 measurements (4.00%)
+  4 (4.00%) high mild
+Benchmarking context/populated_clone_10x10x10
+Benchmarking context/populated_clone_10x10x10: Warming up for 3.0000 s
+Benchmarking context/populated_clone_10x10x10: Collecting 100 samples in estimated 6.3030 s (20k iterations)
+Benchmarking context/populated_clone_10x10x10: Analyzing
+context/populated_clone_10x10x10
+                        time:   [313.18 µs 315.26 µs 317.73 µs]
+                        change: [−2.7956% −1.7008% −0.5970%] (p = 0.00 < 0.05)
+                        Change within noise threshold.
+Found 3 outliers among 100 measurements (3.00%)
+  2 (2.00%) high mild
+  1 (1.00%) high severe
+

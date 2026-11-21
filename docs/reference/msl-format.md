@@ -174,6 +174,22 @@ The exact contract and the writer coverage argument are in
 [`02-data-contracts.md` §3.3](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/02-data-contracts.md#33-compiled-model-payload)
 and [Step 11 amendment 2](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/amendments/step-11-amend-2-cluster-code-expansion.md).
 
+### Solver cluster geometry and the void-member rule
+
+A cluster link is `{cluster_id, byte_position}` and does **not** persist the member's relative cell offset. The
+Step 14 context derives each instance's member image from the centre's own pair links (the candidate position
+first, then the unique member-site image for a multi-centre table) and fails closed when the image is absent or
+ambiguous (OD-1). A cluster table can have one slot-0 link per P1 position of its centre site, so the context
+builds **one instance per slot-0 link**; the committed
+`tests/contracts/packages/step-14-multi-centre-cluster/` package
+exercises four instances for the four-position A site.
+
+The occupation table enumerates only the site's allowed **non-void** particles. A slot whose current particle is
+void therefore has no canonical occupation row; its cluster contribution is **zero** (the empty cluster), not a
+missing-code error. The solver must not call the cluster lookup for a void-member tuple; `cluster_code_id` is
+absent and the per-cell energy row is zero. A non-canonical **non-void** tuple remains the fail-closed
+`code_expansions` case above.
+
 ## Canonical summary (`package-summary-v1`)
 
 `MslPackageInspector.BuildCanonicalSummaryAsync` projects a package to `package-summary-v1`, a normalized JSON
