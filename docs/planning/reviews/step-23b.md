@@ -95,9 +95,9 @@ that result and does not revalidate on open.
 - [ ] **Save point.** The save calls `MarkSaved()` (no-arg) and does not install the store's returned
       `modifiedUtc`; the four save-point consequences and the in-memory timestamp display are documented. Verify
       the redo-after-save trace and that the 23A `MarkSaved(savedProject)` call is changed.
-- [ ] **Undo depth.** `MaxUndoDepth` is init-only, default 200; Step 01 was unbounded, so the default is a
-      deliberate behaviour change. Verify the property is additive, the CLI is unaffected, and invalid values
-      are rejected.
+- [ ] **Undo depth.** `MaxUndoDepth` is init-only, default `0` (unbounded, preserving Step 01); the GUI sets
+      200; negative values are rejected. Verify the property is additive, the GUI construction sets 200, and
+      the boundary/unbounded cases are tested.
 - [ ] **No untitled-project model.** 23A's New writes the file immediately; 23B introduces no untitled session
       and uses `recovery/` only for crash snapshots/manifest-backed fallbacks. Verify this reconciles the
       superseded unsplit wording and the parity/open-decision rows.

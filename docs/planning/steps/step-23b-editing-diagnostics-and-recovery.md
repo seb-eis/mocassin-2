@@ -145,9 +145,9 @@ internal sealed partial class ProjectEditCoordinator : ObservableObject
 }
 ```
 
-- One coordinator per project, created by `ProjectSessionService` and owned by `ProjectSession`. It is the
-  **only** write path: view models never mutate a `Project` or a domain object, never call `ProjectHasher`, and
-  never build a `ProjectChange`.
+- One coordinator per project, created by `ProjectSessionService` and owned by `ProjectSession`. The GUI
+  constructs its `ProjectDocument` with `MaxUndoDepth = 200`. It is the **only** write path: view models never
+  mutate a `Project` or a domain object, never call `ProjectHasher`, and never build a `ProjectChange`.
 - `Apply` delegates to `ProjectDocument.Apply` → `ProjectEditor.Apply`, whose validator is the Step 01
   `ProjectValidator`. That is the **structural** validator (identity, seed, metadata, required fields, references
   within the document), not the full `ProjectValidationPipeline`: an edit that is structurally valid but
@@ -157,8 +157,9 @@ internal sealed partial class ProjectEditCoordinator : ObservableObject
   project, undo/redo stacks, save point, and dirty state unchanged. The initiating document shows the inline
   error; the active Problems channel appends the same diagnostics with source `edit`. The coordinator does not
   reach into the Problems view model itself.
-- `Undo`/`Redo` delegate to `ProjectDocument`; the stack is bounded by `MaxUndoDepth` (default 200, §10), oldest
-  entries dropped first. The stack survives saves; the save point is content-based.
+- `Undo`/`Redo` delegate to `ProjectDocument`; the stack is bounded by `MaxUndoDepth` (`0` = unbounded by
+  default; the GUI constructs its documents with 200, §10), oldest entries dropped first. The stack survives
+  saves; the save point is content-based.
 - `CanEdit` is false for a read-only session; `Apply` returns a `ReadOnly` diagnostic and changes nothing.
 - Every successful apply/undo/redo raises `ProjectChanged` with the previous and current project values and the
   description. The shell refreshes titles, markers, status bar, the Overview and JSON documents, and schedules
@@ -200,8 +201,8 @@ validation coordinator is re-seeded from the replacement session state, not from
 - 23A's `SaveAsync`/`SaveAsAsync` currently call `MarkSaved(result.SavedProject!)`; feature 3 changes both calls
   to `MarkSaved()` and keeps the returned value only for the stamp. This is an internal 23A seam change, listed
   in §11.
-- `ProjectDocument.CreateRecovered(current, lastSaved)` is the recovery entry point: the current snapshot is the
-  document value and the saved file is the clean point. It clears both stacks.
+- `ProjectDocument.CreateRecovered(current, lastSaved, maxUndoDepth: 200)` is the recovery entry point: the
+  current snapshot is the document value and the saved file is the clean point. It clears both stacks.
 
 ### 3. Validation surface
 
@@ -447,8 +448,8 @@ Two additive Core changes; no Packages change and no App public surface change.
 
 | Change | Where | Why the shell cannot own it | Contract effect |
 | --- | --- | --- | --- |
-| `ProjectDocument.MaxUndoDepth` (init-only, default 200) | `Mocassin.Core.Editing` | The stack lives in the document; a UI-level bound would shadow it | Additive property. The default bounds the stack for every consumer; Step 01 was unbounded, so this is a deliberate behaviour change documented here. Values below 1 are rejected when an edit is applied. The CLI never constructs a `ProjectDocument` |
-| `ProjectDocument.CreateRecovered(Project current, Project lastSaved, ProjectEditor? editor = null)` | `Mocassin.Core.Editing` | Recovery needs a clean point different from the current value; `MarkSaved(value)` overwrites both | Additive static factory; constructors unchanged |
+| `ProjectDocument.MaxUndoDepth` (init-only, default `0` = unbounded) | `Mocassin.Core.Editing` | The stack lives in the document; a UI-level bound would shadow it | Additive property; the default preserves Step 01's unbounded behaviour. The GUI constructs its documents with `MaxUndoDepth = 200`. Negative values are rejected when an edit is applied; `0` is unbounded |
+| `ProjectDocument.CreateRecovered(Project current, Project lastSaved, ProjectEditor? editor = null, int maxUndoDepth = 0)` | `Mocassin.Core.Editing` | Recovery needs a clean point different from the current value; `MarkSaved(value)` overwrites both | Additive static factory; constructors unchanged. The GUI passes `maxUndoDepth: 200`; the default `0` is unbounded |
 
 - **No `ProjectStore.WriteAutosaveToPathAsync`.** The Step 01 `WriteAutosaveAsync(project, projectPath)` derives
   `<projectPath>.autosave`; passing the recovery base path `<app-data>/recovery/<projectId>.mocprj` writes the
@@ -516,7 +517,7 @@ dispatcher, time, and the in-memory `IRecoveryStore`/`IAppSettingsStore` for non
 | --- | --- | --- |
 | Validation initial result | PR-fast | Opening a session uses the retained `ProjectSession.Validation`; the coordinator does not run the pipeline on open; a null retained result shows `Not validated`; an edit starts exactly one run |
 | Validation contract (M-1/m-14) | PR-fast | A load/migration fixture yields `Load` `Completed`/`Failed` and reaches Problems; a clean fixture yields `Skipped` with count 0; no duplicate diagnostics; `ValidateFileAsync` is unused; the store has `ValidateOnLoad == false` |
-| Undo/redo | PR-fast | Multi-step apply/undo/redo through the Overview document; save → undo → redo clean; save → edit → undo clean; undo below the save point dirty; bounded depth drops the oldest; a new edit clears redo; `MaxUndoDepth < 1` is rejected |
+| Undo/redo | PR-fast | Multi-step apply/undo/redo through the Overview document; save → undo → redo clean; save → edit → undo clean; undo below the save point dirty; the GUI document uses 200 and drops the oldest; a new edit clears redo; a negative `MaxUndoDepth` is rejected and 0 is unbounded |
 | Rejected edit | PR-fast | A structural failure leaves the project, stacks, dirty state, and save point unchanged and raises `EditRejected`; a cross-domain-invalid but structurally valid edit is accepted and reported by validation |
 | Read-only | PR-fast | Every `Apply` on a read-only session returns `ReadOnly` and changes nothing |
 | Validation surface | PR-fast | Debounce coalesces edits; a stale result is discarded by `DocumentHash`; counts/codes match `ValidationResult`; double-click requests the registered target; an unknown domain produces a notice; a metadata path focuses the Overview field; an unknown code is unlinked |
@@ -540,7 +541,7 @@ PR-fast test; the only test time limit is a hang guard.
 | Risk | Mitigation |
 | --- | --- |
 | Undo/redo complexity | Reuses the Step 01 `ProjectDocument`; no second stack; save-point matrix |
-| `MaxUndoDepth` changes Step 01's unbounded behaviour | Documented as a deliberate bound, default 200, tested at the boundary; the CLI is unaffected |
+| `MaxUndoDepth` semantics | Default 0 (unbounded) preserves Step 01; the GUI sets 200; negative values rejected; the boundary is tested |
 | Edit validation is structural only | `Apply` uses `ProjectValidator`; the full pipeline is the advisory surface and the step page states the difference |
 | Validation cost/threading | Initial result is reused; 300 ms debounce; stale-result guard; off-thread; one pipeline |
 | Autosave/save races | Per-session semaphore; immutable snapshots; atomic writes from the store; tick skips closing sessions |
@@ -599,7 +600,7 @@ amendment before feature 2. **No further split is proposed.**
 
 Open items for the 23B start gate: confirm that the 23A seams proved sufficient in practice (no shell edit
 beyond the §11 list), that the two Core additions are still additive after 23A merged, and that the owner accepts
-the `MaxUndoDepth` default bound and the no-untitled recovery scope.
+the `MaxUndoDepth` GUI bound (default 0/unbounded, GUI sets 200) and the no-untitled recovery scope.
 
 ### 18. Closeout and audit plan
 
