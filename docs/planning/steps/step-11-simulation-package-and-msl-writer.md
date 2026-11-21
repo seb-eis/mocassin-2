@@ -480,14 +480,16 @@ per feature.
 - **Forward read:** the parent `.NET` verifier and Rust reader at `bbc2d08` both open the new fixture and ignore
   the unknown key (recorded in the amendment page).
 - **Local gates:** `./tools/verify.sh all --require` exit 0 on 2026-11-21 — .NET build 0 warnings / 0 errors;
-  **1,989** .NET tests pass (Contracts 38, Symmetry 223, Results 79, Core 685, Compilation 99, Cli 203,
-  Packages 534, Architecture 7, App 121); `dotnet format` clean; ApiCompat and NuGet policy clean; Rust
+  **1,991** .NET tests pass (Contracts 38, Symmetry 223, Results 79, Core 685, Compilation 99, Cli 203,
+  Packages 536, Architecture 7, App 121), including the 40-case reduction-oracle property test and the
+  asymmetric-allowed-set superset case; `dotnet format` clean; ApiCompat and NuGet policy clean; Rust
   `fmt`/`clippy`/`test` clean plus a release build; Python tests/build; contracts (26 artifacts current, 60
-  process tests, SPDX 1010 files, secrets 1478 files, cargo-deny); strict Zensical/DocFX/rustdoc; AOT evidence.
+  process tests, SPDX 1,011 files, secrets 1,499 files, cargo-deny); strict Zensical/DocFX/rustdoc; AOT evidence.
 - **CI:** one Ubuntu closeout dispatch
-  [`44895491322`](https://github.com/seb-eis/mocassin-2/actions/runs/44895491322) green at
-  `aa625294ec201dd8806724e63a2f6235a954de2b`; no per-feature CI; platform CI not run (no platform-conditional
-  code). Recorded in the [audit record](../audits/step-11-amend-2.md).
+  [`44896189617`](https://github.com/seb-eis/mocassin-2/actions/runs/44896189617) green at
+  `ef568beca62f6f51559460d01ba5627219e90345`; no per-feature CI; platform CI not run (no platform-conditional
+  code). Recorded in the [audit record](../audits/step-11-amend-2.md). The earlier run `44895491322` was
+  superseded when the A2-05 property test was added.
 - **Audit:** [request](../audits/step-11-amend-2.md) — separate post-merge audit; `step-11` stays tagged and is
   not moved.
 - **Known limitations / follow-ups:** Step 14 consumes `ClusterTable::lookup`; F-29's formal closure remains a

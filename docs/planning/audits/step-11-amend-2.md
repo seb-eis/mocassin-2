@@ -35,11 +35,11 @@ Design review: [`step-11-amend-2`](../reviews/step-11-amend-2.md) — round 4 `R
 
 | Field | Value |
 | --- | --- |
-| Audited commit | `aa625294ec201dd8806724e63a2f6235a954de2b` (the maintenance branch head at freeze; `b3d967e` plus the `origin/main` merge `63cdd06`) |
-| Closeout CI run | [`44895491322`](https://github.com/seb-eis/mocassin-2/actions/runs/44895491322) — Ubuntu `CI`, conclusion `success` |
-| Closeout CI `head_sha` | `aa625294ec201dd8806724e63a2f6235a954de2b` |
+| Audited commit | `ef568beca62f6f51559460d01ba5627219e90345` (the maintenance branch head at freeze: `b3d967e`, the `origin/main` merge `63cdd06`, the audit-request record `5f9673f`, and the reduction-oracle property test `ef568be`) |
+| Closeout CI run | [`44896189617`](https://github.com/seb-eis/mocassin-2/actions/runs/44896189617) — Ubuntu `CI`, conclusion `success` (the earlier `44895491322` at `aa62529` was superseded when the A2-05 property test was added) |
+| Closeout CI `head_sha` | `ef568beca62f6f51559460d01ba5627219e90345` |
 | `main` SHA at freeze | `63cdd0638b952e9175f75681d864bb95db0b4f68` (merged into the branch as `aa62529` before the gate) |
-| Merge candidate | `aa625294ec201dd8806724e63a2f6235a954de2b` plus this record commit (documentation-only, `[skip ci]`); the code state is unchanged |
+| Merge candidate | `ef568beca62f6f51559460d01ba5627219e90345` plus this record commit (documentation-only, `[skip ci]`); the code state is unchanged |
 | Merge-tree CI | Not required: `main` `63cdd06` was merged before the freeze and the full gate plus closeout CI ran on the merged tree |
 | Platform CI | **Not run** — no P/Invoke, native library, RID, path, GUI, or platform-conditional code is touched |
 | Tag | `step-11.1` after owner approval and a green `main` CI run; `step-11` is never moved |
@@ -121,16 +121,19 @@ Commands run by the implementor before the freeze:
                                        ApiCompat and dependency policy, Rust fmt/clippy/test, Python,
                                        strict Zensical/DocFX/rustdoc, contracts/policy, AOT evidence)
 dotnet build Mocassin.slnx -c Release  0 warnings, 0 errors
-dotnet test Mocassin.slnx -c Release   1,989 tests pass (Contracts 38, Symmetry 223, Results 79,
-                                       Core 685, Compilation 99, Cli 203, Packages 534,
-                                       Architecture 7, App 121)
+dotnet test Mocassin.slnx -c Release   1,991 tests pass (Contracts 38, Symmetry 223, Results 79,
+                                       Core 685, Compilation 99, Cli 203, Packages 536,
+                                       Architecture 7, App 121); this includes
+                                       `ClusterExpansionPropertyTests` (40 randomized
+                                       geometries against the reduction oracle plus the
+                                       asymmetric-allowed-set superset case)
 dotnet format Mocassin.slnx --verify-no-changes --no-restore   clean
 cargo fmt --all --check                clean
 cargo clippy --workspace --all-targets -- -D warnings          clean
 cargo test --workspace                 all targets pass
 cargo build --workspace --release      clean
-./tools/verify.sh contracts            exit 0: 26 artifacts current, 60 process tests, SPDX 1010,
-                                       secrets 1,498, cargo-deny OK
+./tools/verify.sh contracts            exit 0: 26 artifacts current, 60 process tests, SPDX 1,011,
+                                       secrets 1,499, cargo-deny OK
 ./tools/verify.sh docs                 exit 0: math OK, links OK, strict site/DocFX/rustdoc build
 ```
 
@@ -143,9 +146,10 @@ cargo run -p mocassin-cli -- --db <new fixture> --job 1 --dry-run
   -> validation: ok
 ```
 
-The single closeout CI run `44895491322` is green at `aa625294ec201dd8806724e63a2f6235a954de2b`
-(`main` `63cdd0638b952e9175f75681d864bb95db0b4f68` was merged before the gate). Platform CI is not run
-(no platform-conditional code).
+The final closeout CI run `44896189617` is green at `ef568beca62f6f51559460d01ba5627219e90345`
+(`main` `63cdd0638b952e9175f75681d864bb95db0b4f68` was merged before the gate). The earlier run
+`44895491322` at `aa62529` is process history: the reduction-oracle property test (A2-05) was added after it, so
+it was superseded by the final run. Platform CI is not run (no platform-conditional code).
 
 Evidence file: this record (post-merge amendment, per the request row)
 

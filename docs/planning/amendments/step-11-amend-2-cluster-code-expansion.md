@@ -759,10 +759,10 @@ one-time forward read.
   `dotnet run --project src/dotnet/Mocassin.Cli -c Release --no-build -- verify <new fixture>` → all ten checks
   pass, exit 0; `cargo run -p mocassin-cli -- --db <new fixture> --job 1 --dry-run` → `validation: ok`. Both
   ignore the unknown `code_expansions` key.
-- **Gates:** `./tools/verify.sh all --require` exit 0 (1,989 .NET tests, format/ApiCompat/contracts/docs/AOT),
-  Rust `fmt`/`clippy`/`test` plus release build, Python, and the single Ubuntu closeout CI
-  [`44895491322`](https://github.com/seb-eis/mocassin-2/actions/runs/44895491322) green at
-  `aa625294ec201dd8806724e63a2f6235a954de2b`.
+- **Gates:** `./tools/verify.sh all --require` exit 0 (1,991 .NET tests including the reduction-oracle property
+  test, format/ApiCompat/contracts/docs/AOT), Rust `fmt`/`clippy`/`test` plus release build, Python, and the
+  single Ubuntu closeout CI [`44896189617`](https://github.com/seb-eis/mocassin-2/actions/runs/44896189617)
+  green at `ef568beca62f6f51559460d01ba5627219e90345`.
 
 ## Integration
 
