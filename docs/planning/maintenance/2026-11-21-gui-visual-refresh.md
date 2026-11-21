@@ -12,7 +12,7 @@ design and test plan for one `fix/gui-visual-refresh` branch and one owner `--no
 | Worktree | `/workspace` (clean, in place) |
 | Normative visual contract | [`docs/development/ui-visual-contract.md`](../../development/ui-visual-contract.md) |
 | Interaction behaviour | [`docs/development/ui-interaction-contract.md`](../../development/ui-interaction-contract.md) |
-| Status | Implemented 2026-11-21; local and platform gates passed; owner merge approval pending |
+| Status | Merged into `main` as `5592418efa50801bfec76c35fb02bdc2a23ae32a`, main CI `44963227298` green, branch deleted locally and remotely, no tag |
 | Tracking | One branch; internal commit sequence in §4; local gates; one owner `--no-ff` merge approval |
 
 This record holds the defect evidence, scope, migration algorithm, test plan, acceptance criteria, risks, and
@@ -531,3 +531,19 @@ A human Windows/macOS visual spot-check remains recommended evidence, not a merg
 The branch is ready for the owner's `--no-ff` merge approval under `AGENTS.md` §3.5 after the owner-approved
 light-warning correction and the platform-evidence correction. It has not been merged, tagged, or squashed, and
 no step branch or amendment exists.
+
+## Merge closeout (2026-11-21)
+
+- **Merge commit:** `5592418efa50801bfec76c35fb02bdc2a23ae32a` — `fix: refresh the GUI shell visual system`
+  (`--no-ff`; parents `89dbe22` and `900cecf`).
+- **Main CI:** run [`44963227298`](https://github.com/seb-eis/mocassin-2/actions/runs/44963227298) at
+  `head_sha` `5592418efa50801bfec76c35fb02bdc2a23ae32a`; conclusion `success`.
+- **Jobs that ran:** `Detect changes`, `.NET (ubuntu-latest)` (restore, build, test with coverage, format),
+  `Public API compatibility` (NuGet licence/vulnerability, tool restore, ApiCompat baseline), and
+  `Contracts and policy` (contract drift, space-group catalog drift, licence headers, secret scan, cargo-deny).
+  `Rust` and `Python` were path-filtered and skipped.
+- **Branch:** `fix/gui-visual-refresh` deleted locally and on `origin` after the green run. No tag was created.
+- **Follow-ups:** the deferred list in §5 remains deferred. A human Windows/macOS visual spot-check was not
+  performed. The platform runs at `c137421` predate the final head; the final tree is covered by the local
+  `./tools/verify.sh all --require` run, and pixel screenshot comparison remains Linux-only. The light warning
+  decision is closed with `#A15C00`.
