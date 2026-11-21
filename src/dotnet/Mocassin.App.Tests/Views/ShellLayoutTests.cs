@@ -22,6 +22,9 @@ namespace Mocassin.App.Tests.Views;
 [Trait("Tier", "PR-fast")]
 public sealed class ShellLayoutTests
 {
+    private static readonly string[] regionNames =
+        ["Projects panel", "Documents panel", "Inspector panel", "Console panel"];
+
     [Fact]
     public Task TheDefaultFractionsFillTheWorkspaceAtTheDesignSize() =>
         HeadlessSession.DispatchAsync(
@@ -253,6 +256,37 @@ public sealed class ShellLayoutTests
                     Assert.Equal(3, Grid.GetRow(tree));
                     Assert.Equal(4, Grid.GetRow(button));
                     Assert.Single(grid.RowDefinitions, row => row.Height.IsStar);
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+
+    [Fact]
+    public Task RegionCardsUseTheCardRadiusBorderAndGap() =>
+        HeadlessSession.DispatchAsync(
+            () =>
+            {
+                using var workspace = new TempWorkspace();
+                using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+                HeadlessSession.Pump(window);
+
+                try
+                {
+                    foreach (var name in regionNames)
+                    {
+                        var card = window.GetVisualDescendants()
+                            .OfType<Border>()
+                            .Single(border => AutomationProperties.GetName(border) == name);
+                        Assert.Equal(new CornerRadius(6), card.CornerRadius);
+                        Assert.Equal(new Thickness(1), card.BorderThickness);
+                    }
+
+                    var workspaceGrid = Find<Grid>(window, "WorkspaceGrid");
+                    Assert.Equal(new Thickness(6), workspaceGrid.Margin);
                 }
                 finally
                 {
