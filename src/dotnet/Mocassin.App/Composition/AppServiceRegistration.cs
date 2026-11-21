@@ -8,6 +8,7 @@ using Mocassin.App.Startup;
 using Mocassin.App.ViewModels.Commands;
 using Mocassin.App.ViewModels.Consoles;
 using Mocassin.App.ViewModels.Dialogs;
+using Mocassin.App.ViewModels.Diagnostics;
 using Mocassin.App.ViewModels.Documents;
 using Mocassin.App.ViewModels.Navigation;
 using Mocassin.App.ViewModels.Notifications;
@@ -62,6 +63,9 @@ internal static class AppServiceRegistration
         services.AddSingleton<IConsoleService, ConsoleService>();
         services.AddSingleton<SettingsViewModel>();
         services.AddSingleton<IConsoleChannelProvider, ApplicationConsoleChannelProvider>();
+        services.AddSingleton<ProblemsChannelViewModel>();
+        services.AddSingleton<IConsoleChannelProvider, ProblemsChannelProvider>();
+        services.AddSingleton<IStatusBarItemProvider, ValidationStatusItemProvider>();
         services.AddSingleton<INotificationService, NotificationService>();
         services.AddSingleton<ProgressService>();
         services.AddSingleton<GestureFormatter>();

@@ -1,39 +1,34 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Mocassin.App.ViewModels.Consoles"
+             xmlns:diagnostics="using:Mocassin.App.ViewModels.Diagnostics"
+             xmlns:consoles="using:Mocassin.App.Views.Consoles"
              xmlns:automation="using:Avalonia.Automation"
              x:Class="Mocassin.App.Views.Consoles.ConsoleView"
              x:DataType="vm:ConsoleViewModel">
   <Grid RowDefinitions="Auto,*">
-    <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="12,4">
-      <TextBlock Text="{Binding ActiveChannel.Title}" VerticalAlignment="Center" FontWeight="SemiBold" />
-      <TextBox Grid.Column="1"
-               automation:AutomationProperties.Name="Application console filter"
-               Margin="12,0"
-               PlaceholderText="Filter the application console"
-               Text="{Binding ActiveChannel.FilterText}" />
-      <Button Grid.Column="2" Content="Clear"
-                automation:AutomationProperties.Name="Clear application console" Command="{Binding ActiveChannel.ClearCommand}" />
-    </Grid>
-    <ListBox Grid.Row="1"
-             automation:AutomationProperties.Name="Application console entries"
-             ItemsSource="{Binding ActiveChannel.VisibleEntries}"
-             Background="Transparent"
-             BorderThickness="0">
-      <ListBox.ItemTemplate>
-        <DataTemplate x:DataType="vm:ConsoleEntryViewModel">
-          <Grid ColumnDefinitions="Auto,Auto,*">
-            <TextBlock Text="{Binding TimestampUtc, StringFormat='{}{0:HH:mm:ss}'}"
-                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
-                       Margin="0,0,8,0" />
-            <TextBlock Grid.Column="1"
-                       Text="{Binding Severity}"
-                       Width="80"
-                       Margin="0,0,8,0" />
-            <TextBlock Grid.Column="2" Text="{Binding Message}" TextWrapping="Wrap" />
-          </Grid>
+    <ComboBox Grid.Row="0"
+              ItemsSource="{Binding Channels}"
+              SelectedItem="{Binding ActiveChannel}"
+              automation:AutomationProperties.Name="Console channel"
+              HorizontalAlignment="Left"
+              Margin="12,6,0,2"
+              MinWidth="140">
+      <ComboBox.ItemTemplate>
+        <DataTemplate x:DataType="vm:ConsoleChannelViewModel">
+          <TextBlock Text="{Binding Title}" />
         </DataTemplate>
-      </ListBox.ItemTemplate>
-    </ListBox>
+      </ComboBox.ItemTemplate>
+    </ComboBox>
+    <ContentControl Grid.Row="1" Content="{Binding ActiveChannel}">
+      <ContentControl.DataTemplates>
+        <DataTemplate DataType="diagnostics:ProblemsChannelViewModel">
+          <consoles:ProblemsView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:ConsoleChannelViewModel">
+          <consoles:ApplicationConsoleView />
+        </DataTemplate>
+      </ContentControl.DataTemplates>
+    </ContentControl>
   </Grid>
 </UserControl>

@@ -14,16 +14,22 @@ namespace Mocassin.App.ViewModels.Navigation;
 internal sealed class ProjectNavigationTargetProvider : INavigationTargetProvider
 {
     private readonly IProjectWorkspace workspace;
+    private readonly DocumentCollectionViewModel documents;
     private readonly IClipboardService clipboard;
 
     /// <summary>
     /// Initializes the project target provider.
     /// </summary>
     /// <param name="workspace">The project workspace.</param>
+    /// <param name="documents">The open documents, used to focus an existing Overview.</param>
     /// <param name="clipboard">The clipboard boundary.</param>
-    public ProjectNavigationTargetProvider(IProjectWorkspace workspace, IClipboardService clipboard)
+    public ProjectNavigationTargetProvider(
+        IProjectWorkspace workspace,
+        DocumentCollectionViewModel documents,
+        IClipboardService clipboard)
     {
         this.workspace = workspace;
+        this.documents = documents;
         this.clipboard = clipboard;
     }
 
@@ -46,12 +52,19 @@ internal sealed class ProjectNavigationTargetProvider : INavigationTargetProvide
             return Task.FromResult<DocumentViewModel?>(null);
         }
 
-        DocumentViewModel? document = path.Property switch
+        if (string.Equals(path.Property, "json", StringComparison.Ordinal))
         {
-            "overview" => new ProjectOverviewViewModel(project, clipboard),
-            "json" => new ProjectJsonViewModel(project, clipboard),
-            _ => null,
-        };
-        return Task.FromResult(document);
+            return Task.FromResult<DocumentViewModel?>(new ProjectJsonViewModel(project, clipboard));
+        }
+
+        var overview = documents.Find(new DocumentKey(DocumentKinds.ProjectOverview, project.Id))
+            as ProjectOverviewViewModel;
+        overview ??= new ProjectOverviewViewModel(project, clipboard);
+        if (path.Property is "name" or "description" or "author" or "notes")
+        {
+            overview.RequestFocus(path.Property);
+        }
+
+        return Task.FromResult<DocumentViewModel?>(overview);
     }
 }

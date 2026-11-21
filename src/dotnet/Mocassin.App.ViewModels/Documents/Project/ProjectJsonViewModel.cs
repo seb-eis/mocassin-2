@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Mocassin.App.ViewModels.Editing;
 using Mocassin.App.ViewModels.Navigation;
 using Mocassin.App.ViewModels.Projects;
 using Mocassin.App.ViewModels.Shell;
@@ -16,6 +18,9 @@ internal sealed partial class ProjectJsonViewModel : DocumentViewModel, IInspect
     private readonly ProjectWorkspaceEntry entry;
     private readonly IClipboardService clipboard;
 
+    [ObservableProperty]
+    private string jsonText;
+
     /// <summary>
     /// Initializes a project JSON document.
     /// </summary>
@@ -26,7 +31,8 @@ internal sealed partial class ProjectJsonViewModel : DocumentViewModel, IInspect
     {
         this.entry = entry;
         this.clipboard = clipboard;
-        JsonText = ProjectJson.Serialize(entry.Project, indented: true);
+        jsonText = ProjectJson.Serialize(entry.Project, indented: true);
+        entry.Session.EditCoordinator.ProjectChanged += OnProjectChanged;
     }
 
     /// <inheritdoc />
@@ -35,16 +41,29 @@ internal sealed partial class ProjectJsonViewModel : DocumentViewModel, IInspect
     /// <inheritdoc />
     public override string? ToolTip => entry.Path;
 
-    /// <summary>
-    /// Gets the indented canonical project JSON.
-    /// </summary>
-    public string JsonText { get; }
+    /// <inheritdoc />
+    public override Task OnClosingAsync(CancellationToken cancellationToken = default)
+    {
+        entry.Session.EditCoordinator.ProjectChanged -= OnProjectChanged;
+        return Task.CompletedTask;
+    }
 
     /// <inheritdoc />
     public object? CreateInspector(InspectorSelection selection) =>
         new InspectorSummaryViewModel(
             "Project JSON",
             [entry.Path, "Read-only canonical document"]);
+
+    private void OnProjectChanged(object? sender, ProjectChangedEventArgs args)
+    {
+        if (args.Kind == ProjectChangeKind.Saved)
+        {
+            return;
+        }
+
+        JsonText = ProjectJson.Serialize(entry.Project, indented: true);
+        OnPropertyChanged(nameof(Title));
+    }
 
     /// <summary>
     /// Copies the JSON text.

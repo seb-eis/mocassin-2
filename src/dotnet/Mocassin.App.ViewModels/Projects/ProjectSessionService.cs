@@ -123,7 +123,8 @@ internal sealed class ProjectSessionService : IProjectSessionService
             probe.GetStamp(target.FullPath).LastWriteUtc,
             isReadOnly: false,
             lockPath: null,
-            pipeline);
+            pipeline,
+            timeProvider);
         session.Stamp = probe.GetStamp(target.FullPath);
         session.LastWrittenUtc = session.Stamp.LastWriteUtc;
         await AcquireLockAsync(session, cancellationToken);
@@ -156,7 +157,8 @@ internal sealed class ProjectSessionService : IProjectSessionService
             stamp.LastWriteUtc,
             isReadOnly: false,
             lockPath: null,
-            pipeline);
+            pipeline,
+            timeProvider);
         session.Stamp = stamp;
         var lockResult = await store.AcquireLockAsync(fullPath, cancellationToken);
         if (lockResult.IsSuccess)
@@ -217,10 +219,10 @@ internal sealed class ProjectSessionService : IProjectSessionService
             return Failure(ProjectSessionOutcome.SaveFailed, result.Diagnostics);
         }
 
-        session.Document.MarkSaved();
-        session.EditCoordinator.NotifySaved();
         session.Stamp = probe.GetStamp(session.Path);
         session.LastWrittenUtc = session.Stamp.LastWriteUtc;
+        session.Document.MarkSaved();
+        session.EditCoordinator.NotifySaved();
         await RecordSavedAsync(session, cancellationToken);
         return new ProjectSessionResult(ProjectSessionOutcome.Saved, session);
     }
@@ -268,10 +270,10 @@ internal sealed class ProjectSessionService : IProjectSessionService
         session.LockPath = newLock.Lock!.Path;
         session.Path = fullPath;
         session.IsReadOnly = false;
-        session.Document.MarkSaved();
-        session.EditCoordinator.NotifySaved();
         session.Stamp = probe.GetStamp(fullPath);
         session.LastWrittenUtc = session.Stamp.LastWriteUtc;
+        session.Document.MarkSaved();
+        session.EditCoordinator.NotifySaved();
         await RecordSavedAsync(session, cancellationToken);
         return new ProjectSessionResult(ProjectSessionOutcome.Saved, session);
     }
@@ -293,6 +295,7 @@ internal sealed class ProjectSessionService : IProjectSessionService
             load.Project,
             load.Diagnostics,
             cancellationToken: cancellationToken);
+        session.ValidationCoordinator.Reseed(session.Validation, load.Diagnostics);
         var document = new ProjectDocument(load.Project) { MaxUndoDepth = 200 };
         session.Document = document;
         session.EditCoordinator.ReplaceDocument(document, canEdit: !session.IsReadOnly);

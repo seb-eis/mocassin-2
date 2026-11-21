@@ -9,7 +9,7 @@ namespace Mocassin.App.ViewModels.Consoles;
 /// <summary>
 /// One console channel with a bounded entry buffer and a severity/text filter.
 /// </summary>
-internal sealed partial class ConsoleChannelViewModel : ObservableObject
+internal partial class ConsoleChannelViewModel : ObservableObject
 {
     /// <summary>
     /// The maximum number of entries retained by the channel.

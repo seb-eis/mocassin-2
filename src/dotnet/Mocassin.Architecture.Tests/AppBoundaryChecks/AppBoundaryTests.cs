@@ -47,6 +47,35 @@ public sealed class AppBoundaryTests
     }
 
     [Fact]
+    public void TheViewModelSourcesUseTheInMemoryValidationPathOnly()
+    {
+        var root = RepositoryPaths.Combine("src", "dotnet", "Mocassin.App.ViewModels");
+        var violations = EnumerateSources(root)
+            .Where(file => File.ReadAllText(file).Contains("ValidateFileAsync", StringComparison.Ordinal))
+            .Select(file => Path.GetFileName(file))
+            .ToList();
+
+        Assert.True(
+            violations.Count == 0,
+            "The ViewModels layer must use the in-memory pipeline only: " + string.Join(", ", violations));
+    }
+
+    [Fact]
+    public void TheViewModelSourcesDoNotHashProjects()
+    {
+        var root = RepositoryPaths.Combine("src", "dotnet", "Mocassin.App.ViewModels");
+        var violations = EnumerateSources(root)
+            .Where(file => File.ReadAllText(file).Contains("ProjectHasher", StringComparison.Ordinal))
+            .Select(file => Path.GetFileName(file))
+            .ToList();
+
+        Assert.True(
+            violations.Count == 0,
+            "Project hashing stays in Core; the ViewModels layer must not call ProjectHasher: "
+            + string.Join(", ", violations));
+    }
+
+    [Fact]
     public void TheScannerReportsASeededViolation()
     {
         const string source = "namespace Sample; internal sealed class C { internal void M() { File.ReadAllText(\"x\"); } }";

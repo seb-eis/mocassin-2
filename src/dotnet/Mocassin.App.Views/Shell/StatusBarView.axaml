@@ -1,8 +1,12 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Mocassin.App.ViewModels.Shell"
+             xmlns:shell="using:Mocassin.App.Views.Shell"
              x:Class="Mocassin.App.Views.Shell.StatusBarView"
              x:DataType="vm:ShellViewModel">
+  <UserControl.Resources>
+    <shell:StatusBarSeverityToBrushConverter x:Key="StatusBarSeverityBrush" />
+  </UserControl.Resources>
   <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
           BorderThickness="0,1,0,0"
           Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
@@ -17,9 +21,13 @@
         </ItemsControl.ItemsPanel>
         <ItemsControl.ItemTemplate>
           <DataTemplate x:DataType="vm:StatusBarItemViewModel">
-            <TextBlock Text="{Binding Text}"
-                       ToolTip.Tip="{Binding ToolTip}"
-                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+            <StackPanel Orientation="Horizontal" Spacing="4">
+              <TextBlock Text="{Binding Glyph}"
+                         Foreground="{Binding Severity, Converter={StaticResource StatusBarSeverityBrush}}" />
+              <TextBlock Text="{Binding Text}"
+                         ToolTip.Tip="{Binding ToolTip}"
+                         Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+            </StackPanel>
           </DataTemplate>
         </ItemsControl.ItemTemplate>
       </ItemsControl>

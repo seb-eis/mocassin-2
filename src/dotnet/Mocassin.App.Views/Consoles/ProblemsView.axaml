@@ -1,0 +1,111 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Mocassin.App.ViewModels.Diagnostics"
+             xmlns:automation="using:Avalonia.Automation"
+             x:Class="Mocassin.App.Views.Consoles.ProblemsView"
+             x:DataType="vm:ProblemsChannelViewModel">
+  <Grid RowDefinitions="Auto,Auto,Auto,*">
+    <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Margin="12,4">
+      <TextBlock Text="{Binding HeaderText}" FontWeight="SemiBold" VerticalAlignment="Center" />
+      <TextBlock Grid.Column="1" Text="{Binding SummaryText}" VerticalAlignment="Center" Margin="12,0" />
+      <TextBlock Grid.Column="2" Text="{Binding LastValidationText}" VerticalAlignment="Center"
+                 Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+    </Grid>
+    <WrapPanel Grid.Row="1" Margin="12,0,12,4">
+      <ComboBox x:Name="SeverityFilter"
+                ItemsSource="{Binding SeverityOptions}"
+                SelectedItem="{Binding SeverityOption}"
+                automation:AutomationProperties.Name="Problems severity filter"
+                Margin="0,0,8,4"
+                MinWidth="130">
+        <ComboBox.ItemTemplate>
+          <DataTemplate x:DataType="vm:ProblemsSeverityOption">
+            <TextBlock Text="{Binding Label}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+      <TextBox Text="{Binding CodeFilter}"
+               automation:AutomationProperties.Name="Problems code filter"
+               PlaceholderText="Code"
+               Margin="0,0,8,4"
+               Width="100" />
+      <ComboBox ItemsSource="{Binding SourceOptions}"
+                SelectedItem="{Binding SourceFilter}"
+                automation:AutomationProperties.Name="Problems source filter"
+                Margin="0,0,8,4"
+                MinWidth="110" />
+      <TextBox Text="{Binding TextFilter}"
+               automation:AutomationProperties.Name="Problems text filter"
+               PlaceholderText="Filter text"
+               Margin="0,0,8,4"
+               Width="180" />
+      <ComboBox ItemsSource="{Binding SortModes}"
+                SelectedItem="{Binding SortMode}"
+                automation:AutomationProperties.Name="Problems sort column"
+                Margin="0,0,8,4"
+                MinWidth="100" />
+      <CheckBox Content="Descending"
+                IsChecked="{Binding SortDescending}"
+                automation:AutomationProperties.Name="Problems descending sort"
+                Margin="0,0,8,4" />
+      <Button Content="Revalidate"
+              Command="{Binding RevalidateCommand}"
+              automation:AutomationProperties.Name="Revalidate project"
+              Margin="0,0,8,4" />
+      <Button Content="Clear filters"
+              Command="{Binding ClearFiltersCommand}"
+              automation:AutomationProperties.Name="Clear problem filters"
+              Margin="0,0,0,4" />
+    </WrapPanel>
+    <Grid Grid.Row="2" ColumnDefinitions="Auto,Auto,*,Auto,Auto" Margin="12,0,12,4">
+      <TextBlock Text="Severity" FontWeight="SemiBold" Width="66" />
+      <TextBlock Grid.Column="1" Text="Code" FontWeight="SemiBold" Width="80" />
+      <TextBlock Grid.Column="2" Text="Message" FontWeight="SemiBold" />
+      <TextBlock Grid.Column="3" Text="Path" FontWeight="SemiBold" Width="220" />
+      <TextBlock Grid.Column="4" Text="Source" FontWeight="SemiBold" Width="90" />
+    </Grid>
+    <Grid Grid.Row="3">
+      <ListBox ItemsSource="{Binding Items}"
+               automation:AutomationProperties.Name="Problem entries"
+               SelectionMode="Single"
+               Background="Transparent"
+               BorderThickness="0"
+               DoubleTapped="OnItemsDoubleTapped"
+               KeyDown="OnItemsKeyDown">
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="vm:DiagnosticItemViewModel">
+            <Grid ColumnDefinitions="66,80,*,220,90" ToolTip.Tip="{Binding Hint}">
+              <TextBlock Text="{Binding SeverityGlyph}" />
+              <TextBlock Grid.Column="1" Text="{Binding Code}" />
+              <TextBlock Grid.Column="2" Text="{Binding Message}" TextWrapping="Wrap" />
+              <TextBlock Grid.Column="3" Text="{Binding PathText}" TextWrapping="Wrap" />
+              <TextBlock Grid.Column="4" Text="{Binding SourceText}" />
+              <Grid.ContextMenu>
+                <ContextMenu>
+                  <MenuItem Header="Open help"
+                            Command="{Binding OpenHelpCommand}"
+                            IsVisible="{Binding HasHelp}" />
+                  <MenuItem Header="Related paths"
+                            ItemsSource="{Binding RelatedItems}"
+                            IsVisible="{Binding HasRelated}">
+                    <MenuItem.ItemTemplate>
+                      <DataTemplate x:DataType="vm:DiagnosticRelatedItemViewModel">
+                        <MenuItem Header="{Binding Display}" Command="{Binding NavigateCommand}" />
+                      </DataTemplate>
+                    </MenuItem.ItemTemplate>
+                  </MenuItem>
+                </ContextMenu>
+              </Grid.ContextMenu>
+            </Grid>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+      <TextBlock Text="{Binding EmptyText}"
+                 IsVisible="{Binding !HasItems}"
+                 HorizontalAlignment="Center"
+                 VerticalAlignment="Center"
+                 Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                 TextWrapping="Wrap" />
+    </Grid>
+  </Grid>
+</UserControl>

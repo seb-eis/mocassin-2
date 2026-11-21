@@ -71,7 +71,8 @@ public sealed class NavigationServiceTests
         var workspace = new WorkspaceViewModel();
         workspace.Add(entry);
         var console = new ConsoleService(new InlineUiDispatcher(), new ManualTimeProvider());
-        var provider = new ProjectNavigationTargetProvider(workspace, new RecordingClipboardService());
+        var documents = new DocumentCollectionViewModel();
+        var provider = new ProjectNavigationTargetProvider(workspace, documents, new RecordingClipboardService());
 
         var exception = Assert.Throws<InvalidOperationException>(
             () => new NavigationService(
@@ -94,7 +95,7 @@ public sealed class NavigationServiceTests
             documents,
             workspace,
             console,
-            [new ProjectNavigationTargetProvider(workspace, new RecordingClipboardService())]);
+            [new ProjectNavigationTargetProvider(workspace, documents, new RecordingClipboardService())]);
         var explorer = new ProjectExplorerViewModel(
             workspace,
             [new ProjectExplorerNodeProvider()],

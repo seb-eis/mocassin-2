@@ -26,7 +26,7 @@ public sealed class ProjectExplorerTests
             documents,
             workspace,
             console,
-            [new ProjectNavigationTargetProvider(workspace, new RecordingClipboardService())]);
+            [new ProjectNavigationTargetProvider(workspace, documents, new RecordingClipboardService())]);
         var explorer = new ProjectExplorerViewModel(
             workspace,
             [new ProjectExplorerNodeProvider()],

@@ -1,11 +1,47 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Mocassin.App.ViewModels.Documents.Project"
+             xmlns:automation="using:Avalonia.Automation"
              x:Class="Mocassin.App.Views.Documents.Project.ProjectOverviewView"
              x:DataType="vm:ProjectOverviewViewModel">
   <ScrollViewer>
     <StackPanel Spacing="12" Margin="20">
-      <TextBlock Text="{Binding Name}" FontSize="24" FontWeight="SemiBold" />
+      <StackPanel Orientation="Horizontal" Spacing="12">
+        <TextBox Text="{Binding NameDraft, Mode=TwoWay}"
+                   x:Name="NameField"
+                   FontSize="24"
+                   FontWeight="SemiBold"
+                   Width="420"
+                   IsEnabled="{Binding CanEdit}"
+                   automation:AutomationProperties.Name="Project name"
+                   PlaceholderText="Project name"
+                   LostFocus="OnNameLostFocus"
+                   KeyDown="OnFieldKeyDown" />
+        <TextBlock Text="{Binding DirtyText}"
+                   VerticalAlignment="Center"
+                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+      </StackPanel>
+      <TextBlock Text="{Binding NameError}"
+                 IsVisible="{Binding HasNameError}"
+                 Foreground="#D32F2F"
+                 TextWrapping="Wrap" />
+      <TextBlock Text="{Binding InlineError}"
+                 IsVisible="{Binding HasInlineError}"
+                 Foreground="#D32F2F"
+                 TextWrapping="Wrap" />
+      <Border BorderBrush="#33D32F2F"
+              BorderThickness="1"
+              CornerRadius="4"
+              Padding="8"
+              IsVisible="{Binding Validation.HasErrors}">
+        <TextBlock Text="{Binding Validation.StatusText}"
+                   TextWrapping="Wrap"
+                   automation:AutomationProperties.Name="Validation errors" />
+      </Border>
+      <TextBlock Text="This project is open read-only. Metadata cannot be changed."
+                 IsVisible="{Binding IsReadOnly}"
+                 TextWrapping="Wrap"
+                 Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
       <TextBlock Text="{Binding FilePath}"
                  Classes="caption"
                  TextWrapping="Wrap" />
@@ -14,14 +50,37 @@
               CornerRadius="4"
               Padding="12">
         <Grid ColumnDefinitions="180,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
-          <TextBlock Grid.Row="0" Grid.Column="0" Text="Project id" FontWeight="SemiBold" />
-          <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ProjectIdText}" TextWrapping="Wrap" />
-          <TextBlock Grid.Row="1" Grid.Column="0" Text="Description" FontWeight="SemiBold" Margin="0,4,0,0" />
-          <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Description}" TextWrapping="Wrap" Margin="0,4,0,0" />
-          <TextBlock Grid.Row="2" Grid.Column="0" Text="Author" FontWeight="SemiBold" Margin="0,4,0,0" />
-          <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Author}" TextWrapping="Wrap" Margin="0,4,0,0" />
-          <TextBlock Grid.Row="3" Grid.Column="0" Text="Notes" FontWeight="SemiBold" Margin="0,4,0,0" />
-          <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Notes}" TextWrapping="Wrap" Margin="0,4,0,0" />
+          <TextBlock Grid.Row="0" Grid.Column="0" Text="Description" FontWeight="SemiBold" />
+          <TextBox Grid.Row="0" Grid.Column="1"
+                   x:Name="DescriptionField"
+                   Text="{Binding DescriptionDraft, Mode=TwoWay}"
+                   IsEnabled="{Binding CanEdit}"
+                   automation:AutomationProperties.Name="Project description"
+                   PlaceholderText="Description"
+                   LostFocus="OnDescriptionLostFocus"
+                   KeyDown="OnFieldKeyDown" />
+          <TextBlock Grid.Row="1" Grid.Column="0" Text="Author" FontWeight="SemiBold" Margin="0,4,0,0" />
+          <TextBox Grid.Row="1" Grid.Column="1"
+                   x:Name="AuthorField"
+                   Text="{Binding AuthorDraft, Mode=TwoWay}"
+                   IsEnabled="{Binding CanEdit}"
+                   automation:AutomationProperties.Name="Project author"
+                   PlaceholderText="Author"
+                   Margin="0,4,0,0"
+                   LostFocus="OnAuthorLostFocus"
+                   KeyDown="OnFieldKeyDown" />
+          <TextBlock Grid.Row="2" Grid.Column="0" Text="Notes" FontWeight="SemiBold" Margin="0,4,0,0" />
+          <TextBox Grid.Row="2" Grid.Column="1"
+                   x:Name="NotesField"
+                   Text="{Binding NotesDraft, Mode=TwoWay}"
+                   IsEnabled="{Binding CanEdit}"
+                   automation:AutomationProperties.Name="Project notes"
+                   PlaceholderText="Notes"
+                   Margin="0,4,0,0"
+                   LostFocus="OnNotesLostFocus"
+                   KeyDown="OnFieldKeyDown" />
+          <TextBlock Grid.Row="3" Grid.Column="0" Text="Project id" FontWeight="SemiBold" Margin="0,4,0,0" />
+          <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding ProjectIdText}" TextWrapping="Wrap" Margin="0,4,0,0" />
           <TextBlock Grid.Row="4" Grid.Column="0" Text="Created" FontWeight="SemiBold" Margin="0,4,0,0" />
           <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding CreatedUtcText}" Margin="0,4,0,0" />
           <TextBlock Grid.Row="5" Grid.Column="0" Text="Modified" FontWeight="SemiBold" Margin="0,4,0,0" />
@@ -37,13 +96,32 @@
           <TextBlock Grid.Row="10" Grid.Column="0" Text="Master seed" FontWeight="SemiBold" Margin="0,4,0,0" />
           <StackPanel Grid.Row="10" Grid.Column="1" Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
             <TextBlock Text="{Binding MasterSeed}" TextWrapping="Wrap" MaxWidth="460" />
-            <Button Content="Copy" Command="{Binding CopyMasterSeedCommand}" />
+            <Button Content="Copy" Command="{Binding CopyMasterSeedCommand}" automation:AutomationProperties.Name="Copy master seed" />
           </StackPanel>
         </Grid>
       </Border>
       <StackPanel Orientation="Horizontal" Spacing="8">
-        <Button Content="Copy path" Command="{Binding CopyPathCommand}" />
+        <Button Content="Copy path" Command="{Binding CopyPathCommand}" automation:AutomationProperties.Name="Copy project path" />
       </StackPanel>
+      <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+              BorderThickness="1"
+              CornerRadius="4"
+              Padding="12">
+        <StackPanel Spacing="8">
+          <StackPanel Orientation="Horizontal" Spacing="12">
+            <Button Content="{Binding Validation.StatisticsToggleText}"
+                    Command="{Binding ToggleStatisticsCommand}"
+                    automation:AutomationProperties.Name="Toggle statistics" />
+            <TextBlock Text="{Binding Validation.LastCompletedText}"
+                       VerticalAlignment="Center"
+                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+          </StackPanel>
+          <TextBlock Text="{Binding Validation.StatisticsText}"
+                     IsVisible="{Binding Validation.IsStatisticsActive}"
+                     TextWrapping="Wrap"
+                     automation:AutomationProperties.Name="Model statistics" />
+        </StackPanel>
+      </Border>
     </StackPanel>
   </ScrollViewer>
 </UserControl>

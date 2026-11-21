@@ -23,4 +23,17 @@ internal sealed class AvaloniaShellLauncher : IShellLauncher
         using var process = Process.Start(startInfo);
         return Task.CompletedTask;
     }
+
+    /// <inheritdoc />
+    public Task OpenUriAsync(string uri, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(uri);
+        cancellationToken.ThrowIfCancellationRequested();
+        using var process = Process.Start(new ProcessStartInfo
+        {
+            FileName = uri,
+            UseShellExecute = true,
+        });
+        return Task.CompletedTask;
+    }
 }
