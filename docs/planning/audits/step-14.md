@@ -16,7 +16,7 @@
 | Step agent (implementor) | Step 14 step agent |
 | Audit initiated by | Orchestrator, on request of the step agent |
 | Step branch | `step/14-simulation-context-initialization` |
-| Closeout evidence | `docs/planning/closeout/step-14.json` |
+| Closeout evidence | [`docs/planning/closeout/step-14.json`](../closeout/step-14.json) |
 | Audit date | — |
 | Auditor | — |
 
@@ -163,9 +163,9 @@ auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Ready for audit
+**State:** In audit
 
-`Ready for audit` means the step branch is frozen at a specific commit and this request is complete.
+`In audit` means the step branch is frozen at the request and a fresh audit context is pending or reviewing it.
 
 ## Reviewer independence
 

@@ -1,0 +1,30 @@
+{
+  "step": "step-14",
+  "audit_commit": "3fd45161d5683405955f806196ca61b295066479",
+  "closeout_ci": {
+    "run_id": "44922414484",
+    "head_sha": "3fd45161d5683405955f806196ca61b295066479"
+  },
+  "main_sha_at_freeze": "929327e660c7eda4cb74e438901277b5fa31aa65",
+  "merge_candidate": "3fd45161d5683405955f806196ca61b295066479",
+  "merge_tree_ci": {
+    "run_id": "",
+    "head_sha": ""
+  },
+  "platform_ci": "not run",
+  "tag": "",
+  "notes": [
+    "Closeout CI is the single Ubuntu workflow_dispatch run 44922414484 at 3fd45161d5683405955f806196ca61b295066479 (platforms=ubuntu, force_all=false). It is the only step-branch CI run; no per-feature or per-push CI was used. The .NET, Rust, Contracts/policy, and Public API jobs ran; Python is skipped by its path filter (no src/python change).",
+    "The full local gate ./tools/verify.sh all --require exited 0 at 8c09a8c38dd7b1dc4a01f7fc85dc7708ff760ebe ('Closeout gate completed with required checks enabled.'): 2,007 .NET tests passed (Contracts 38, Symmetry 223, Results 91, Core 685, Compilation 99, Cli 203, Packages 536, Architecture 7, App 125), the Rust workspace tests and doctests passed (including context_fixtures 3 and allocation 1), Python 3 passed with sdist/wheel built, documentation links 196 files + Zensical strict + DocFX 0 errors + rustdoc clean, contracts/policy green, and the AOT strict smoke/positive control passed. The real Mocassin.Cli AOT publish fails with 62 IL2026/IL3050 diagnostics; it is recorded as non-gating evidence, and Step 31 owns the AOT decision. The only delta from 8c09a8c to the audited commit 3fd4516 is the benchmark-evidence sourceCommit string and docs/planning (step page, status, audit request); the code and fixtures are identical.",
+    "main 929327e660c7eda4cb74e438901277b5fa31aa65 (the Step 23B design start) was merged into the step branch as 8c09a8c38dd7b1dc4a01f7fc85dc7708ff760ebe before the audited commit; main is an ancestor of 3fd4516. The closeout CI covers the merged tree, so the merge-tree rule is satisfied and no separate merge-tree run is needed. main's delta was docs/planning and the Avalonia ViewLocator; the Rust solver, fixtures, and benchmark sources are unchanged.",
+    "N-2 merge-candidate convention (Step 11): a commit cannot contain its own SHA, so audit_commit, closeout_ci.head_sha, and merge_candidate all record the audited tip 3fd45161d5683405955f806196ca61b295066479. The following documentation/status commit changes only docs/planning (the closeout evidence, the audit record state, the step page, and the status dashboard). check_closeout_evidence.py therefore compares an empty 3fd4516..3fd4516 delta; the docs-only delta is verified manually with git diff --name-status 3fd4516..HEAD.",
+    "Fixture authoring deviation (recorded): the project model's ENM008 validator requires 2-8 surrounding offsets, so the design's one-member cluster cannot be authored. The step-14-multi-centre-cluster sample adds a third stable site C and uses two distinct member sites (B and C) at [0,0,0.05] and [0,0,0.1]; two images of one member site remain the rejected OD-1 ambiguity. The step-13-centered package stays byte-identical and the four-instance/member-site fallback acceptance is unchanged. See the step page section 19 and the fixture READMEs.",
+    "The real-writer step-14-ceria-10x10x10 fixture is table-free (the ceria primary model has no pair or cluster tables). The step-13-populated model cloned onto a hand-built 10x10x10 InitialLattice is the pair/cluster-scale benchmark; both scenarios are recorded in tests/reference/bench/step-14-context.json and the rustContext entry in baselines.json.",
+    "Benchmark evidence: Criterion context bench, release, runner class linux-x64-local-container-amd-ryzen-7-7840u-rust-1.99.1 (AMD Ryzen 7 7840U, Debian GNU/Linux 13, Rust 1.99.1, Criterion 0.8.2): ceria 10x10x10 median 75.565 us (CI 74.908-76.269), memory plan 308,632 B; populated clone 10x10x10 median 315.26 us (CI 313.18-317.73), memory plan 234,832 B (capacity 234,864). Both are below the <100 ms and <=64 MiB budgets; the 10% rule is applied only within the same runner class and Step 29 owns the automated same-class regression job.",
+    "Allocation proof: tests/allocation.rs is its own test binary with a counting global allocator. The ceria 10x10x10 build makes 98 allocations / 316,872 B against a 308,632 B plan (capacity equal to the plan); the populated 2x2x2 build makes 103 allocations / 11,861 B against a 2,672 B plan. After construction the hot accessors and 200 pool set_selectable particle-change cycles allocate zero bytes and do not change the pool capacity/pointer.",
+    "Platform CI not run: Step 14 adds Rust library/test/benchmark code and Markdown/JSON fixtures. It adds no P/Invoke, LibraryImport, native library, RID-specific package, Windows/macOS path/case/locking behaviour, or GUI code. Ubuntu is the only affected platform; the absence of Windows/macOS runs is an accepted risk recorded for the audit.",
+    "Void-member rule for Step 15: a cluster cell with a void centre or member has no canonical occupation row and contributes zero (the empty cluster). Step 15 must use the zero energy row / absent cluster_code_id instead of cluster_lookup; the non-canonical non-void code_expansions fail-closed behaviour is unchanged. Recorded in docs/reference/msl-format.md, docs/physics/energies.md, docs/development/solver-architecture.md, and docs/development/testing-and-parity.md.",
+    "Feature 6 squash is 00fceabce7fa6d910cb79f701f175aa4b681bf5f; the closeout feature also includes the real-writer fixtures, the .NET rebuild tests, the context-summary snapshot, the allocation proof, the Criterion benchmark and rustContext baseline, and the implementation documentation. The audit request is docs/planning/audits/step-14.md.",
+    "The step is not merged or tagged. The human owner approves the audit verdict, the step-to-main merge, and the step-14 tag. The main merge must wait for a green automatic main CI run, and the tag points to the --no-ff merge commit."
+  ]
+}
