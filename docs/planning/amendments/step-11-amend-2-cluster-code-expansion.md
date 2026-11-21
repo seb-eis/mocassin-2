@@ -316,7 +316,7 @@ future signed projection includes the field, which this amendment explicitly doe
 - `ReaderLimits` gains `max_cluster_expansion_bytes: u64` with a **128 MiB** default (A2-01). Like
   `max_rules`, it is a solver-only cap: a writer-valid package above it is rejected with a structured error and
   needs a raised `ReaderLimits`. The default bounds the typed map to `12 × 11.18M ≈ 128 MiB`; the encoded
-  payload for that many entries is roughly 53–160 MiB depending on the integer widths, so the cap binds before
+  payload for that many entries is roughly 21–150 MiB depending on the integer widths, so the cap binds before
   the 512 MiB model guard.
 
 #### 6.2 Lookup and fail-closed semantics
@@ -341,9 +341,9 @@ partial map".
 
 The earlier "8 bytes per entry / 1.5×" argument is **withdrawn**. The stored integers use MessagePack's
 smallest-width encoding: a code is 1–9 bytes and an index is 1–5 bytes, so a 512 MiB payload can declare
-roughly 50–250M entries and drive a typed `u64` + `u32` pair of roughly 0.6–3 GiB. The payload byte guard alone
-is therefore **not** a bound on the typed arrays, and the .NET typed decode has the same exposure before the
-verifier runs.
+roughly 38–268M entries and drive a typed `u64` + `u32` pair of roughly 0.45–3.2 GB. The payload byte guard
+alone is therefore **not** a bound on the typed arrays, and the .NET typed decode has the same exposure before
+the verifier runs.
 
 The design adds an explicit budget on **both** read paths, checked before the arrays are allocated:
 
