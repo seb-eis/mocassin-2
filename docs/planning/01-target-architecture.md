@@ -137,6 +137,10 @@ Rules:
   `Results`; post-build verification is composed by the caller.
 - `Results` depends on `Core` + `Contracts` (not `Packages`) and owns `.msl`/`.msr`/`.mcs` reading, structural
   package inspection/verification, collection, and evaluation.
+- The compiled-model payload carries the per-cluster occupation **expansion map** produced by the Step 02/08
+  reduction: every raw slot-tuple code resolves to its canonical occupation index and applied energy. The
+  solver performs a sorted-array lookup and never re-runs symmetry; `ClusterReduction` remains the only place
+  that computes orbits.
 - Package-verification diagnostics (`PKG`) are Contracts-owned descriptors. CLI diagnostics (`CLI`) are also
   Contracts-owned so `Packages` composes them into its `DiagnosticCatalog` for the docs-drift check and the
   CLI constructs them without a reverse edge. `Results` constructs its diagnostics from the same descriptors
@@ -495,6 +499,11 @@ boundaries. There is no server component and no remote telemetry.
 | CLI JSON/events | `schemaVersion` | One version per report id and for the event stream; additive changes only within a major version |
 | .NET libraries | NuGet SemVer | No breaking public API within a major; `ApiCompat` gate |
 | Python package | `__version__` + declared format range | New format major requires a package major; wheel per release |
+
+Additive **optional** payload members are allowed within a major version when every existing field keeps its
+meaning, absence has a defined safe behaviour, the reader ignores unknown fields, and no canonical signature
+projection changes ([ADR 0013](adr/0013-format-compatibility-and-api-versioning.md) addendum). A new required
+field, a changed field meaning, or a new signature input is a major change with a previous-major reader.
 
 ## 8. Architecture decision records
 

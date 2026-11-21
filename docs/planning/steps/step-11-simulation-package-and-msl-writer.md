@@ -27,11 +27,13 @@ read-only inspection/verification library for the build CLI.
 - **Design review:** Ready with notes — accepted 2026-11-15 (record `32411c9`) — [record](../reviews/step-11.md)
 - **Amendments:** [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) — .NET 11
   toolchain and native Zstandard — **Integrated** (`00753e7`); design review `Ready with notes` accepted
-  2026-11-15 ([record](../reviews/step-11-amend-1.md))
+  2026-11-15 ([record](../reviews/step-11-amend-1.md)). [`step-11-amend-2`](../amendments/step-11-amend-2-cluster-code-expansion.md)
+  — cluster occupation code expansion map — **Planned**; design review requested 2026-11-21
+  ([record](../reviews/step-11-amend-2.md)); post-merge `step-11.1` process, `step-11` is not moved
 - **Feature list:** Approved 2026-11-15 (seven features)
 - **Post-implementation correction:** `fix/container-build-context` (2026-11-16) removed the containerfile's
   `COPY global.json` pin step after the image build failed with the opencode-container context; see deviation 2.
-- **Last updated:** 2026-11-16
+- **Last updated:** 2026-11-21
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
@@ -46,6 +48,7 @@ read-only inspection/verification library for the build CLI.
 | 7 Fixtures, performance, documentation, and closeout | `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs`; `feature/step-11-simulation-package-and-msl-writer/fix-windows-canonical-json` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `e25811f` (fixtures/Part B/docs); `0ae05a4` (Windows canonical JSON) |
 | Closeout | `feature/step-11-simulation-package-and-msl-writer/closeout` | Squashed | `docs --require`, `policy --require` exit 0 | Ubuntu closeout and Windows platform gate green | `e94d975` |
 | X2 Audit-minor fixes | `feature/step-11-simulation-package-and-msl-writer/fix-audit-minors` | Squashed | `all --require` exit 0 | Ubuntu closeout and Windows platform gate green at X2 | `4197166` |
+| A2 Cluster code expansion map | `docs/step-11-amend-2` (design); `fix/step-11.1-cluster-code-expansion` (planned) | Planned — design review requested | — | — | — |
 
 ### Approved feature list
 
@@ -1190,6 +1193,26 @@ At this point, document the simulation package:
   Step 12 CLI status. The owner directed that this page be written in feature 7 even though the original design
   deferred the CLI-facing page to Step 12; it describes the implemented pipeline and marks the command as
   Step 12 work.
+
+## Post-merge amendment 2 — cluster occupation code expansion map
+
+Step 14 design-review round 3 raised **F-29**: the `.msl` cluster table stores one `CanonicalCode` per
+symmetry-reduced orbit and the writer persisted only that code, so the solver cannot resolve a raw occupation
+tuple that is not the canonical representative. The original solver stored every equivalent code
+(`GroupLookupCodes`); the canonical-only package is a regression for non-P1 multi-member clusters. The primary
+ceria sample's two-member `±0.25` cluster reduces 8 raw tuples to 6 canonical codes, and two of the eight actual
+assignments fail as `MissingOccupationCode`.
+
+The amendment adds one optional `code_expansions` member per cluster table: a strictly ascending
+`expanded_codes:[u64]` array and a parallel `canonical_indices:[u32]` array, mapping every raw slot tuple to
+`occupation_codes`/`energies`. It is produced from the already-computed Step 08 `Expansions`, is not a signature
+input (`signatures.model` already binds those codes), and enters v1 additively while `.msl` is unreleased. No
+runtime symmetry is added to the solver. Full design, fixtures, tests, and the `step-11.1` post-merge process
+are in [`step-11-amend-2`](../amendments/step-11-amend-2-cluster-code-expansion.md).
+
+The Step 11 audit record and `docs/planning/closeout/step-11.json` are historical and are not rewritten. The
+amendment is audited separately at `docs/planning/audits/step-11-amend-2.md` and would be tagged `step-11.1`
+only after owner approval and a green `main` CI run.
 
 ## Tests
 

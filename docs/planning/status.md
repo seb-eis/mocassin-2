@@ -157,7 +157,10 @@ Notes N-1 (directory-fsync order), N-4 (`AGENTS.md` §1 drift), and N-6 (Step 29
 2026-11-16 and approved the merge and tag. The step merged into `main` with `--no-ff` as
 `84ceb76eaa3e14c7cbe42c7ccbdc9842611891bc`; automatic main CI
 [`43948410478`](https://github.com/seb-eis/mocassin-2/actions/runs/43948410478) is green at that merge commit;
-the annotated `step-11` tag is pushed; and the step branch is deleted locally and remotely.
+the annotated `step-11` tag is pushed; and the step branch is deleted locally and remotely. Post-merge amendment
+2 ([`step-11-amend-2`](amendments/step-11-amend-2-cluster-code-expansion.md), cluster occupation code expansion
+map) is **Planned** and in design review as of 2026-11-21; it does not change the step's Done/tagged state and
+proposes a `step-11.1` tag without moving `step-11`.
 
 Step 12 — Build Orchestration and the `mocassin` CLI is **Done**. The design was accepted at `1b6af90`; seven
 features are squash-merged, and the round-1 audit fixes are `07851d8`. Audit round 2 returned `Passed with

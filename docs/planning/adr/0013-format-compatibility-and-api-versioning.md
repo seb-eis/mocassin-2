@@ -38,6 +38,28 @@ Without an explicit policy, a new release can silently break old files or public
 - Results intended for long-term archive should be exported to CSV/JSON/Parquet. Archived `.msr` files get the
   same two-major window.
 
+**Additive payload fields within a major version (addendum, 2026-11-21).** A versioned payload (`.msl` model,
+job, and lattice payloads; `.msr` rows and state references; `.mcs` documents) may gain a **new optional member**
+without a major version bump when all of the following hold:
+
+- every existing field keeps its name, type, meaning, and required/optional status;
+- the writer always emits a valid current-major document, and the new member's **absence** has a defined
+  meaning that is safe for every document written before it existed;
+- a reader that predates the member ignores it (the payload unknown-field policy is `ignore`) and still reads
+  the document under the documented absence rule;
+- the member is not part of a canonical signature projection, or the projection already binds the same data;
+  adding a new signature input is a format-breaking change;
+- the current-major fixtures are updated and a byte-fixed pre-change fixture, when the old shape must keep
+  working, is retained for the life of the major.
+
+A **new required field**, a changed type or meaning, a removed field, a changed ordering/encoding invariant, or
+a new signature input is a **major** change: bump the version, add a version-specific reader, and keep the
+previous-major fixtures. This addendum does not change the current/previous-major support window; it records how
+an additive member enters a major. The first released `.msl` freezes v1; from that point, an optional member is
+still additive within v1 only if the conditions above hold, and any change to the meaning of the absence rule or
+to a signed projection is major. The cluster `code_expansions` member in
+[`step-11-amend-2`](../amendments/step-11-amend-2-cluster-code-expansion.md) is the first application.
+
 ### .NET libraries
 
 - NuGet packages use SemVer 2.0.

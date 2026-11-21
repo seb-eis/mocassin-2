@@ -14,7 +14,12 @@ lookup tables, selection pools, jump-status caches, counters, goals, and tracker
 - **Step tag:** —
 - **Audit:** Not requested
 - **Design review:** Not requested
-- **Last updated:** —
+- **Cross-step dependency:** F-29 (cluster-code expansion map) is resolved by
+  [`step-11-amend-2`](../amendments/step-11-amend-2-cluster-code-expansion.md); the Step 14 design must consume
+  `ClusterTable::canonical_index` and fail closed when a non-canonical raw tuple has no map. The authoritative
+  Step 14 design text and the F-29 review are on the unmerged Step 14 design branch; reconcile this pointer
+  there before the start gate.
+- **Last updated:** 2026-11-21
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
