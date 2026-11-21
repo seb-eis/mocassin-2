@@ -58,7 +58,7 @@ public sealed class ProjectPathRulesTests
         var target = ProjectPathRules.ValidateTarget("/tmp/projects", name, ProjectTargetState.Absent);
 
         Assert.True(target.IsSuccess);
-        Assert.Equal(Path.Combine("/tmp/projects", "Named.mocprj"), target.FullPath);
+        Assert.Equal(Path.GetFullPath(Path.Combine("/tmp/projects", "Named.mocprj")), target.FullPath);
     }
 
     [Fact]
