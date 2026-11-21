@@ -41,7 +41,7 @@
                    Maximum="1"
                    Value="{Binding Progress.Fraction, TargetNullValue=0}"
                    IsIndeterminate="{Binding Progress.IsIndeterminate}"
-                   Background="{DynamicResource Mocassin.SelectedBackground}"
+                   Background="Transparent"
                    Foreground="{DynamicResource Mocassin.StatusBarForeground}"
                    IsVisible="{Binding Progress.IsActive}" />
     </Grid>
