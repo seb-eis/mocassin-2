@@ -12,7 +12,7 @@
     "head_sha": ""
   },
   "platform_ci": "windows run 44889462922 at 30dcf3ed13dbd48cf2e8ed7c9aee349e1effacde (green, https://github.com/seb-eis/mocassin-2/actions/runs/44889462922); macos run 44889646766 at 30dcf3ed13dbd48cf2e8ed7c9aee349e1effacde (green, https://github.com/seb-eis/mocassin-2/actions/runs/44889646766)",
-  "tag": "",
+  "tag": "step-23a",
   "notes": [
     "Ubuntu closeout CI run 44889193801 is the workflow_dispatch at audited commit 30dcf3ed13dbd48cf2e8ed7c9aee349e1effacde (platforms=ubuntu, force_all=false). It is green: Detect changes, .NET (ubuntu-latest), Contracts and policy, Public API compatibility, Rust, and Python all succeeded.",
     "Windows platform gate run 44889462922 and macOS platform gate run 44889646766 were dispatched sequentially at the same commit and are green. Both run the focused platform job: Release build of Mocassin.slnx plus Mocassin.App.Tests (Avalonia headless workspace), Mocassin.Packages.Tests, Mocassin.Results.Tests, and Mocassin.Cli.Tests.",
@@ -20,6 +20,6 @@
     "Local gate: ./tools/verify.sh all --require exited 0 on the fixed tree at commit 30dcf3e, including the strict documentation build, DocFX, rustdoc, contracts/policy, structure, and the AOT evidence gate. The AOT CLI publish reports 62 IL diagnostics as recorded evidence; the gate's documented policy treats that as evidence, not a failure.",
     "Automated Xvfb real-window evidence was captured on 2026-11-21T09:15:51Z on Debian 13 with .NET 11.0.0 and Xvfb 1280x800x24; docs/development/platform-checklist.md records the command, steps, and image hashes and states that it is automated Xvfb evidence, not a manual checklist.",
     "No code, test, contract, or configuration file changes after 30dcf3ed13dbd48cf2e8ed7c9aee349e1effacde. The closeout evidence commit, the audit-record resolutions, the step page, and the status dashboard are documentation-only.",
-    "Step 23A is tagged only after an audit pass and owner approval; tag is intentionally empty at this freeze."
+    "Step 23A was tagged `step-23a` on merge commit 9f4d18668424e0b3a0b3b25b3ab2bf1d0567a0ed after the main CI run 44892961809 passed; the step branch was deleted locally and remotely."
   ]
 }

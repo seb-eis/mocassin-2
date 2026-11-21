@@ -19,12 +19,12 @@ those are Step 23B.
 
 ## Implementation status
 
-- **Status:** Re-audit required — round-1 and round-2 fixes frozen at `30dcf3e`; Ubuntu, Windows, and macOS gates green
-- **Step branch:** `step/23a-workspace-and-project-lifecycle`
-- **Step CI:** Ubuntu closeout [44889193801](https://github.com/seb-eis/mocassin-2/actions/runs/44889193801), Windows gate [44889462922](https://github.com/seb-eis/mocassin-2/actions/runs/44889462922), macOS gate [44889646766](https://github.com/seb-eis/mocassin-2/actions/runs/44889646766) — all green at `30dcf3e`
-- **Main merge:** — (`main` `eadfe13` is merged into the step branch at `a584b20`; the step merge follows the passed audit)
-- **Step tag:** —
-- **Audit:** Re-audit required — [record](../audits/step-23a.md), [evidence](../closeout/step-23a.json)
+- **Status:** Done — audit `Passed with notes` accepted 2026-11-21; merged and tagged
+- **Step branch:** `step/23a-workspace-and-project-lifecycle` (merged and deleted)
+- **Step CI:** Ubuntu closeout [44889193801](https://github.com/seb-eis/mocassin-2/actions/runs/44889193801), Windows gate [44889462922](https://github.com/seb-eis/mocassin-2/actions/runs/44889462922), macOS gate [44889646766](https://github.com/seb-eis/mocassin-2/actions/runs/44889646766) green at `30dcf3e`; [main CI 44892961809](https://github.com/seb-eis/mocassin-2/actions/runs/44892961809) green at `9f4d186`
+- **Main merge:** `9f4d186` (`--no-ff`; `main` `eadfe13` was merged into the step branch at `a584b20`)
+- **Step tag:** `step-23a`
+- **Audit:** Passed with notes — accepted by the human owner 2026-11-21; R3-1…R3-3 fixed, R3-4/R3-5 accepted ([record](../audits/step-23a.md), [evidence](../closeout/step-23a.json))
 - **Design review:** Ready with notes — **accepted by the human owner 2026-11-20** at `b9c56fe`
   ([record](../reviews/step-23a.md), round 3 record commit `b6a472c`). Notes n-12/n-13 are corrected in
   feature 5.
