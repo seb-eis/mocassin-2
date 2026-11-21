@@ -46,7 +46,7 @@ public sealed class ShellRenderTests
     [Fact]
     public Task TheShellStartsWithTheApplicationConsoleAndTheRegionToggles() =>
         HeadlessSession.DispatchAsync(
-            () =>
+            async () =>
             {
                 using var workspace = new TempWorkspace();
                 using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
@@ -71,6 +71,35 @@ public sealed class ShellRenderTests
                     shell.Regions.ToggleProjectsCommand.Execute(null);
                     Assert.False(shell.Regions.IsProjectsVisible);
                     Assert.False(window.GetVisualDescendants().OfType<ProjectsRegionView>().Single().IsVisible);
+                    await shell.PendingLayoutPersist;
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+
+    [Fact]
+    public Task RapidRegionTogglesCoalesceIntoTheLastPersistedLayout() =>
+        HeadlessSession.DispatchAsync(
+            async () =>
+            {
+                using var workspace = new TempWorkspace();
+                using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+
+                try
+                {
+                    var shell = Assert.IsType<ShellViewModel>(window.DataContext);
+                    shell.Regions.ToggleProjectsCommand.Execute(null);
+                    shell.Regions.ToggleProjectsCommand.Execute(null);
+                    await shell.PendingLayoutPersist;
+
+                    var loaded = new Mocassin.App.Settings.AppSettingsStore(host.Paths).Load();
+                    Assert.True(loaded.Settings.Layout.LeftVisible);
+                    Assert.Empty(
+                        Directory.EnumerateFiles(workspace.Path, "*.tmp", SearchOption.AllDirectories));
                 }
                 finally
                 {

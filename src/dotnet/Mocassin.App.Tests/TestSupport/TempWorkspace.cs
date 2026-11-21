@@ -5,8 +5,16 @@ namespace Mocassin.App.Tests.TestSupport;
 /// <summary>
 /// A temporary directory that is deleted when the test disposes it.
 /// </summary>
+/// <remarks>
+/// Asynchronous settings persistence can still hold a temporary file when a headless test finishes. Windows
+/// reports that as a sharing violation during recursive deletion, so disposal retries briefly instead of failing
+/// the test on a transient lock.
+/// </remarks>
 internal sealed class TempWorkspace : IDisposable
 {
+    private const int deleteAttempts = 20;
+    private static readonly TimeSpan deleteRetryDelay = TimeSpan.FromMilliseconds(50);
+
     /// <summary>
     /// Initializes a new temporary directory.
     /// </summary>
@@ -34,9 +42,23 @@ internal sealed class TempWorkspace : IDisposable
     /// <inheritdoc />
     public void Dispose()
     {
-        if (Directory.Exists(Path))
+        for (var attempt = 1; attempt <= deleteAttempts; attempt++)
         {
-            Directory.Delete(Path, recursive: true);
+            try
+            {
+                if (Directory.Exists(Path))
+                {
+                    Directory.Delete(Path, recursive: true);
+                }
+
+                return;
+            }
+            catch (Exception exception) when (
+                attempt < deleteAttempts
+                && exception is IOException or UnauthorizedAccessException)
+            {
+                Thread.Sleep(deleteRetryDelay);
+            }
         }
     }
 }

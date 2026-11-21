@@ -38,6 +38,7 @@ internal sealed partial class ShellViewModel : ObservableObject
     private readonly IStorageService storage;
     private readonly IDialogService dialogs;
     private readonly string? startupProjectPath;
+    private Task pendingLayoutPersist = Task.CompletedTask;
 
     [ObservableProperty]
     private string windowTitle = "MOCASSIN";
@@ -512,7 +513,35 @@ internal sealed partial class ShellViewModel : ObservableObject
             or nameof(ShellRegionsViewModel.RightWidth)
             or nameof(ShellRegionsViewModel.ConsoleHeight))
         {
-            _ = PersistLayoutAsync();
+            ScheduleLayoutPersist();
+        }
+    }
+
+    /// <summary>
+    /// Gets the pending layout-persistence task; tests await it before disposing the data directory.
+    /// </summary>
+    internal Task PendingLayoutPersist => pendingLayoutPersist;
+
+    private void ScheduleLayoutPersist()
+    {
+        var previous = pendingLayoutPersist;
+        pendingLayoutPersist = PersistLayoutAfterAsync(previous);
+    }
+
+    private async Task PersistLayoutAfterAsync(Task previous)
+    {
+        await previous.ConfigureAwait(true);
+        try
+        {
+            await PersistLayoutAsync().ConfigureAwait(true);
+        }
+        catch (Exception exception) when (
+            exception is IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            consoleService.Write(
+                ConsoleSeverity.Warning,
+                "settings",
+                $"The layout could not be saved: {exception.Message}");
         }
     }
 
