@@ -18,7 +18,7 @@ branch is `step/23b-editing-diagnostics-and-recovery`. The review record is
 
 ## Implementation status
 
-- **Status:** **In progress** — design accepted, feature 1 in progress
+- **Status:** **In progress** — design accepted; feature 1 squashed (`bb048ad`, test fix `90d9f73`); feature 2 next
 - **Step branch:** `step/23b-editing-diagnostics-and-recovery`
 - **Step CI:** — (local gates only; the single closeout `CI` run is dispatched at closeout)
 - **Main merge:** —
