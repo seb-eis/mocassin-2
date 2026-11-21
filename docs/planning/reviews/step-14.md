@@ -15,18 +15,23 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — created from the reviewed `main` commit after the start-gate approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `7c7ff0de83a4ae4c5f9849650e0601c7238494b8` |
+| Reviewed commit | `b6dc50361e749954480efa1d1559d987c10b4142` (round 2 freeze: design corrections after round 1) |
+| Previous reviewed commit | `7c7ff0de83a4ae4c5f9849650e0601c7238494b8` (round 1 freeze) |
 | Docs branch | `docs/step-14-design` (from `main` = `bbc2d083ed96fa6e26526e335304107b20a7fdcb`, `step-13` merged and tagged) |
-| Review date | 2026-11-20 |
+| Review date | 2026-11-20 (round 1); re-review request 2026-11-21 |
 | Reviewer | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh context, no shared conversation with the planner, implementor, or orchestrator |
 
 Step page: [`Step 14 — Simulation Context Initialization`](../steps/step-14-simulation-context-initialization.md)
 
 **Freeze note.** The design docs are committed as the freeze commit; this request record is a documentation-only
-follow-up so the freeze SHA can be written. The design freeze includes the step page, the architecture, data
-contract, quality-strategy, roadmap, open-decision, parity, code-structure, solver-architecture, and physics
-updates, plus the Step 15 interface reconciliation. No code, test, configuration, contract artifact, or
-generated file is part of the freeze.
+follow-up so the freeze SHA can be written. The round-1 freeze (`7c7ff0d`) included the step page, the
+architecture, data contract, quality-strategy, roadmap, open-decision, parity, code-structure,
+solver-architecture, and physics updates, plus the Step 15 interface reconciliation. The round-2 freeze
+(`b6dc503`) applies the F-1…F-16 resolutions: the owner-major link CSR with an inverse routing index, the
+supercell selection-pool key space, the pre-allocation memory plan and derived-array caps, the receiver-major
+jump links, the repair of the resume, goal, memory, `nu_max`, `!Sync`, and crate-dependency issues, and the
+Step 15/16 interface reconciliation. No code, test, configuration, contract artifact, or generated file is part
+of either freeze.
 
 **No code exists yet.** Step 14 has no branch and no implementation. The design is judged on whether the runtime
 layout, the cross-step interfaces, the two gated decisions, the fixtures, the test/budget plan, and the
@@ -264,7 +269,10 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Changes required
+**State:** Re-review required
+
+The request owner set this state after applying the round-1 resolutions; the reviewer-authored round-1 text below
+is unchanged.
 
 ## Reviewer independence
 
@@ -284,27 +292,58 @@ Follow-up step: Step 14 — re-freeze the corrected design and append a fresh re
 ## Approval summary
 
 The request owner (step agent or planner) completes this section before the orchestrator presents the approval
-request. It must cover the full history, not only the latest round.
+request. It must cover the full history, not only the latest round. This section is prepared for the Step 14
+start gate; it is not a merge/tag/waiver request and makes no claim about round 2.
 
-- [ ] Requested decision and frozen commit recorded
-- [ ] Every review/audit round recorded (round, date, commit, reviewer, verdict)
-- [ ] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
-- [ ] Accepted notes and waivers recorded with rationale
-- [ ] Residual risks, deferred items, and follow-up owners recorded
-- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
-- [ ] Final CI and documentation-build results recorded
+- [x] Requested decision and frozen commit recorded — re-review of the corrected design at
+      `b6dc50361e749954480efa1d1559d987c10b4142`; the start gate remains the owner's decision
+- [x] Every review/audit round recorded (round, date, commit, reviewer, verdict) — round 1 recorded; round 2 is
+      pending a fresh reviewer and is listed as pending, not omitted
+- [x] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status) — the reviewer's
+      table above and the resolutions below cover F-1…F-16
+- [x] Accepted notes and waivers recorded with rationale — OD-1 and OD-2 accepted 2026-11-20 (see below)
+- [ ] Residual risks, deferred items, and follow-up owners recorded — the step page §21/§23 and OD-1 carry them;
+      the final list is completed at the start gate
+- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived — pending round 2
+- [ ] Final CI and documentation-build results recorded — round-2 `docs`/`policy` results are recorded in the
+      resolution section; the closeout CI belongs to the step, not this gate
 
 Round history:
 
 | Round | Date | Commit | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| 1 | 2026-11-20 | `7c7ff0d` | DeepSeek V4.1 Flash 1017 (fresh planning auditor) | Changes required |
+| 2 | pending | `b6dc503` | pending fresh planning auditor | pending |
 
 Findings and resolutions:
 
 | Finding | Severity | Issue | Resolution | Commit | Status |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| F-1 | Major | Pool member/key space could not represent the supercell selection | `SelectionPool`/`PoolMember { env: EnvId, particle }`, global `slot` map, per-P1 `pool_of`, Step 16 aligned | `b6dc503` | Addressed |
+| F-2 | Major | Jump/pair delta orientation was sender-relative/transposed | Owner-major link CSR + inverse index; receiver-major jump links; Step 15 §4 rewritten; asymmetric-table test | `b6dc503` | Addressed |
+| F-3 | Major | Unbounded derived cluster/jump-status allocations | `MemoryPlan` before allocation, per-array formulas/caps, `max_context_bytes`, fail-closed `LimitExceeded` | `b6dc503` | Addressed |
+| F-4 | Minor | Slot 0 subjected to the unique-image rule | Slot 0 = `[0,0,0]` by definition; rule applies to slots `1..n` | `b6dc503` | Addressed |
+| F-5 | Minor | `pool_of: Vec<u8>` could wrap | `u32` + `max_pools` checked in the plan | `b6dc503` | Addressed |
+| F-6 | Minor | `nu_max` prose denied the persisted optional cap | Prose corrected to "job cap persisted, derived modulus not" | `b6dc503` | Addressed |
+| F-7 | Minor | Resume signature fields ambiguous; `.mcs` has no lattice signature | Parameterized `modelSignature` + `seedHash`; lattice signature removed; goal/flags non-validation stated | `b6dc503` | Addressed |
+| F-8 | Minor | Step 16 path formula was cumulative | Step 16 uses relative-to-start `resolve_node` | `b6dc503` | Addressed |
+| F-9 | Minor | 10×10×10 budget measured on a table-free model | Populated 10×10×10 clone added as the recorded pair/cluster measurement; limitation stated | `b6dc503` | Addressed |
+| F-10 | Minor | 500k memory row inconsistent with the caps | Replaced by the `max_context_bytes` row with a passing example and the per-array caps | `b6dc503` | Addressed |
+| F-11 | Minor | `Send`-not-`Sync` was not enforced | Explicit `PhantomData<Cell<()>>` marker + `compile_fail` doctest | `b6dc503` | Addressed |
+| F-12 | Minor | Zero-total goal dropped; `max(1, total/100)` | `total == 0` is exit 12; `total/100` after round-up | `b6dc503` | Addressed |
+| F-13 | Note | A writer-valid cross-image cluster is rejected only at solver start | Named follow-up in OD-1 (owner planner, writer build-time diagnostic) + docs notes | `b6dc503` | Addressed (follow-up recorded) |
+| F-14 | Note | `LimitExceeded` 12 vs architecture 14 | Explicit 12-vs-14 distinction in the step page, architecture §7.3, and quality strategy | `b6dc503` | Addressed |
+| F-15 | Note | Unused solver dependencies | Feature 1 makes `mocassin-msl` dev-only and removes `mocassin-state`/`mocassin-extension`/`rayon` | `b6dc503` | Addressed (implementation task) |
+| F-16 | Note | `EnergyEngine` held `&SimulationContext` but mutated | Step 15 API uses `&mut SimulationContext` and `&mut self` | `b6dc503` | Addressed |
+
+Accepted notes and waivers:
+
+- **OD-1 accepted (2026-11-20, owner):** the v1 cluster-link limitation stands, with slot 0 = `[0,0,0]`, the
+  unique centre→member link rule for slots `1..n`, fail-closed exit 12, and a named writer follow-up. No payload
+  revision now.
+- **OD-2 accepted (2026-11-20, owner):** the exact accounting (site once, pair ×0.5, cluster once at the centre)
+  stands; AGENTS §10 and `physics/energies.md` agree; Step 29 parity covers the deviation.
+- Both acceptances are recorded in `05-open-decisions.md` §2 and in the step page §§6.4 and 7.4.
 
 ## Human approval
 
@@ -318,9 +357,53 @@ Date:
 
 ## Resolution status
 
-| Finding | Status | Owner | Commit |
-| --- | --- | --- | --- |
-| — | — | — | — |
+| Finding | Status | Owner | What changed | Commit |
+| --- | --- | --- | --- | --- |
+| F-1 | Resolved | Planner | Step 14 §8/§15: `SelectionPool`/`PoolMember { env: EnvId, particle }`, one global `slot` map over `env*pc+particle`, `pool_of` over `P*pc`, `max_pools`; Step 16 §2 reads `member.env`; Step 13 page notes the placeholder retirement | `b6dc503` |
+| F-2 | Resolved | Planner | Step 14 §6.1/§7.2/§9.2/§9.3: owner-major forward CSR + inverse `IncomingLink` index, owner's table/row for deltas, receiver-major `JumpLink { sender_path_id, receiver_path_id, link_id }`, link-carried cluster associations, no reverse-link synthesis; Step 15 §2–§6 rewritten; `02-data-contracts` §3.3 and `physics/energies.md` state the orientation | `b6dc503` |
+| F-3 | Resolved | Planner | Step 14 §2: phase-0 `MemoryPlan` with per-array formulas (cluster `K*C`, cluster energy `C*Σ mapping_len`, jump `P*D+1`), new caps (`max_cluster_instances`, `max_cluster_state_bytes`, `max_cluster_energy_bytes`, `max_link_bytes`, `max_pool_bytes`, `max_status_count`, `max_jump_links`, `max_context_bytes`), fail-closed `LimitExceeded` | `b6dc503` |
+| F-4 | Resolved | Planner | Step 14 §6.2/§6.4: slot 0 = centre and `[0,0,0]`; the unique-link rule covers slots `1..n` | `b6dc503` |
+| F-5 | Resolved | Planner | Step 14 §8: `pool_of: Vec<u32>` + `max_pools` (65,536) checked in the plan | `b6dc503` |
+| F-6 | Resolved | Planner | Step 14 §11.1: the payload persists the optional job cap, not the derived build-time modulus | `b6dc503` |
+| F-7 | Resolved | Planner | Step 14 §12: `model_signature` = parameterized `.mcs` signature, `seed_hash` added, `lattice_signature` removed, `totalGoal`/`flags` explicitly not re-validated | `b6dc503` |
+| F-8 | Resolved | Planner | Step 16 §3: relative-to-start `resolve_node`; cumulative formula removed | `b6dc503` |
+| F-9 | Resolved | Planner | Step 14 §19/§20 and quality strategy §13: populated 10×10×10 clone is the recorded pair/cluster measurement; the table-free fixture limitation is stated | `b6dc503` |
+| F-10 | Resolved | Planner | Step 14 §2/§20: per-array caps + 1 GiB total with a passing 500k example; the impossible 512 MiB row removed | `b6dc503` |
+| F-11 | Resolved | Planner | Step 14 §1: `_not_sync: PhantomData<Cell<()>>` and a `compile_fail` doctest | `b6dc503` |
+| F-12 | Resolved | Planner | Step 14 §10: zero total is exit 12; `total/100` after the round-up | `b6dc503` |
+| F-13 | Resolved (follow-up recorded) | Planner | Step 14 §6.4/§21; `05-open-decisions.md` §2 OD-1: named writer build-time diagnostic, owner planner, plus the `msl-format.md`/`troubleshooting` notes in feature 6 | `b6dc503` |
+| F-14 | Resolved | Planner | Step 14 §13; `01-target-architecture.md` §7.3; quality strategy §9.12: exit 12 = context cannot be represented, exit 14 = run-time abort | `b6dc503` |
+| F-15 | Resolved (implementation task) | Planner | Step 14 §22; `solver-architecture.md` crate graph: `mocassin-msl` dev-only, `mocassin-state`/`mocassin-extension`/`rayon` removed in feature 1 and restored in Steps 18/19/29 | `b6dc503` |
+| F-16 | Resolved | Planner | Step 15 §1: `EnergyEngine<'a> { ctx: &'a mut SimulationContext }` and `&mut self` methods; `EnvId` accessors | `b6dc503` |
+
+**Major redesign summary.**
+
+- **F-1 (selection space).** A pool member is now an absolute supercell environment (`PoolMember { env: EnvId,
+  particle: ParticleId }`); the direction count and mask stay P1-keyed, so `pool_of` is a small `P*pc` table and
+  the O(1) member slot map is one global `E*pc` array. Two cells never collide, `set_selectable(env, particle)`
+  addresses the changed environment, and the plan bounds `M*8 + E*pc*4 + P*pc*4`. Step 16 selects
+  `member.env` with the pool weight `members.len() * direction_count`.
+- **F-2 (orientation).** The static vector is owner-major: `E(owner,p) = site + Σ table[pair_id][p][partner]`.
+  A second compact CSR (partner P1 → owners) answers "who changes"; a change at `V` updates each owner's vector
+  with the owner's table and row. Jump links are receiver-major (`sender_path_id`, `receiver_path_id`,
+  `link_id` into the receiver's list) and carry the receiver's cluster associations, so Step 15/17 never apply a
+  sender's table. A missing reverse link is legal and is not synthesised. The tests use an asymmetric pair table
+  and a one-directional link so a transposed implementation fails.
+- **F-3 (bounds).** A phase-0 `MemoryPlan` computes every array from the package counts with checked `u64`
+  arithmetic before any `Vec` exists: `K*C` codes/code-ids, `C*Σ mapping_len` cluster energy,
+  `(P*D+1)` jump offsets (with `max_status_count`), the counted jump links (`max_jump_links`), the inverse link
+  index, the pool slot map, and the cluster geometry. Per-array caps plus `max_context_bytes` (1 GiB) reject
+  with `LimitExceeded` (exit 12); `MemoryReport` must equal the plan.
+
+**Gate results for the corrected freeze.**
+
+- `./tools/verify.sh docs --require` → exit 0; Zensical strict (182 link-scanned files), math check (179 files),
+  DocFX (0 warnings), rustdoc clean.
+- `./tools/verify.sh policy --require` → exit 0; contracts current (26), projections 5/4/2, Space-group catalog
+  current, process consistency OK, 60 tool tests OK, SPDX headers 780 files, secret scan 1,217 files, ApiCompat
+  and cargo-deny OK.
+- `git status --short` clean before the record edit; this record commit touches only
+  `docs/planning/reviews/step-14.md`.
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
