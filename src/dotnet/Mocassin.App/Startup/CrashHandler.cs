@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Mocassin.App.Composition;
 using Mocassin.App.ViewModels.Dialogs;
 using Mocassin.App.ViewModels.Dialogs.Requests;
+using Mocassin.App.ViewModels.Recovery;
 using Mocassin.App.ViewModels.Shell;
 
 namespace Mocassin.App.Startup;
@@ -23,6 +24,7 @@ internal sealed partial class CrashHandler
     private readonly IUiDispatcher dispatcher;
     private readonly AppPaths paths;
     private readonly TimeProvider timeProvider;
+    private readonly ICrashRecoveryWriter? recoveryWriter;
 
     /// <summary>
     /// Initializes a new crash handler.
@@ -33,13 +35,15 @@ internal sealed partial class CrashHandler
     /// <param name="dispatcher">The UI dispatcher.</param>
     /// <param name="paths">The application-data paths.</param>
     /// <param name="timeProvider">The time provider used for crash-report names.</param>
+    /// <param name="recoveryWriter">The optional bounded crash-recovery writer.</param>
     public CrashHandler(
         ILogger<CrashHandler> logger,
         IDialogService dialogs,
         IShellLifetime lifetime,
         IUiDispatcher dispatcher,
         AppPaths paths,
-        TimeProvider timeProvider)
+        TimeProvider timeProvider,
+        ICrashRecoveryWriter? recoveryWriter = null)
     {
         this.logger = logger;
         this.dialogs = dialogs;
@@ -47,6 +51,7 @@ internal sealed partial class CrashHandler
         this.dispatcher = dispatcher;
         this.paths = paths;
         this.timeProvider = timeProvider;
+        this.recoveryWriter = recoveryWriter;
     }
 
     /// <summary>
@@ -72,6 +77,7 @@ internal sealed partial class CrashHandler
         CancellationToken cancellationToken = default)
     {
         LogUnhandled(logger, exception, source);
+        var snapshots = recoveryWriter?.CaptureDirtySessions() ?? [];
         try
         {
             await dialogs.ShowCrashAsync(
@@ -79,6 +85,7 @@ internal sealed partial class CrashHandler
                     "MOCASSIN encountered an unexpected error and must close.",
                     paths.LogsDirectory,
                     exception.ToString()),
+                snapshots,
                 cancellationToken);
         }
 #pragma warning disable CA1031 // The crash boundary must not throw while reporting a crash.

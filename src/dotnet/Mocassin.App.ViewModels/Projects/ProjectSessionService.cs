@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT
 
 using System.Collections.Immutable;
+using Mocassin.App.ViewModels.Editing;
+using Mocassin.App.ViewModels.Recovery;
 using Mocassin.App.ViewModels.Settings;
+using Mocassin.App.ViewModels.Settings.Blocks;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Editing;
 using Mocassin.Packages.Projects;
@@ -21,6 +24,10 @@ internal sealed class ProjectSessionService : IProjectSessionService
     private readonly IProjectWorkspace workspace;
     private readonly ISettingsService settings;
     private readonly TimeProvider timeProvider;
+    private readonly IRecoveryStore recovery;
+    private readonly ProjectRecoveryDetector recoveryDetector;
+    private readonly Dictionary<ProjectSession, EventHandler<ProjectChangedEventArgs>> changeHandlers = [];
+    private Task maintenance = Task.CompletedTask;
 
     /// <summary>
     /// Initializes the session service.
@@ -31,13 +38,15 @@ internal sealed class ProjectSessionService : IProjectSessionService
     /// <param name="workspace">The project workspace.</param>
     /// <param name="settings">The application settings.</param>
     /// <param name="timeProvider">The clock.</param>
+    /// <param name="recovery">The application-local recovery store.</param>
     public ProjectSessionService(
         ProjectStore store,
         ProjectValidationPipeline pipeline,
         IProjectFileProbe probe,
         IProjectWorkspace workspace,
         ISettingsService settings,
-        TimeProvider timeProvider)
+        TimeProvider timeProvider,
+        IRecoveryStore recovery)
     {
         if (store.Options.ValidateOnLoad)
         {
@@ -52,6 +61,8 @@ internal sealed class ProjectSessionService : IProjectSessionService
         this.workspace = workspace;
         this.settings = settings;
         this.timeProvider = timeProvider;
+        this.recovery = recovery ?? throw new ArgumentNullException(nameof(recovery));
+        recoveryDetector = new ProjectRecoveryDetector(store, recovery, probe, timeProvider);
     }
 
     /// <inheritdoc />
@@ -123,7 +134,8 @@ internal sealed class ProjectSessionService : IProjectSessionService
             probe.GetStamp(target.FullPath).LastWriteUtc,
             isReadOnly: false,
             lockPath: null,
-            pipeline);
+            pipeline,
+            timeProvider);
         session.Stamp = probe.GetStamp(target.FullPath);
         session.LastWrittenUtc = session.Stamp.LastWriteUtc;
         await AcquireLockAsync(session, cancellationToken);
@@ -156,7 +168,8 @@ internal sealed class ProjectSessionService : IProjectSessionService
             stamp.LastWriteUtc,
             isReadOnly: false,
             lockPath: null,
-            pipeline);
+            pipeline,
+            timeProvider);
         session.Stamp = stamp;
         var lockResult = await store.AcquireLockAsync(fullPath, cancellationToken);
         if (lockResult.IsSuccess)
@@ -171,6 +184,7 @@ internal sealed class ProjectSessionService : IProjectSessionService
         }
 
         AddSession(session);
+        session.AvailableRecovery = await recoveryDetector.DetectAsync(session, load.Project, cancellationToken).ConfigureAwait(true);
         await RecordOpenAsync(session, cancellationToken);
         return new ProjectSessionResult(
             session.IsReadOnly ? ProjectSessionOutcome.OpenedReadOnly : ProjectSessionOutcome.Opened,
@@ -211,17 +225,31 @@ internal sealed class ProjectSessionService : IProjectSessionService
                     : "The project file changed externally; reload it before saving.");
         }
 
-        var result = await store.SaveAsync(session.Project, session.Path, cancellationToken);
-        if (!result.IsSuccess)
+        await session.Gate.WaitAsync(cancellationToken);
+        try
         {
-            return Failure(ProjectSessionOutcome.SaveFailed, result.Diagnostics);
-        }
+            var result = await store.SaveAsync(session.Project, session.Path, cancellationToken);
+            if (!result.IsSuccess)
+            {
+                return Failure(ProjectSessionOutcome.SaveFailed, result.Diagnostics);
+            }
 
-        session.Document.MarkSaved(result.SavedProject!);
-        session.Stamp = probe.GetStamp(session.Path);
-        session.LastWrittenUtc = session.Stamp.LastWriteUtc;
-        await RecordSavedAsync(session, cancellationToken);
-        return new ProjectSessionResult(ProjectSessionOutcome.Saved, session);
+            session.Stamp = probe.GetStamp(session.Path);
+            session.LastWrittenUtc = session.Stamp.LastWriteUtc;
+            session.Document.MarkSaved();
+            session.EditCoordinator.NotifySaved();
+            if (session.PendingRecovery is null)
+            {
+                await DeleteSnapshotsAsync(session, includePending: false, cancellationToken);
+            }
+
+            await RecordSavedAsync(session, cancellationToken);
+            return new ProjectSessionResult(ProjectSessionOutcome.Saved, session);
+        }
+        finally
+        {
+            session.Gate.Release();
+        }
     }
 
     /// <inheritdoc />
@@ -249,65 +277,377 @@ internal sealed class ProjectSessionService : IProjectSessionService
             return Failure(ProjectSessionOutcome.Io, directoryError);
         }
 
-        var newLock = await store.AcquireLockAsync(fullPath, cancellationToken);
-        if (!newLock.IsSuccess)
+        await session.Gate.WaitAsync(cancellationToken);
+        var previousPath = session.Path;
+        try
         {
-            return Failure(ProjectSessionOutcome.Locked, newLock.Diagnostics);
-        }
+            var newLock = await store.AcquireLockAsync(fullPath, cancellationToken);
+            if (!newLock.IsSuccess)
+            {
+                return Failure(ProjectSessionOutcome.Locked, newLock.Diagnostics);
+            }
 
-        var result = await store.SaveAsync(session.Project, fullPath, cancellationToken);
-        if (!result.IsSuccess)
+            var result = await store.SaveAsync(session.Project, fullPath, cancellationToken);
+            if (!result.IsSuccess)
+            {
+                newLock.Lock?.Dispose();
+                return Failure(ProjectSessionOutcome.SaveFailed, result.Diagnostics);
+            }
+
+            session.FileLock?.Dispose();
+            session.FileLock = newLock.Lock;
+            session.LockPath = newLock.Lock!.Path;
+            session.Path = fullPath;
+            session.IsReadOnly = false;
+            session.Stamp = probe.GetStamp(fullPath);
+            session.LastWrittenUtc = session.Stamp.LastWriteUtc;
+            session.Document.MarkSaved();
+            session.EditCoordinator.NotifySaved();
+            if (session.PendingRecovery is null)
+            {
+                ProjectStore.DeleteAutosave(previousPath);
+                await DeleteSnapshotsAsync(session, includePending: false, cancellationToken);
+            }
+
+            await RecordSavedAsync(session, cancellationToken);
+            return new ProjectSessionResult(ProjectSessionOutcome.Saved, session);
+        }
+        finally
         {
-            newLock.Lock?.Dispose();
-            return Failure(ProjectSessionOutcome.SaveFailed, result.Diagnostics);
+            session.Gate.Release();
         }
-
-        session.FileLock?.Dispose();
-        session.FileLock = newLock.Lock;
-        session.LockPath = newLock.Lock!.Path;
-        session.Path = fullPath;
-        session.IsReadOnly = false;
-        session.Document.MarkSaved(result.SavedProject!);
-        session.Stamp = probe.GetStamp(fullPath);
-        session.LastWrittenUtc = session.Stamp.LastWriteUtc;
-        await RecordSavedAsync(session, cancellationToken);
-        return new ProjectSessionResult(ProjectSessionOutcome.Saved, session);
     }
 
     /// <inheritdoc />
     public async Task<ProjectSessionResult> ReloadAsync(
         ProjectSession session,
+        bool discardChanges = false,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(session);
-        var load = await store.LoadAsync(session.Path, cancellationToken);
-        if (load.Project is null)
+        if (session.Document.IsDirty && !discardChanges)
         {
-            return Failure(MapFailure(load.FailureKind), load.Diagnostics, load.Diagnostics.FirstOrDefault()?.Message);
+            return Failure(
+                ProjectSessionOutcome.UnsavedChanges,
+                "Reload and discard changes?");
         }
 
-        session.Document = new ProjectDocument(load.Project);
-        session.LoadDiagnostics = load.Diagnostics;
-        session.Validation = pipeline.Validate(
-            load.Project,
-            load.Diagnostics,
-            cancellationToken: cancellationToken);
-        session.Stamp = probe.GetStamp(session.Path);
-        session.LastWrittenUtc = session.Stamp.LastWriteUtc;
-        return new ProjectSessionResult(ProjectSessionOutcome.Reloaded, session, load.Diagnostics);
+        session.IsClosing = true;
+        var acquired = false;
+        var completed = false;
+        try
+        {
+            await session.Gate.WaitAsync(cancellationToken);
+            acquired = true;
+            var load = await store.LoadAsync(session.Path, cancellationToken);
+            if (load.Project is null)
+            {
+                return Failure(MapFailure(load.FailureKind), load.Diagnostics, load.Diagnostics.FirstOrDefault()?.Message);
+            }
+
+            await DeleteSnapshotsAsync(session, includePending: true, cancellationToken);
+            session.PendingRecovery = null;
+            session.AvailableRecovery = null;
+            session.LoadDiagnostics = load.Diagnostics;
+            session.Validation = pipeline.Validate(
+                load.Project,
+                load.Diagnostics,
+                cancellationToken: cancellationToken);
+            session.ValidationCoordinator.Reseed(session.Validation, load.Diagnostics);
+            var document = new ProjectDocument(load.Project) { MaxUndoDepth = 200 };
+            session.Document = document;
+            session.EditCoordinator.ReplaceDocument(document, canEdit: !session.IsReadOnly);
+            session.Stamp = probe.GetStamp(session.Path);
+            session.LastWrittenUtc = session.Stamp.LastWriteUtc;
+            session.AvailableRecovery = await recoveryDetector.DetectAsync(session, load.Project, cancellationToken).ConfigureAwait(true);
+            await RecordSessionStateAsync(cleanExit: false, cancellationToken);
+            session.IsClosing = false;
+            completed = true;
+            return new ProjectSessionResult(ProjectSessionOutcome.Reloaded, session, load.Diagnostics);
+        }
+        finally
+        {
+            if (!completed)
+            {
+                session.IsClosing = false;
+            }
+
+            if (acquired)
+            {
+                session.Gate.Release();
+            }
+        }
     }
 
     /// <inheritdoc />
-    public Task<ProjectSessionResult> CloseAsync(
+    public async Task<ProjectSessionResult> CloseAsync(
         ProjectSession session,
+        bool discardChanges = false,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(session);
-        cancellationToken.ThrowIfCancellationRequested();
-        session.FileLock?.Dispose();
-        session.FileLock = null;
-        workspace.Remove(session.Id);
-        return Task.FromResult(new ProjectSessionResult(ProjectSessionOutcome.Closed, session));
+        if (session.Document.IsDirty && !session.IsReadOnly && !discardChanges)
+        {
+            return Failure(ProjectSessionOutcome.UnsavedChanges, "The project has unsaved changes.");
+        }
+
+        session.IsClosing = true;
+        var acquired = false;
+        var closed = false;
+        try
+        {
+            await session.Gate.WaitAsync(cancellationToken);
+            acquired = true;
+            if (discardChanges)
+            {
+                await DeleteSnapshotsAsync(session, includePending: true, cancellationToken);
+                session.PendingRecovery = null;
+            }
+            else if (session.PendingRecovery is null)
+            {
+                await DeleteSnapshotsAsync(session, includePending: false, cancellationToken);
+            }
+
+            if (changeHandlers.Remove(session, out var handler))
+            {
+                session.EditCoordinator.ProjectChanged -= handler;
+            }
+
+            session.AvailableRecovery = null;
+            session.FileLock?.Dispose();
+            session.FileLock = null;
+            workspace.Remove(session.Id);
+            closed = true;
+            await RecordSessionStateAsync(cleanExit: false, cancellationToken);
+            return new ProjectSessionResult(ProjectSessionOutcome.Closed, session);
+        }
+        finally
+        {
+            if (!closed)
+            {
+                session.IsClosing = false;
+            }
+
+            if (acquired)
+            {
+                session.Gate.Release();
+            }
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<ProjectSessionResult> RecoverAsync(
+        ProjectSession session,
+        RecoveryCandidate candidate,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+        ArgumentNullException.ThrowIfNull(candidate);
+        if (candidate.ProjectId != session.Id)
+        {
+            return Failure(ProjectSessionOutcome.InvalidContent, "The recovery snapshot belongs to a different project.");
+        }
+
+        await session.Gate.WaitAsync(cancellationToken);
+        try
+        {
+            var load = await store.LoadAsync(candidate.SnapshotPath, cancellationToken);
+            if (load.Project is null || load.Project.Metadata.ProjectId != session.Id)
+            {
+                return Failure(
+                    ProjectSessionOutcome.InvalidContent,
+                    load.Diagnostics,
+                    "The recovery snapshot could not be loaded for this project.");
+            }
+
+            var saved = session.Document.LastSavedProject;
+            session.LoadDiagnostics = load.Diagnostics;
+            session.Validation = pipeline.Validate(
+                load.Project,
+                load.Diagnostics,
+                cancellationToken: cancellationToken);
+            session.ValidationCoordinator.Reseed(session.Validation, load.Diagnostics);
+            var document = ProjectDocument.CreateRecovered(load.Project, saved, maxUndoDepth: 200);
+            session.Document = document;
+            session.EditCoordinator.ReplaceDocument(document, canEdit: !session.IsReadOnly);
+            session.PendingRecovery = null;
+            session.AvailableRecovery = null;
+            session.Stamp = probe.GetStamp(session.Path);
+            session.LastWrittenUtc = session.Stamp.LastWriteUtc;
+            await RecordSessionStateAsync(cleanExit: false, cancellationToken);
+            return new ProjectSessionResult(ProjectSessionOutcome.Recovered, session, load.Diagnostics);
+        }
+        finally
+        {
+            session.Gate.Release();
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<ProjectSessionResult> DiscardRecoveryAsync(
+        ProjectSession session,
+        RecoveryCandidate candidate,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+        ArgumentNullException.ThrowIfNull(candidate);
+        if (candidate.ProjectId != session.Id)
+        {
+            return Failure(ProjectSessionOutcome.InvalidContent, "The recovery snapshot belongs to a different project.");
+        }
+
+        await session.Gate.WaitAsync(cancellationToken);
+        try
+        {
+            if (candidate.Source == RecoverySource.Sidecar)
+            {
+                // A Save As with a deferred candidate leaves the sidecar at the candidate's old snapshot path,
+                // so delete exactly that file rather than deriving one from the new session path.
+                ProjectStore.DeleteAutosaveFile(candidate.SnapshotPath);
+            }
+            else
+            {
+                await recovery.DeleteAsync(candidate, cancellationToken);
+            }
+
+            session.PendingRecovery = null;
+            session.AvailableRecovery = null;
+            await RecordSessionStateAsync(cleanExit: false, cancellationToken);
+            return new ProjectSessionResult(ProjectSessionOutcome.Discarded, session);
+        }
+        finally
+        {
+            session.Gate.Release();
+        }
+    }
+
+    /// <inheritdoc />
+    public Task<IReadOnlyList<RecoveryCandidate>> ListRecoveryAsync(CancellationToken cancellationToken = default) =>
+        recovery.ListAsync(cancellationToken);
+
+    /// <inheritdoc />
+    public Task<int> SweepRecoveryAsync(CancellationToken cancellationToken = default) =>
+        recovery.SweepAsync(
+            timeProvider.GetUtcNow(),
+            RecoveryRetentionPolicy.Retention,
+            cancellationToken);
+
+    /// <inheritdoc />
+    public Task MarkCleanExitAsync(CancellationToken cancellationToken = default) =>
+        RecordSessionStateAsync(cleanExit: true, cancellationToken);
+
+    /// <summary>
+    /// Gets the latest queued snapshot-cleanup task, for deterministic tests.
+    /// </summary>
+    internal Task WhenMaintenanceIdleAsync() => maintenance;
+
+    private void OnSessionProjectChanged(ProjectSession session, ProjectChangedEventArgs args)
+    {
+        if (args.Kind is not (ProjectChangeKind.Edited or ProjectChangeKind.Undo or ProjectChangeKind.Redo))
+        {
+            return;
+        }
+
+        if (!ReferenceEquals(args.Previous, args.Current))
+        {
+            session.PendingRecovery = null;
+        }
+
+        if (session.PendingRecovery is not null || session.Document.IsDirty)
+        {
+            return;
+        }
+
+        maintenance = CleanupAsync(session);
+    }
+
+    private async Task CleanupAsync(ProjectSession session)
+    {
+        if (!Sessions.Contains(session))
+        {
+            return;
+        }
+
+        // The trigger runs on the UI thread. Keep the continuation there so the workspace/document reads in
+        // this method stay UI-thread-confined; the snapshot deletes below are asynchronous file I/O.
+        await session.Gate.WaitAsync().ConfigureAwait(true);
+        try
+        {
+            if (!session.Document.IsDirty
+                && session.PendingRecovery is null
+                && Sessions.Contains(session))
+            {
+                await DeleteSnapshotsAsync(session, includePending: false, CancellationToken.None)
+                    .ConfigureAwait(false);
+            }
+        }
+        finally
+        {
+            session.Gate.Release();
+        }
+    }
+
+    private async Task DeleteSnapshotsAsync(
+        ProjectSession session,
+        bool includePending,
+        CancellationToken cancellationToken)
+    {
+        var pending = session.PendingRecovery;
+        if (pending is null || includePending)
+        {
+            ProjectStore.DeleteAutosave(session.Path);
+            await DeleteRecoveryCandidatesAsync(session, exceptSnapshotPath: null, cancellationToken)
+                .ConfigureAwait(false);
+            return;
+        }
+
+        if (pending.Source != RecoverySource.Sidecar)
+        {
+            ProjectStore.DeleteAutosave(session.Path);
+        }
+
+        await DeleteRecoveryCandidatesAsync(session, pending.SnapshotPath, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    private async Task DeleteRecoveryCandidatesAsync(
+        ProjectSession session,
+        string? exceptSnapshotPath,
+        CancellationToken cancellationToken)
+    {
+        var candidates = await recovery.ListAsync(cancellationToken).ConfigureAwait(false);
+        foreach (var candidate in candidates)
+        {
+            if (candidate.ProjectId != session.Id)
+            {
+                continue;
+            }
+
+            if (exceptSnapshotPath is not null
+                && string.Equals(candidate.SnapshotPath, exceptSnapshotPath, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            await recovery.DeleteAsync(candidate, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    private async Task RecordSessionStateAsync(bool cleanExit, CancellationToken cancellationToken)
+    {
+        var open = Sessions.Select(session => session.Path).ToArray();
+        var active = ActiveSession?.Path;
+        var updated = settings.Current with
+        {
+            Session = new SessionSettings
+            {
+                OpenProjects = [.. open],
+                ActiveProject = active,
+                CleanExit = cleanExit,
+                SavedUtc = timeProvider.GetUtcNow(),
+            },
+        };
+        await settings.UpdateAsync(updated, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -343,6 +683,9 @@ internal sealed class ProjectSessionService : IProjectSessionService
         var entry = new ProjectWorkspaceEntry(session);
         workspace.Add(entry);
         workspace.Activate(entry);
+        EventHandler<ProjectChangedEventArgs> handler = (_, args) => OnSessionProjectChanged(session, args);
+        changeHandlers[session] = handler;
+        session.EditCoordinator.ProjectChanged += handler;
     }
 
     private ProjectSession? FindByPath(string fullPath) =>
@@ -375,6 +718,7 @@ internal sealed class ProjectSessionService : IProjectSessionService
             : settings.Current with { Paths = paths with { LastOpenDirectory = directory } };
         await settings.UpdateAsync(updated, cancellationToken);
         await settings.AddRecentFileAsync(session.Path, timeProvider.GetUtcNow(), cancellationToken);
+        await RecordSessionStateAsync(cleanExit: false, cancellationToken);
     }
 
     private async Task RecordSavedAsync(ProjectSession session, CancellationToken cancellationToken)
@@ -388,6 +732,7 @@ internal sealed class ProjectSessionService : IProjectSessionService
         }
 
         await settings.AddRecentFileAsync(session.Path, timeProvider.GetUtcNow(), cancellationToken);
+        await RecordSessionStateAsync(cleanExit: false, cancellationToken);
     }
 
     private static ProjectSessionOutcome MapFailure(ProjectLoadFailureKind failure) =>

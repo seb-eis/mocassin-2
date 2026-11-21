@@ -1600,3 +1600,4 @@ static Mocassin.Packages.Projects.Templates.ProjectTargetResult.operator ==(Moca
 ~override Mocassin.Packages.Projects.Templates.ProjectNameResult.ToString() -> string
 ~override Mocassin.Packages.Projects.Templates.ProjectTargetResult.Equals(object obj) -> bool
 ~override Mocassin.Packages.Projects.Templates.ProjectTargetResult.ToString() -> string
+static Mocassin.Packages.Projects.ProjectStore.DeleteAutosaveFile(string! autosavePath) -> bool

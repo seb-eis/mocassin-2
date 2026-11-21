@@ -4,6 +4,7 @@ using Avalonia;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Mocassin.App.Composition;
+using Mocassin.App.Scheduling;
 using Mocassin.App.ViewModels.Settings;
 using Mocassin.App.Views.Shell;
 
@@ -48,6 +49,7 @@ internal sealed partial class StartupCoordinator : IDisposable
             themeApplier.Apply(settingsService.Current);
             settingsService.Changed += (_, updated) => themeApplier.Apply(updated);
             var window = host.Services.GetRequiredService<ShellWindow>();
+            host.Services.GetRequiredService<AutosaveTimer>().Start();
             var startupLogger = loggerFactory.CreateLogger<StartupCoordinator>();
             LogShellStarted(startupLogger, host.Paths.RootDirectory);
 

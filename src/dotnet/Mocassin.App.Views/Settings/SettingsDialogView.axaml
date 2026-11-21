@@ -50,6 +50,13 @@
               <CheckBox automation:AutomationProperties.Name="Reduce motion" Content="Reduce motion" IsChecked="{Binding ReduceMotion}" />
               <CheckBox automation:AutomationProperties.Name="Confirm before reloading an externally changed project" Content="Confirm before reloading an externally changed project" IsChecked="{Binding ConfirmOnExternalChange}" />
               <CheckBox automation:AutomationProperties.Name="Show the welcome document on a fresh start" Content="Show the welcome document on a fresh start" IsChecked="{Binding ShowWelcomeOnStart}" />
+              <CheckBox automation:AutomationProperties.Name="Enable autosave" Content="Enable autosave" IsChecked="{Binding AutosaveEnabled}" />
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="Autosave interval (minutes)" VerticalAlignment="Center" />
+                <TextBox Text="{Binding AutosaveIntervalMinutes}"
+                         automation:AutomationProperties.Name="Autosave interval minutes"
+                         Width="80" />
+              </StackPanel>
             </StackPanel>
 
             <StackPanel Spacing="6">

@@ -2,6 +2,7 @@
 
 using System.Collections.Immutable;
 using System.Text.Json.Serialization;
+using Mocassin.App.ViewModels.Settings.Blocks;
 
 namespace Mocassin.App.ViewModels.Settings;
 
@@ -83,6 +84,16 @@ internal sealed record AppSettings
     /// Gets the persisted layout.
     /// </summary>
     public LayoutSettings Layout { get; init; } = new();
+
+    /// <summary>
+    /// Gets the additive autosave settings block.
+    /// </summary>
+    public AutosaveSettings Autosave { get; init; } = new();
+
+    /// <summary>
+    /// Gets the additive session settings block.
+    /// </summary>
+    public SessionSettings Session { get; init; } = new();
 
     /// <summary>
     /// Gets the documented default settings.

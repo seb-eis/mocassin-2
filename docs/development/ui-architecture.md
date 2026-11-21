@@ -14,9 +14,9 @@ Mocassin.App  ──►  Mocassin.App.Views  ──►  Mocassin.App.ViewModels 
 
 | Project | Owns | Must not own |
 | --- | --- | --- |
-| `Mocassin.App` | `Program`, `App`, `ViewLocator`, host composition, startup options, app paths, logging, crash boundary, settings store and project file probe | View models, views, scientific logic |
-| `Mocassin.App.ViewModels` | Shell/region/document view models, navigation, project sessions, settings model and pure logic, dialogs/consoles/commands, theme contracts | Avalonia types, views, `System.IO`, `Environment`, `Application`, resource dictionaries |
-| `Mocassin.App.Views` | Shell and region views, dialog overlay, settings view, console/palette/cheat-sheet views, theme applier, pickers, dispatcher, key-binding translation | Library calls, scientific logic, persistence decisions |
+| `Mocassin.App` | `Program`, `App`, `ViewLocator`, host composition, startup options, app paths, logging, crash boundary, settings store, recovery store, crash-recovery writer, autosave timer, and project file probe | View models, views, scientific logic |
+| `Mocassin.App.ViewModels` | Shell/region/document view models, navigation, project sessions, edit/validation/recovery coordination, autosave scheduler, settings model and pure logic, dialogs/consoles/commands, theme contracts | Avalonia types, views, `System.IO`, `Environment`, `Application`, resource dictionaries |
+| `Mocassin.App.Views` | Shell and region views, Problems/recovery views, dialog overlay, settings view, console/palette/cheat-sheet views, theme applier, pickers, dispatcher, key-binding translation | Library calls, scientific logic, persistence decisions |
 
 ## Composition root
 
@@ -24,10 +24,11 @@ Mocassin.App  ──►  Mocassin.App.Views  ──►  Mocassin.App.ViewModels 
 disposal. Registration is enumerable in `AppServiceRegistration`:
 
 - `AddMocassinApp` — lifetime, crash boundary, settings environment, project file probe, project store,
-  validation pipeline, project session service, appearance platform.
-- `AddMocassinViewModels` — console, notifications, progress, command catalog, workspace, document collection,
-  navigation, explorer, settings dialog.
-- `AddMocassinViews` — picker, clipboard, dialog service, theme applier.
+  validation pipeline, project session service, recovery store, autosave scheduler/timer, crash-recovery writer,
+  appearance platform.
+- `AddMocassinViewModels` — console + Problems channel, validation/autosave status items, notifications,
+  progress, command catalog, workspace, document collection, navigation, explorer, settings dialog.
+- `AddMocassinViews` — picker, clipboard, dialog service, Problems/recovery/crash views, theme applier.
 - `AddMocassinShell` — shell view model and main window.
 
 There is no assembly scanning, no service locator, and no reflection-based discovery. Only `Program`/`App`
@@ -42,6 +43,7 @@ ViewModels contracts implemented in `Mocassin.App`:
 | Concern | Contract | Implementation |
 | --- | --- | --- |
 | Settings file | `IAppSettingsStore`, `ISettingsService` | `AppSettingsStore` |
+| Recovery files | `IRecoveryStore`, `ICrashRecoveryWriter` | `RecoveryStore`, `CrashRecoveryWriter` |
 | Project file facts | `IProjectFileProbe` | `ProjectFileProbe` |
 | App-data paths | `AppPaths` value | `AppPaths.Resolve` in `Mocassin.App` |
 | Theme | `IThemeApplier` | `AvaloniaThemeApplier` |
@@ -86,12 +88,86 @@ Windows/Linux and Command on macOS.
 pipeline once with those diagnostics. The session owns the `ProjectDocument`, lock, last-written value, file
 stamp, load diagnostics, and validation result. Services never prompt; the shell owns dialogs and pickers.
 
+## Edit pipeline and undo/redo
+
+`ProjectEditCoordinator` is the single write path for a project. It wraps the session-owned
+`ProjectDocument`, delegates every mutation to `ProjectEditor`/`ProjectValidator`, records one bounded undo
+entry per committed field, and raises `ProjectChanged` (`Edited`, `Undo`, `Redo`, `Saved`, `Replaced`) and
+`EditRejected`. `ProjectDocument.MaxUndoDepth` defaults to unbounded (`0`) for the library; the GUI constructs
+its documents with 200. Metadata editing is one `Apply` per committed field, not per keystroke.
+
+The Overview metadata form uses `ProjectPathRules` for the project name before applying the edit. A structural
+validation failure leaves the project, stacks, save point, and dirty state unchanged and shows the inline error;
+the Problems channel receives the same diagnostics with source `edit`. A read-only session returns the app-level
+`EditApplyOutcome.ReadOnly` message and never emits a diagnostic code.
+
+Undo/redo are exposed in the Edit menu (`Ctrl+Z`/`Ctrl+Y`), follow the active project, and are disabled for a
+read-only session or an empty stack. The save point is content-based: save calls the no-arg
+`ProjectDocument.MarkSaved()` so save → undo → redo remains clean.
+
+## Validation coordinator
+
+`ProjectSession` owns one `ValidationCoordinator`. It is seeded from the single `ProjectSession.Validation`
+result that 23A produced at load/create/reload, so opening never runs a second validation. After a content
+change it debounces 300 ms on a `TimeProvider`, runs the shared `ProjectValidationPipeline` off the UI thread on
+an immutable snapshot, and applies the result only when the captured document version and snapshot still match.
+A newer edit cancels the previous run; a late result is discarded. Statistics are an explicit Overview action,
+cached per immutable snapshot, and are never requested on open.
+
+The status bar shows a text glyph and severity plus the validation text. The Problems console channel follows
+the active project, shows severity/code/message/path/source, supports severity/code/text/source filters and
+sorting, navigates via `INavigationService` on double-click/Enter, opens catalog help anchors, and offers the
+`Related` paths. Diagnostics are never invented in the UI; an unknown code is rendered unlinked.
+
+## Recovery, autosave, and the session gate
+
+`ProjectSession` owns a `SemaphoreSlim` gate and an `IsClosing` flag. Save, autosave, close, reload, and recovery
+await the gate; an autosave tick uses a non-blocking wait and skips busy or closing sessions. `CloseAsync` and
+`ReloadAsync` take a `discardChanges` guard and return `UnsavedChanges` without closing when a dirty session has
+not been confirmed; `IsClosing` is cleared on cancel, `UnsavedChanges`, and failure.
+
+`AutosaveScheduler` is tick-driven through `TimeProvider`; `AutosaveTimer` in `Mocassin.App` owns the timer and
+the UI dispatch. A due writable dirty session writes the `<file>.autosave` sidecar; a failed sidecar write falls
+back to `IRecoveryStore` in `recovery/`, and both the failure and the fallback are logged. The scheduler returns
+to the UI context after each asynchronous write and marshals the status item and `MarkAutosaved` through
+`IUiDispatcher`, so no view-bound state or document mutation runs on a thread-pool continuation. Autosave never
+clears dirty state or moves the save point. A
+content change that returns to the save point, a clean close, and an explicit discard remove the sidecar and
+recovery snapshot; a deferred `PendingRecovery` candidate is preserved across a clean close until Recover or
+Discard. A successful save removes the snapshots only when no candidate is pending. The first accepted content
+edit clears a deferred candidate; a no-op same-hash edit does not. Snapshot cleanup is triggered on the UI
+thread and keeps its state checks on that thread; the file deletion itself stays asynchronous.
+
+`IRecoveryStore`/`RecoveryStore` own the `recovery/` snapshots and `mocassin.recovery` manifests. Recovery
+candidates are compared with the saved file using `ProjectDocument.IsDirty` after normalizing `modifiedUtc`
+(no ViewModels hashing), so a timestamp-only snapshot is not offered. The newest content-different sidecar or
+manifest candidate wins. A timestamp tie is deterministic: the adjacent `.autosave` sidecar is preferred over a
+`recovery/` manifest, then the ordinal snapshot path breaks any remaining tie. The seven-day retention sweep
+applies only to `recovery/`; a `.autosave` sidecar next to a user project is never swept (m-14 accepts that a
+deferred `recovery/` candidate can expire).
+
+`ShellLifecycleCoordinator` owns the Save/Discard/Cancel decisions, clean-exit session state, and the unclean-exit
+restore offer. A window close is two-phase: it first collects a decision for every dirty project and aborts
+before saving or closing anything if any prompt returns Cancel; only then does it apply saves and close the
+sessions. Cancel therefore closes no project and deletes no sidecar. `ShellProjectOperations` owns
+open/close/reload result handling, recovery prompts, and navigation. A clean window close closes sessions,
+writes the `session` settings block, and sets `cleanExit = true`; a cancel leaves it false. The restore offer
+reads the session block captured before a `--project` startup open, so that open cannot manufacture an
+"unexpected exit" prompt or replace the list being offered. The crash path captures dirty sessions on the UI
+thread and `CrashRecoveryWriter` writes them asynchronously with a 2 s budget; the dead-UI path writes no
+recovery files.
+
 ## Settings and logging
 
 Settings are read before logging is configured so the persisted log level selects the minimum level, with
 `--log-level` as a run override. The settings file is application-local and not part of
 `contracts/manifest.json`. Theme, density, font-scale, contrast, and motion are applied through
 `IThemeApplier` when settings load or change.
+
+The additive `autosave` and `session` blocks stay in the same v1 document with no schema bump. `autosave`
+controls the periodic sidecar; `session` records open projects, the active project, `cleanExit`, and the write
+time. Older 23A documents load with defaults. The blocks are not in the contract manifest and have no
+cross-language fixtures.
 
 ## Testing
 

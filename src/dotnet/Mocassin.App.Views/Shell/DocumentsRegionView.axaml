@@ -14,6 +14,11 @@
         <DataTemplate x:DataType="documents:DocumentViewModel">
           <StackPanel Orientation="Horizontal" Spacing="8">
             <TextBlock Text="{Binding Title}" ToolTip.Tip="{Binding ToolTip}" VerticalAlignment="Center" />
+            <TextBlock Text="*"
+                       IsVisible="{Binding IsDirty}"
+                       automation:AutomationProperties.Name="Unsaved changes"
+                       VerticalAlignment="Center"
+                       FontWeight="Bold" />
             <Button Content="×"
                     automation:AutomationProperties.Name="Close document"
                     Command="{Binding CloseCommand}"

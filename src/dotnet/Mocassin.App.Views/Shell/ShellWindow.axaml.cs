@@ -16,6 +16,8 @@ namespace Mocassin.App.Views.Shell;
 /// </summary>
 internal sealed partial class ShellWindow : Window
 {
+    private bool closeApproved;
+
     /// <summary>
     /// Initializes the shell window.
     /// </summary>
@@ -46,13 +48,43 @@ internal sealed partial class ShellWindow : Window
         {
             storage.StorageProvider = StorageProvider;
             clipboard.Clipboard = Clipboard;
+            if (DataContext is ShellViewModel shell)
+            {
+                shell.BeginStartupRestore();
+            }
         };
+        Closing += OnClosing;
         Closed += (_, _) =>
         {
             storage.StorageProvider = null;
             clipboard.Clipboard = null;
             dialogs.Host = null;
         };
+    }
+
+    private async void OnClosing(object? sender, WindowClosingEventArgs e)
+    {
+        if (closeApproved || DataContext is not ShellViewModel shell)
+        {
+            return;
+        }
+
+        e.Cancel = true;
+        try
+        {
+            if (await shell.RequestCloseAsync())
+            {
+                await shell.PendingLayoutPersist;
+                closeApproved = true;
+                Close();
+            }
+        }
+#pragma warning disable CA1031 // A close-handler failure must leave the window open, not crash the process.
+        catch (Exception)
+#pragma warning restore CA1031
+        {
+            closeApproved = false;
+        }
     }
 
     private void OnKeyDown(object? sender, KeyEventArgs e)

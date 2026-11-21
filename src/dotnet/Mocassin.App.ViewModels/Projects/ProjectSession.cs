@@ -3,7 +3,10 @@
 using System.Collections.Immutable;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Editing;
+using Mocassin.App.ViewModels.Diagnostics;
 using Mocassin.App.ViewModels.Documents;
+using Mocassin.App.ViewModels.Editing;
+using Mocassin.App.ViewModels.Recovery;
 using Mocassin.Core.Project;
 using Mocassin.Packages.Projects;
 using Mocassin.Packages.Projects.Validation;
@@ -15,6 +18,8 @@ namespace Mocassin.App.ViewModels.Projects;
 /// </summary>
 internal sealed class ProjectSession
 {
+    private bool isReadOnly;
+
     private ProjectSession(
         ProjectDocument document,
         string path,
@@ -23,22 +28,66 @@ internal sealed class ProjectSession
         string? lockPath,
         ImmutableArray<Diagnostic> loadDiagnostics,
         ValidationResult? validation,
-        ProjectFileStamp stamp)
+        ProjectFileStamp stamp,
+        ProjectValidationPipeline pipeline,
+        TimeProvider timeProvider)
     {
         Document = document;
         Path = path;
         LastWrittenUtc = lastWrittenUtc;
-        IsReadOnly = isReadOnly;
+        this.isReadOnly = isReadOnly;
         LockPath = lockPath;
         LoadDiagnostics = loadDiagnostics.IsDefault ? ImmutableArray<Diagnostic>.Empty : loadDiagnostics;
         Validation = validation;
         Stamp = stamp;
+        EditCoordinator = new ProjectEditCoordinator(document, canEdit: !isReadOnly);
+        ValidationCoordinator = new ValidationCoordinator(
+            EditCoordinator,
+            pipeline,
+            validation,
+            LoadDiagnostics,
+            timeProvider);
     }
 
     /// <summary>
     /// Gets the mutable project document.
     /// </summary>
     public ProjectDocument Document { get; internal set; }
+
+    /// <summary>
+    /// Gets the single edit coordinator over <see cref="Document"/>.
+    /// </summary>
+    public ProjectEditCoordinator EditCoordinator { get; }
+
+    /// <summary>
+    /// Gets the per-session live validation surface.
+    /// </summary>
+    public ValidationCoordinator ValidationCoordinator { get; }
+
+    /// <summary>
+    /// Gets the gate that serializes save, autosave, close, reload, and recovery.
+    /// </summary>
+    public SemaphoreSlim Gate { get; } = new(1, 1);
+
+    /// <summary>
+    /// Gets or sets a value indicating whether a close/reload is in progress.
+    /// </summary>
+    public bool IsClosing { get; internal set; }
+
+    /// <summary>
+    /// Gets or sets the deferred recovery candidate the user chose to keep for later.
+    /// </summary>
+    public RecoveryCandidate? PendingRecovery { get; internal set; }
+
+    /// <summary>
+    /// Gets or sets the newest recovery candidate offered after open/reload.
+    /// </summary>
+    public RecoveryCandidate? AvailableRecovery { get; internal set; }
+
+    /// <summary>
+    /// Gets a value indicating whether the document differs from the save point.
+    /// </summary>
+    public bool IsDirty => EditCoordinator.IsDirty;
 
     /// <summary>
     /// Gets the current immutable project.
@@ -68,7 +117,20 @@ internal sealed class ProjectSession
     /// <summary>
     /// Gets a value indicating whether the session is read-only.
     /// </summary>
-    public bool IsReadOnly { get; internal set; }
+    public bool IsReadOnly
+    {
+        get => isReadOnly;
+        internal set
+        {
+            if (isReadOnly == value)
+            {
+                return;
+            }
+
+            isReadOnly = value;
+            EditCoordinator.SetCanEdit(!value);
+        }
+    }
 
     /// <summary>
     /// Gets the lock path, whether or not this session owns the lock.
@@ -113,13 +175,15 @@ internal sealed class ProjectSession
     /// <param name="lastWrittenUtc">The last write time.</param>
     /// <param name="isReadOnly">Whether the session is read-only.</param>
     /// <param name="lockPath">The optional lock path.</param>
+    /// <param name="timeProvider">The clock used by the validation debounce; defaults to the system clock.</param>
     /// <returns>The session.</returns>
     public static ProjectSession CreateStandalone(
         Project project,
         string path,
         DateTimeOffset? lastWrittenUtc = null,
         bool isReadOnly = false,
-        string? lockPath = null) =>
+        string? lockPath = null,
+        TimeProvider? timeProvider = null) =>
         new(
             new ProjectDocument(project),
             path,
@@ -128,7 +192,9 @@ internal sealed class ProjectSession
             lockPath,
             [],
             null,
-            ProjectFileStamp.Missing);
+            ProjectFileStamp.Missing,
+            new ProjectValidationPipeline(),
+            timeProvider ?? TimeProvider.System);
 
     /// <summary>
     /// Creates a session from a store load and validates the loaded snapshot exactly once.
@@ -139,6 +205,7 @@ internal sealed class ProjectSession
     /// <param name="isReadOnly">Whether the session is read-only.</param>
     /// <param name="lockPath">The optional lock path.</param>
     /// <param name="pipeline">The validation pipeline.</param>
+    /// <param name="timeProvider">The clock used by the validation debounce; defaults to the system clock.</param>
     /// <returns>The session.</returns>
     public static ProjectSession CreateFromLoad(
         ProjectLoadResult load,
@@ -146,7 +213,8 @@ internal sealed class ProjectSession
         DateTimeOffset? lastWrittenUtc,
         bool isReadOnly,
         string? lockPath,
-        ProjectValidationPipeline pipeline)
+        ProjectValidationPipeline pipeline,
+        TimeProvider? timeProvider = null)
     {
         ArgumentNullException.ThrowIfNull(load);
         ArgumentNullException.ThrowIfNull(pipeline);
@@ -155,7 +223,7 @@ internal sealed class ProjectSession
             throw new ArgumentException("A session cannot be created from a failed load.", nameof(load));
         }
 
-        var document = new ProjectDocument(load.Project);
+        var document = new ProjectDocument(load.Project) { MaxUndoDepth = 200 };
         var validation = pipeline.Validate(load.Project, load.Diagnostics);
         return new ProjectSession(
             document,
@@ -165,6 +233,8 @@ internal sealed class ProjectSession
             lockPath,
             load.Diagnostics,
             validation,
-            ProjectFileStamp.Missing);
+            ProjectFileStamp.Missing,
+            pipeline,
+            timeProvider ?? TimeProvider.System);
     }
 }

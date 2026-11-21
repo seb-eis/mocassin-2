@@ -254,6 +254,34 @@ public sealed class ProjectStore
     }
 
     /// <summary>
+    /// Deletes a known autosave file at its exact snapshot path.
+    /// </summary>
+    /// <param name="autosavePath">The autosave snapshot path returned by a recovery candidate.</param>
+    /// <returns><see langword="true"/> when a file was removed.</returns>
+    public static bool DeleteAutosaveFile(string autosavePath)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(autosavePath);
+        try
+        {
+            if (!File.Exists(autosavePath))
+            {
+                return false;
+            }
+
+            File.Delete(autosavePath);
+            return true;
+        }
+        catch (IOException)
+        {
+            return false;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Acquires the project editing lock, reclaiming a stale lock when safe.
     /// </summary>
     /// <param name="projectPath">The project file path.</param>

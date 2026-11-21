@@ -4,6 +4,8 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.Text.Json;
 
+using Mocassin.App.ViewModels.Settings.Blocks;
+
 namespace Mocassin.App.ViewModels.Settings.Json;
 
 /// <summary>
@@ -76,6 +78,8 @@ internal static class AppSettingsJsonReader
         var uiElement = ReadObject(root, "ui", warnings);
         var pathsElement = ReadObject(root, "paths", warnings);
         var layoutElement = ReadObject(root, "layout", warnings);
+        var autosaveElement = ReadObject(root, "autosave", warnings);
+        var sessionElement = ReadObject(root, "session", warnings);
 
         var settings = new AppSettings
         {
@@ -101,6 +105,8 @@ internal static class AppSettingsJsonReader
             },
             RecentFiles = ReadRecentFiles(root, warnings, ignoreCasePaths),
             Layout = ReadLayout(layoutElement, warnings),
+            Autosave = ReadAutosave(autosaveElement, warnings),
+            Session = ReadSession(sessionElement, warnings, ignoreCasePaths),
         };
 
         return new AppSettingsLoadResult(settings, warnings, IsFatal: false, LoadedFromFile: true, FatalMessage: null);
@@ -141,6 +147,101 @@ internal static class AppSettingsJsonReader
                     allowNull: false)
                 ?? SettingsDefaults.DefaultConsoleChannel,
         };
+
+    private static AutosaveSettings ReadAutosave(JsonElement element, List<string> warnings) =>
+        new()
+        {
+            Enabled = ReadBool(element, "enabled", true, warnings),
+            IntervalMinutes = ReadRange(
+                element,
+                "intervalMinutes",
+                SettingsDefaults.DefaultAutosaveIntervalMinutes,
+                SettingsDefaults.MinAutosaveIntervalMinutes,
+                SettingsDefaults.MaxAutosaveIntervalMinutes,
+                warnings),
+        };
+
+    private static SessionSettings ReadSession(
+        JsonElement element,
+        List<string> warnings,
+        bool ignoreCasePaths)
+    {
+        var comparer = ignoreCasePaths ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
+        var projects = ImmutableArray.CreateBuilder<string>();
+        if (element.ValueKind == JsonValueKind.Object
+            && element.TryGetProperty("openProjects", out var projectsElement))
+        {
+            if (projectsElement.ValueKind != JsonValueKind.Array)
+            {
+                warnings.Add("session.openProjects was not an array; it was cleared.");
+            }
+            else
+            {
+                foreach (var item in projectsElement.EnumerateArray())
+                {
+                    if (projects.Count >= SettingsDefaults.MaxOpenProjects)
+                    {
+                        warnings.Add($"session.openProjects was capped at {SettingsDefaults.MaxOpenProjects} entries.");
+                        break;
+                    }
+
+                    if (item.ValueKind != JsonValueKind.String
+                        || string.IsNullOrWhiteSpace(item.GetString()))
+                    {
+                        warnings.Add("A session.openProjects entry was ignored because it is empty or not a string.");
+                        continue;
+                    }
+
+                    var path = item.GetString()!;
+                    if (projects.Any(existing => comparer.Equals(existing, path)))
+                    {
+                        continue;
+                    }
+
+                    projects.Add(path);
+                }
+            }
+        }
+
+        var activeProject = ReadString(element, "activeProject", null, warnings, allowNull: true);
+        if (activeProject is not null
+            && !projects.Any(path => comparer.Equals(path, activeProject)))
+        {
+            warnings.Add("session.activeProject was not one of the open projects; it was cleared.");
+            activeProject = null;
+        }
+
+        DateTimeOffset? savedUtc = null;
+        if (element.ValueKind == JsonValueKind.Object
+            && element.TryGetProperty("savedUtc", out var savedElement))
+        {
+            if (savedElement.ValueKind == JsonValueKind.Null)
+            {
+                savedUtc = null;
+            }
+            else if (savedElement.ValueKind == JsonValueKind.String
+                && DateTimeOffset.TryParse(
+                    savedElement.GetString(),
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
+                    out var parsed))
+            {
+                savedUtc = parsed.ToUniversalTime();
+            }
+            else
+            {
+                warnings.Add("session.savedUtc is not a valid ISO-8601 UTC time; it was cleared.");
+            }
+        }
+
+        return new SessionSettings
+        {
+            OpenProjects = projects.ToImmutable(),
+            ActiveProject = activeProject,
+            CleanExit = ReadBool(element, "cleanExit", true, warnings),
+            SavedUtc = savedUtc,
+        };
+    }
 
     private static ImmutableArray<RecentFile> ReadRecentFiles(
         JsonElement root,

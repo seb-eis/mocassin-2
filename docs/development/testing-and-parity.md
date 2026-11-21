@@ -160,8 +160,8 @@ or SQLite. Prefer real temporary directories and real files produced by the real
   `Skipped`, diagnostics `Completed`/`Failed`).
 - Project lifecycle tests use real files and locks: create/open/save/save-as/close/reload, existing-target refusal
   for New, read-only lock handling, lock migration on Save As, external modification/deletion, recents and last
-  directories, and `--project` startup. Undo/redo and save-point coverage arrives with Step 23B; 23A has no
-  writer.
+  directories, and `--project` startup. Step 23B adds the undo/redo and save-point coverage on top of the same
+  real session/store path.
 - Settings tests cover the source-generated round-trip, defaults, unknown/missing/wrong-type/future-major,
   migration idempotence, the 4 MiB cap, atomic/failed writes, theme resources, settings-dialog validation, log
   level at startup, and recent/last-directory persistence.
@@ -183,17 +183,46 @@ or SQLite. Prefer real temporary directories and real files produced by the real
   dictionaries, the padding/min-height/border keys, the `Mocassin.Transitions` resource (empty when reduce
   motion is on), and `SystemAccentColor`. Redundant flag-only resources were removed rather than left dead.
 
-## Avalonia editing, diagnostics, and recovery (Step 23B, planned)
+## Avalonia editing, diagnostics, and recovery (Step 23B)
 
-Step 23B is design-frozen but not implemented. Its tests extend the 23A harness: the edit pipeline and
-save-point matrix, the retained `ProjectSession.Validation`/`Load`-stage fixtures, the Problems surface, the
-read-only outcome, the explicit statistics trigger, dirty markers and prompts, the autosave tick, the
-`IsDirty`-based recovery comparison (no ViewModels hash), the `recovery/` crash snapshot and manifest,
-return-to-clean sidecar cleanup with the deferred-sidecar exception and the accepted `recovery/` 7-day expiry,
-unclean-exit restore, the per-session gate, and the 2 s crash-path budget. Tests use `ManualTimeProvider` and the scheduler's
-injectable tick instead of real sleeps, and the crash dialog's dead-UI path is asserted to write no recovery
-files. Screenshots and accessibility checks for the Problems channel, recovery prompt, and metadata form are
-PR-medium on Ubuntu only.
+The 23B tests extend the 23A harness with real temporary files, the real `ProjectStore`/`ProjectValidationPipeline`,
+the real `ProjectDocument`/`ProjectEditCoordinator`, and `ManualTimeProvider` timers. The dialogs, dispatcher,
+clipboard, and in-memory settings/recovery stores are the only test doubles; there is no fake project, fake
+validation result, or fake project store. `ShellTestHost` composes the production DI graph with a scripted
+`IDialogService` and inline dispatcher for prompt/restore tests.
+
+- **Edit pipeline and metadata.** Apply/undo/redo, bounded depth (including negative rejection and unbounded
+  `0`), redo clearing, no-op same-hash edits, rejected structural edits, read-only refusal, the save-point matrix
+  (save → undo → redo clean, save → edit → undo clean, undo below the save point dirty), one undo entry per
+  committed metadata field, name rules, and JSON refresh.
+- **Validation surface.** Retained-result/no-open-validation, 300 ms debounce, rapid-edit coalescing,
+  version/snapshot stale discard, explicit revalidate, statistics one-run/cache, no open-time statistics, both
+  `Load`-stage fixtures, Problems filters/sort/edit diagnostics/navigation/help/`Related`, and the status item.
+- **Dirty, autosave, and the gate.** Dirty-only sidecar writes, interval/due gating, save cleanup, read-only/
+  closing/busy skipping, return-to-clean and clean-close cleanup, and saved `IsClosing` cancellation. The
+  scheduler is called directly after advancing `ManualTimeProvider`; no real sleep is used. The dispatcher and
+  `MarkAutosaved` path is covered from a thread-pool start, and a failing sidecar is failure-injected to prove
+  the `recovery/` fallback and its warning log.
+- **Recovery.** Sidecar and manifest detection, content-different comparison (timestamp-only snapshots are not
+  offered), newest candidate composition and its timestamp tie-break, Recover/Discard/later, validation and
+  `LoadDiagnostics` set before `Replaced`, deferred `PendingRecovery` preservation and first-edit clear, no-op
+  preservation, sidecar/manifest deletion, Save As with a deferred sidecar then Discard, foreign-project
+  candidate rejection, missing-project reporting, clean-exit restore, and the seven-day sweep. Sidecars are
+  never swept. Malformed recovery manifests are logged and ignored.
+- **Crash path.** Capture of dirty sessions, real recovery writes, the 2 s budget timeout, per-session dialog
+  status, and the disabled Exit action while writing. The dead-UI path writes no recovery files (document
+  snapshots are UI-thread-confined).
+- **Window lifecycle and startup.** A two-session close where the second prompt is cancelled proves that no
+  earlier project was closed, saved, or stripped of its sidecar; `--project` combined with a clean and an
+  unclean prior session proves the startup open neither invents a restore prompt nor loses the prior list.
+- **Settings.** `autosave`/`session` round-trip, defaults for a 23A document, interval clamping, open-project
+  cap/dedupe/normalisation, and the settings-dialog autosave control.
+- **UI.** Headless dirty markers on the tab/project switcher, Problems rendering, the Overview metadata form,
+  and the settings autosave controls are PR-fast; screenshot/a11y checks for the new views are PR-medium on
+  Ubuntu only. Windows/macOS recovery, autosave, and crash prompts remain a manual platform gate.
+
+Known test limitations: the dead-UI path is documented rather than automated; and Windows/macOS recovery,
+autosave, crash, and close prompts are covered by the manual platform gate.
 
 ## Test tiers
 

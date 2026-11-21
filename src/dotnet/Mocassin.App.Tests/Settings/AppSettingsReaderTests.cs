@@ -2,6 +2,7 @@
 
 using System.Text.Json;
 using Mocassin.App.ViewModels.Settings;
+using Mocassin.App.ViewModels.Settings.Blocks;
 using Mocassin.App.ViewModels.Settings.Json;
 
 namespace Mocassin.App.Tests.Settings;
@@ -25,6 +26,12 @@ public sealed class AppSettingsReaderTests
         Assert.Equal(SettingsDefaults.DefaultFontScale, result.Settings.FontScale);
         Assert.Equal(SettingsDefaults.DefaultLeftWidth, result.Settings.Layout.LeftWidth);
         Assert.Equal(SettingsDefaults.DefaultConsoleChannel, result.Settings.Layout.ActiveConsoleChannel);
+        Assert.True(result.Settings.Autosave.Enabled);
+        Assert.Equal(SettingsDefaults.DefaultAutosaveIntervalMinutes, result.Settings.Autosave.IntervalMinutes);
+        Assert.Empty(result.Settings.Session.OpenProjects);
+        Assert.Null(result.Settings.Session.ActiveProject);
+        Assert.True(result.Settings.Session.CleanExit);
+        Assert.Null(result.Settings.Session.SavedUtc);
     }
 
     [Fact]
@@ -58,6 +65,14 @@ public sealed class AppSettingsReaderTests
                 ConsoleVisible = false,
                 ActiveConsoleChannel = "problems",
             },
+            Autosave = new AutosaveSettings { Enabled = false, IntervalMinutes = 7 },
+            Session = new SessionSettings
+            {
+                OpenProjects = ["/tmp/a.mocprj", "/tmp/b.mocprj"],
+                ActiveProject = "/tmp/b.mocprj",
+                CleanExit = false,
+                SavedUtc = new DateTimeOffset(2026, 11, 21, 10, 0, 0, TimeSpan.Zero),
+            },
         };
         var json = JsonSerializer.Serialize(settings, AppSettingsJsonContext.Default.AppSettings);
 
@@ -79,6 +94,42 @@ public sealed class AppSettingsReaderTests
         var recent = Assert.Single(result.Settings.RecentFiles);
         Assert.Equal(settings.RecentFiles[0].Path, recent.Path);
         Assert.Equal(settings.RecentFiles[0].LastOpenedUtc, recent.LastOpenedUtc);
+        Assert.False(result.Settings.Autosave.Enabled);
+        Assert.Equal(7, result.Settings.Autosave.IntervalMinutes);
+        Assert.Equal(settings.Session.OpenProjects.ToArray(), result.Settings.Session.OpenProjects.ToArray());
+        Assert.Equal("/tmp/b.mocprj", result.Settings.Session.ActiveProject);
+        Assert.False(result.Settings.Session.CleanExit);
+        Assert.Equal(settings.Session.SavedUtc, result.Settings.Session.SavedUtc);
+    }
+
+    [Fact]
+    public void AutosaveAndSessionValuesNormalizeWithWarnings()
+    {
+        var projects = string.Join(
+            ',',
+            Enumerable.Range(0, 25).Select(index => $"\"/tmp/p{index % 21}.mocprj\""));
+        var result = AppSettingsJsonReader.Read(
+            $$"""
+            {
+              "format": "mocassin.settings",
+              "autosave": { "enabled": "no", "intervalMinutes": 99 },
+              "session": {
+                "openProjects": [{{projects}}, "", "/tmp/outside.mocprj"],
+                "activeProject": "/tmp/outside.mocprj",
+                "cleanExit": "yes",
+                "savedUtc": "not-a-time"
+              }
+            }
+            """);
+
+        Assert.False(result.IsFatal);
+        Assert.True(result.Settings.Autosave.Enabled);
+        Assert.Equal(SettingsDefaults.DefaultAutosaveIntervalMinutes, result.Settings.Autosave.IntervalMinutes);
+        Assert.Equal(SettingsDefaults.MaxOpenProjects, result.Settings.Session.OpenProjects.Length);
+        Assert.Null(result.Settings.Session.ActiveProject);
+        Assert.True(result.Settings.Session.CleanExit);
+        Assert.Null(result.Settings.Session.SavedUtc);
+        Assert.NotEmpty(result.Warnings);
     }
 
     [Fact]
@@ -192,6 +243,12 @@ public sealed class AppSettingsReaderTests
             [
                 .. Enumerable.Range(0, 12).Select(index => new RecentFile($"/tmp/{index}.mocprj", DateTimeOffset.UnixEpoch)),
             ],
+            Autosave = new AutosaveSettings { Enabled = false, IntervalMinutes = 0 },
+            Session = new SessionSettings
+            {
+                OpenProjects = ["/tmp/a.mocprj", "/tmp/a.mocprj", "", .. Enumerable.Range(0, 25).Select(index => $"/tmp/{index}.mocprj")],
+                ActiveProject = "/tmp/missing.mocprj",
+            },
         };
 
         var (normalized, warnings) = AppSettingsValidator.Normalize(settings);
@@ -204,6 +261,10 @@ public sealed class AppSettingsReaderTests
         Assert.Equal(SettingsDefaults.DefaultConsoleHeight, normalized.Layout.ConsoleHeight);
         Assert.Equal(SettingsDefaults.DefaultConsoleChannel, normalized.Layout.ActiveConsoleChannel);
         Assert.Equal(SettingsDefaults.MaxRecentFiles, normalized.RecentFiles.Length);
+        Assert.False(normalized.Autosave.Enabled);
+        Assert.Equal(SettingsDefaults.DefaultAutosaveIntervalMinutes, normalized.Autosave.IntervalMinutes);
+        Assert.Equal(SettingsDefaults.MaxOpenProjects, normalized.Session.OpenProjects.Length);
+        Assert.Null(normalized.Session.ActiveProject);
         Assert.NotEmpty(warnings);
     }
 }

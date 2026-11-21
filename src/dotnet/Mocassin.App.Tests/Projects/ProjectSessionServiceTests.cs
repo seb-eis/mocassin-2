@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT
 
+using Mocassin.App.Composition;
 using Mocassin.App.Files;
+using Mocassin.App.Recovery;
 using Mocassin.App.Tests.TestSupport;
+using Mocassin.App.ViewModels.Editing;
 using Mocassin.App.ViewModels.Projects;
 using Mocassin.App.ViewModels.Settings;
 using Mocassin.Core.Diagnostics;
@@ -92,22 +95,68 @@ public sealed class ProjectSessionServiceTests
         using var temp = new TempWorkspace();
         var created = await context.Service.CreateAsync(ProjectTemplateKind.Blank, "Saved", temp.Path);
         var session = created.Session!;
-        session.Document.Apply(
+        var edit = session.EditCoordinator.Apply(
             "Rename",
             project => project with { Metadata = project.Metadata with { Name = "Renamed" } });
+        Assert.Equal(EditApplyOutcome.Applied, edit.Outcome);
         Assert.True(session.Document.IsDirty);
+        Assert.True(session.EditCoordinator.IsDirty);
 
         var saved = await context.Service.SaveAsync(session);
 
         Assert.True(saved.IsSuccess, saved.Message);
         Assert.False(session.Document.IsDirty);
+        Assert.False(session.EditCoordinator.IsDirty);
         Assert.Equal("Renamed", session.Name);
         Assert.NotEqual(ProjectFileStamp.Missing, session.Stamp);
 
-        Assert.True(session.Document.Undo());
-        Assert.True(session.Document.IsDirty);
-        Assert.True(session.Document.Redo());
-        Assert.False(session.Document.IsDirty);
+        Assert.True(session.EditCoordinator.Undo());
+        Assert.True(session.EditCoordinator.IsDirty);
+        Assert.True(session.EditCoordinator.Redo());
+        Assert.False(session.EditCoordinator.IsDirty);
+
+        await context.Service.CloseAsync(session);
+    }
+
+    [Fact]
+    public async Task SessionStateTracksOpenProjectsAndCleanExit()
+    {
+        var context = CreateContext(out _);
+        using var temp = new TempWorkspace();
+        var first = await context.Service.CreateAsync(ProjectTemplateKind.Blank, "First", temp.Path);
+        var firstSession = first.Session!;
+
+        Assert.Contains(firstSession.Path, context.Settings.Current.Session.OpenProjects);
+        Assert.Equal(firstSession.Path, context.Settings.Current.Session.ActiveProject);
+        Assert.False(context.Settings.Current.Session.CleanExit);
+        Assert.NotNull(context.Settings.Current.Session.SavedUtc);
+
+        await context.Service.MarkCleanExitAsync();
+        Assert.True(context.Settings.Current.Session.CleanExit);
+
+        var second = await context.Service.CreateAsync(ProjectTemplateKind.Blank, "Second", temp.Path);
+        Assert.Equal(2, context.Settings.Current.Session.OpenProjects.Length);
+        Assert.Equal(second.Session!.Path, context.Settings.Current.Session.ActiveProject);
+        Assert.False(context.Settings.Current.Session.CleanExit);
+
+        await context.Service.CloseAsync(second.Session);
+        Assert.Single(context.Settings.Current.Session.OpenProjects);
+        await context.Service.CloseAsync(firstSession);
+        Assert.Empty(context.Settings.Current.Session.OpenProjects);
+        Assert.Null(context.Settings.Current.Session.ActiveProject);
+    }
+
+    [Fact]
+    public async Task AProjectSessionCreatesTheGuiCoordinatorWithTheGuiUndoBound()
+    {
+        var context = CreateContext(out _);
+        using var temp = new TempWorkspace();
+        var created = await context.Service.CreateAsync(ProjectTemplateKind.Blank, "Coordinator", temp.Path);
+        var session = created.Session!;
+
+        Assert.Same(session.Document, session.EditCoordinator.Document);
+        Assert.True(session.EditCoordinator.CanEdit);
+        Assert.Equal(200, session.Document.MaxUndoDepth);
 
         await context.Service.CloseAsync(session);
     }
@@ -121,6 +170,8 @@ public sealed class ProjectSessionServiceTests
         var session = created.Session!;
         var oldPath = session.Path;
         var newPath = Path.Combine(temp.Path, "Moved.mocprj");
+        var oldSidecar = ProjectStore.GetAutosavePath(oldPath);
+        await File.WriteAllTextAsync(oldSidecar, "sidecar");
 
         var saved = await context.Service.SaveAsAsync(session, newPath);
 
@@ -129,6 +180,7 @@ public sealed class ProjectSessionServiceTests
         Assert.True(File.Exists(newPath));
         Assert.False(File.Exists(ProjectStore.GetLockPath(oldPath)));
         Assert.True(File.Exists(ProjectStore.GetLockPath(newPath)));
+        Assert.False(File.Exists(oldSidecar));
         Assert.Contains(
             context.Settings.Current.RecentFiles,
             file => string.Equals(file.Path, newPath, StringComparison.Ordinal));
@@ -171,6 +223,12 @@ public sealed class ProjectSessionServiceTests
 
         Assert.Equal(ProjectSessionOutcome.OpenedReadOnly, second.Outcome);
         Assert.True(second.Session!.IsReadOnly);
+        Assert.False(second.Session.EditCoordinator.CanEdit);
+        var edit = second.Session.EditCoordinator.Apply(
+            "Rename",
+            project => project with { Metadata = project.Metadata with { Name = "Changed" } });
+        Assert.Equal(EditApplyOutcome.ReadOnly, edit.Outcome);
+        Assert.Equal("Locked", second.Session.Name);
         var save = await secondContext.Service.SaveAsync(second.Session);
         Assert.Equal(ProjectSessionOutcome.Locked, save.Outcome);
 
@@ -197,6 +255,9 @@ public sealed class ProjectSessionServiceTests
 
         Assert.True(reloaded.IsSuccess, reloaded.Message);
         Assert.Equal("Changed", session.Name);
+        Assert.Same(session.Document, session.EditCoordinator.Document);
+        Assert.Equal(200, session.Document.MaxUndoDepth);
+        Assert.False(session.EditCoordinator.CanUndo);
         Assert.Equal(ProjectExternalChange.Unchanged, context.Service.CheckExternalChange(session));
         await context.Service.CloseAsync(session);
     }
@@ -291,7 +352,8 @@ public sealed class ProjectSessionServiceTests
                 new ProjectFileProbe(),
                 new WorkspaceViewModel(),
                 new SettingsService(new InMemorySettingsStore(), AppSettingsLoadResult.Missing()),
-                new ManualTimeProvider()));
+                new ManualTimeProvider(),
+                CreateRecoveryStore()));
 
         Assert.Contains("ValidateOnLoad", exception.Message, StringComparison.Ordinal);
     }
@@ -324,15 +386,27 @@ public sealed class ProjectSessionServiceTests
     {
         workspace = new WorkspaceViewModel();
         var time = timeProvider ?? new ManualTimeProvider();
+        var store = new ProjectStore(time, new ProjectStoreOptions { ValidateOnLoad = false });
         var service = new ProjectSessionService(
-            new ProjectStore(time, new ProjectStoreOptions { ValidateOnLoad = false }),
+            store,
             new ProjectValidationPipeline(),
             new ProjectFileProbe(),
             workspace,
             settings,
-            time);
+            time,
+            new RecoveryStore(CreatePaths(), store, time));
         return new Context(service, settings);
     }
+
+    private static RecoveryStore CreateRecoveryStore()
+    {
+        var time = new ManualTimeProvider();
+        var store = new ProjectStore(time, new ProjectStoreOptions { ValidateOnLoad = false });
+        return new RecoveryStore(CreatePaths(), store, time);
+    }
+
+    private static AppPaths CreatePaths() =>
+        new(Path.Combine(Path.GetTempPath(), "mocassin-app-tests", Guid.NewGuid().ToString("N")));
 
     private sealed record Context(ProjectSessionService Service, SettingsService Settings);
 }

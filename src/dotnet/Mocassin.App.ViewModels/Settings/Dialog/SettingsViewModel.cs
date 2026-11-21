@@ -4,6 +4,8 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
+using Mocassin.App.ViewModels.Settings.Blocks;
+
 namespace Mocassin.App.ViewModels.Settings.Dialog;
 
 /// <summary>
@@ -40,6 +42,12 @@ internal sealed partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty]
     private bool showWelcomeOnStart = true;
+
+    [ObservableProperty]
+    private bool autosaveEnabled = true;
+
+    [ObservableProperty]
+    private int autosaveIntervalMinutes = SettingsDefaults.DefaultAutosaveIntervalMinutes;
 
     [ObservableProperty]
     private SettingsLogLevel logLevel = SettingsLogLevel.Information;
@@ -146,6 +154,8 @@ internal sealed partial class SettingsViewModel : ObservableObject
         ReduceMotion = value.ReduceMotion;
         ConfirmOnExternalChange = value.Ui.ConfirmOnExternalChange;
         ShowWelcomeOnStart = value.Ui.ShowWelcomeOnStart;
+        AutosaveEnabled = value.Autosave.Enabled;
+        AutosaveIntervalMinutes = value.Autosave.IntervalMinutes;
         LogLevel = value.Logging.Level;
         RecentFiles.Clear();
         foreach (var recent in value.RecentFiles)
@@ -167,6 +177,13 @@ internal sealed partial class SettingsViewModel : ObservableObject
             return;
         }
 
+        if (AutosaveIntervalMinutes < SettingsDefaults.MinAutosaveIntervalMinutes
+            || AutosaveIntervalMinutes > SettingsDefaults.MaxAutosaveIntervalMinutes)
+        {
+            ErrorMessage = $"The autosave interval must be between {SettingsDefaults.MinAutosaveIntervalMinutes} and {SettingsDefaults.MaxAutosaveIntervalMinutes} minutes.";
+            return;
+        }
+
         var updated = settings.Current with
         {
             Theme = Theme,
@@ -181,6 +198,12 @@ internal sealed partial class SettingsViewModel : ObservableObject
                 ConfirmOnExternalChange = ConfirmOnExternalChange,
                 ShowWelcomeOnStart = ShowWelcomeOnStart,
             },
+            Autosave = new AutosaveSettings
+            {
+                Enabled = AutosaveEnabled,
+                IntervalMinutes = AutosaveIntervalMinutes,
+            },
+            Session = settings.Current.Session,
             RecentFiles = [.. RecentFiles],
         };
         var result = await settings.UpdateAsync(updated, cancellationToken);

@@ -42,6 +42,7 @@ internal sealed class TempWorkspace : IDisposable
     /// <inheritdoc />
     public void Dispose()
     {
+        DrainHeadlessQueue();
         for (var attempt = 1; attempt <= deleteAttempts; attempt++)
         {
             try
@@ -59,6 +60,20 @@ internal sealed class TempWorkspace : IDisposable
             {
                 Thread.Sleep(deleteRetryDelay);
             }
+        }
+    }
+
+    private static void DrainHeadlessQueue()
+    {
+        if (!Avalonia.Threading.Dispatcher.UIThread.CheckAccess())
+        {
+            return;
+        }
+
+        for (var pass = 0; pass < 10; pass++)
+        {
+            Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+            Thread.Sleep(5);
         }
     }
 }

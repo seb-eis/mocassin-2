@@ -13,6 +13,29 @@ and general help. The per-instance message and `hint` usually name the exact obj
 3. Double-click or search using the reported path (`domain`, object ID, property) in the editor.
 4. Re-run validation after each fix; do not rely on stale output.
 
+## Desktop validation, autosave, and recovery
+
+The desktop Problems channel uses the same diagnostic codes and the published anchors as the CLI; it does not
+invent codes or reword messages. The read-only edit refusal is an app-level message, not a diagnostic code.
+
+| Symptom | Likely cause | Fix |
+| --- | --- | --- |
+| “Not validated” after opening | The session has no retained load result (standalone/tests) | Edit the project or use **Revalidate**; a normal opened project has a retained result. |
+| A diagnostic has no help link | The code is not in the catalog or has no documented anchor | Check the code in the [diagnostics reference](../reference/diagnostics.md); unknown codes are intentionally unlinked. |
+| Metadata name is refused with an inline error | Empty, over 128 characters, path separators, `..`, control characters, or reserved characters | Correct the name; the project and save point are unchanged. |
+| “This project is open read-only; changes cannot be saved.” | Another session owns the lock, or the file is read-only | Edit in the owning session, or use Save As to a new path. |
+| “Auto-saving…” then “Autosave failed” | The sidecar could not be written (permissions/disk) | Check the project directory and free space; a `recovery/` fallback may have been written. |
+| “Recovery available” remains after open | You chose **Decide later** | Use **Recover** or **Discard**; a deferred `recovery/` candidate can expire after seven days. |
+| Recovery prompt on startup | The previous session ended uncleanly (`cleanExit = false`) | Restore the remembered projects, or choose **Not now**; missing paths are reported and skipped. |
+| The project file is missing but a recovery snapshot exists | The main file was moved/deleted | The restore/Problems flow reports the missing path; a `.autosave` sidecar is preserved, while a `recovery/` entry remains subject to retention. |
+| Crash dialog shows recovery results | The crash action ran with its 2 s budget | Saved sessions are under `<app-data>/recovery/`; timed-out sessions were not claimed saved. If the UI thread is dead, no recovery files are written. |
+| Closing the window does not close | A dirty-project Save/Discard/Cancel prompt was cancelled | Choose Save or Discard; Cancel keeps every session open with its sidecar and autosave running. |
+
+Recovery files are untrusted input: manifests are size/count bounded (64 KiB/100 entries), snapshots go through
+the normal project load path (64 MiB), and the seven-day sweep deletes only known recovery snapshot/manifest
+patterns. Sidecars are never swept. See
+[Repository and file layout](../reference/file-layout.md#application-data-layout).
+
 ## Common failures
 
 | Symptom | Likely cause | Fix |

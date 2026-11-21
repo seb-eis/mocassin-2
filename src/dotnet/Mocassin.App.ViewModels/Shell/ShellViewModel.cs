@@ -8,10 +8,12 @@ using Mocassin.App.ViewModels.Consoles;
 using Mocassin.App.ViewModels.Dialogs;
 using Mocassin.App.ViewModels.Dialogs.Requests;
 using Mocassin.App.ViewModels.Documents;
+using Mocassin.App.ViewModels.Editing;
 using Mocassin.App.ViewModels.Navigation;
 using Mocassin.App.ViewModels.Projects;
 using Mocassin.Packages.Projects.Templates;
 using Mocassin.App.ViewModels.Settings;
+using Mocassin.App.ViewModels.Settings.Blocks;
 using Mocassin.App.ViewModels.Settings.Dialog;
 
 namespace Mocassin.App.ViewModels.Shell;
@@ -21,11 +23,12 @@ namespace Mocassin.App.ViewModels.Shell;
 /// </summary>
 internal sealed partial class ShellViewModel : ObservableObject
 {
-    private static readonly MenuKind[] menuOrder = [MenuKind.File, MenuKind.Edit, MenuKind.View, MenuKind.Help];
-
     private readonly IShellLifetime lifetime;
     private readonly ISettingsService settings;
+    private readonly SessionSettings startupSessionSnapshot;
     private readonly IConsoleService consoleService;
+    private ProjectEditCoordinator? subscribedEditor;
+    private bool startupRestoreStarted;
     private bool applyingLayout;
     private readonly AsyncRelayCommand backCommand;
     private readonly AsyncRelayCommand forwardCommand;
@@ -34,6 +37,9 @@ internal sealed partial class ShellViewModel : ObservableObject
     private readonly AsyncRelayCommand saveAsProjectCommand;
     private readonly AsyncRelayCommand closeProjectCommand;
     private readonly AsyncRelayCommand reloadProjectCommand;
+    private readonly ShellEditCommands editCommands;
+    private readonly ShellLifecycleCoordinator lifecycle;
+    private readonly ShellProjectOperations projectOperations;
     private readonly IProjectSessionService sessions;
     private readonly IStorageService storage;
     private readonly IDialogService dialogs;
@@ -115,6 +121,7 @@ internal sealed partial class ShellViewModel : ObservableObject
         Commands = commands;
         Platform = platform;
         this.settings = settings;
+        startupSessionSnapshot = settings.Current.Session;
         this.consoleService = consoleService;
         this.sessions = sessions;
         this.storage = storage;
@@ -124,18 +131,21 @@ internal sealed partial class ShellViewModel : ObservableObject
         RecentProjects = new RecentProjectsViewModel(settings, probe, OpenProjectPathAsync);
         Console = new ConsoleViewModel(consoleService, consoleChannels);
 
+        editCommands = new ShellEditCommands(sessions);
+        lifecycle = new ShellLifecycleCoordinator(sessions, settings, dialogs, consoleService, probe, lifetime);
+        projectOperations = new ShellProjectOperations(sessions, dialogs, consoleService, Navigation, Documents, lifecycle);
         backCommand = new AsyncRelayCommand(() => Navigation.GoBackAsync(), () => Navigation.CanGoBack);
         forwardCommand = new AsyncRelayCommand(() => Navigation.GoForwardAsync(), () => Navigation.CanGoForward);
         closeActiveCommand = new AsyncRelayCommand(CloseActiveAsync, () => Documents.ActiveDocument is not null);
         saveProjectCommand = new AsyncRelayCommand(SaveProjectAsync, () => sessions.ActiveSession is not null);
         saveAsProjectCommand = new AsyncRelayCommand(SaveAsProjectAsync, () => sessions.ActiveSession is not null);
-        closeProjectCommand = new AsyncRelayCommand(CloseProjectAsync, () => sessions.ActiveSession is not null);
-        reloadProjectCommand = new AsyncRelayCommand(ReloadProjectAsync, () => sessions.ActiveSession is not null);
+        closeProjectCommand = new AsyncRelayCommand(projectOperations.CloseActiveAsync, () => sessions.ActiveSession is not null);
+        reloadProjectCommand = new AsyncRelayCommand(projectOperations.ReloadActiveAsync, () => sessions.ActiveSession is not null);
 
         RegisterCommands(commands);
         Palette = new CommandPaletteViewModel(commands, () => IsPaletteOpen = false);
         Shortcuts = new ShortcutCheatSheetViewModel(commands, () => IsCheatSheetOpen = false);
-        Menus = BuildMenus(menuProvider);
+        Menus = ShellMenuFactory.Build(menuProvider);
 
         documents.ActiveDocumentChanged += OnActiveDocumentChanged;
         workspace.ActiveProjectChanged += OnActiveProjectChanged;
@@ -172,6 +182,8 @@ internal sealed partial class ShellViewModel : ObservableObject
         {
             StartupProjectTask = OpenProjectPathAsync(startupProjectPath);
         }
+
+        AttachActiveEditor();
         UpdateActiveDocument();
         UpdateActiveProject();
     }
@@ -257,6 +269,11 @@ internal sealed partial class ShellViewModel : ObservableObject
     internal Task StartupProjectTask { get; private set; } = Task.CompletedTask;
 
     /// <summary>
+    /// Gets the startup session-restore task. It is completed when no restore was offered.
+    /// </summary>
+    internal Task StartupRestoreTask { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
     /// Gets the text shown when the documents region is empty.
     /// </summary>
     public string EmptyDocumentText { get; } = "No document is open.";
@@ -265,7 +282,29 @@ internal sealed partial class ShellViewModel : ObservableObject
     /// Exits the application.
     /// </summary>
     [RelayCommand]
-    private void Exit() => lifetime.Shutdown();
+    private Task ExitAsync() => lifecycle.ExitAsync(StartupProjectTask);
+
+    /// <summary>
+    /// Begins the unclean-exit restore offer after the window is shown.
+    /// </summary>
+    internal void BeginStartupRestore()
+    {
+        if (startupRestoreStarted)
+        {
+            return;
+        }
+
+        startupRestoreStarted = true;
+        StartupRestoreTask = lifecycle.RestoreSessionAsync(StartupProjectTask, startupSessionSnapshot);
+    }
+
+    /// <summary>
+    /// Prompts for dirty sessions and closes them before the window closes.
+    /// </summary>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns><see langword="true"/> when the window may close.</returns>
+    internal Task<bool> RequestCloseAsync(CancellationToken cancellationToken = default) =>
+        lifecycle.RequestCloseAsync(StartupProjectTask, cancellationToken);
 
     /// <summary>
     /// Opens the command palette.
@@ -301,7 +340,7 @@ internal sealed partial class ShellViewModel : ObservableObject
 
     private void RegisterCommands(ICommandCatalog catalog)
     {
-        catalog.Add("shell.exit", "Exit", "File", MenuKind.File, null, new RelayCommand(() => lifetime.Shutdown()));
+        catalog.Add("shell.exit", "Exit", "File", MenuKind.File, null, ExitCommand);
         catalog.Add(
             "view.projects",
             "Toggle Projects",
@@ -359,6 +398,7 @@ internal sealed partial class ShellViewModel : ObservableObject
             MenuKind.File,
             new KeyGestureDescriptor("F5"),
             reloadProjectCommand);
+        editCommands.Register(catalog);
         catalog.Add(
             "view.settings",
             "Settings…",
@@ -424,37 +464,6 @@ internal sealed partial class ShellViewModel : ObservableObject
             new RelayCommand(PreviousDocument));
     }
 
-    private static List<MenuViewModel> BuildMenus(IMenuItemProvider provider)
-    {
-        var menus = new List<MenuViewModel>();
-        foreach (var menu in menuOrder)
-        {
-            var items = provider.CreateMenuItems(menu)
-                .Select(command => new MenuItemViewModel(
-                    command.Title,
-                    command.Command,
-                    command.Gesture,
-                    command.GestureText))
-                .ToList();
-            if (items.Count > 0)
-            {
-                menus.Add(new MenuViewModel(HeaderFor(menu), items));
-            }
-        }
-
-        return menus;
-    }
-
-    private static string HeaderFor(MenuKind menu) =>
-        menu switch
-        {
-            MenuKind.File => "_File",
-            MenuKind.Edit => "_Edit",
-            MenuKind.View => "_View",
-            MenuKind.Help => "_Help",
-            _ => menu.ToString(),
-        };
-
     private async Task CloseActiveAsync(CancellationToken cancellationToken)
     {
         if (Documents.ActiveDocument is { } document)
@@ -487,11 +496,40 @@ internal sealed partial class ShellViewModel : ObservableObject
 
     private void OnActiveProjectChanged(object? sender, EventArgs e)
     {
+        AttachActiveEditor();
+        UpdateActiveDocument();
         UpdateActiveProject();
+        editCommands.Attach(sessions.ActiveSession);
         saveProjectCommand.NotifyCanExecuteChanged();
         saveAsProjectCommand.NotifyCanExecuteChanged();
         closeProjectCommand.NotifyCanExecuteChanged();
         reloadProjectCommand.NotifyCanExecuteChanged();
+    }
+
+    private void AttachActiveEditor()
+    {
+        var editor = sessions.ActiveSession?.EditCoordinator;
+        if (ReferenceEquals(subscribedEditor, editor))
+        {
+            return;
+        }
+
+        if (subscribedEditor is not null)
+        {
+            subscribedEditor.ProjectChanged -= OnActiveEditorChanged;
+        }
+
+        subscribedEditor = editor;
+        if (subscribedEditor is not null)
+        {
+            subscribedEditor.ProjectChanged += OnActiveEditorChanged;
+        }
+    }
+
+    private void OnActiveEditorChanged(object? sender, ProjectChangedEventArgs args)
+    {
+        UpdateActiveDocument();
+        UpdateActiveProject();
     }
 
     private void OnSettingsChanged(object? sender, AppSettings updated)
@@ -650,7 +688,7 @@ internal sealed partial class ShellViewModel : ObservableObject
             return;
         }
 
-        await ApplySessionResultAsync(result, cancellationToken);
+        await projectOperations.ApplyResultAsync(result, cancellationToken);
     }
 
     /// <summary>
@@ -666,16 +704,17 @@ internal sealed partial class ShellViewModel : ObservableObject
         }
     }
 
-    private async Task OpenProjectPathAsync(string path)
+    internal async Task OpenProjectPathAsync(string path)
     {
-        await ApplySessionResultAsync(await sessions.OpenAsync(path), CancellationToken.None);
+        await projectOperations.OpenAsync(path);
+        UpdateActiveProject();
     }
 
     private async Task SaveProjectAsync()
     {
         if (sessions.ActiveSession is { } session)
         {
-            await ApplySessionResultAsync(await sessions.SaveAsync(session), CancellationToken.None);
+            await projectOperations.ApplyResultAsync(await sessions.SaveAsync(session), CancellationToken.None);
         }
     }
 
@@ -689,53 +728,7 @@ internal sealed partial class ShellViewModel : ObservableObject
         var path = await storage.PickSaveProjectAsync(session.Name + ".mocprj");
         if (!string.IsNullOrWhiteSpace(path))
         {
-            await ApplySessionResultAsync(await sessions.SaveAsAsync(session, path), CancellationToken.None);
-        }
-    }
-
-    private async Task CloseProjectAsync()
-    {
-        if (sessions.ActiveSession is { } session)
-        {
-            foreach (var document in Documents.Documents.Where(document => document.Key.ScopeId == session.Id).ToArray())
-            {
-                await Documents.CloseAsync(document);
-            }
-
-            await ApplySessionResultAsync(await sessions.CloseAsync(session), CancellationToken.None);
-        }
-    }
-
-    private async Task ReloadProjectAsync()
-    {
-        if (sessions.ActiveSession is { } session)
-        {
-            await ApplySessionResultAsync(await sessions.ReloadAsync(session), CancellationToken.None);
-        }
-    }
-
-    private async Task ApplySessionResultAsync(ProjectSessionResult result, CancellationToken cancellationToken)
-    {
-        if (!result.IsSuccess)
-        {
-            consoleService.Write(
-                ConsoleSeverity.Warning,
-                "project",
-                result.Message ?? $"The project operation ended with {result.Outcome}.");
-            return;
-        }
-
-        if (result.Outcome == ProjectSessionOutcome.Closed)
-        {
-            return;
-        }
-
-        if (result.Session is { } session)
-        {
-            await Navigation.NavigateToAsync(
-                new Mocassin.Core.Diagnostics.ModelPath("project", session.Id, "overview"),
-                NavigationIntent.Activate,
-                cancellationToken);
+            await projectOperations.ApplyResultAsync(await sessions.SaveAsAsync(session, path), CancellationToken.None);
         }
     }
 
@@ -751,7 +744,10 @@ internal sealed partial class ShellViewModel : ObservableObject
         StatusBar.SetActiveDocument(active?.Title);
         var isWelcome = active is not null
             && string.Equals(active.Key.Kind, DocumentKinds.Welcome, StringComparison.Ordinal);
-        WindowTitle = active is null || isWelcome ? "MOCASSIN" : $"{active.Title} — MOCASSIN";
+        var dirtyMarker = Workspace.ActiveProject?.IsDirty == true ? "* " : string.Empty;
+        WindowTitle = active is null || isWelcome
+            ? $"{dirtyMarker}MOCASSIN"
+            : $"{dirtyMarker}{active.Title} — MOCASSIN";
 
         if (active is IInspectorContributor contributor)
         {
@@ -783,10 +779,15 @@ internal sealed partial class ShellViewModel : ObservableObject
     private void UpdateActiveProject()
     {
         var project = Workspace.ActiveProject;
+        var recovery = sessions.ActiveSession?.PendingRecovery is not null
+            ? " — Recovery available"
+            : string.Empty;
         StatusBar.SetProject(
             project is null
                 ? "No project"
-                : $"{project.Name} — {project.Path}{(project.IsReadOnly ? " (read-only)" : string.Empty)}");
+                : $"{project.Name} — {project.Path}{(project.IsReadOnly ? " (read-only)" : string.Empty)}"
+                + (project.IsDirty ? " — Unsaved changes" : " — Saved")
+                + recovery);
         ReadOnlyBannerText = project?.IsReadOnly == true
             ? $"This project is open read-only. Lock: {project.LockPath ?? "held by another session"}."
             : null;

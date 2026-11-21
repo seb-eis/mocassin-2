@@ -1,7 +1,7 @@
 # Quickstart
 
-This quickstart uses the desktop shell and the same project files as the CLI. It covers the workspace and
-project lifecycle delivered by Step 23A. Editing, validation surfaces, autosave, and recovery are later work.
+This quickstart uses the desktop shell and the same project files as the CLI. It covers the workspace,
+project lifecycle, editing, validation, autosave, and recovery delivered through Step 23B.
 
 ## Create a project
 
@@ -27,8 +27,10 @@ recorded in the recent-file list and application settings.
 - **Console** shows the Application channel.
 - **Status** shows the active document, project path/lock state, appearance, and version.
 
-The Project Overview and Project JSON documents are read-only in this step. The JSON document is the canonical,
-indented project document and can be copied to the clipboard.
+The Overview edits the project name, description, author, and notes; the Edit menu provides Undo/Redo across the
+save point. The Problems console channel shows live validation results and lets you navigate to a model path.
+The Project JSON document remains read-only; it is the canonical, indented project document and refreshes after
+content changes.
 
 ## Save and close
 
@@ -37,8 +39,9 @@ indented project document and can be copied to the clipboard.
 - **File → Reload Project** (`F5`) re-reads the file.
 - **File → Close Project** releases the lock and closes the project's documents.
 
-There is no unsaved-changes prompt in Step 23A because nothing is editable. The prompt and dirty markers arrive
-with Step 23B.
+Dirty projects show `*` in the title/tab/project switcher and “Unsaved changes” in the status bar. Closing a
+dirty project or the window prompts Save/Discard/Cancel; autosave writes an `.autosave` sidecar and a recovery
+offer appears after an unclean exit. See [Projects and lifecycle](../user-guide/projects.md#autosave-and-recovery).
 
 ## Locks and read-only mode
 

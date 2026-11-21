@@ -35,6 +35,11 @@ internal abstract partial class DocumentViewModel : ObservableObject
     public virtual string? ToolTip => null;
 
     /// <summary>
+    /// Gets a value indicating whether the document's project has unsaved changes.
+    /// </summary>
+    public virtual bool IsDirty => false;
+
+    /// <summary>
     /// Gets or sets the command that closes this document.
     /// </summary>
     public ICommand? CloseCommand { get; internal set; }

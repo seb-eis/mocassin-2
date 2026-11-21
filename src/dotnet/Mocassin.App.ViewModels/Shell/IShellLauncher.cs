@@ -14,4 +14,12 @@ internal interface IShellLauncher
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that completes when the request has been handed to the platform.</returns>
     public Task OpenFolderAsync(string path, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Opens the supplied URI with the platform default handler.
+    /// </summary>
+    /// <param name="uri">The absolute URI to open.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A task that completes when the request has been handed to the platform.</returns>
+    public Task OpenUriAsync(string uri, CancellationToken cancellationToken = default);
 }

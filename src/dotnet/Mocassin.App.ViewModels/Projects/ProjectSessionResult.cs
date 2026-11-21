@@ -27,7 +27,9 @@ internal sealed record ProjectSessionResult(
         or ProjectSessionOutcome.OpenedReadOnly
         or ProjectSessionOutcome.Saved
         or ProjectSessionOutcome.Reloaded
-        or ProjectSessionOutcome.Closed;
+        or ProjectSessionOutcome.Closed
+        or ProjectSessionOutcome.Recovered
+        or ProjectSessionOutcome.Discarded;
 
     /// <summary>
     /// Gets a value indicating whether the session is read-only.

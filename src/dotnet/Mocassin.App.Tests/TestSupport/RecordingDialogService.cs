@@ -2,6 +2,7 @@
 
 using Mocassin.App.ViewModels.Dialogs;
 using Mocassin.App.ViewModels.Dialogs.Requests;
+using Mocassin.App.ViewModels.Recovery;
 
 namespace Mocassin.App.Tests.TestSupport;
 
@@ -36,6 +37,11 @@ internal sealed class RecordingDialogService : IDialogService
     public List<CrashDialogRequest> CrashRequests { get; } = [];
 
     /// <summary>
+    /// Gets the captured crash snapshots from the most recent request.
+    /// </summary>
+    public List<CrashRecoverySnapshot> CrashSnapshots { get; } = [];
+
+    /// <summary>
     /// Gets or sets the scripted confirmation result.
     /// </summary>
     public bool ConfirmResult { get; set; } = true;
@@ -44,6 +50,11 @@ internal sealed class RecordingDialogService : IDialogService
     /// Gets or sets the scripted prompt result.
     /// </summary>
     public string? PromptResult { get; set; }
+
+    /// <summary>
+    /// Gets or sets an optional choice handler; the first choice is selected when it is unset.
+    /// </summary>
+    public Func<ChoiceDialogRequest, DialogResult>? ChoiceHandler { get; set; }
 
     /// <inheritdoc />
     public Task<bool> ConfirmAsync(ConfirmDialogRequest request, CancellationToken cancellationToken = default)
@@ -56,6 +67,11 @@ internal sealed class RecordingDialogService : IDialogService
     public Task<DialogResult> ChooseAsync(ChoiceDialogRequest request, CancellationToken cancellationToken = default)
     {
         ChoiceRequests.Add(request);
+        if (ChoiceHandler is not null)
+        {
+            return Task.FromResult(ChoiceHandler(request));
+        }
+
         var choice = request.Choices.Count == 0 ? null : request.Choices[0];
         return Task.FromResult(
             choice is null
@@ -78,9 +94,17 @@ internal sealed class RecordingDialogService : IDialogService
     }
 
     /// <inheritdoc />
-    public Task ShowCrashAsync(CrashDialogRequest request, CancellationToken cancellationToken = default)
+    public Task ShowCrashAsync(
+        CrashDialogRequest request,
+        IReadOnlyList<CrashRecoverySnapshot>? recoverySnapshots = null,
+        CancellationToken cancellationToken = default)
     {
         CrashRequests.Add(request);
+        if (recoverySnapshots is not null)
+        {
+            CrashSnapshots.AddRange(recoverySnapshots);
+        }
+
         return Task.CompletedTask;
     }
 

@@ -91,4 +91,24 @@ internal static class SettingsDefaults
     /// The default active console channel.
     /// </summary>
     public const string DefaultConsoleChannel = "application";
+
+    /// <summary>
+    /// The default autosave interval in minutes.
+    /// </summary>
+    public const int DefaultAutosaveIntervalMinutes = 5;
+
+    /// <summary>
+    /// The minimum autosave interval in minutes.
+    /// </summary>
+    public const int MinAutosaveIntervalMinutes = 1;
+
+    /// <summary>
+    /// The maximum autosave interval in minutes.
+    /// </summary>
+    public const int MaxAutosaveIntervalMinutes = 60;
+
+    /// <summary>
+    /// The maximum number of remembered open-project paths.
+    /// </summary>
+    public const int MaxOpenProjects = 20;
 }

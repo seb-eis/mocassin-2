@@ -1,0 +1,26 @@
+{
+  "step": "step-23b",
+  "audit_commit": "fe79552585690fb9d552e58aad558df0ca96ced8",
+  "closeout_ci": {
+    "run_id": "44932597523",
+    "head_sha": "fe79552585690fb9d552e58aad558df0ca96ced8"
+  },
+  "main_sha_at_freeze": "3a2048150488e6b14f3cc4f3da59aa44bae93908",
+  "merge_candidate": "fe79552585690fb9d552e58aad558df0ca96ced8",
+  "merge_tree_ci": {
+    "run_id": "",
+    "head_sha": ""
+  },
+  "platform_ci": "windows run 44932918537 at fe79552585690fb9d552e58aad558df0ca96ced8 (green, https://github.com/seb-eis/mocassin-2/actions/runs/44932918537); macos run 44932432910 at fe79552585690fb9d552e58aad558df0ca96ced8 (green, https://github.com/seb-eis/mocassin-2/actions/runs/44932432910)",
+  "tag": "step-23b",
+  "notes": [
+    "Ubuntu closeout CI run 44932597523 is the workflow_dispatch at audited commit fe79552585690fb9d552e58aad558df0ca96ced8 (platforms=ubuntu, force_all=false). It is green: Detect changes, .NET (ubuntu-latest), Contracts and policy, and Public API compatibility succeeded; Rust/Python were skipped by path filters.",
+    "Windows platform gate run 44932918537 and macOS platform gate run 44932432910 were dispatched sequentially at the same commit and are green. Both run the focused platform job: Release build of Mocassin.slnx plus Mocassin.App.Tests (Avalonia headless workspace, including the new audit-round-1 close, restore, autosave, and recovery tests), Mocassin.Packages.Tests, Mocassin.Results.Tests, and Mocassin.Cli.Tests.",
+    "Dispatch history: three initial dispatches were sent together; the CI workflow's per-ref concurrency group (cancel-in-progress) cancelled the ubuntu and windows duplicates (runs 44932428742 and 44932430657, conclusion cancelled, no test failure) and let macOS 44932432910 complete green. Ubuntu 44932597523 and Windows 44932918537 are the serialized replacement gate runs recorded here; they supersede the cancelled duplicates.",
+    "main 3a2048150488e6b14f3cc4f3da59aa44bae93908 (Step 14) was merged into the step branch at 7a2f463e1726f3d4fc7d28d426626ef35360af26 before the original audited commit; it has not moved since, so no merge-tree CI run applies and main_sha_at_freeze is unchanged.",
+    "Audit round 1 returned Fixes required (F1-F3 Major, F4-F5 Minor, F6-F7 Notes). The fixes are squashed at ca64c9a and the re-audit candidate is fe79552. F1 snapshots the session block before a --project open; F2 makes window close two-phase; F3 marshals autosave status/MarkAutosaved through IUiDispatcher; F4 deletes candidate.SnapshotPath and rejects a foreign ProjectId; F5 logs autosave/fallback/recovery failures; F6 keeps CleanupAsync on the UI context; F7 adds the --project+restore, two-session cancel, LoadDiagnostics, and timestamp-tie tests.",
+    "Local gate: ./tools/verify.sh all --require exited 0 on the audited tree at fe79552, including the strict documentation build, DocFX, rustdoc, contracts/policy, structure, Rust, Python, and the AOT evidence gate. The AOT CLI publish reports 62 IL diagnostics as recorded evidence; the documented policy treats that as evidence, not a failure. dotnet format --verify-no-changes and the structure/API gates were also run clean.",
+    "No code, test, contract, or configuration file changes after fe79552585690fb9d552e58aad558df0ca96ced8. The closeout evidence commit, the audit-record resolutions, the step page, and the status dashboard are documentation-only.",
+    "Recorded limitations after the fixes: close/exit prompts remain per project (no apply-to-all batch choice); ordinary Open on a missing main file reports the load failure without a dedicated snapshot-path dialog, while session restore reports missing paths; the dead-UI crash path writes no recovery files; a deferred recovery/ candidate may expire under the owner-accepted m-14 seven-day sweep; Windows/macOS prompts are the manual platform gate."
+  ]
+}

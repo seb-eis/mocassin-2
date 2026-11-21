@@ -20,7 +20,13 @@
         <ListBox.ItemTemplate>
           <DataTemplate x:DataType="projects:ProjectWorkspaceEntry">
             <StackPanel>
-              <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+              <StackPanel Orientation="Horizontal" Spacing="4">
+                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                <TextBlock Text="*"
+                           IsVisible="{Binding IsDirty}"
+                           automation:AutomationProperties.Name="Unsaved changes"
+                           FontWeight="Bold" />
+              </StackPanel>
               <TextBlock Text="{Binding Path}"
                          Classes="caption"
                          TextTrimming="CharacterEllipsis" />

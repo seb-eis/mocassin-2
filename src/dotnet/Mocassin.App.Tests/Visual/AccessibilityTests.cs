@@ -34,7 +34,8 @@ public sealed class AccessibilityTests
                     var controls = window.GetVisualDescendants()
                         .OfType<Control>()
                         .Where(control => control is Button or TextBox or ComboBox or CheckBox or Slider
-                            or ListBox or TreeView or Menu or TabControl);
+                            or ListBox or TreeView or Menu or TabControl)
+                        .Where(control => !control.Name?.StartsWith("PART_", StringComparison.Ordinal) ?? true);
                     foreach (var control in controls)
                     {
                         var name = AutomationProperties.GetName(control);

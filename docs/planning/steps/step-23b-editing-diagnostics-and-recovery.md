@@ -5,9 +5,11 @@
 Not dependent on Steps 08–11 or 13–22.
 **Delivers:** The single-project edit pipeline with undo/redo, the validation and Problems surface, dirty state
 and save-point handling, autosave, crash recovery, and unclean-exit session restore — on top of the 23A shell.
-**Status:** **In progress.** The design was accepted by the human owner on 2026-11-21 as `Ready with notes`
-(round-4 freeze `a33711d`, record `c4ded0e`), class High and the four features were approved, and the step
-branch is `step/23b-editing-diagnostics-and-recovery`. The review record is
+**Status:** **In audit — `Passed with notes` accepted; merge pending.** The design was accepted by the human
+owner on 2026-11-21 as `Ready with notes` (round-4 freeze `a33711d`, record `c4ded0e`), class High and the four
+features were approved, and the step branch is `step/23b-editing-diagnostics-and-recovery`. Audit round 1
+returned `Fixes required` (F1–F7); round 2 returned `Passed with notes`, which the owner accepted on 2026-11-21
+(F8/F9/N1 fixed in the docs-only resolution commit; F10 accepted as a note). The review record is
 [`reviews/step-23b.md`](../reviews/step-23b.md).
 
 > **Split note.** Step 23 was split into **23A** and **23B** by the owner on 2026-11-20 (complexity class High,
@@ -18,12 +20,12 @@ branch is `step/23b-editing-diagnostics-and-recovery`. The review record is
 
 ## Implementation status
 
-- **Status:** **In progress** — design accepted, feature 1 in progress
+- **Status:** **In audit** — audit round 2 returned `Passed with notes`; the human owner accepted on 2026-11-21 with F8/F9/N1 fixed in the docs-only resolution commit and F10 accepted as a note; merge and tag pending
 - **Step branch:** `step/23b-editing-diagnostics-and-recovery`
-- **Step CI:** — (local gates only; the single closeout `CI` run is dispatched at closeout)
+- **Step CI:** replacement Ubuntu closeout [44932597523](https://github.com/seb-eis/mocassin-2/actions/runs/44932597523), Windows [44932918537](https://github.com/seb-eis/mocassin-2/actions/runs/44932918537), and macOS [44932432910](https://github.com/seb-eis/mocassin-2/actions/runs/44932432910) green at `fe79552`; the original `eb120e1` runs are historical
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Not requested
+- **Audit:** `Passed with notes` — **accepted by the human owner 2026-11-21** ([`audits/step-23b.md`](../audits/step-23b.md)); closeout evidence [`closeout/step-23b.json`](../closeout/step-23b.json) binds `fe79552`
 - **Design review:** **Accepted `Ready with notes` by the human owner 2026-11-21** at the round-4 freeze
   `a33711d` (record `c4ded0e`, round-4 verdict `Ready with notes`) — see
   [`reviews/step-23b.md`](../reviews/step-23b.md).
@@ -37,12 +39,12 @@ branch is `step/23b-editing-diagnostics-and-recovery`. The review record is
   "preserved until Recover or Discard" claim accordingly.
 - **Last updated:** 2026-11-21
 
-| Feature | Branch | Status | Local gates | Step CI | Squash commit |
-| --- | --- | --- | --- | --- | --- |
-| 1 | Edit pipeline and undo/redo | — | Planned | — | — | — |
-| 2 | Validation surface | — | Planned | — | — | — |
-| 3 | Dirty state, autosave, crash recovery | — | Planned | — | — | — |
-| 4 | 23B tests, documentation, and closeout | — | Planned | — | — | — |
+| # | Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | Edit pipeline and undo/redo | `feature/step-23b-editing-diagnostics-and-recovery/edit-pipeline-and-undo-redo` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `bb048ad`; test fix `90d9f73` |
+| 2 | Validation surface | `feature/step-23b-editing-diagnostics-and-recovery/validation-surface` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `77c1b9c`; refresh fix `d4badd0`; undo/redo commands `eb50095` |
+| 3 | Dirty state, autosave, crash recovery | `feature/step-23b-editing-diagnostics-and-recovery/dirty-autosave-and-recovery` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `97c42ec`; crash-writer fix `a9506bf` |
+| 4 | 23B tests, documentation, and closeout | `feature/step-23b-editing-diagnostics-and-recovery/tests-docs-and-closeout` | Squashed | `./tools/verify.sh all --require` 0; closeout CI/platform gates green | Ubuntu 44929014836; Windows 44929276522; macOS 44929582584 | `a14ef1f`; fixes `833f135`, `eb120e1` |
 
 ### Approved feature list (owner-approved 2026-11-21)
 
@@ -52,10 +54,195 @@ seam fills in §1.
 
 | # | Feature | Slug | Planned scope | Done when |
 | --- | --- | --- | --- | --- |
-| 1 | Edit pipeline and undo/redo | `edit-pipeline-and-undo-redo` | `ProjectEditCoordinator` per project over `ProjectDocument`; `Apply`/`Undo`/`Redo`; bounded undo depth; `ProjectChanged` and `EditRejected`; app-level read-only refusal; the Project Overview metadata editor (name/description/author/notes, one undo entry per committed field) | Undo/redo crosses the save point correctly in both directions; a rejected structural edit changes nothing and reports diagnostics; a read-only session returns the `ReadOnly` outcome with no diagnostic code; the coordinator is the only write path |
-| 2 | Validation surface | `validation-surface` | `ValidationCoordinator` seeded from the session's retained `ProjectSession.Validation`, 300 ms debounce after `ProjectChanged`, stale-result discard, status-bar validity item, Problems channel with severity/code/text/source filters, sorting, help anchors, `Related` navigation, revalidate, edit diagnostics, on-demand statistics in the Overview | A 23A load/migration fixture's retained result reaches Problems; a clean load leaves `Load` `Skipped`; opening never runs a second validation; a stale result is discarded; no double validation on open |
+| 1 | Edit pipeline and undo/redo | `edit-pipeline-and-undo-redo` | `ProjectEditCoordinator` per project over `ProjectDocument`; `Apply`/`Undo`/`Redo`; bounded undo depth; `ProjectChanged` and `EditRejected`; app-level read-only refusal | Undo/redo crosses the save point correctly in both directions; a rejected structural edit changes nothing and reports diagnostics; a read-only session returns the `ReadOnly` outcome with no diagnostic code; the coordinator is the only write path |
+| 2 | Validation surface | `validation-surface` | `ValidationCoordinator` seeded from the session's retained `ProjectSession.Validation`, 300 ms debounce after `ProjectChanged`, stale-result discard, status-bar validity item, Problems channel with severity/code/text/source filters, sorting, help anchors, `Related` navigation, revalidate, edit diagnostics, on-demand statistics in the Overview, and the Project Overview metadata editor moved from feature 1 (name/description/author/notes, one undo entry per committed field) | A 23A load/migration fixture's retained result reaches Problems; a clean load leaves `Load` `Skipped`; opening never runs a second validation; a stale result is discarded; no double validation on open |
 | 3 | Dirty state, autosave, crash recovery | `dirty-autosave-and-recovery` | Save-point-correct dirty tracking and markers, unsaved-changes prompts, `AutosaveScheduler` with an injectable tick, `.autosave` sidecar, crash snapshots and manifests in `recovery/`, recovery prompt, Reload/Recover/Discard/Keep operations, unclean-exit session restore, retention, bounded asynchronous crash-recovery writer | Autosave writes only dirty documents and deletes its file on save; a simulated crash leaves a recoverable `recovery/` snapshot; recovery restores the exact in-memory project; recovery files are swept after 7 days and sidecars are not |
 | 4 | 23B tests, documentation, and closeout | `tests-docs-and-closeout` | Harness extension, dirty/save-point/autosave/recovery/validation/crash tests, the 23B documentation column (§12), parity/status updates, `closeout/step-23b.json` (`"step": "step-23b"`), and the audit request | `./tools/verify.sh all --require` passes; the strict docs build passes; `closeout/step-23b.json` validates (the `step-NN[a-z]` checker support is already on `main`); the audit request is complete |
+
+### Feature log
+
+#### Feature 1 — edit pipeline and undo/redo (squashed `bb048ad`)
+
+- **Branch:** `feature/step-23b-editing-diagnostics-and-recovery/edit-pipeline-and-undo-redo`; deleted after the
+  squash. Git operations: branch created from `929327e`, feature commit `c4ae50a`, squash `bb048ad`. A follow-up
+  `fix-feature-1-rejected-test` branch (deleted) is squashed as `90d9f73` and strengthens the rejected-edit test
+  to assert the redo stack and save point are unchanged.
+- **Local gates:** `./tools/verify.sh dotnet` exit 0 (all solution tests, 0 warnings, `dotnet format` clean);
+  `./tools/verify.sh structure` exit 0 (7 architecture tests); `./tools/verify.sh api` exit 0 (no baseline
+  break); `./tools/verify.sh docs` exit 0 (link/math checks, DocFX, rustdoc, strict Zensical build). The
+  follow-up fix re-ran `./tools/verify.sh dotnet` exit 0. **No CI run** was triggered; per-feature CI is not
+  used.
+- **Diff summary:** `ProjectDocument.MaxUndoDepth` (init-only; `0` unbounded, negative throws) with oldest-first
+  trimming and a public-API entry; the app-level `ProjectEditCoordinator` with `EditApplyResult` /
+  `EditApplyOutcome` (`Applied`/`Rejected`/`ReadOnly`), same-hash no-op with `Change == null` and no event,
+  `EditRejected`, `ProjectChanged` (`Edited`/`Undo`/`Redo`/`Saved`/`Replaced`), `NotifySaved`, and
+  `ReplaceDocument`; `ProjectSession` owns the coordinator, constructs GUI documents with `MaxUndoDepth = 200`,
+  follows the lock/read-only state, saves through the no-arg `MarkSaved()` + `NotifySaved()`, and replaces the
+  coordinator document on reload. Tests cover apply/undo/redo, the bound and overflow, no-op, rejected,
+  read-only, the save-point across save/undo/redo, replacement, and the real session/store path.
+- **Known limitations:** the Project Overview metadata form (name/description/author/notes) was not built in
+  this feature; the owner moved it to feature 2 and it landed there (`77c1b9c`). The validation surface,
+  autosave/recovery, dialogs, published documentation column, fixtures, and closeout are features 2–4. At this
+  feature's squash no app public API changed and the only public addition was `ProjectDocument.MaxUndoDepth` in
+  `Mocassin.Core/PublicAPI.Unshipped.txt`; feature 3 added `CreateRecovered` and the audit fix added the
+  Packages `ProjectStore.DeleteAutosaveFile`.
+
+#### Feature 2 — validation surface and metadata editor (squashed `77c1b9c`)
+
+- **Branch:** `feature/step-23b-editing-diagnostics-and-recovery/validation-surface`; deleted after the squash.
+  Feature commit `dc5c909`, squash `77c1b9c`. A `fix-overview-refresh` follow-up (deleted) is squashed as
+  `d4badd0`; it raises change notifications for every project-derived Overview property after an edit/reload.
+  A `fix-shell-undo-redo` follow-up (deleted) is squashed as `eb50095`; it adds the Edit-menu Undo/Redo commands
+  and extracts `ShellEditCommands`/`ShellMenuFactory` to keep the shell view model under the 800-line limit.
+- **Local gates:** `./tools/verify.sh dotnet` exit 0 (all solution tests, 0 warnings, `dotnet format` clean);
+  `./tools/verify.sh structure` exit 0 (9 architecture tests); `./tools/verify.sh api` exit 0 (no baseline
+  break); `./tools/verify.sh docs` exit 0 (link/math checks, DocFX, rustdoc, strict Zensical build). **No CI run**
+  was triggered.
+- **Diff summary:** per-session `ValidationCoordinator` seeded from `ProjectSession.Validation` with a 300 ms
+  debounce, off-thread pipeline runs on immutable snapshots, version/snapshot stale guard, explicit revalidate,
+  and one cached statistics-enabled run per snapshot; `ProblemsChannelViewModel`/`ProblemsView` with
+  severity/code/text/source filters, sorting, revalidate, help anchors, related-path navigation, and edit
+  diagnostics cleared by the next successful content change; the status-bar validity item with glyph and
+  severity; `DiagnosticHelpLinks` and `IShellLauncher.OpenUriAsync`; the Overview metadata form
+  (name/description/author/notes) through `ProjectEditCoordinator.Apply`, name rules, inline errors, read-only
+  refusal, save-point dirty text, focus requests, and the explicit statistics panel; `ProjectJsonViewModel`
+  refreshes on content changes; Edit-menu Undo/Redo commands follow the active project and are disabled for
+  read-only or empty stacks. Tests cover the initial-result/no-open-validation contract, debounce, stale
+  discard, statistics caching, the `Load` stage fixtures, filters/sort/edit diagnostics/navigation/help, metadata
+  apply/reject/read-only, one undo entry per field, save-point text, focus, and headless rendering.
+- **Metadata-form scope move:** the owner moved the Project Overview metadata form from feature 1 to feature 2;
+  the feature-list rows above record that move and the form is complete here.
+- **Stale-guard deviation (M-2):** the design's "apply only when `DocumentHash` equals the current hash" is
+  implemented as the document version plus immutable snapshot identity, because `Mocassin.App.ViewModels` must
+  not call `ProjectHasher` (M-2). The architecture test now fails on any `ProjectHasher` or `ValidateFileAsync`
+  token in the ViewModels sources. The statistics cache uses the same per-snapshot identity.
+- **Name-validation detail:** the form runs `ProjectPathRules.NormalizeName` before `ProjectEditCoordinator.Apply`,
+  so empty and reserved-character names are refused inline without an undo entry; the structural validator still
+  guards any accepted candidate.
+- **Seam order fix:** `ProjectSessionService.SaveAsync`/`SaveAsAsync` update the file stamp before raising
+  `NotifySaved`, so the Overview's "last saved" refresh reads the new stamp. This is an internal 23A seam order
+  change, not a public API change.
+- **Known limitations:** shell/tab/project-switcher dirty markers, the unsaved-changes prompt, autosave,
+  recovery, dialogs, the published documentation column, fixtures, and closeout are features 3–4. The Problems
+  channel and status item show the active project only, as designed. No App public API changed; the console
+  channel selector and status glyph are internal view-model/view additions.
+
+#### Feature 3 — dirty state, autosave, and crash recovery (squashed `97c42ec`)
+
+- **Branch:** `feature/step-23b-editing-diagnostics-and-recovery/dirty-autosave-and-recovery`; deleted after the
+  squash. Feature commit `3dd58de`, squash `97c42ec`. A `fix-crash-writer-result` follow-up (deleted) is squashed as
+  `a9506bf`; it awaits completed crash writes instead of reading `Task.Result`.
+- **Local gates:** `./tools/verify.sh dotnet` exit 0 (all solution tests, 211 App tests, 0 warnings,
+  `dotnet format` clean); `./tools/verify.sh structure` exit 0 (9 architecture tests); `./tools/verify.sh api`
+  exit 0 (no baseline break); `./tools/verify.sh docs` exit 0. **No CI run** was triggered.
+- **Diff summary:** `ProjectDocument.CreateRecovered` (additive Core API, `PublicAPI.Unshipped.txt`);
+  save-point dirty markers in the window title, tab, project switcher, and status bar; Save/Discard/Cancel close,
+  reload, and exit prompts with `IsClosing` cleared on cancel; per-session `SemaphoreSlim` gate; `AutosaveScheduler`
+  with `TimeProvider` ticks, dirty-only sidecar writes, fallback to `recovery/`, and status item;
+  `IRecoveryStore`/`RecoveryStore` with bounded manifests, candidates, seven-day sweep, and sidecar detection;
+  `PendingRecovery` preservation on clean close, first-edit clear (no-op edits do not clear), return-to-clean and
+  clean-close cleanup; Recover/Discard/Keep flows with validation and `LoadDiagnostics` set before `Replaced`;
+  unclean-exit restore and clean-exit setting; `CrashRecoveryWriter` (2 s budget, async, no sync-over-async) and
+  the crash-dialog recovery action; additive `autosave`/`session` settings with no schema bump and the settings
+  dialog autosave control. The shell/session logic is split into `ShellEditCommands`, `ShellMenuFactory`,
+  `ShellLifecycleCoordinator`, `ShellProjectOperations`, and `ProjectRecoveryDetector` to keep the files within
+  the 800-line and 20-file structure limits.
+- **Tests:** real temp-file coverage for dirty/save-point transitions; close/reload/exit Save/Discard/Cancel;
+  autosave dirty-only/interval/save cleanup/read-only/closing/busy gates; return-to-clean and clean-close
+  sidecar cleanup; pending-candidate preservation and first-edit/no-op behavior; recovery detection/comparison,
+  validation ordering, Discard, timestamp-only suppression, missing paths, sidecar/manifest candidates, and
+  sweep retention; crash writer success/timeout/dialog; settings round-trip/clamp/defaults; headless dirty markers
+  and autosave controls.
+- **Deviations / limitations:**
+  - The close/exit prompt is per project; there is no "apply to all" batch choice (a design word, not a
+    functional gap in the Save/Discard/Cancel contract). Recorded as a limitation.
+  - A missing main project file is reported by session restore and by `ListRecoveryAsync`; the ordinary Open path
+    reports the load failure but does not show a separate snapshot-path/discard dialog. Recorded as a limitation.
+  - The dead-UI crash path writes no recovery files (document snapshots are UI-thread-confined); the crash dialog
+    reports per-session results and disables Exit while writing.
+  - Recovery detection loads manifest snapshots to enforce the m-5 content comparison; this is bounded and only
+    runs on open.
+  - The autosave failure-to-`recovery/` fallback is failure-injected in a PR-fast test (autosave failure, recovery write, and warning log).
+  - `autosave`/`session` live in `Settings/Blocks/` and remain application-local with no schema bump.
+- **Known limitations:** the platform recovery/autosave prompt is a manual Windows/macOS gate; the documentation
+  column, parity/status closeout, fixtures, and audit request are feature 4.
+
+#### Feature 4 — tests, documentation, and closeout (squashed `a14ef1f`; fixes `833f135`, `eb120e1`)
+
+- **Branch:** `feature/step-23b-editing-diagnostics-and-recovery/tests-docs-and-closeout`; feature commit
+  `74ea8dc`, squash `a14ef1f`. Two closeout fixes followed: `833f135` makes the immediate-revalidate test
+  timing-independent after the first Ubuntu closeout run failed it; `eb120e1` awaits the close and drains
+  dispatched headless work before test cleanup after the first Windows platform gate exposed a settings
+  temp-file lock.
+- **Docs/parity:** `docs/development/ui-architecture.md` (edit pipeline, validation coordinator, recovery, gate
+  and lifecycle collaborators), `docs/development/testing-and-parity.md` (23B harness/tiers/limitations),
+  `docs/development/design-decisions.md`, the user-guide workspace/projects/settings pages,
+  `docs/reference/file-layout.md` (`autosave`/`session`, `recovery/`, sidecar rules, seven-day retention),
+  `docs/reference/diagnostics.md` (help anchors/no new codes), `docs/troubleshooting/errors.md` (recovery/crash
+  failures), the quickstart/first-project pages, and the parity rows for edit/undo, validation/Problems,
+  metadata editing, dirty markers, autosave, recovery, session restore, and crash recovery. The settings blocks
+  are documented as additive app-local v1 fields with no schema bump.
+- **Local closeout gate:** `./tools/verify.sh all --require` exited 0 on the audited tree at `eb120e1`, including
+  .NET, Rust, Python, strict docs/DocFX/rustdoc, contracts/policy, structure, and the AOT evidence gate. The AOT
+  CLI publish reports 62 IL diagnostics as recorded evidence; the gate treats that as evidence, not failure.
+  `python tools/check_closeout_evidence.py docs/planning/closeout/step-23b.json` returned OK.
+- **Closeout CI/platform:** Ubuntu [44929014836](https://github.com/seb-eis/mocassin-2/actions/runs/44929014836),
+  Windows [44929276522](https://github.com/seb-eis/mocassin-2/actions/runs/44929276522), and macOS
+  [44929582584](https://github.com/seb-eis/mocassin-2/actions/runs/44929582584) are green at the audited commit
+  `eb120e17ce43a152c8905fc1f54528b69448b3e3`. `main` `3a2048150488e6b14f3cc4f3da59aa44bae93908` was merged into
+  the step branch at `7a2f463e1726f3d4fc7d28d426626ef35360af26`; it did not move again before the freeze.
+- **Known limitations carried into the audit:** per-project close/exit prompts (no apply-to-all batch choice);
+  ordinary Open on a missing main file reports the load failure without a dedicated snapshot-path/discard
+  dialog, while session restore reports missing paths; the dead-UI crash path writes no recovery files; the
+  autosave failure-to-`recovery/` fallback is now failure-injected in a PR-fast test; a deferred `recovery/`
+  candidate may expire under the accepted m-14 seven-day sweep.
+- **Evidence:** [`closeout/step-23b.json`](../closeout/step-23b.json); audit request
+  [`audits/step-23b.md`](../audits/step-23b.md) (`Passed with notes`, owner-accepted).
+
+#### Audit round 1 fixes (F1–F7)
+
+- **Branch:** `feature/step-23b-editing-diagnostics-and-recovery/fix-audit-round-1`, from the step branch at the
+  audit record commit `39c450d` (folded unchanged from the auditor); feature commit `4ef9d6f`, squash
+  `ca64c9a`.
+- **F1 (Major):** the shell captures the `session` settings block before a `--project` startup open and passes
+  that frozen state to `RestoreSessionAsync`, so the startup open cannot manufacture a false unclean-exit prompt
+  or replace the prior list. Covered by the clean and unclean `--project` + restore test.
+- **F2 (Major):** `ShellLifecycleCoordinator.RequestCloseAsync` is two-phase: it collects every dirty-project
+  decision before saving or closing anything, then applies the saves and closes only after no prompt cancelled.
+  The two-session cancel test proves no session closes, no save is applied, and both sidecars survive.
+- **F3 (Major):** `AutosaveScheduler` returns to the UI context after its asynchronous writes and marshals the
+  status item and `MarkAutosaved` through `IUiDispatcher`; file writes stay asynchronous. A thread-pool-start
+  test asserts the dispatcher path and the updated timestamp.
+- **F4 (Minor):** `DiscardRecoveryAsync` rejects a candidate whose `ProjectId` differs and deletes the
+  candidate's exact `SnapshotPath`. The Save As + deferred sidecar + Discard test proves the old sidecar is
+  removed and the new path is untouched; the foreign-candidate test proves nothing is deleted.
+- **F5 (Minor):** autosave failure, recovery fallback success/failure, and recovery-manifest read/size/delete
+  failures are logged. The failure-injected sidecar test asserts the fallback and warning log; the malformed
+  recovery-manifest test asserts the warning.
+- **F6 (Note):** `CleanupAsync` keeps its continuation on the captured UI context; the file deletions remain
+  asynchronous. The trigger is the UI-thread `ProjectChanged` handler.
+- **F7 (Note):** added the `--project` + restore, two-session cancel, `LoadDiagnostics` recovery assertion, and
+  timestamp-tie tests; the tie-break is sidecar first, then ordinal snapshot path.
+- **Gates:** `./tools/verify.sh all --require` exited 0 at `fe79552` (including strict docs/DocFX/rustdoc,
+  structure, API, contracts/policy, and the AOT evidence gate); the focused App/Recovery/Scheduling tests and
+  `dotnet format --verify-no-changes` were clean. Replacement Ubuntu closeout 44932597523, Windows 44932918537,
+  and macOS 44932432910 are green at `fe79552`. Two initial parallel dispatches were cancelled by the workflow's
+  per-ref concurrency group before starting; the serialized replacement runs above are the gate evidence.
+
+#### Audit round 2 — `Passed with notes` (owner-accepted 2026-11-21)
+
+- **F8 (Minor):** §10 and §17 now record the three additive public APIs — `ProjectDocument.MaxUndoDepth`,
+  `ProjectDocument.CreateRecovered`, and the Packages `ProjectStore.DeleteAutosaveFile` — with the latter in
+  `Mocassin.Packages/PublicAPI.Unshipped.txt`; ApiCompat remains clean. The "no Packages API change" claim is
+  removed. The decision records (`05-open-decisions.md`, `04-roadmap.md`, `design-decisions.md`) name the third
+  API.
+- **F9 (Minor):** the parity matrix now states that the autosave fallback **is** failure-injected by
+  `AFailedSidecarWriteFallsBackToRecoveryAndIsLogged`.
+- **N1 (Note):** the audit-request table is rebound to `fe79552`.
+- **F10 (Note, accepted):** the recovery `LoadDiagnostics` assertion compares empty arrays for a valid snapshot,
+  so it is vacuous; the assignment is verified at `ProjectSessionService.cs:464`. A diagnostic-bearing fixture is
+  deferred as a test-strength improvement, not a product defect.
+- **Owner decision:** `Passed with notes` accepted on 2026-11-21; merge `--no-ff` and tag `step-23b` approved.
 
 ### Inherited 23A deviations and how 23B respects them
 
@@ -90,7 +277,7 @@ new shell surface: it fills the seams 23A delivered.
 - Autosave (sidecar plus a `recovery/` fallback/crash snapshot), the recovery prompt,
   Reload/Recover/Discard/Keep, unclean-exit session restore, retention, and the bounded asynchronous
   crash-recovery writer.
-- Two additive Core APIs and the additive settings fields (§10).
+- Three additive APIs (two Core, one Packages) and the additive settings fields (§10).
 - The 23B tests, documentation, parity/status updates, closeout evidence, and audit request.
 
 **Non-goals**
@@ -297,7 +484,7 @@ event thread).
 - **Statistics (m-6).** Statistics are an **explicit user action** (a "Statistics" toggle/button in the
   Overview or a command), never an automatic request on open. The first activation runs the pipeline with
   `IncludeStatistics = true`; that is a full validation/statistics run, not the open-time validation, and it is
-  cached by document hash. It runs again only when the panel is active and the hash changes. Opening a project
+  cached per immutable snapshot (no ViewModels hash). It runs again only when the panel is active and the snapshot changes. Opening a project
   alone starts no statistics run. The Step 07 budgets (200 ms / 2 s for ceria) are non-gating evidence (§14). In
   23B statistics are display-only; clicking a count to an editor is Steps 24–25 and is not claimed here.
 - Diagnostics are never invented in the UI: no new codes, no reworded messages. The read-only edit refusal is
@@ -554,12 +741,13 @@ Details that follow from the base shape:
 
 ### 10. Library changes owned by this step
 
-Two additive Core changes; no Packages change and no App public surface change.
+Three additive public APIs: two Core APIs and one Packages API. There is no App public surface change.
 
 | Change | Where | Why the shell cannot own it | Contract effect |
 | --- | --- | --- | --- |
 | `ProjectDocument.MaxUndoDepth` (init-only, default `0` = unbounded) | `Mocassin.Core.Editing` | The stack lives in the document; a UI-level bound would shadow it | Additive property; the default preserves Step 01's unbounded behaviour. The GUI constructs its documents with `MaxUndoDepth = 200`. The init accessor throws `ArgumentOutOfRangeException` for a negative value; `0` is unbounded (m-9) |
 | `ProjectDocument.CreateRecovered(Project current, Project lastSaved, ProjectEditor? editor = null, int maxUndoDepth = 0)` | `Mocassin.Core.Editing` | Recovery needs a clean point different from the current value; `MarkSaved(value)` overwrites both | Additive static factory; constructors unchanged. The GUI passes `maxUndoDepth: 200`; the default `0` is unbounded |
+| `ProjectStore.DeleteAutosaveFile(string autosavePath)` | `Mocassin.Packages.Projects` | A deferred-sidecar discard after Save As must delete the candidate's old snapshot path, not one derived from the new session path | Additive static helper; `DeleteAutosave(projectPath)` is unchanged. Listed in `Mocassin.Packages/PublicAPI.Unshipped.txt`; ApiCompat reports no break |
 
 - **No new diagnostic code (M-1).** The read-only refusal is the app-level `EditApplyOutcome.ReadOnly` in §2,
   not a `Diagnostic`. `ProjectDiagnosticCodes`, `DiagnosticCatalog`, and every message remain unchanged;
@@ -567,9 +755,11 @@ Two additive Core changes; no Packages change and no App public surface change.
   The docs plan records the app-level message in the user guide.
 - **No `ProjectStore.WriteAutosaveToPathAsync`.** The Step 01 `WriteAutosaveAsync(project, projectPath)` derives
   `<projectPath>.autosave`; passing the recovery base path `<app-data>/recovery/<projectId>.mocprj` writes the
-  recovery snapshot without a new API. `IRecoveryStore` wraps that call and owns the manifest. This keeps the
-  library delta at two APIs and reuses the existing `AutosaveFailed` diagnostics.
-- Both are listed in `Mocassin.Core/PublicAPI.Unshipped.txt`; no baseline refresh is expected. 23A's
+  recovery snapshot without a new API. `IRecoveryStore` wraps that call and owns the manifest. The F4 audit
+  fix adds the separate `ProjectStore.DeleteAutosaveFile(autosavePath)` for exact-path discard; the library
+  delta is three public APIs and reuses the existing `AutosaveFailed` diagnostics.
+- The two Core additions are listed in `Mocassin.Core/PublicAPI.Unshipped.txt`, and the Packages addition in
+  `Mocassin.Packages/PublicAPI.Unshipped.txt`; ApiCompat reports no breaking change. 23A's
   `ProjectPathRules` change is not repeated. `EditApplyResult`/`ProjectChangeKind` are internal
   `Mocassin.App.ViewModels` types, not public API.
 - The save-point change in §2.2 and the close guard in §4 are internal `Mocassin.App.ViewModels` edits, not
@@ -650,7 +840,7 @@ dispatcher, time, and the in-memory `IRecoveryStore`/`IAppSettingsStore` for non
 | Undo/redo | PR-fast | Multi-step apply/undo/redo through the Overview document; save → undo → redo clean; save → edit → undo clean; undo below the save point dirty; the GUI document uses 200 and drops the oldest; a new edit clears redo; `MaxUndoDepth = -1` throws at init and 0 is unbounded |
 | Rejected edit | PR-fast | A structural failure leaves the project, stacks, dirty state, and save point unchanged and raises `EditRejected`; a cross-domain-invalid but structurally valid edit is accepted and reported by validation |
 | Read-only | PR-fast | Every `Apply` on a read-only session returns `EditApplyOutcome.ReadOnly`, changes nothing, adds no `Diagnostic`/`PROJ031`, and the edit commands are disabled |
-| Validation surface | PR-fast | Debounce coalesces edits; a stale result is discarded by `DocumentHash`; counts/codes match `ValidationResult`; double-click requests the registered target; an unknown domain produces a notice; a metadata path focuses the Overview field; an unknown code is unlinked; the help map covers every catalog code (or the explicit unlinked set) and the launcher receives the anchored URI |
+| Validation surface | PR-fast | Debounce coalesces edits; a stale result is discarded by the document version and snapshot identity (no ViewModels hash, M-2); counts/codes match `ValidationResult`; double-click requests the registered target; an unknown domain produces a notice; a metadata path focuses the Overview field; an unknown code is unlinked; the help map covers every catalog code (or the explicit unlinked set) and the launcher receives the anchored URI |
 | Statistics trigger | PR-fast | The Overview does not request statistics on open; the explicit toggle/command runs one `IncludeStatistics = true` pipeline and caches by document hash; a content change while the panel is active invalidates and reruns it |
 | Dirty/autosave | PR-fast | Only dirty writable documents are written; the interval comes from settings and the tick uses `IsAutosaveDue`; save/autosave/close/reload never interleave (tick skips busy/closing; close/reload await the gate); a clean save or explicit discard deletes the sidecar/recovery file, **except that a successful save with a deferred `PendingRecovery` candidate preserves it** (n-11); a discard-close and a discard-reload are not re-offered; a return to the save point and a clean close delete the sidecar (except a pending candidate, next row); an `UnsavedChanges` return/Cancel leaves `IsClosing` false; read-only sessions never write; a sidecar failure falls back to `recovery/` |
 | Pending recovery / cleanup (m-13, m-14, n-10) | PR-fast | A deferred sidecar `PendingRecovery` candidate survives a clean close and is re-offered on reopen; a deferred `recovery/` candidate older than 7 days is deleted by the sweep (accepted limitation); the first accepted edit clears it; a later return-to-clean then deletes the sidecar; the `ProjectChanged` cleanup handler ignores `Saved`/`Replaced` and does not re-enter the non-reentrant gate (no deadlock); autosave resumes after a cancelled close |
@@ -695,13 +885,13 @@ PR-fast test; the only test time limit is a hang guard.
 
 | Dimension | Class | Evidence |
 | --- | --- | --- |
-| Contracts, formats, and public surfaces | **Medium** | Two additive Core APIs; the settings additions are additive with no schema bump; no format change |
+| Contracts, formats, and public surfaces | **Medium** | Three additive APIs (two Core, one Packages); the settings additions are additive with no schema bump; no format change |
 | New dependencies | **Low** | None; the harness and Avalonia stack come from 23A |
 | Cross-step interfaces | **High** | `ProjectEditCoordinator`/`ProjectChanged` and the validation surface are consumed by Steps 24, 25, 26, and 27; a late change rewrites editor code |
 | Irreversibility | **Medium** | Undo/save-point and autosave semantics are documented and testable; reversible with a recorded decision; no scientific or persisted-project change |
 | Test-matrix breadth and failure modes | **High** | Dirty/save-point, autosave timing, recovery/crash, validation staleness, and platform recovery paths, on top of the headless harness |
 | Independent acceptance stories | **Medium** | One coherent story: editing is safe and diagnosable (undo/validation) and recoverable (autosave/recovery); the facets are not separately approvable deliverables |
-| Evidence size for a fresh auditor | **Medium** | Four features, no new application project, two additive APIs, nine documentation sections; one sitting is feasible |
+| Evidence size for a fresh auditor | **Medium** | Four features, no new application project, three additive APIs, nine documentation sections; one sitting is feasible |
 
 **Class: High** (cross-step interface and test-matrix breadth). *Justification:* 23B defines the edit/validation
 interfaces that four later steps consume and spans a broad failure matrix (save point, timers, crash, staleness,
@@ -744,14 +934,15 @@ amendment before feature 2. **No further split is proposed.**
 | `Load` stage is conditional on load diagnostics (clean load is `Skipped`) | This page §3/§13 |
 | No untitled-project model; `recovery/` holds crash snapshots and manifest-backed fallbacks | This page §5/§6 |
 | `IRecoveryStore` + `CrashRecoveryWriter`; there is no `IRecoveryWriter` type | This page §6 |
-| Two additive Core APIs; no Packages API change | This page §10 |
+| Three additive APIs: Core `MaxUndoDepth` and `CreateRecovered`, plus Packages `ProjectStore.DeleteAutosaveFile` | This page §10 |
 | `autosave`/`session` are additive settings fields with no schema bump | This page §9 |
 | Problems shows the active project only; statistics are display-only in 23B | This page §3 |
 | Class High; owner acceptance at the start gate; no further split | This page §16 |
 
 The 23B start-gate items were confirmed by the human owner on 2026-11-21 (§17.2): the 23A seams proved
-sufficient in practice (no shell edit beyond the §11 list), the two Core additions are still additive after 23A
-merged, and the owner accepted the `MaxUndoDepth` GUI bound (default 0/unbounded, GUI sets 200), the app-level
+sufficient in practice (no shell edit beyond the §11 list), the Core additions are still additive after 23A
+merged, and the third additive API (`ProjectStore.DeleteAutosaveFile`) was accepted at the re-audit approval.
+The owner accepted the `MaxUndoDepth` GUI bound (default 0/unbounded, GUI sets 200), the app-level
 read-only refusal (no `PROJ031` reuse), and the no-untitled recovery scope.
 
 #### 17.1 Owner questions for the start gate (n-9)
@@ -760,8 +951,9 @@ These are the same decisions as §16/§17, listed explicitly so the gate questio
 
 1. Accept **class High** as one unit, with no further split, per §16.
 2. Approve the **four-feature list** in the proposed order.
-3. Confirm the **two additive Core APIs** (`MaxUndoDepth`, `CreateRecovered`) and that the GUI sets
-   `MaxUndoDepth = 200` while the library default stays `0`/unbounded.
+3. Confirm the **three additive APIs** (`ProjectDocument.MaxUndoDepth`, `ProjectDocument.CreateRecovered`, and
+   the Packages `ProjectStore.DeleteAutosaveFile`) and that the GUI sets `MaxUndoDepth = 200` while the library
+   default stays `0`/unbounded.
 4. Confirm the **app-level read-only refusal** (`EditApplyOutcome.ReadOnly`, no `PROJ031`, no new code).
 5. Confirm that 23B introduces **no untitled-project model** and that `recovery/` is the crash/fallback
    snapshot store described in §6.
@@ -779,7 +971,7 @@ section. They are scope/class approvals, not a design verdict.
 | --- | --- |
 | Class **High** as one unit, no further split | **Approved** |
 | Four-feature list and order | **Approved** |
-| Two additive Core APIs (`MaxUndoDepth`, `CreateRecovered`); GUI depth 200, library default `0` | **Confirmed** |
+| Three additive APIs (`MaxUndoDepth`, `CreateRecovered`, and the Packages `ProjectStore.DeleteAutosaveFile`); GUI depth 200, library default `0` | **Confirmed** (the third accepted with `Passed with notes` on 2026-11-21) |
 | App-level read-only refusal (`EditApplyOutcome.ReadOnly`, no `PROJ031`) | **Confirmed** |
 | §11 seam fills, including the console selector, autosave control, and status glyph/severity | **Confirmed** |
 | No untitled-project model; `recovery/` is the crash/fallback snapshot store | **Confirmed** |
@@ -809,46 +1001,46 @@ section. They are scope/class approvals, not a design verdict.
 
 ## Implementation tasks
 
-- [ ] Implement `ProjectEditCoordinator` with apply/undo/redo, bounded depth, `ProjectChanged`/`EditRejected`,
+- [x] Implement `ProjectEditCoordinator` with apply/undo/redo, bounded depth, `ProjectChanged`/`EditRejected`,
       read-only refusal, and the Overview metadata editor.
-- [ ] Implement `ValidationCoordinator` from the retained result, the validity status item, the Problems channel
+- [x] Implement `ValidationCoordinator` from the retained result, the validity status item, the Problems channel
       (filters, sort, help anchors, related navigation, revalidate), edit diagnostics, and on-demand statistics.
-- [ ] Implement dirty state, the save point, markers, unsaved-changes prompts, the autosave scheduler, the
+- [x] Implement dirty state, the save point, markers, unsaved-changes prompts, the autosave scheduler, the
       sidecar and `recovery/` fallback, the recovery prompt, Reload/Recover/Discard/Keep, session restore, and
       retention.
-- [ ] Implement `IRecoveryStore`, `RecoveryStore` (App), `CrashRecoveryWriter`, and the crash-dialog recovery
+- [x] Implement `IRecoveryStore`, `RecoveryStore` (App), `CrashRecoveryWriter`, and the crash-dialog recovery
       action.
-- [ ] Add the two Core changes with tests and `PublicAPI.Unshipped.txt` entries; verify no App or Packages API
-      change.
-- [ ] Add the 23B tests, documentation column, parity/status updates, `closeout/step-23b.json`, and request the
+- [x] Add the three additive APIs (two Core, one Packages) with tests and `PublicAPI.Unshipped.txt` entries;
+      verify no App public API change.
+- [x] Add the 23B tests, documentation column, parity/status updates, `closeout/step-23b.json`, and request the
       audit.
 
 ## Acceptance criteria
 
-- [ ] Metadata editing works with undo/redo across the save point in both directions; a rejected structural edit
+- [x] Metadata editing works with undo/redo across the save point in both directions; a rejected structural edit
       changes nothing; a read-only session returns the app-level `ReadOnly` outcome with no diagnostic code.
-- [ ] The validity indicator and Problems channel show code, severity, path, source, and help; double-click
+- [x] The validity indicator and Problems channel show code, severity, path, source, and help; double-click
       navigates through a registered provider and produces a notice otherwise; the retained load/migration
       result reaches Problems and a clean load leaves the `Load` stage `Skipped`; opening does not run a second
       validation or a statistics run; the help map matches the documented anchors.
-- [ ] Dirty state is correct across save, undo, and redo; closing with unsaved changes prompts; Cancel closes
+- [x] Dirty state is correct across save, undo, and redo; closing with unsaved changes prompts; Cancel closes
       nothing and leaves autosave running; Discard and discard-reload delete the sidecar/recovery file; a return
       to the save point or a clean close deletes the sidecar, except a deferred sidecar candidate, which
       survives until Recover/Discard and is cleared by the first accepted content change (a no-op same-hash
       edit does not clear it, n-12); a deferred `recovery/` candidate remains subject to the 7-day sweep.
-- [ ] Autosave writes only dirty documents and deletes its file on save; save/autosave/close/reload/recovery do
+- [x] Autosave writes only dirty documents and deletes its file on save; save/autosave/close/reload/recovery do
       not interleave; a simulated crash leaves a `recovery/` snapshot; recovery restores a dirty document equal
       to the snapshot, updates `LoadDiagnostics`, and recomputes validation before the `Replaced` event; a
       timestamp-only snapshot is not offered; the crash path completes within its budget or reports the timeout.
-- [ ] Recovery candidates include the sidecar source; the newest valid candidate wins; recovery files are swept
+- [x] Recovery candidates include the sidecar source; the newest valid candidate wins; recovery files are swept
       after 7 days; sidecars are never swept; unclean-exit session restore works; missing project files are
       reported without an untitled session.
-- [ ] The `autosave`/`session` settings fields round-trip without a schema bump and older documents still load.
-- [ ] No unhandled exception kills the process silently, and the crash dialog reports recovery results; the
+- [x] The `autosave`/`session` settings fields round-trip without a schema bump and older documents still load.
+- [x] No unhandled exception kills the process silently, and the crash dialog reports recovery results; the
       dead-UI path is documented.
-- [ ] `./tools/verify.sh all --require` passes, the strict docs build passes, and `closeout/step-23b.json` with
+- [x] `./tools/verify.sh all --require` passes, the strict docs build passes, and `closeout/step-23b.json` with
       `"step": "step-23b"` validates.
-- [ ] Documentation written (§12), and no page claims a later step's capability or an untitled-project model.
+- [x] Documentation written (§12), and no page claims a later step's capability or an untitled-project model.
 
 ## Documentation
 
