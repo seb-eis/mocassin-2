@@ -13,7 +13,7 @@ small MIT-licensed Phosphor Icons subset as committed geometry.
 | Worktree | `/workspace` (clean, in place) |
 | Normative contract | [`docs/development/ui-visual-contract.md`](../../development/ui-visual-contract.md) §2, §5.2, §7.4, §7.6, §8, §11.3, §12, §13 |
 | Design review | [`step-gui-icon-pass.md`](../reviews/step-gui-icon-pass.md) — Light class, `Ready for implementation` |
-| Status | Implemented; local gate green; owner merge approval pending |
+| Status | Merged into `main` as `64ec7055ca8b4cfebb47528b09100f80341da7ed` (`--no-ff`), main CI `45040603511` green, branch deleted locally and remotely, no tag |
 | Tracking | One branch; local gates; no per-feature CI; no step tag; no ADR |
 
 ## 1. Owner request and fixed decisions
@@ -506,3 +506,41 @@ would keep a horizontal axis, not a new control template or dependency.
   screenshots are Linux-only by policy. Recorded as an accepted risk, not a gate.
 - A future icon set that grows beyond this hand-vendored subset is still a Full-trigger reclassification
   (§2); no generator, drift-check tool, or new dependency was added.
+
+## Merge closeout (2026-11-22)
+
+The owner approved the out-of-step `--no-ff` merge on 2026-11-22 after the accepted Light-class design review
+([`step-gui-icon-pass.md`](../reviews/step-gui-icon-pass.md)) and the green local gates in §16 and §17. One merge
+commit landed on `main`; no step tag, parity row, amendment, or further branch was created.
+
+| Field | Value |
+| --- | --- |
+| Merge commit | `64ec7055ca8b4cfebb47528b09100f80341da7ed` |
+| Subject | `gui: add Phosphor icons to the explorer and document tabs` |
+| Parents | `2d9d5f487706ba946d6a027a1d668677b2535d19` (`main` base); `eef38c6886e7eafc8d31215a772c60657fcf9bcc` (`fix/gui-icon-pass` tip) |
+| Merge kind | `--no-ff` merge commit; the branch tip is preserved, not squashed or rebased |
+| Diff | 41 files changed, 1928 insertions, 46 deletions against the `2d9d5f4` base |
+
+**Main CI.** The automatic `main` push run for that merge commit:
+
+| Field | Value |
+| --- | --- |
+| Run | `45040603511` — https://github.com/seb-eis/mocassin-2/actions/runs/45040603511 |
+| `head_sha` | `64ec7055ca8b4cfebb47528b09100f80341da7ed` |
+| Conclusion | `success` |
+| Jobs that ran | Detect changes; .NET on Ubuntu (build, test with coverage, `dotnet format`); Contracts and policy; Public API compatibility |
+| Jobs skipped | Rust and Python — path-filtered out, because the merge changed no Rust or Python files |
+
+**Branch and tag state.**
+
+- `fix/gui-icon-pass` is deleted locally and on `origin`; `git branch -a --list '*gui-icon-pass*'` returns
+  nothing.
+- No tag was created. Out-of-step maintenance has no `step-NN` tag (§13), and no tag was requested; `main` at
+  the merge commit is the durable reference.
+
+**Durability waiver.** The owner waived the record-correction requirement on 2026-11-22, so §17.7's attribution
+text stands as written. The deviation it records — the explorer tree's
+`ScrollViewer.HorizontalScrollBarVisibility="Disabled"` plus `TextTrimming="CharacterEllipsis"` on node labels —
+was itself owner-ratified on the same day. This closeout edits only the status line above and this section; no
+code, test, contract, baseline, `NOTICE.md`, or review-record change accompanies it, and the docs-only commit
+carries `[skip ci]`, so the CI result recorded here is the one for the merge commit itself.
