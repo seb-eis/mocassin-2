@@ -570,10 +570,74 @@ To be completed by the implementor:
 | Field | Value |
 | --- | --- |
 | Design commit | `ac9464c` — `docs: define tab header and scroll gutter treatment [skip ci]` |
-| Implementation commits | — |
-| Full gate | — |
-| App tests | — |
-| .NET tests | — |
-| Screenshots | — |
-| `docs`/`policy` on the final tree | — |
-| Merge commit | — |
+| Implementation commits | `9f71254` — `ui: add seamless tab headers and scroll gutters` |
+| Full gate | `./tools/verify.sh all --require` — passed 2026-11-22 |
+| App tests | 309 passed, 0 failed |
+| .NET tests | 2,197 passed, 0 failed (nine test projects) |
+| Screenshots | Seven shell/overlay baselines regenerated; five new baselines added (see §14) |
+| `docs`/`policy` on the final tree | `./tools/verify.sh docs --require` and `./tools/verify.sh policy --require` — passed 2026-11-22 |
+| Merge commit | — (owner `--no-ff` approval pending) |
+
+## 14. Implementation evidence
+
+**Commit.** `9f71254` (`ui: add seamless tab headers and scroll gutters`) on
+`fix/gui-tabs-scroll-gutters`, based on `main` at `ec88921`. The design-only commits `ac9464c`, `2e8fd91`, and
+`7955d9e` are unchanged.
+
+**Gate.** `./tools/verify.sh all --require` on the implementation commit passed: .NET restore/build/test/format,
+public API and ApiCompat, Rust fmt/clippy/test, Python pytest/build, docs (math, links, strict Zensical, DocFX,
+rustdoc), contracts and policy (manifest/projection/catalog/process/SPDX/secret/cargo-deny), and AOT. The .NET
+run reported 2,197 passing tests across nine projects with zero failures; `Mocassin.App.Tests` reported 309
+passing tests. The screenshot comparison was re-run without regeneration and passed.
+
+**Screenshots.** Regenerated with
+`MOCASSIN_REGENERATE_VISUAL_BASELINES=1 dotnet test src/dotnet/Mocassin.App.Tests/Mocassin.App.Tests.csproj -c Release --filter "FullyQualifiedName~ScreenshotTests"`.
+
+- Regenerated: `light.png`, `dark.png`, `highcontrast.png`, `light-validation.png`, `dark-validation.png`,
+  `light-settings.png`, `dark-settings.png`.
+- Added: `light-palette.png`, `dark-palette.png`, `light-cheatsheet.png`, `dark-cheatsheet.png`,
+  `dark-tab-hover.png`.
+- The palette and cheat-sheet captures assert `Extent > Viewport` and scroll to the end before capture; the
+  palette gesture text clears the bar. The hover capture moves the pointer over the inactive Validation tab; the
+  saved pixels show `#37373D` against the `#2D2D30` inactive chip.
+
+**Realized tests.**
+
+- `Visual/TabTreatmentTests` reads `PART_LayoutRoot`, `PART_ContentPresenter`, and `PART_SelectedPipe` in light,
+  dark, and high contrast: top-only `4,4,0,0` radius, active/inactive fills, active/inactive text, pipe
+  visibility/fill/height/top alignment/inset/zero radius, `Padding=0`, header margin, no strip/content gap, and
+  the indicator at the tab top. It also asserts the `Mocassin.Tab*`/`TabItemHeader*` equality guards, the
+  `TabItemMinHeight` mirror, the `TabControlTopPlacementItemMargin = 0` token, and the retired
+  `Mocassin.TabStripBackground`.
+- `Visual/AccessibilityTests` adds the 2 px `FocusBrush` tab adorner with the tab corner radius and the
+  collapsed, unnamed, `AccessibilityView=Raw`, non-focusable, non-hit-testable 16 × 16 `TabIconSlot` on both
+  strips, with the console `Header.ToString()` names unchanged.
+- `Visual/ScrollGutterTests` measures every surface in §4.2 at 1000 × 700, 900 × 600, and 1.5× compact. It reads
+  the realized `PART_VerticalScrollBar`/`PART_HorizontalScrollBar` and the realized item presenter, content root,
+  or scroll-presenter padding; the palette and cheat sheet are scrolled before measurement. The `TextBox` and
+  `ComboBox` popup assert the realized `ScrollContentPresenter` padding.
+- `Views/ConsoleTabsTests` asserts the leading slot on both console tabs; `Visual/AccentDeliveryTests` now checks
+  the pipe geometry as well as its fill; `Visual/ThemeContrastTests` retires the strip role, updates the inactive
+  values, and adds the tab text/hover/pressed/indicator contrast pairs.
+
+**Deviations and implementation notes.**
+
+1. A tab selects on pointer press (`TabItem.OnPointerPressed`), so the unselected *pressed* fill is not reachable
+   with a pointer. The realized press test asserts the selection change and the selected fill, and the equality
+   guard pins `TabItemHeaderBackgroundUnselectedPressed` to `PressedBackground`; the design's pressed-state intent
+   is preserved without inventing an unreachable state.
+2. The pipe style uses the `TabItem:selected` pseudo-class. A plain `TabItem /template/ ...` selector loses to the
+   Fluent placement-specific control-theme style; adding `:selected` wins without a template replacement. The
+   property change is style-only.
+3. The `ComboBox /template/ ScrollViewer` selector does reach the popup scroll viewer; the test opens the Log
+   level drop-down and reads the realized `ScrollContentPresenter.Padding`.
+
+**Residual risk and limitations.**
+
+- Tab-strip horizontal scrolling/overflow remains the open observation in §10; this branch does not add a tab
+  strip `ScrollViewer` or drag reorder.
+- Menu/context-menu flyouts and tooltips remain excluded per §4.2; no custom scrollbar or control template is
+  added and `AllowAutoHide` stays `true`.
+- Screenshot comparison remains Linux-only; Windows/macOS platform runs are recommended but not a merge gate.
+- The icon slot is a collapsed placeholder only; the Phosphor pass still supplies the source and any icon
+  template.
