@@ -416,5 +416,5 @@ Owner decisions:
 | `f1a8c1a` | `docs: record fixed-accent delivery commit [skip ci]` — commit list update |
 | `e8983ea` | `docs: request fixed-accent round 4 review [skip ci]` — round 4 request |
 | `657da5b` | `docs: record fixed-accent round 4 review [skip ci]` — round 4 findings |
-| (round 5 design commit) | `docs: resolve HC check-box label findings [skip ci]` — M-13/m-14 and docs/test gaps |
+| `27dceb0` | `docs: resolve HC check-box label findings [skip ci]` — M-13/m-14 and docs/test gaps |
 | (round 5 request commit) | `docs: request fixed-accent round 5 review [skip ci]` — review record at `Re-review required` |
