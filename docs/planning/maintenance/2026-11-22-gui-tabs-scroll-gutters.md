@@ -569,6 +569,7 @@ To be completed by the implementor:
 
 | Field | Value |
 | --- | --- |
+| Design commit | `ac9464c` — `docs: define tab header and scroll gutter treatment [skip ci]` |
 | Implementation commits | — |
 | Full gate | — |
 | App tests | — |
