@@ -12,7 +12,7 @@ not a user-selectable palette. The record is the design and test plan for one
 | Base | `main` at `19cb6ffe190e02449ce8b827706f365f2ea7afe2` |
 | Worktree | `/workspace` (clean, in place) |
 | Normative visual contract | [`docs/development/ui-visual-contract.md`](../../development/ui-visual-contract.md) §3.6 |
-| Status | Design frozen for round 5 review. No implementation yet. |
+| Status | Implemented; local gates passed; awaiting owner `--no-ff` merge approval. |
 | Tracking | One branch; local gates; one owner `--no-ff` merge approval; no per-feature CI |
 
 ## 1. Owner decision
@@ -372,7 +372,7 @@ accent-text surface is claimed; `Mocassin.AccentTextBrush` remains resource-only
 | `ui-interaction-contract.md` | **No change.** The interaction rules are unchanged; the Settings Accent focus stop is intentionally removed with its control. |
 | Settings Tab order | **Intentional accessibility delta.** The Accent ComboBox focus stop and `Accent` automation name are gone; the remaining order is tested and no other focus target changes. |
 | Control templates | **None.** Targeted TreeView selected-state styles only; no control templates. |
-| Design review | **Round 4 requested.** The fixed-family design and M-6 proof are accepted; the delivery-detail corrections are the new target. |
+| Design review | **Round 5 `Ready with notes`.** The notes are accepted; implementation is complete. |
 | Step tag | **None.** |
 | Parity matrix | **No change.** |
 | Merge | One owner `--no-ff` approval after local gates and the evidence below. No per-feature CI. |
@@ -424,3 +424,87 @@ Owner decisions:
 | `657da5b` | `docs: record fixed-accent round 4 review [skip ci]` — round 4 findings |
 | `27dceb0` | `docs: resolve HC check-box label findings [skip ci]` — M-13/m-14 and docs/test gaps |
 | (round 5 request commit) | `docs: request fixed-accent round 5 review [skip ci]` — review record at `Re-review required` |
+| `8021cb9` | `app: deliver fixed accent family and remove accent selection` — palette, HC, applier, targeted styles, settings removal |
+| `e3a3f4e` | `test: cover fixed accent delivery and legacy accent no-op` — realized parts, contrast, theme switch, screenshots, legacy settings |
+
+## 16. Implementation evidence
+
+| Field | Value |
+| --- | --- |
+| Branch | `fix/gui-accent-propagation` |
+| Implementation commits | `8021cb9` (app), `e3a3f4e` (tests) |
+| Base | `main` at `19cb6ffe190e02449ce8b827706f365f2ea7afe2` |
+| Full gate | `./tools/verify.sh all --require` — exit 0 |
+| App tests | 301 passed, 0 failed (`Mocassin.App.Tests`, net11.0) |
+| All .NET tests | 2,189 passed, 0 failed |
+| Docs/policy | Part of the full gate: strict Zensical, DocFX, rustdoc, `check_docs_links.py`, `check_doc_math.py`, `check_process_consistency.py`, 60 policy tests, ApiCompat, contracts, SPDX, secret scan, `cargo-deny` — all clean |
+| Format | `dotnet format Mocassin.slnx --verify-no-changes --no-restore` — exit 0 |
+
+### 16.1 What landed
+
+- `Palette.axaml` `Default`/`Light`/`Dark`: fixed base roles, `Mocassin.FocusBrush`, the six derived
+  `SystemAccentColor*` **`Color`** keys, `SystemControlForegroundAccentBrush`, the two reveal brushes, the
+  CheckBox/Slider alias keys, the neutral focus pair, and the corrected shared selected/hover text key
+  (`#FFFFFF` dark / `#1F1F1F` light).
+- `HighContrast.axaml`: the same keys with `#FFD700`/`#000000` values, the six derived keys as `<Color>`, the
+  HC focus pair, the HC CheckBox sub-states (including the three disabled label aliases), the HC TextBox
+  selection pair through the accent roles, and `SystemControlForegroundChromeWhiteBrush`/`Highlight*ChromeWhite`
+  `#000000` per contract §3.5/§3.6.
+- `AvaloniaThemeApplier`: one direct `SystemAccentColor` (`#007ACC`, HC `#FFD700`); no per-accent overlay; the
+  `AccentColor`/`OnAccent`/`Contrast`/`RelativeLuminance`/`Linear` helpers and the two on-accent constants are
+  removed. The merged-dictionary slot now re-adds a dictionary if an external reset dropped it.
+- `ShellStyles.axaml`: the exact targeted `TreeViewItem:selected` selectors for `Border#PART_LayoutRoot`,
+  direct `ContentPresenter#PART_HeaderPresenter`, and `Path#ChevronPath`; `TextBox.SelectionBrush`/
+  `SelectionForegroundBrush`.
+- `ShellView.axaml`: all three splitter `FocusAdorner` borders use `Mocassin.FocusBrush`.
+- Settings: the Accent ComboBox, `AccentPalette`, `SelectedAccent`, `Accents`, `AppSettings.Accent`, the reader
+  branch, and the validator path are gone. The Settings grid was reflowed. A legacy `accent` property is an
+  accepted silent no-op and is omitted on the next write; no schema bump.
+
+### 16.2 Tests
+
+- `Visual/AccentDeliveryTests` (new, 11 PR-fast headless tests): realized `CheckBox`
+  `NormalRectangle.Background`/`BorderBrush`, `CheckGlyph.Fill`, and `PART_ContentPresenter.Foreground`; realized
+  `Slider` thumb and `PART_DecreaseButton`; the selected `TreeViewItem` layout root/header/chevron; the selected
+  `ComboBoxItem` `PART_ContentPresenter`; the dialog `ProgressBar`; `TextBox` selection pair; splitter focus
+  adorner and selected-tab pipe; HC unchecked-pressed and disabled labels; the Light→Dark switch; the neutral
+  focus pair layer ratios; and a source scan for the removed selection path.
+- `ThemeContrastTests`: fixed roles, fixed family values, the six `Color` types in Default/Light/Dark/HC, the
+  extended Fluent/alias key set, fixed-family contrast floors, and the neutral focus pair.
+- `AppSettingsReaderTests`: legacy `accent` strings, unknown strings, and non-string values load silently with
+  no warning and are omitted on write; the old accent round-trip/validation assertions are removed.
+- `SettingsViewModel`/settings-surface tests: no Accent control or automation name and the deterministic
+  Settings Tab order is asserted.
+- `ThemeApplierTests`: the fixed `SystemAccentColor` and no direct accent brush resources.
+
+### 16.3 Realized-template coverage
+
+The probes and tests read the realized template parts, not only `TryGetResource`:
+`CheckBox.NormalRectangle.Background`/`BorderBrush`, `CheckBox.CheckGlyph.Fill`,
+`CheckBox.PART_ContentPresenter.Foreground` (including the HC pressed/disabled sub-states),
+`Slider` thumb `Background` and `PART_DecreaseButton.Background`, `TreeViewItem` `PART_LayoutRoot.Background`
+and the direct `PART_HeaderPresenter.Foreground`/`Path#ChevronPath.Fill`, `ComboBoxItem.PART_ContentPresenter`,
+dialog `ProgressBar.Foreground`, `TextBox.SelectionBrush`/`SelectionForegroundBrush`, and the splitter focus
+adorner/selected-tab pipe. No realized shipped part is `#0078D7`.
+
+### 16.4 Screenshots
+
+- Regenerate command:
+  `MOCASSIN_REGENERATE_VISUAL_BASELINES=1 dotnet test src/dotnet/Mocassin.App.Tests/Mocassin.App.Tests.csproj -c Release --filter "FullyQualifiedName~ScreenshotTests"`.
+- Affected and committed: `light-settings.png`, `dark-settings.png` (the Accent row is gone and the Settings
+  grid is reflowed). The regenerator writes all seven baselines; the other five kept their committed bytes
+  because their pixel comparison still passed and their content did not change.
+
+### 16.5 Deviations and residual risk
+
+- The Fluent neutral focus adorner is not exposed as a visual control in Avalonia 12.1.6 headless; the test
+  resolves the explicit `SystemControlFocusVisualPrimaryBrush`/`SecondaryBrush` pair from the theme
+  dictionaries and measures the 2 px primary against the paired surface and the 1 px secondary against the
+  primary. The realized splitter focus adorner and selected-tab pipe are still read directly. This is the
+  accepted m-16 measurement basis rather than a claimed rendered Fluent adorner.
+- `Mocassin.AccentTextBrush` remains resource-only; no rendered accent-text/link surface is claimed.
+- The non-HC disabled CheckBox label aliases remain Fluent's captured low-contrast values; only HC is
+  overridden (`#A0A0A0`), because no shipped surface disables a CheckBox. This is the recorded future-only risk.
+- The ComboBox selected fill is read on the realized `PART_ContentPresenter.Background`; the `ComboBoxItem`
+  itself delegates its fill to that presenter.
+- Platform Windows/macOS runs are not a merge gate; if dispatched, their results are added here.
