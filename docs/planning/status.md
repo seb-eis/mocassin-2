@@ -255,6 +255,10 @@ early-warning signal for the next cross-cutting review.
   `./tools/verify.sh all --require` passed locally with 301 App tests. No step branch, step tag, parity row,
   ADR, interaction-contract, or format change is created; the implementation evidence is in
   [`maintenance/2026-11-22-gui-accent-propagation.md`](maintenance/2026-11-22-gui-accent-propagation.md).
+- The open investigation branch `fix/gui-palette-freeze` (command-palette freeze — negative reproduction, no fix
+  shipped) is **kept as evidence per owner decision 2026-11-22**; it is not merged and not deleted. Its record
+  `docs/planning/maintenance/2026-11-22-gui-palette-freeze.md` exists only on that branch, not on `main` — see
+  the record on the branch.
 - Step 08 received a maintenance fix on 2026-11-20 on branch `fix/step-08-equivalent-start-mapping` (commits
   `1899421`, `85e27b2`, `4f5059e`), merged into `main` as `1f5b473` with the owner's approval. A centered group
   now emits one direction with every translation-equivalent start and a cross-bucket `jump_mapping`; the
