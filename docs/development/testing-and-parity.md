@@ -183,9 +183,10 @@ or SQLite. Prefer real temporary directories and real files produced by the real
   the recorded run. That is automated evidence, not a manual checklist.
 - Appearance resources carry their effect through `Themes/Palette.axaml`, the merged
   `HighContrast.axaml`/`Density.axaml` dictionaries, the typography/spacing/shape keys, the
-  `Mocassin.Transitions` resource (empty when reduce motion is on), and `SystemAccentColor`/`OnAccentBrush`.
-  `ThemeContrastTests` resolves every role and Fluent key in both themes and the default fallback, computes the
-  WCAG pairs, and covers high-contrast/density precedence and every optional accent.
+  `Mocassin.Transitions` resource (empty when reduce motion is on), and the fixed `SystemAccentColor`; the
+  accent/selection roles including `OnAccentBrush` come from the palette. `ThemeContrastTests` resolves every
+  role and Fluent key in both themes and the default fallback, computes the WCAG pairs, and covers
+  high-contrast/density precedence and the fixed accent family.
 
 ## Avalonia editing, diagnostics, and recovery (Step 23B)
 
@@ -261,7 +262,7 @@ screenshot coverage.
 
 - **Palette and contrast.** `ThemeContrastTests` resolves every `Mocassin.*` role in light, dark, and the default
   fallback, asserts every curated Fluent key, checks high-contrast and compact-density precedence, computes the
-  WCAG pairs from the visual contract, and checks a contrast-safe `OnAccentBrush` for every optional accent.
+  WCAG pairs from the visual contract, and checks the fixed accent family, realized shipped-control alias parts, and high-contrast values.
 - **Console tabs.** `ConsoleTabsTests` asserts the fixed `Console`/`Validation` order, the real Validation content,
   arrow/click selection, the `Enter` no-op, the absent close/reorder controls, the persisted tab across a real
   restart, and the unknown-id fallback. The old `Console channel` combo is asserted absent.

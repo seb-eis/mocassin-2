@@ -68,7 +68,9 @@ tie.
 
 The settings document is application-local. It is **not** part of `contracts/manifest.json`, has no
 cross-language fixtures, and has no compatibility guarantee with any project/package/results format. Unknown
-properties are ignored and dropped on the next write. A missing key takes its documented default.
+properties are ignored and dropped on the next write. A missing key takes its documented default. The former
+`accent` property is a legacy accepted no-op: a string value is ignored silently and the next write omits it;
+there is no schema bump.
 
 ## `mocassin.settings` v1
 
@@ -77,7 +79,6 @@ properties are ignored and dropped on the next write. A missing key takes its do
   "format": "mocassin.settings",
   "schemaVersion": 1,
   "theme": "system",
-  "accent": null,
   "density": "comfortable",
   "fontScale": 1.0,
   "highContrast": false,
@@ -116,7 +117,6 @@ properties are ignored and dropped on the next write. A missing key takes its do
 | `format` | string | — (required) | Must equal `"mocassin.settings"`; any other value makes the document invalid and it is not loaded or overwritten |
 | `schemaVersion` | integer | `1` | Current major is `1`; a value above the current major is rejected without overwriting; a lower value is migrated |
 | `theme` | string enum | `"system"` | `system` / `light` / `dark` |
-| `accent` | string or null | `null` | `blue`, `teal`, `green`, `amber`, `violet`, `rose`, or null for the Fluent default |
 | `density` | string enum | `"comfortable"` | `comfortable` / `compact` |
 | `fontScale` | number | `1.0` | 0.85–1.5 inclusive; outside the range falls back to `1.0` with a warning |
 | `highContrast` | boolean | `false` | High-contrast selection |

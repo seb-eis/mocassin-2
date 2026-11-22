@@ -86,7 +86,6 @@ internal static class AppSettingsJsonReader
         {
             SchemaVersion = schemaVersion,
             Theme = ReadTheme(root, warnings),
-            Accent = ReadAccent(root, warnings),
             Density = ReadDensity(root, warnings),
             FontScale = ReadFontScale(root, warnings),
             HighContrast = ReadBool(root, "highContrast", false, warnings),
@@ -496,18 +495,6 @@ internal static class AppSettingsJsonReader
     {
         warnings.Add($"'{field}' has the unknown value '{value}'; the default was used.");
         return fallback;
-    }
-
-    private static string? ReadAccent(JsonElement root, List<string> warnings)
-    {
-        var value = ReadString(root, "accent", null, warnings, allowNull: true);
-        if (value is null || AccentPalette.IsKnown(value))
-        {
-            return value;
-        }
-
-        warnings.Add($"'accent' has the unknown value '{value}'; the default accent was used.");
-        return null;
     }
 
     private static double ReadFontScale(JsonElement root, List<string> warnings)

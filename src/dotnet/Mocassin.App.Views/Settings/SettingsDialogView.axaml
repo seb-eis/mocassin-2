@@ -14,7 +14,7 @@
         <TextBlock Text="Settings" FontSize="{DynamicResource Mocassin.TitleFontSize}" LineHeight="{DynamicResource Mocassin.TitleLineHeight}" FontWeight="SemiBold" Foreground="{DynamicResource Mocassin.ForegroundStrongBrush}" automation:AutomationProperties.Name="Settings" />
         <ScrollViewer Grid.Row="1">
           <StackPanel Spacing="14">
-            <Grid ColumnDefinitions="200,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+            <Grid ColumnDefinitions="200,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
               <TextBlock Grid.Row="0" Text="Theme" VerticalAlignment="Center" />
               <ComboBox Grid.Row="0"
                         Grid.Column="1"
@@ -22,24 +22,21 @@
                         ItemsSource="{Binding Themes}"
                         SelectedItem="{Binding Theme}"
                         automation:AutomationProperties.Name="Theme" />
-              <TextBlock Grid.Row="1" Text="Accent" VerticalAlignment="Center" Margin="0,6,0,0" />
-              <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Accents}" SelectedItem="{Binding SelectedAccent}"
-                             automation:AutomationProperties.Name="Accent" Margin="0,6,0,0" />
-              <TextBlock Grid.Row="2" Text="Density" VerticalAlignment="Center" Margin="0,6,0,0" />
-              <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding Densities}" SelectedItem="{Binding Density}"
+              <TextBlock Grid.Row="1" Text="Density" VerticalAlignment="Center" Margin="0,6,0,0" />
+              <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Densities}" SelectedItem="{Binding Density}"
                              automation:AutomationProperties.Name="Density" Margin="0,6,0,0" />
-              <TextBlock Grid.Row="3" Text="Font scale" VerticalAlignment="Center" Margin="0,6,0,0" />
-              <Grid Grid.Row="3" Grid.Column="1" ColumnDefinitions="*,Auto" Margin="0,6,0,0">
+              <TextBlock Grid.Row="2" Text="Font scale" VerticalAlignment="Center" Margin="0,6,0,0" />
+              <Grid Grid.Row="2" Grid.Column="1" ColumnDefinitions="*,Auto" Margin="0,6,0,0">
                 <Slider automation:AutomationProperties.Name="Font scale" Minimum="0.85" Maximum="1.5" TickFrequency="0.05" Value="{Binding FontScale}" />
                 <TextBlock Grid.Column="1" Text="{Binding FontScale, StringFormat='{}{0:0.00}×'}" VerticalAlignment="Center" Margin="8,0,0,0" />
               </Grid>
-              <TextBlock Grid.Row="4" Text="Log level" VerticalAlignment="Center" Margin="0,6,0,0" />
-              <ComboBox Grid.Row="4" Grid.Column="1" ItemsSource="{Binding LogLevels}" SelectedItem="{Binding LogLevel}"
+              <TextBlock Grid.Row="3" Text="Log level" VerticalAlignment="Center" Margin="0,6,0,0" />
+              <ComboBox Grid.Row="3" Grid.Column="1" ItemsSource="{Binding LogLevels}" SelectedItem="{Binding LogLevel}"
                              automation:AutomationProperties.Name="Log level" Margin="0,6,0,0" />
-              <TextBlock Grid.Row="5" Text="Culture" VerticalAlignment="Center" Margin="0,6,0,0" />
-              <TextBlock Grid.Row="5" Grid.Column="1" Text="Invariant English (localization is deferred)" Classes="caption" Margin="0,6,0,0" />
-              <TextBlock Grid.Row="6" Text="Paths" VerticalAlignment="Top" Margin="0,6,0,0" />
-              <StackPanel Grid.Row="6" Grid.Column="1" Margin="0,6,0,0">
+              <TextBlock Grid.Row="4" Text="Culture" VerticalAlignment="Center" Margin="0,6,0,0" />
+              <TextBlock Grid.Row="4" Grid.Column="1" Text="Invariant English (localization is deferred)" Classes="caption" Margin="0,6,0,0" />
+              <TextBlock Grid.Row="5" Text="Paths" VerticalAlignment="Top" Margin="0,6,0,0" />
+              <StackPanel Grid.Row="5" Grid.Column="1" Margin="0,6,0,0">
                 <TextBlock Text="{Binding SettingsPath}" Classes="caption" TextWrapping="Wrap" />
                 <TextBlock Text="{Binding DataDirectory}" Classes="caption" TextWrapping="Wrap" />
               </StackPanel>

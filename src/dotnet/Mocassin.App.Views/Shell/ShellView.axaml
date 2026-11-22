@@ -48,7 +48,7 @@
                     automation:AutomationProperties.HelpText="Use the arrow keys to resize the projects panel">
         <GridSplitter.FocusAdorner>
           <Template>
-            <Border BorderBrush="{DynamicResource Mocassin.AccentBrush}"
+            <Border BorderBrush="{DynamicResource Mocassin.FocusBrush}"
                     BorderThickness="{DynamicResource Mocassin.FocusThickness}"
                     CornerRadius="1" />
           </Template>
@@ -73,7 +73,7 @@
                       automation:AutomationProperties.HelpText="Use the arrow keys to resize the console">
           <GridSplitter.FocusAdorner>
             <Template>
-              <Border BorderBrush="{DynamicResource Mocassin.AccentBrush}"
+              <Border BorderBrush="{DynamicResource Mocassin.FocusBrush}"
                       BorderThickness="{DynamicResource Mocassin.FocusThickness}"
                       CornerRadius="1" />
             </Template>
@@ -95,7 +95,7 @@
                     automation:AutomationProperties.HelpText="Use the arrow keys to resize the inspector panel">
         <GridSplitter.FocusAdorner>
           <Template>
-            <Border BorderBrush="{DynamicResource Mocassin.AccentBrush}"
+            <Border BorderBrush="{DynamicResource Mocassin.FocusBrush}"
                     BorderThickness="{DynamicResource Mocassin.FocusThickness}"
                     CornerRadius="1" />
           </Template>

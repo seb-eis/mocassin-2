@@ -92,7 +92,7 @@ a real desktop:
 4. `Ctrl+S`, `Ctrl+Shift+S`, `F5`, and Close; confirm the lock and last-saved values.
 5. Open a second instance of the same project; confirm the read-only banner and disabled Save.
 6. Change the file externally; confirm Save refuses and Reload recovers.
-7. Open Settings; change theme, accent, density, font scale, high contrast, and reduce motion; confirm the
+7. Open Settings; change theme, density, font scale, high contrast, and reduce motion; confirm the
    change is visible and survives a restart.
 8. Confirm a rejected future-major settings file is preserved and reported in the settings banner.
 9. Use the command palette (`Ctrl+Shift+P`) and shortcut sheet (`F1`); reach every primary action by keyboard.

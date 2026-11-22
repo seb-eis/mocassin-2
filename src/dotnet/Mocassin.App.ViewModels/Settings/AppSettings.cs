@@ -30,11 +30,6 @@ internal sealed record AppSettings
     public ThemeSelection Theme { get; init; } = ThemeSelection.System;
 
     /// <summary>
-    /// Gets the optional accent palette key.
-    /// </summary>
-    public string? Accent { get; init; }
-
-    /// <summary>
     /// Gets the UI density.
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter<Density>))]

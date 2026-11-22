@@ -24,7 +24,6 @@ sidecar next to a user project and the settings document are user state.
 **View → Settings…** (`Ctrl+,`) edits:
 
 - theme (`system`, `light`, `dark`);
-- accent from a small fixed palette, or the Fluent default;
 - density (`comfortable`, `compact`);
 - font scale `0.85`–`1.5`;
 - high contrast and reduce motion;
@@ -35,7 +34,7 @@ sidecar next to a user project and the settings document are user state.
 - **Open config folder** and **Clear logs and cache**.
 
 **Reset to defaults** changes the dialog state; **Save** validates, writes atomically, and applies the theme,
-accent, density, font scale, contrast, and motion resources without restarting. A failed write leaves the previous
+density, font scale, contrast, and motion resources without restarting. A failed write leaves the previous
 file intact, keeps the dialog open, and shows an error banner; a successful save shows a short status banner.
 
 ## Autosave and session blocks
@@ -81,9 +80,9 @@ The complete field table and example are in
 The theme variant follows the selection; `system` follows the platform. Both themes use the shared `Mocassin.*`
 role palette from [UI visual contract](../development/ui-visual-contract.md): light is the Light+ equivalent,
 dark uses the owner-approved `#1e1e1e`/`#252526`/`#2d2d30` surfaces, and high contrast overrides every role and
-control resource with black, yellow, and white plus 2 px borders. Accent keys map to fixed accessible colours;
-the default and `blue` are `#007ACC`, and the app derives a contrast-safe foreground for every optional accent.
-Font scale changes every text token. Density changes spacing and control heights only.
+control resource with black, yellow, and white plus 2 px borders. The accent is a fixed `#007ACC` family; there
+is no accent choice. The palette defines the accent text, focus, status bar, and selected colours, and the
+shipped Fluent controls use the same fixed family. Font scale changes every text token. Density changes spacing and control heights only.
 `AvaloniaThemeApplier` publishes the runtime values; the palette, density, and high-contrast dictionaries remain
 the declarative source. The appearance is applied by the shell, not by scientific code.
 

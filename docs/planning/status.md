@@ -238,6 +238,17 @@ early-warning signal for the next cross-cutting review.
   `./tools/verify.sh all --require` passed locally. No step branch, step tag, parity row, ADR, or amendment is
   created; the implementation evidence is in
   [`maintenance/2026-11-21-gui-visual-refresh.md`](maintenance/2026-11-21-gui-visual-refresh.md).
+- The fixed accent family GUI maintenance fix is implemented on `fix/gui-accent-propagation` from `main` at
+  `19cb6ffe190e02449ce8b827706f365f2ea7afe2` (commits `8021cb9`, `e3a3f4e`, and the evidence commits) and
+  awaits the owner's `--no-ff` merge approval. It removes the Settings accent choice and the
+  `AccentPalette`/reader/validator path, delivers the fixed `#007ACC` palette and high-contrast family to the
+  realized CheckBox/Slider/TreeView/ProgressBar/TextBox parts with targeted selected-state styles, and accepts
+  a legacy `accent` property as a silent no-op. Windows
+  [45016997359](https://github.com/seb-eis/mocassin-2/actions/runs/45016997359) and macOS
+  [45017296087](https://github.com/seb-eis/mocassin-2/actions/runs/45017296087) platform gates are green;
+  `./tools/verify.sh all --require` passed locally with 301 App tests. No step branch, step tag, parity row,
+  ADR, interaction-contract, or format change is created; the implementation evidence is in
+  [`maintenance/2026-11-22-gui-accent-propagation.md`](maintenance/2026-11-22-gui-accent-propagation.md).
 - Step 08 received a maintenance fix on 2026-11-20 on branch `fix/step-08-equivalent-start-mapping` (commits
   `1899421`, `85e27b2`, `4f5059e`), merged into `main` as `1f5b473` with the owner's approval. A centered group
   now emits one direction with every translation-equivalent start and a cross-bucket `jump_mapping`; the
