@@ -11,7 +11,7 @@ visual defects: the document/console tab headers do not read as tabs, and some t
 | Base | `main` at `ec889212a60aa81c8b6f51f01c35867d0fb14be9` |
 | Worktree | `/workspace` (clean, in place) |
 | Normative contract | [`docs/development/ui-visual-contract.md`](../../development/ui-visual-contract.md) §3.1, §3.2, §5, §5.1, §6, §7.1, §7.4, §7.5, §8, §10, §11, §13 |
-| Status | Design frozen; implementation pending owner approval. Docs-only commit on the branch; one owner merge approval. |
+| Status | Design accepted 2026-11-22; ready for implementation. O1–O3 are confirmed as recommended. Docs-only commit on the branch; one owner merge approval. |
 | Tracking | One branch; local gates; no per-feature CI; no step tag; no ADR |
 
 ## 1. Owner report and decisions
@@ -146,11 +146,10 @@ surface and no strip paint is added.
 - No bottom border is added to the selected tab and the strip has no bottom border.
 
 This is the smallest route that satisfies "active background equals the content" and "seamless transition".
-The alternative — a chrome band (`TabStripBackground` `#1E1E1E`/`#F3F3F3`) behind the tabs — would make the
-active tab's top corners visible against the band, but it either needs a view-level band or an
-`ItemsPanel` background plus a content-surface invariant, and the owner did not ask for a different band. It is
-recorded in §10 as the one alternative the owner may choose instead; it changes only `TabStripBackground` and
-the band delivery.
+The owner confirmed the content-surface option on 2026-11-22 (O1). The alternative — a chrome band
+(`TabStripBackground` `#1E1E1E`/`#F3F3F3`) behind the tabs — would make the active tab's top corners visible
+against the band, but it either needs a view-level band or an `ItemsPanel` background plus a content-surface
+invariant. It is not part of this design; §10 records it as the alternative if the design is revisited.
 
 ### 3.2 Tokens
 
@@ -192,8 +191,9 @@ colour-only cue because the line has thickness.
 
 The indicator is the existing `PART_SelectedPipe`, moved from the bottom to the top. Keeping the part keeps
 `TabItemHeaderSelectedPipeFill` and `Mocassin.FocusBrush` as the realized accent consumer; no accent key is
-retired. The 4 px end inset is a deliberate detail so the line never squares off the rounded corners. The
-full-width variant (`Margin=0`) is a one-value alternative if the owner prefers it; both are style-only.
+retired. The 4 px end inset is a deliberate detail so the line never squares off the rounded corners; the owner
+confirmed it on 2026-11-22 (O2). The full-width variant (`Margin=0`) remains a one-value alternative if the
+design is revisited; both are style-only.
 
 The header is a minimum height: at 1.5× font scale the 20 × 1.5 = 30 px line plus the 2 × 3 px margin is 36 px
 comfortable (34 px compact), so the tab grows and never clips. `TabHeight` remains the floor, not a fixed
@@ -251,8 +251,8 @@ No icon or asset is added in this pass. The template reserves the slot so the la
   `PublicAPI.Unshipped.txt` entry. Icons are set at construction, so no change notification is needed.
 - The slot is collapsed while `Icon` is null, so this pass has no empty leading gap and no tab-width change.
   The later pass only supplies the icon source (and, if needed, a `DataTemplate` for it); the tab template is
-  unchanged. The alternative — an always-visible empty 16 px slot now — is rejected because it would indent
-  every title for no content.
+  unchanged. The owner confirmed the collapsed slot on 2026-11-22 (O3). The alternative — an always-visible
+  empty 16 px slot now — is rejected because it would indent every title for no content.
 - `TabItem.Icon`/`IconTemplate` exist in Avalonia 12.1.6 but the Fluent template does not render them, so the
   item-template slot is the binding point, not the container property.
 - Decorative only: the slot carries no accessible name and no text, so a tab is never identified by an icon
@@ -513,13 +513,13 @@ density:
 | Merge | One owner `--no-ff` approval after the local gates and the evidence below. No per-feature CI. |
 | Platform runs | Not a merge gate; screenshots are Linux-only, as today. |
 
-Owner confirmations to carry into the merge request:
+Owner confirmations (resolved by the owner on 2026-11-22; all accepted as recommended):
 
-| ID | Question | Recommended default |
+| ID | Decision | Outcome |
 | --- | --- | --- |
-| O1 | Keep the strip on the content surface (no separate band), or restore a chrome band behind the tabs so the active tab's top corners show against it? | Keep the content surface (§3.1). The chrome-band variant re-adds `TabStripBackground`, a band delivery (view-level band or `ItemsPanel` background plus a content-surface invariant), and the §3.1/§7.1 surface text; the owner can request it as a follow-up. |
-| O2 | Is the 4 px indicator end inset acceptable, or should the 2 px line span the full tab width? | Inset (§3.3); it preserves the rounded corners. One token value changes it. |
-| O3 | Should the icon slot be collapsed now (no layout change) or always reserve 16 px? | Collapsed until the Phosphor pass supplies an icon (§3.6). |
+| O1 | Keep the tab strip on the content surface, with no separate chrome band. | **Confirmed.** §3.1 stands; the chrome-band variant is not in scope. |
+| O2 | Use the 4 px `Mocassin.TabIndicatorInset` at each end of the 2 px accent line. | **Confirmed.** §3.3 stands; the full-width variant is not in scope. |
+| O3 | Keep the `TabIconSlot` collapsed until the Phosphor icon pass supplies an icon. | **Confirmed.** §3.6 stands; no visible empty slot in this pass. |
 
 Open observation (not fixed here): the contract says the tab strip "scrolls horizontally; it never wraps"
 (§7.4), but the Fluent `TabControl` template has no `ScrollViewer` around the `ItemsPresenter`. The claim is
