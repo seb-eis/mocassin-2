@@ -11,7 +11,7 @@ visual defects: the document/console tab headers do not read as tabs, and some t
 | Base | `main` at `ec889212a60aa81c8b6f51f01c35867d0fb14be9` |
 | Worktree | `/workspace` (clean, in place) |
 | Normative contract | [`docs/development/ui-visual-contract.md`](../../development/ui-visual-contract.md) §3.1, §3.2, §5, §5.1, §6, §7.1, §7.4, §7.5, §8, §10, §11, §13 |
-| Status | Design accepted 2026-11-22; ready for implementation. O1–O3 are confirmed as recommended. Docs-only commit on the branch; one owner merge approval. |
+| Status | Merged into `main` as `df1067e9263ee3ea4d2e60f58822c65684e552fe`, main CI `45025170304` green, branch deleted locally and remotely, no tag. |
 | Tracking | One branch; local gates; no per-feature CI; no step tag; no ADR |
 
 ## 1. Owner report and decisions
@@ -653,3 +653,23 @@ the workflow conditions:
 | --- | --- | --- | --- |
 | Windows | [`45024050867`](https://github.com/seb-eis/mocassin-2/actions/runs/45024050867) | Detect changes, `.NET (windows-latest)` | success |
 | macOS | [`45024363111`](https://github.com/seb-eis/mocassin-2/actions/runs/45024363111) | Detect changes, `.NET (macos-latest)` | success |
+
+## Merge closeout (2026-11-22)
+
+- **Merge commit:** `df1067e9263ee3ea4d2e60f58822c65684e552fe` — `ui: add seamless tab headers and scroll gutters`.
+  It is a `--no-ff` merge of `fix/gui-tabs-scroll-gutters` (`46168ba`) into `main` at `ec88921`; no commit was
+  added, amended, rebased, or squashed.
+- **Main CI:** run [`45025170304`](https://github.com/seb-eis/mocassin-2/actions/runs/45025170304) on
+  `head_sha` `df1067e9263ee3ea4d2e60f58822c65684e552fe`, conclusion `success`. The jobs that ran were
+  **Detect changes**, **.NET (ubuntu-latest)** (restore, build, test with coverage, format), **Public API
+  compatibility** (restore, build, NuGet licence/vulnerability audit, ApiCompat), and **Contracts and policy**
+  (contract and catalog drift, SPDX headers, secret scan, cargo-deny). **Rust** and **Python** were skipped because
+  no Rust or Python paths changed; the conditional `Platform tests - *` and `Upload test results` steps were also
+  skipped.
+- **Branch:** `fix/gui-tabs-scroll-gutters` was deleted locally and remotely after the green main CI. No tag was
+  created.
+- **Follow-ups and residual risk:** tab-strip horizontal overflow remains the open observation in §10; menu,
+  flyout, and tooltip surfaces remain excluded; no custom scrollbar or `TabItem` template was added and
+  `AllowAutoHide` stays `true`; screenshot comparison remains Linux-only; the `TabIconSlot` is a collapsed
+  placeholder for the later Phosphor pass. The Windows/macOS platform runs were on `6650e08`; the later commits
+  on the branch were documentation-only.
