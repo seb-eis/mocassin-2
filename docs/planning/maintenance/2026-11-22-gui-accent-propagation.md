@@ -548,7 +548,7 @@ rewritten.
 | `e7a6227` | `docs: resolve GUI accent propagation review findings [skip ci]` — round 1 corrections, part 2 |
 | `0b8beea` | `docs: request GUI accent propagation re-review [skip ci]` — round 2 request |
 | `cbf2d90` | `docs: record GUI accent propagation re-review [skip ci]` — round 2 findings |
-| (round 2 resolution design commit) | `docs: resolve GUI accent propagation round 2 findings [skip ci]` — alias, precedence, live-variant, and inventory corrections |
+| `787c4ed` | `docs: resolve GUI accent propagation round 2 findings [skip ci]` — alias, precedence, live-variant, and inventory corrections |
 | (round 3 request commit) | `docs: request GUI accent propagation round 3 review [skip ci]` — review record at `Re-review required` |
 
 No code, test, or configuration commit exists yet. The branch base is
