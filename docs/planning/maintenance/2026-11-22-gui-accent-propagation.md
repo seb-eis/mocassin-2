@@ -322,5 +322,5 @@ Owner decisions:
 | `cbf2d90` | `docs: record GUI accent propagation re-review [skip ci]` — round 2 findings |
 | `787c4ed` | `docs: resolve GUI accent propagation round 2 findings [skip ci]` — optional-accent corrections, now superseded |
 | `c7532fb` | `docs: record round 2 resolution commit [skip ci]` — reviewed, now superseded |
-| (scope-change design commit) | `docs: replace optional accent with fixed family [skip ci]` — fixed-family contract and record |
+| `6db42cf` | `docs: replace optional accent with fixed family [skip ci]` — fixed-family contract and record |
 | (round 3 request commit) | `docs: request GUI accent propagation round 3 review [skip ci]` — review record at `Re-review required` |
