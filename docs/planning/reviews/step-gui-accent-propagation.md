@@ -12,7 +12,7 @@
 | --- | --- |
 | Review ID | `MAINT-2026-11-22-GUI-ACCENT` |
 | Type | Out-of-step maintenance design review (not a roadmap step) |
-| Target commit | `f1a8c1a7d1ee704b121964a8c7d030773488d859` |
+| Target commit | `5b2956b26e5cd4047edbbce52ecc191f01064916` |
 | Docs branch | `fix/gui-accent-propagation` |
 | Request owner | Planner |
 | Orchestrator | — |
@@ -246,7 +246,7 @@ altering the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Changes required
+**State:** Re-review required
 
 Round 1 froze the design at `6ed4858f562ec9f29e1042b6ae4294bd3cac6fef`; its branch head
 `5fb01f8ee4aecd6bd20333ccc25995fb9f5cfbcd` differed only by the one-line review-target update. Round 2
@@ -365,6 +365,12 @@ Date:
 | n-4 | Resolved; commit list and AltBaseHigh consumers updated | Planner | `f1a8c1a` |
 | n-5 | Resolved; stale testing/contract rows updated | Planner | `f1a8c1a` |
 | n-6 | Resolved; dead applier helpers listed for removal | Planner | `f1a8c1a` |
+| M-13 | Resolved; HC pressed label white on black card | Planner | `5b2956b` |
+| m-14 | Resolved; HC disabled label aliases `#A0A0A0` | Planner | `5b2956b` |
+| m-15 | Resolved; quickstart/platform checklist accent text removed | Planner | `5b2956b` |
+| n-7 | Resolved; record status says round 5 | Planner | `5b2956b` |
+| n-8 | Resolved; neutral focus pair specified for Light/Dark/HC | Planner | `5b2956b` |
+| n-9 | Resolved; splitter FocusAdorner added to realized tests | Planner | `5b2956b` |
 
 The request owner fills this section after the verdict. Do not alter the reviewer-authored findings, evidence,
 or verdict.
@@ -574,6 +580,35 @@ and the contract runtime-settings row no longer says “accent”.
 **Re-review request.** The delivery-detail design is frozen at
 `f1a8c1a7d1ee704b121964a8c7d030773488d859` on `fix/gui-accent-propagation`; the request commit adds only this
 record. A fresh planning auditor should verify the fixed-family contract and the M-9–M-12 delivery details.
+
+### Round 5 HC-label resolutions (request owner)
+
+**M-13 — HC unchecked-pressed CheckBox label.** The pressed **box** is
+`CheckBoxCheckBackgroundFillUncheckedPressed` `#FFD700`, but the label is `PART_ContentPresenter` on the
+transparent row/card (`#000000`). `CheckBoxForegroundUncheckedPressed` is therefore `#FFFFFF`, not black. The
+realized label foreground, not only `NormalRectangle`/`CheckGlyph`, is read in HC Light and Dark.
+
+**m-14 — HC disabled CheckBox labels.** HC now overrides the captured Fluent aliases
+`CheckBoxForegroundUncheckedDisabled`, `CheckBoxForegroundCheckedDisabled`, and
+`CheckBoxForegroundIndeterminateDisabled` to `#A0A0A0`; checked/indeterminate disabled fills remain `#000000`
+and disabled glyphs `#A0A0A0`. No shipped surface currently disables a CheckBox, so these are
+component-level future-proofing tests and a recorded risk for future disabled controls.
+
+**m-15 — stale user instructions.** `docs/getting-started/quickstart.md:57` and
+`docs/development/platform-checklist.md:95` no longer tell users to change the removed accent.
+
+**n-7 — record status.** The maintenance record status now says “Design frozen for round 5 review”.
+
+**n-8 — neutral focus pair.** The palette now specifies `SystemControlFocusVisualPrimaryBrush`/
+`SecondaryBrush`: light `#000000`/`#FFFFFF`, dark `#FFFFFF`/`#000000`, HC `#FFD700`/`#000000`. The realized
+focus ring is tested in Light, Dark, and HC at 3:1.
+
+**n-9 — splitter FocusAdorner.** The three splitter `FocusAdorner` borders use `Mocassin.FocusBrush` and are
+added to the §8.2 realized-part test list, together with the selected-tab pipe.
+
+**Re-review request.** The HC-label delivery design is frozen at
+`5b2956b26e5cd4047edbbce52ecc191f01064916` on `fix/gui-accent-propagation`; the request commit adds only this
+record. A fresh planning auditor should verify the fixed-family HC label/focus details.
 
 ## Review rounds
 
