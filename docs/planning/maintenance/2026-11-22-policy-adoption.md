@@ -281,3 +281,33 @@ Residual risks:
 - [`docs/development/design-proportionality.md`](../../development/design-proportionality.md).
 - [`docs/planning/README.md`](../README.md), [`status.md`](../status.md), [`reviews/README.md`](../reviews/README.md),
   [`audits/README.md`](../audits/README.md).
+
+## 8. Implementation evidence
+
+**Binding commit(s):**
+
+- `chore: bind lead, design, dev-free, dev, and review agents` — adds
+  `.opencode/agents/{lead,design,dev-free,dev,review}.md`, sets `opencode.json` `default_agent` to `lead`,
+  updates `.opencode/commands/step-start.md` and `step-closeout.md`, and updates
+  `tools/check_process_consistency.py` and `tools/tests/test_opencode_binding.py`. Exact SHA: `PENDING-COMMIT-1`.
+- `chore: remove superseded role bindings` — deletes `.opencode/agents/{orchestrator,planner,implementor,reviewer}.md`
+  after the new bindings are in place, and re-runs the policy gate. This commit is the branch tip at closeout.
+
+**Local gates:**
+
+| Command | Result |
+| --- | --- |
+| `python -m pytest tools/tests/test_opencode_binding.py tools/tests/test_process_consistency.py -q` | `14 passed, 11 subtests passed` before removal; re-run after removal |
+| `./tools/verify.sh policy --require` | `Process consistency: OK`; `Closeout gate completed with required checks enabled.` |
+| `./tools/verify.sh docs --require` | `Build succeeded. 0 warning(s), 0 error(s)`; `Documentation built in /workspace/site` |
+| `./tools/verify.sh all --require` | `Process consistency: OK`; `Ran 62 tests ... OK`; `AOT passed`; `Closeout gate completed with required checks enabled.` |
+
+**Restart requirement.** `opencode api get /api/info` reports OpenCode `2.3.2` (pid 13) on the running service.
+That service still holds the pre-rename agent list, so `lead`/`design`/`dev-free`/`dev`/`review` take effect
+after the owner or a new session restarts or warms the service. This run did not restart it, because a restart
+would kill the active session. `opencode.json` now names `lead` as `default_agent`; a restarted service selects
+it by default.
+
+**Deviations.** None from §5. The binding test in `tools/tests/test_opencode_binding.py` was updated because it is
+the process-check test for this binding, not an unrelated test. `./tools/verify.sh policy --require` also runs the
+API and contract checks by design; the process-consistency result is the row that covers §5.9.
