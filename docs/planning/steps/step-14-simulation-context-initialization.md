@@ -446,8 +446,10 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
   workspace tests green, including the `mocassin-solver` lib 40, `context_goals` 16, `context_skeleton` 12,
   `context_fixtures` 3, `allocation` 1, and both `context` doctests); `cargo build --manifest-path
   src/rust/Cargo.toml --workspace --release` → exit 0; `./tools/verify.sh docs` → exit 0 (math 207 files, links
-  210 files, DocFX 0 warnings / 0 errors, rustdoc clean, Zensical strict). No CI run was dispatched: maintenance
-  branches are validated locally only (AGENTS.md §3.5/§3.13).
+  210 files, DocFX 0 warnings / 0 errors, rustdoc clean, Zensical strict); `./tools/verify.sh contracts` → exit 0
+  (projections 5/4/2, process consistency OK, SPDX headers in 1,114 files, no secret patterns in 1,642 files,
+  cargo-deny advisories/bans/licenses/sources OK). No CI run was dispatched: maintenance branches are validated
+  locally only (AGENTS.md §3.5/§3.13).
 - **Known limitations:** the mechanical Rust file-length/layout check remains deferred to Step 29 (the local
   structure gate is .NET-only); F-2's delta assertion is owned by Step 15. The F-3 split is structural only and
   adds no test beyond the existing suite; the new N-2/N-3/F-1 tests are the regression coverage for the audit
