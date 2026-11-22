@@ -12,7 +12,7 @@ not a user-selectable palette. The record is the design and test plan for one
 | Base | `main` at `19cb6ffe190e02449ce8b827706f365f2ea7afe2` |
 | Worktree | `/workspace` (clean, in place) |
 | Normative visual contract | [`docs/development/ui-visual-contract.md`](../../development/ui-visual-contract.md) §3.6 |
-| Status | Implemented; local gates passed; awaiting owner `--no-ff` merge approval. |
+| Status | merged into `main` as `033da6fc2823e2923115f6ba916c67dc66624e40`, main CI `45018253523` green, branch deleted locally and remotely, no tag. |
 | Tracking | One branch; local gates; one owner `--no-ff` merge approval; no per-feature CI |
 
 ## 1. Owner decision
@@ -512,3 +512,21 @@ adorner/selected-tab pipe. No realized shipped part is `#0078D7`.
   and passed:
   - Windows: run `45016997359` — success (`https://github.com/seb-eis/mocassin-2/actions/runs/45016997359`).
   - macOS: run `45017296087` — success (`https://github.com/seb-eis/mocassin-2/actions/runs/45017296087`).
+
+## 17. Merge closeout (2026-11-22)
+
+- **Merge commit:** `033da6fc2823e2923115f6ba916c67dc66624e40` — `fix: use one fixed accent and remove accent
+  selection` (`--no-ff`). The approved branch tip was
+  `2e56dfe9385a780ba29a9955017c5a096846d906`.
+- **Main CI:** run `45018253523`, `https://github.com/seb-eis/mocassin-2/actions/runs/45018253523`,
+  `head_sha` `033da6fc2823e2923115f6ba916c67dc66624e40`, conclusion `success`.
+- **Jobs that ran:** `Detect changes`, `.NET (ubuntu-latest)`, `Public API compatibility`, and
+  `Contracts and policy` all succeeded. The `Rust` and `Python` jobs and the optional `.NET` platform steps
+  (package writer, results reader, CLI signal/probe paths, Avalonia headless workspace) were skipped by the
+  path filters.
+- **Branch deletion:** `fix/gui-accent-propagation` was deleted locally and remotely. No tag was created.
+- **Follow-ups / accepted residual risks:** no human visual spot-check; the Windows/macOS platform runs were at
+  `7f42dbe` and predate the final docs-only commits; high-contrast runtime switching was not separately
+  exercised; the non-HC disabled CheckBox labels remain Fluent-captured; `Mocassin.AccentTextBrush` remains
+  resource-only; the neutral Fluent focus adorner is not exposed headless, so its pair is measured from the
+  theme dictionaries; screenshot comparison remains Linux-only.
