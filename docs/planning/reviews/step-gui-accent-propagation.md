@@ -12,7 +12,7 @@
 | --- | --- |
 | Review ID | `MAINT-2026-11-22-GUI-ACCENT` |
 | Type | Out-of-step maintenance design review (not a roadmap step) |
-| Target commit | `6ed4858f562ec9f29e1042b6ae4294bd3cac6fef` |
+| Target commit | `e7a62275c372d5f7485b6310646ea66b8fed2c78` |
 | Docs branch | `fix/gui-accent-propagation` |
 | Request owner | Planner |
 | Orchestrator | — |
@@ -246,7 +246,7 @@ altering the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Changes required
+**State:** Re-review required
 
 The design is frozen for round 1 at `6ed4858f562ec9f29e1042b6ae4294bd3cac6fef`; the branch head
 `5fb01f8ee4aecd6bd20333ccc25995fb9f5cfbcd` differs only by the one-line review-target update.
@@ -309,10 +309,82 @@ Date:
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| M-1 | Resolved in design | Planner | `e7a6227` |
+| M-2 | Resolved in design | Planner | `e7a6227` |
+| M-3 | Resolved in design | Planner | `e7a6227` |
+| M-4 | Resolved in design | Planner | `e7a6227` |
+| M-5 | Resolved in design | Planner | `e7a6227` |
+| m-1 | Resolved in design | Planner | `e7a6227` |
+| m-2 | Resolved in design | Planner | `e7a6227` |
+| n-1 | Recorded; no design change required | Planner | `e7a6227` |
 
-The request owner fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
-verdict.
+The request owner fills this section after the verdict. Do not alter the reviewer-authored findings, evidence,
+or verdict.
+
+### Resolutions to round 1 (request owner)
+
+**M-1 — System uses the actual resolved variant.** Visual contract §3.6 now derives the theme column from
+`Application.ActualThemeVariant` after `RequestedThemeVariant` is applied. `ThemeVariant.Dark` uses the dark
+column; `Light` (including an unresolved `Default` fallback) uses the light column. `ThemeSelection.System`
+therefore follows the OS variant instead of a fixed Light fallback. The applier gets an internal actual-variant
+test seam; tests cover System-light and System-dark and assert the palette dictionary plus `AccentText`,
+`SelectedFill`, `FocusAccent`, and `FluentState` columns. Maintenance record §4.1, §4.2, §6.4 and risks updated.
+
+**M-2 — Selection blend reconciled at 30% accent / 70% chrome.** The intended A2 blend is 30% accent, so the
+formula is retained and every optional `SelectedFill` row is corrected: dark `#153F3F`/`#233B24`/`#4A3515`/
+`#352C41`/`#4A152D` and light `#AAD4D4`/`#AAD0B9`/`#E0CAAA`/`#CAC1D6`/`#DFAAC2` for
+teal/green/amber/violet/rose. `SelectedText` is regenerated from the fills: dark is `#FFFFFF`; light is
+`#1F1F1F` for every accent, including light `rose` on `#DFAAC2`. The contract table, record §4.1, and §6.2
+tests now agree.
+
+**M-3 — Derived Fluent accent states are overlaid, not left to the platform.** Visual contract §3.6 adds a
+derived Fluent accent-state overlay published for every non-high-contrast accent, including `null`/`blue`:
+`SystemAccentColorLight1`/`Light2`/`Light3`/`Dark1`/`Dark2`/`Dark3` (`Color`), `SystemControlForegroundAccentBrush`,
+`SystemControlHighlightAccent2RevealBackgroundBrush`/`Accent3RevealBackgroundBrush`,
+`SystemControlHighlightAltChromeWhiteBrush`, and `SystemControlForegroundChromeWhiteBrush`. The six colours are
+`FluentState` values: Fluent 12.1.6's HSL offsets applied to `FocusAccent`, clamped to 3:1 against the worst
+theme surface and `AccentGlyph`. `Light1`/`Dark1` are the keys consumed by checkbox, radio, toggle, and slider
+hover/press in 12.1.6; `Light2`/`Light3`/`Dark2`/`Dark3` are overlaid for completeness and have no 12.1.6
+control-resource consumer. High contrast removes the group and the dictionary supplies `#FFD700`/`#000000`.
+Rendered checkbox/radio/toggle/slider tests are added. No platform-accent limitation is accepted; the only
+recorded limitation is that the clamp can make a state equal the base when the base already sits on the 3:1
+floor, which is a contrast-safe visual choice rather than a fallback.
+
+**M-4 — Shared selected/hover text key no longer overloaded.** `SystemControlHighlightAltBaseHighBrush` is
+removed from both overlays. It remains the shared selected/hover text role for ListBoxItem, TreeViewItem,
+ComboBox focused/selected, MenuFlyout, and TabItem, and the palette is corrected to `#FFFFFF` dark /
+`#1F1F1F` light (was `#FFFFFF` in light) / `#000000` high contrast. It meets 4.5:1 on every `SelectedFill` and
+on the neutral hover/pressed fills. Accent-control glyphs moved to the dedicated
+`SystemControlHighlightAltChromeWhiteBrush`/`SystemControlForegroundChromeWhiteBrush` keys (`#FFFFFF`, 3:1 on
+`FocusAccent` and the derived states). Rendered light `green`/`violet` and dark `teal`/`amber` list/tree
+selected and hover text tests are added, plus tree reveal fills.
+
+**M-5 — Focus floor uses the bright dark surfaces.** `worstSurface(dark)` is now `#3C3C3C` (input fill); the
+`#37373D` hover fill is darker and covered by the same choice. `FocusAccent` and the default dark
+`Mocassin.FocusBrush` are recomputed: dark `#248DD3`/`#179595`/`#549457`/`#B97717`/`#927CB0`/`#CE6192` for
+blue/teal/green/amber/violet/rose, light unchanged. Contract §3.6/§11.1 and record §4.1/§4.3/§6.2 are updated;
+tests assert 3:1 on `#3C3C3C`, `#37373D`, `#2D2D30`, `#252526`, `#1E1E1E`, and light `#F3F3F3`/`#FFFFFF`.
+
+**m-1 — Test plan expanded.** Added actual System-light/System-dark, rendered checkbox/radio/toggle/slider
+normal/hover/press, tree selected normal/hover, list/combo selected and hover text, `#3C3C3C`/`#37373D` focus
+surfaces, high-contrast rendered Fluent controls, derived-state overlay presence, and the explicit
+resource-only `AccentTextBrush` assertion.
+
+**m-2 — Inventory corrected.** The tree selected fill is `SystemControlHighlightAccent3RevealBackgroundBrush`
+(normal) / `Accent2` (pointer-over); `SystemControlForegroundAccentBrush` (slider thumb),
+`SystemControlHighlightAltChromeWhiteBrush` (check/toggle glyph), and `SystemControlForegroundChromeWhiteBrush`
+consumers are listed; the six `SystemAccentColor` derived keys are listed; `Mocassin.SelectedBackground`/
+`SelectedForeground` are marked not directly consumed; and `SystemControlHighlightAltBaseHighBrush` is listed
+with its real selected/hover text consumers. High-contrast gaps for the derived/reveal/glyph keys are recorded.
+
+**n-1 — Accent text is explicitly resource-only.** A3 stands: `Mocassin.AccentTextBrush` is overlaid and
+contrast-tested but has no rendered surface today. The contract, record, and test plan now say so explicitly;
+no rendered link/accent-text surface is claimed and no new link surface is added. No owner decision is needed.
+
+**Re-review request.** The corrected design is frozen at `e7a62275c372d5f7485b6310646ea66b8fed2c78` on
+`fix/gui-accent-propagation`. The branch head before this record update is `e7a6227`; the review request commit
+adds only this record. A fresh planning auditor should verify the corrected contract and record against these
+resolutions.
 
 ## Review rounds
 
