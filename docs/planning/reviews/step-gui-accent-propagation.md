@@ -19,7 +19,7 @@
 | Step agent (implementor) | — (no step; the fix is a bounded maintenance branch) |
 | Review initiated by | Orchestrator, on request of the planner |
 | Review date | 2026-11-22 |
-| Reviewer | Round 1: DeepSeek V4.1 Flash 1017 (opencode-go), fresh context. Round 2: DeepSeek V4.1 Flash 1017 (opencode-go), a separate fresh context with no shared conversation with round 1, the planner, implementor, or orchestrator. Round 3: DeepSeek V4.1 Flash 1017 (opencode-go), a separate fresh context with no shared conversation with rounds 1–2, the planner, implementor, or orchestrator |
+| Reviewer | Round 1: DeepSeek V4.1 Flash 1017 (opencode-go), fresh context. Round 2: DeepSeek V4.1 Flash 1017 (opencode-go), a separate fresh context with no shared conversation with round 1, the planner, implementor, or orchestrator. Round 3: DeepSeek V4.1 Flash 1017 (opencode-go), a separate fresh context with no shared conversation with rounds 1–2, the planner, implementor, or orchestrator. Round 4: DeepSeek V4.1 Flash 1017 (opencode-go), a separate fresh context with no shared conversation with rounds 1–3, the planner, implementor, or orchestrator |
 
 Maintenance record:
 [`2026-11-22-gui-accent-propagation.md`](../maintenance/2026-11-22-gui-accent-propagation.md)
@@ -51,23 +51,23 @@ Non-goals of the design review:
 
 ## Design decisions reviewed
 
-- [x] Accent overlay completeness and precedence (default/`blue`, optional accents, high contrast) — Reviewed; the precedence model is sound, but the overlay set is incomplete for Fluent-derived states (M-3) and the shared selected-text key (M-4); the inventory is inaccurate (m-2). Round 2: the two-group model is present, but §2 still says the overlay is optional-accent-only (M-7) and Fluent alias capture defeats the base-key overlays (M-6). Round 3: the fixed family removes the overlay; the palette alias keys deliver the CheckBox/Slider parts and the tree background, but the tree-foreground selector is ambiguous and the Fluent `Border > ContentPresenter` shape does not match (M-9); the HC focus pair and selected-tree chevron are not overridden (M-10, M-11).
-- [x] `OnAccent`, `AccentText`, `FocusAccent`, `SelectedFill`, and `SelectedText` derivation — Reviewed and recomputed. `OnAccent`, `AccentText`, `FocusAccent`, and `SelectedText` match the table and the stated floors; `SelectedFill` does not match its own formula (M-2). Focus floors are based on the wrong worst surface (M-5). Round 2: `FocusAccent`, `AccentText`, and all 24 `FluentState` values reproduce exactly; the light `green` `SelectedFill` still does not (m-3). Round 3: the fixed values replace the per-accent matrix; the recomputed floors pass (white on `#007ACC` 4.51, `#248DD3` on `#3C3C3C` 3.06, accent text 5.37–7.10, selected 9.76/12.73, white on the dark `Light1` 3.009).
-- [x] `Mocassin.FocusBrush` as the contrast-safe focus/indicator role — Reviewed; the role is well motivated, but the dark input/hover surfaces are not in the contrast oracle (M-5). Round 2: every `FocusAccent` and `#248DD3` passes 3:1 on `#3C3C3C`, `#37373D`, `#2D2D30`, `#252526`, `#1E1E1E`, and the light surfaces; the Fluent slider thumb does not receive `FocusAccent` (M-6). Round 3: the focus values pass, but `Mocassin.FocusBrush` has no view consumer (the splitter adorner and tab pipe still use `AccentBrush`/`#007ACC`, m-8), and the HC neutral focus pair is not overridden (M-10).
-- [x] Status-bar background/foreground and progress contrast — Reviewed; all six accents pass 4.5:1 (`blue` 4.511 white, `teal`/`amber` black, `green`/`violet`/`rose` white) and the progress bar uses `StatusBarForeground` on a transparent track. Round 3: status bar `#007ACC`/white passes 4.51; the shipped `ProgressDialogView` progress bar gets the dark focus `#248DD3` because `SystemControlHighlightAccentBrush` is mapped to `FocusBrush` (m-7).
-- [x] Selected list/tree/combo and text-selection treatment — Reviewed; combo and TextBox pairs are coherent, but list/tree selected and hover text share `SystemControlHighlightAltBaseHighBrush` with Fluent accent-control glyphs (M-4), and tree selected fill uses the Fluent Reveal keys rather than the documented list keys (m-2). Round 2: `AltBaseHigh` is removed from the overlays and the list/combo text passes; Fluent captures the tree/reveal aliases at load, so the reveal overlay does not set the tree fill and the HC tree text/glyph values do not reach the controls (M-6). Round 3: the list/combo keys and the targeted tree style are present; the HC selected-tree chevron remains white on gold (M-11), and the TextBox selection foreground is unset, so the §11.1 selection pair is 2.82/3.03/1.35 (M-12).
+- [x] Accent overlay completeness and precedence (default/`blue`, optional accents, high contrast) — Reviewed; the precedence model is sound, but the overlay set is incomplete for Fluent-derived states (M-3) and the shared selected-text key (M-4); the inventory is inaccurate (m-2). Round 2: the two-group model is present, but §2 still says the overlay is optional-accent-only (M-7) and Fluent alias capture defeats the base-key overlays (M-6). Round 3: the fixed family removes the overlay; the palette alias keys deliver the CheckBox/Slider parts and the tree background, but the tree-foreground selector is ambiguous and the Fluent `Border > ContentPresenter` shape does not match (M-9); the HC focus pair and selected-tree chevron are not overridden (M-10, M-11). Round 4: M-9 selectors, M-10 HC pair, and M-11 chevron are present; the m-11 HC unchecked-pressed CheckBox label is black on the black HC surface (M-13).
+- [x] `OnAccent`, `AccentText`, `FocusAccent`, `SelectedFill`, and `SelectedText` derivation — Reviewed and recomputed. `OnAccent`, `AccentText`, `FocusAccent`, and `SelectedText` match the table and the stated floors; `SelectedFill` does not match its own formula (M-2). Focus floors are based on the wrong worst surface (M-5). Round 2: `FocusAccent`, `AccentText`, and all 24 `FluentState` values reproduce exactly; the light `green` `SelectedFill` still does not (m-3). Round 3: the fixed values replace the per-accent matrix; the recomputed floors pass (white on `#007ACC` 4.51, `#248DD3` on `#3C3C3C` 3.06, accent text 5.37–7.10, selected 9.76/12.73, white on the dark `Light1` 3.009). Round 4: the fixed floors and the realized TextBox selection pair reproduce (M-12 resolved).
+- [x] `Mocassin.FocusBrush` as the contrast-safe focus/indicator role — Reviewed; the role is well motivated, but the dark input/hover surfaces are not in the contrast oracle (M-5). Round 2: every `FocusAccent` and `#248DD3` passes 3:1 on `#3C3C3C`, `#37373D`, `#2D2D30`, `#252526`, `#1E1E1E`, and the light surfaces; the Fluent slider thumb does not receive `FocusAccent` (M-6). Round 3: the focus values pass, but `Mocassin.FocusBrush` has no view consumer (the splitter adorner and tab pipe still use `AccentBrush`/`#007ACC`, m-8), and the HC neutral focus pair is not overridden (M-10). Round 4: splitter and tab-pipe consumers are specified; the tab pipe is resource-tested, the splitter adorner is not realized-tested (n-9).
+- [x] Status-bar background/foreground and progress contrast — Reviewed; all six accents pass 4.5:1 (`blue` 4.511 white, `teal`/`amber` black, `green`/`violet`/`rose` white) and the progress bar uses `StatusBarForeground` on a transparent track. Round 3: status bar `#007ACC`/white passes 4.51; the shipped `ProgressDialogView` progress bar gets the dark focus `#248DD3` because `SystemControlHighlightAccentBrush` is mapped to `FocusBrush` (m-7). Round 4: the dialog ProgressBar realizes #007ACC/#248DD3/#FFD700 (m-7 resolved).
+- [x] Selected list/tree/combo and text-selection treatment — Reviewed; combo and TextBox pairs are coherent, but list/tree selected and hover text share `SystemControlHighlightAltBaseHighBrush` with Fluent accent-control glyphs (M-4), and tree selected fill uses the Fluent Reveal keys rather than the documented list keys (m-2). Round 2: `AltBaseHigh` is removed from the overlays and the list/combo text passes; Fluent captures the tree/reveal aliases at load, so the reveal overlay does not set the tree fill and the HC tree text/glyph values do not reach the controls (M-6). Round 3: the list/combo keys and the targeted tree style are present; the HC selected-tree chevron remains white on gold (M-11), and the TextBox selection foreground is unset, so the §11.1 selection pair is 2.82/3.03/1.35 (M-12). Round 4: the direct header/chevron selectors and the realized TextBox pair verify (M-9, M-11, M-12); the HC disabled label gap remains (m-14).
 - [x] Default restoration and live reapply — Reviewed; the remove-then-publish logic and `StartupCoordinator.Changed` reapply are sound for explicit `Light`/`Dark`. `ThemeSelection.System` is not a fixed light fallback (M-1). Round 2: the initial System resolution now uses `Application.ActualThemeVariant`; a live OS Light/Dark switch still has no reapply trigger (M-8). Round 3: the fixed family in the palette theme dictionaries switches the realized alias and derived parts on a live Light/Dark change; no runtime overlay; M-8 is resolved.
-- [x] Test plan, contrast matrix, and screenshot scope — Reviewed; the matrix and screenshots are a good start, but the omissions would let the M-3/M-4/M-5 surfaces ship (m-1). Round 2: the matrix and rendered cases were expanded, but there is no rendered high-contrast Fluent-control check and no realized-template-part assertion, and the System seam can bypass the production read (m-5); `SystemControlHighlightChromeWhiteBrush` is still missing (m-6). Round 3: the realized-part oracle is specified, but the focus/derived 3:1 sentence is an unsatisfiable cross-product (m-9), and the HC focus/chevron, ProgressBar, text selection, and palette `Color` type are missing (m-7, m-10).
-- [x] Documentation plan and acceptance criteria — Reviewed; the documentation touches the right sections, but acceptance criteria 1 and 4 are not met by the design as written (M-4, M-5). Round 2: acceptance criteria 1/3/4 are still not established for the aliased Fluent controls (M-6), and §2 was not updated to match the two-group model (M-7). Round 3: §2, §3.4, and §3.6 now state one fixed-family precedence; acceptance criteria 5 and 7 are still not established for the HC chevron/focus and the TextBox selection (M-10–M-12).
+- [x] Test plan, contrast matrix, and screenshot scope — Reviewed; the matrix and screenshots are a good start, but the omissions would let the M-3/M-4/M-5 surfaces ship (m-1). Round 2: the matrix and rendered cases were expanded, but there is no rendered high-contrast Fluent-control check and no realized-template-part assertion, and the System seam can bypass the production read (m-5); `SystemControlHighlightChromeWhiteBrush` is still missing (m-6). Round 3: the realized-part oracle is specified, but the focus/derived 3:1 sentence is an unsatisfiable cross-product (m-9), and the HC focus/chevron, ProgressBar, text selection, and palette `Color` type are missing (m-7, m-10). Round 4: the realized probes pass, but the HC unchecked-pressed label is not read (M-13).
+- [x] Documentation plan and acceptance criteria — Reviewed; the documentation touches the right sections, but acceptance criteria 1 and 4 are not met by the design as written (M-4, M-5). Round 2: acceptance criteria 1/3/4 are still not established for the aliased Fluent controls (M-6), and §2 was not updated to match the two-group model (M-7). Round 3: §2, §3.4, and §3.6 now state one fixed-family precedence; acceptance criteria 5 and 7 are still not established for the HC chevron/focus and the TextBox selection (M-10–M-12). Round 4: M-10/M-12 are established; the HC unchecked-pressed label is black on black (M-13).
 - [x] Owner decisions A1–A3 and the superseded refresh wording — Reviewed; A1–A3 are recorded, internally consistent, and the supersession of the fixed-white status-bar and maximum-contrast `blue` wording is explicit. Round 3: A1–A4 are recorded; the fixed family, legacy no-op, and accent-text-resource-only decisions are consistent.
-- [x] No ADR, interaction-contract, control-template, dependency, or format change — Reviewed; no ADR, interaction-contract, control-template, dependency, `contracts/manifest.json`, or format change is proposed. The `TextBox` selection pair is a property setter, not a template. Round 3: no ADR/template/format change; the Settings accent removal does remove a focus stop and change the Settings Tab order, which the maintenance record §13 calls unchanged (m-12).
+- [x] No ADR, interaction-contract, control-template, dependency, or format change — Reviewed; no ADR, interaction-contract, control-template, dependency, `contracts/manifest.json`, or format change is proposed. The `TextBox` selection pair is a property setter, not a template. Round 3: no ADR/template/format change; the Settings accent removal does remove a focus stop and change the Settings Tab order, which the maintenance record §13 calls unchanged (m-12). Round 4: the Tab-order delta is documented and tested; no other focus target changes.
 
 ## Dependency and interface checks
 
-- [x] The base is current `main` at `19cb6ffe190e02449ce8b827706f365f2ea7afe2` — Verified: `git rev-parse main` is `19cb6ffe...`; the branch is based on it and `main` has not moved. Round 3: HEAD `7a8f5bc`; `73a297f..7a8f5bc` is only the review record; `main` is unchanged.
+- [x] The base is current `main` at `19cb6ffe190e02449ce8b827706f365f2ea7afe2` — Verified: `git rev-parse main` is `19cb6ffe...`; the branch is based on it and `main` has not moved. Round 3: HEAD `7a8f5bc`; `73a297f..7a8f5bc` is only the review record; `main` is unchanged. Round 4: HEAD e8983ea; f1a8c1a..e8983ea is only this record; main is still 19cb6ffe.
 - [x] The design uses only existing accent keys and resources, plus the new derived `Mocassin.FocusBrush` — Verified: the six accent keys and five optional hex values are unchanged, and `FocusBrush` is a derived role in `Palette.axaml`/`HighContrast.axaml`, not a new selectable accent. Round 3: `FocusBrush` is added, the derived/alias keys are existing Fluent keys, but the neutral focus pair `SystemControlFocusVisualPrimaryBrush`/`SecondaryBrush` is not in the override set (M-10).
 - [x] The overlay/removal interface with `AvaloniaThemeApplier` is defined — Reviewed: `RemoveAccentOverlay` and `PublishAccentOverlay` are specified, and the current `ApplyAccent` failure mode (`AvaloniaThemeApplier.cs:104-127`) matches the record. The key list is incomplete (M-3, m-2). Round 3: there is no runtime overlay; `ApplyAccent` sets `SystemAccentColor` only and the fixed family lives in the palette theme dictionaries; the alias/derived delivery is in the palette, not an overlay.
-- [x] High-contrast and density precedence remain authoritative — Reviewed: the applier removes the overlay under high contrast, high contrast and density merged dictionaries keep their precedence, and density owns only spacing/size tokens. `ThemeSelection.System` remains a separate precedence defect (M-1). Round 3: the HC dictionary is merged after the palette and the probe confirms it wins; density is untouched; the HC focus pair and selected-tree chevron are still not overridden (M-10, M-11).
+- [x] High-contrast and density precedence remain authoritative — Reviewed: the applier removes the overlay under high contrast, high contrast and density merged dictionaries keep their precedence, and density owns only spacing/size tokens. `ThemeSelection.System` remains a separate precedence defect (M-1). Round 3: the HC dictionary is merged after the palette and the probe confirms it wins; density is untouched; the HC focus pair and selected-tree chevron are still not overridden (M-10, M-11). Round 4: HC focus pair #FFD700/#000000 and the selected chevron #000000 on gold verify.
 - [x] No unresolved cross-language, format, or public-API interface question remains — Verified: no `contracts/manifest.json`, project/package/results/state format, cross-language fixture, or public API change is proposed. The remaining issues are visual-contract and Fluent-resource issues, not format/API ones. Round 3: the settings file remains app-local with no schema bump; the legacy `accent` key is ignored by the tolerant reader and omitted by the source-generated writer.
 
 ## Standard design-review checklist
@@ -80,7 +80,7 @@ Non-goals of the design review:
 - [x] Licensing, provenance, and dependency checks are resolved (no new dependency) — Verified: no new dependency, font, icon package, or third-party theme; the work uses Avalonia Fluent 12.1.6 and first-party tokens. Round 3: unchanged; no new dependency or copied asset.
 - [x] Risks and mitigations are realistic — Reviewed; the risk table correctly names the shared-key conflict and the System assumption, but its mitigations are insufficient (M-1, M-4). Round 3: the risk table's "HC tree selected text is white on gold" mitigation covers the header text but not the selected-tree chevron (M-11), and the neutral focus ring is not mitigated for HC (M-10).
 - [x] Code layout and namespace plan follow the structure policy (no new source area) — Verified: no new source area; the `TextBox` changes belong in `ShellStyles.axaml`, the splitter changes in `ShellView.axaml`, and the applier changes in `Theming/AvaloniaThemeApplier.cs`. Round 3: the implementation shape omits the splitter adorner swap (it still uses `Mocassin.AccentBrush`, m-8) and the Settings Tab-order/automation delta (m-12).
-- [x] No hidden scope, stale placeholders, or unowned decisions — Reviewed; no hidden scope, no stale placeholder text, and A1–A3 are owned. OS-dark support is explicitly deferred but the deferral assumes a light `System` variant that the app does not implement (M-1). Round 3: A1–A4 are owned; the maintenance record §15 still has a round-3 request placeholder and omits `82d3422`, and the claimed `AltBaseHigh` consumer list is not in the frozen docs (n-4).
+- [x] No hidden scope, stale placeholders, or unowned decisions — Reviewed; no hidden scope, no stale placeholder text, and A1–A3 are owned. OS-dark support is explicitly deferred but the deferral assumes a light `System` variant that the app does not implement (M-1). Round 3: A1–A4 are owned; the maintenance record §15 still has a round-3 request placeholder and omits `82d3422`, and the claimed `AltBaseHigh` consumer list is not in the frozen docs (n-4). Round 4: the commit/consumer list is updated; the maintenance status row still says round 3 (n-7); quickstart/platform checklist still mention the accent (m-15).
 
 ## Evidence
 
@@ -246,7 +246,7 @@ altering the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-review required
+**State:** Changes required
 
 Round 1 froze the design at `6ed4858f562ec9f29e1042b6ae4294bd3cac6fef`; its branch head
 `5fb01f8ee4aecd6bd20333ccc25995fb9f5cfbcd` differed only by the one-line review-target update. Round 2
@@ -261,6 +261,13 @@ chevron (M-11), and the unimplemented TextBox selection pair (M-12). M-6 is reso
 parts and the tree background, and M-7/M-8 are resolved.
 
 `Changes required` is the round-2 verdict; `Re-review required` was the request state before round 2.
+
+Round 4 reviewed the delivery-detail design at `f1a8c1a7d1ee704b121964a8c7d030773488d859`; the round-4 request
+`e8983eac4b22d5cb9b5b54be0ee30ca0ebef31c6` differs only by this record. M-9, M-10, and M-12 are resolved, and
+m-7, m-9, m-10, m-12, n-4, n-5, and n-6 are resolved; m-8 is design-resolved with a test-coverage note. A new
+Major remains: the HC unchecked-pressed CheckBox label is black on the black HC surface (M-13). Two Minors
+(m-14, m-15) and three Notes (n-7, n-8, n-9) also remain. `Changes required` is the round-3 verdict and the
+round-4 verdict.
 
 ## Reviewer independence
 
@@ -283,6 +290,11 @@ Round 3: `Changes required`. M-6 is resolved for the CheckBox/Slider parts and t
 M-7/M-8 are resolved, but four Majors remain: the TreeView targeted-selector ambiguity (M-9), the HC neutral
 focus pair (M-10), the HC selected-tree chevron (M-11), and the unimplemented TextBox selection pair (M-12).
 The fixed-family values themselves pass the recomputed floors.
+
+Round 4: `Changes required`. M-9, M-10, and M-12 are resolved, and m-7, m-9, m-10, m-12, n-4, n-5, and n-6
+are resolved; m-8 is design-resolved with a test-coverage note. The m-11 HC unchecked-pressed CheckBox label is
+black on the black HC surface (M-13), so the design must be corrected and re-frozen. The fixed-family values and
+the recomputed floors still pass.
 
 ## Approval summary
 
@@ -896,6 +908,131 @@ record, code, tests, configuration, or any other record.
 established. Four Majors remain: the TreeView targeted-selector ambiguity (M-9), the HC neutral focus pair
 (M-10), the HC selected-tree chevron (M-11), and the unimplemented TextBox selection pair (M-12). The design
 must be corrected and re-frozen; no implementation code exists on the branch.
+
+Follow-up owner: Planner (design corrections); the implementor starts only after a fresh re-review passes.
+Follow-up step: — (out-of-step maintenance fix; no step tag).
+
+---
+
+### Re-review round 4
+
+#### Independence and frozen state
+
+I am a separate fresh context. I did not author, plan, implement, or review rounds 1–3, and I have no shared
+conversation with rounds 1–3, the planner, the implementor, or the orchestrator. I read the repository at the
+frozen delivery-detail design `f1a8c1a7d1ee704b121964a8c7d030773488d859` and worked only in
+`docs/planning/reviews/step-gui-accent-propagation.md`; I did not edit the visual contract, the maintenance
+record, code, tests, configuration, or any other record.
+
+- Frozen design: `f1a8c1a7d1ee704b121964a8c7d030773488d859`.
+- Branch head / round-4 request: `e8983eac4b22d5cb9b5b54be0ee30ca0ebef31c6`.
+- `git diff --name-status f1a8c1a..e8983ea` reported only
+  `M docs/planning/reviews/step-gui-accent-propagation.md`; `git diff --stat` is 78 insertions and 2 deletions.
+  The diff changes the target metadata, the record state, the resolution-status rows, the round-4 resolutions,
+  and the round-4 request; earlier rounds are unchanged.
+- Base `main` is `19cb6ffe190e02449ce8b827706f365f2ea7afe2`; `git merge-base --is-ancestor main HEAD` exited 0.
+  The branch has no code, test, configuration, or contract change; it is docs-only.
+
+#### Resolution verification (round 4)
+
+| Finding | Round-4 status | Evidence |
+| --- | --- | --- |
+| M-9 | **Resolved.** The contract names the five exact selectors and explicitly rejects the Fluent `Border#PART_LayoutRoot > ContentPresenter#PART_HeaderPresenter` shape. A probe with a direct selector set the realized `PART_HeaderPresenter.Foreground` in Light, Dark, and HC; the child-combinator style did not apply (the header stayed at the direct value), and the presenter's visual parent is `Grid#PART_Header`. The test plan reads the realized presenter foreground. | Contract §3.6 `:261-275`; `Controls_TreeViewItem.xaml:73-98,138-155`; probe; record §8.2. |
+| M-10 | **Resolved.** `HighContrast.axaml` is specified to define `SystemControlFocusVisualPrimaryBrush` `#FFD700` and `SystemControlFocusVisualSecondaryBrush` `#000000`; both are in §3.4. A probe with the HC dictionary rendered the focus adorner as a 2 px `#FFD700` outer border and a 1 px `#000000` inner border (14.97:1 and 14.97:1). The test plan renders the realized HC adorner. | Contract §3.4 `:155`, §3.5 `:204-205`, §3.6 `:282-283`; `ctl/AdornerLayer.xaml`; record §8.2; probe. |
+| M-11 | **Partially resolved / new Major.** The selected chevron fill is set from `Mocassin.SelectedForeground` and the realized HC chevron is `#000000` on `#FFD700` (14.97:1), so the original white-on-gold defect is fixed. The new m-11 checkbox-label override is wrong: `CheckBoxForegroundUncheckedPressed` `#000000` is applied to the `PART_ContentPresenter`, which sits on the transparent row/card, not on the gold 20 px box; in HC the label is black on the black `#000000` card (1:1). | Contract §3.5 `:207`; `Controls_CheckBox.xaml:43-76,115-126`; `Accents_FluentControlResources.xaml:285,299`; probe; record §8.2; finding M-13. |
+| M-12 | **Resolved.** `ShellStyles.axaml` sets `TextBox.SelectionBrush`/`SelectionForegroundBrush` from `Mocassin.AccentBrush`/`OnAccentBrush`; a real `TextBox` realized `#007ACC`/`#FFFFFF` in Light and Dark and `#FFD700`/`#000000` in HC (4.51:1 and 14.97:1). The test reads both properties. | Contract §3.6 `:233`; record §4/§8.2; probe. |
+| m-7 | **Resolved.** The `ProgressDialog.ProgressBar` is in the shipped-control inventory and the realized-part list; a `ProgressBar` probe read `#007ACC` Light, `#248DD3` Dark, `#FFD700` HC. | Record §2/§8.2; `ProgressDialogView.axaml:11`; `ctl/ProgressBar.xaml:29`; probe. |
+| m-8 | **Design resolved; test coverage note.** The splitter `FocusAdorner` borders and `TabItemHeaderSelectedPipeFill` are specified to use `Mocassin.FocusBrush`. The tab pipe is in the resource test; the §8.2 realized list does not include the splitter adorner, so the "role is no longer unused" claim is source-level only. | Contract §3.6 `:239-241`; record §7/§8.1-§8.2; `ShellView.axaml:49-55,74-80,96-102`; finding n-9. |
+| m-9 | **Resolved.** Record §8.1 now pairs the dark focus/derived values with `#3C3C3C`/`#37373D`/`#2D2D30`/`#252526`/`#1E1E1E` and the light values with `#F3F3F3`/`#FFFFFF`; the contract §11.1 row is paired. Recomputation confirms the cross-products would fail (`#007ACC` on `#3C3C3C` 2.446, `#3A9CDD` on `#F3F3F3` 2.712), so the pairing is necessary. | Record §8.1; contract §11.1 `:580`; recomputation. |
+| m-10 | **Resolved.** §3.4 and §3.6 state that the six `SystemAccentColor*` keys are `Color` in `Default`/`Light`/`Dark` and HC; §8.1 tests the type. | Contract §3.4 `:169-171`, §3.6 `:235-237`; record §8.1. |
+| m-11 | **Partially resolved.** HC fills/glyphs for unchecked-pressed and checked/indeterminate-disabled are specified and the probe reads `#FFD700`/`#000000` for the box and `#A0A0A0` for the disabled glyph, but the unchecked-pressed label is black on black (M-13) and the disabled label aliases are not overridden (m-14). | Contract §3.5 `:207`; record §4/§8.2; probe; findings M-13/m-14. |
+| m-12 | **Resolved.** The removal is documented as an intentional accessibility delta in record §5/§13 and contract §11.2; §8.3 tests the new deterministic order and the absent `Accent` automation name; the interaction contract does not prohibit the removal and needs no text change. | Record §5/§8.3/§13; contract §11.2 `:592-595`; `SettingsDialogView.axaml:25-27`; interaction contract §6.5/§7. |
+| n-4 | **Resolved for the commit/consumer list.** §15 lists `82d3422`, `73a297f`, `7a8f5bc`, `7ba3600`, and `cc06a67`; §2 names the `TableViewRow*`/`DateTimePickerShared.xaml:63` consumers and the unshipped `CalendarButton` `Dark2` consumer. The record status row is stale (n-7). | Maintenance record §2/§15. |
+| n-5 | **Resolved.** `testing-and-parity.md` now says the accent/selection roles including `OnAccentBrush` come from the palette; the contract §2 runtime-settings row says "fixed `SystemAccentColor`", not accent. | `testing-and-parity.md:186-187`; contract `:37`. |
+| n-6 | **Resolved.** Record §7 lists `AccentColor`, `OnAccent`, `Contrast`, `RelativeLuminance`, `Linear`, and the `lightOnAccent`/`darkOnAccent` constants for removal; they are the current `AvaloniaThemeApplier.cs:21-24,166-195` helpers. | Maintenance record §7; `AvaloniaThemeApplier.cs`. |
+
+#### Commands and results (round 4)
+
+- `git rev-parse HEAD` — `e8983eac4b22d5cb9b5b54be0ee30ca0ebef31c6`.
+- `git rev-parse f1a8c1a7d1ee704b121964a8c7d030773488d859` — the frozen delivery-detail design.
+- `git rev-parse main` — `19cb6ffe190e02449ce8b827706f365f2ea7afe2`; `git merge-base --is-ancestor main HEAD` — exit 0.
+- `git diff --name-status f1a8c1a..e8983ea` — only
+  `M docs/planning/reviews/step-gui-accent-propagation.md`; `git diff --stat` — 78 insertions, 2 deletions.
+- `git diff --check` — clean; `git status --short` — clean before the record edit.
+- `python3 tools/check_docs_links.py` — `Documentation links OK (204 files scanned)`.
+- `python3 tools/check_doc_math.py` — `Documentation math conventions OK (201 files scanned)`.
+- `python3 tools/check_process_consistency.py` — `Process consistency: OK`.
+- `python3 -m unittest discover -s tools/tests -t .` — 60 tests, all passed.
+- `./tools/verify.sh docs` — exit 0; strict Zensical build, DocFX 465 models with 0 warnings/0 errors, rustdoc workspace built.
+- `./tools/verify.sh policy` — exit 0; ApiCompat no breaking changes, contract artifacts current (26 files), space-group catalog current, 60 policy tests passed, SPDX/secret scan/`cargo-deny` clean.
+- A scratch Avalonia 12.1.6 headless probe under `/home/node/tmp/r4probe` (not committed, `dotnet run -c Release`)
+  for the tree selectors, chevron, TextBox pair, HC focus pair/adorners, HC CheckBox sub-states, ProgressBar, and
+  a Light→Dark switch.
+- Avalonia 12.1.6 source inspection from the extracted Fluent package under `/home/node/tmp/fluent1216`
+  (`Controls_TreeViewItem.xaml`, `Controls_CheckBox.xaml`, `ctl/AdornerLayer.xaml`,
+  `ctl/ProgressBar.xaml`, `Accents_FluentControlResources.xaml`, `BaseResources.xaml`).
+
+#### Probe evidence
+
+- **M-9 tree selectors.** A real `TreeView`/`TreeViewItem` with a child rendered in Light, Dark, and HC. The
+  direct `TreeViewItem:selected /template/ ContentPresenter#PART_HeaderPresenter` style set the realized
+  `ContentPresenter.Foreground` and the generated `TextBlock.Foreground`; the child-combinator style
+  `TreeViewItem:selected /template/ Border#PART_LayoutRoot > ContentPresenter#PART_HeaderPresenter` did not
+  apply (the realized header stayed at the direct value). The presenter's visual parent was
+  `Grid#PART_Header`. The row style set `PART_LayoutRoot.Background` to `#CCE5FF`/`#094771`/`#FFD700`, and the
+  chevron selector set `Path#ChevronPath.Fill` to `#1F1F1F`/`#FFFFFF`/`#000000`.
+- **M-11 chevron.** The realized `Path#ChevronPath` in HC was `#000000` and visible on the `#FFD700` selected
+  row; 14.97:1. The Light/Dark values were `#1F1F1F`/`#FFFFFF`.
+- **M-12 TextBox pair.** A real `TextBox` with `SelectAll()` realized `SelectionBrush`/`SelectionForegroundBrush`
+  `#007ACC`/`#FFFFFF` in Light and Dark and `#FFD700`/`#000000` in HC; the `TextPresenter` carried the same
+  pair.
+- **M-10 HC focus pair.** The HC dictionary resolved `SystemControlFocusVisualPrimaryBrush` `#FFD700` and
+  `SystemControlFocusVisualSecondaryBrush` `#000000`; a focused `Button` produced a focus adorner with a 2 px
+  `#FFD700` outer border and a 1 px `#000000` inner border.
+- **m-7 ProgressBar.** A dialog-shaped `ProgressBar` read `Foreground` `#007ACC` Light, `#248DD3` Dark, and
+  `#FFD700` HC.
+- **m-11/M-13 CheckBox.** With the design's HC keys, a checked-disabled `CheckBox` realized
+  `NormalRectangle.Background` `#000000` and `CheckGlyph.Fill` `#A0A0A0`; an unchecked pressed `CheckBox`
+  realized `NormalRectangle.Background` `#FFD700`, `PART_ContentPresenter.Foreground` `#000000`, and
+  `PART_Border.Background` transparent over the `#000000` card. The label is therefore `#000000` on
+  `#000000` (1:1) in both HC Light and HC Dark. The disabled label was `#000000` in HC Light (1:1 on black)
+  and `#FFFFFF` in HC Dark; adding `SystemControlDisabledBaseMediumLowBrush` `#000000` to the HC dictionary
+  did not change the captured `CheckBoxForegroundCheckedDisabled` alias.
+- **Theme switch.** A Light→Dark switch updated the realized `PART_LayoutRoot.Background` `#CCE5FF`→`#094771`,
+  the header foreground `#1F1F1F`→`#FFFFFF`, and the chevron `#1F1F1F`→`#FFFFFF` through `DynamicResource`;
+  the TextBox selection pair stayed `#007ACC`/`#FFFFFF`. This matches the design's theme-switch claim.
+
+#### Recomputation
+
+- Fixed floors: `#FFFFFF` on `#007ACC` 4.5106; `#000000` on `#FFD700` 14.9722; white on `#FFD700` 1.4026;
+  `#A0A0A0` on `#000000` 8.0307; `#000000` on `#000000` 1.0000.
+- Focus/derived dark: `#248DD3` on `#3C3C3C` 3.0601, `#37373D` 3.2796, `#2D2D30` 3.8085, `#252526` 4.2483,
+  `#1E1E1E` 4.6247; `#3A9CDD` on `#3C3C3C` 3.6662 and `#2D2D30` 4.5628; `#248CD1` on `#3C3C3C` 3.0188.
+- Light: `#007ACC` on `#F3F3F3` 4.0650 and `#FFFFFF` 4.5106; `#0090F0` on `#F3F3F3` 3.0292; `#1F1F1F` on
+  `#CCE5FF` 12.7305; `#FFFFFF` on `#094771` 9.7613; `#4DA6FF` on `#2D2D30` 5.3700 and `#1E1E1E` 6.5208;
+  `#005A9E` on `#F3F3F3` 6.4020 and `#FFFFFF` 7.1037.
+- On-accent glyphs: white on `#3A9CDD` 3.0089, on `#248CD1` 3.6541, on `#0090F0` 3.3613, on `#005994` 7.3515.
+- Cross-product checks: `#007ACC` on `#3C3C3C` 2.4456 and `#3A9CDD` on `#F3F3F3` 2.7116 are below 3:1, so the
+  paired test surfaces in record §8.1 are required.
+- HC: white on `#000000` 21.0000; gold on black 14.9722; the M-13 label is 1.0000.
+
+#### Findings (round 4)
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| Major | **M-13 — The HC unchecked-pressed CheckBox label is black on the black HC surface.** The design overrides `CheckBoxForegroundUncheckedPressed` to `#000000` on the assumption that the pressed fill is the label background. The Fluent CheckBox template puts the label in `PART_ContentPresenter` outside the 20 px `NormalRectangle`, and `CheckBoxBackgroundUncheckedPressed` is `SystemControlTransparentBrush`; only the box is `#FFD700`. On the HC `#000000` card the label is `#000000` on `#000000` (1:1) in both HC Light and HC Dark. A press on an unchecked shipped CheckBox (Settings/Problems) is a reachable interaction. The §8.2 realized test reads `NormalRectangle`/`CheckGlyph` and does not read the content foreground, so it would pass. | Contract §3.5 `:207`; `Controls_CheckBox.xaml:43-76,115-126`; `Accents_FluentControlResources.xaml:285,299`; probe; record §8.2; recomputation. |
+| Minor | **m-14 — HC disabled CheckBox label foreground is not overridden.** `CheckBoxForegroundCheckedDisabled`/`UncheckedDisabled`/`IndeterminateDisabled` are `StaticResource` aliases to `SystemControlDisabledBaseMediumLowBrush`; §3.4 lists the disabled fills/glyphs but not these label aliases. In HC Light the label is `#000000` on the `#000000` card (1:1); in HC Dark it is `#FFFFFF` (21:1). Adding the base key to HC did not change the captured alias. The §8.2 disabled case reads the fill/glyph, not the label; no current shipped surface disables a CheckBox, so this is inventory/test accuracy rather than a live shipped regression. | `Accents_FluentControlResources.xaml:286,290,295`; contract §3.4 `:154-162`, §3.5 `:207`; probe. |
+| Minor | **m-15 — Two documentation pages still instruct the user to change the removed accent.** `docs/getting-started/quickstart.md:57` and `docs/development/platform-checklist.md:95` still say "change theme, accent, density…"; the record §9 documentation plan lists the visual contract, `settings.md`, and `testing-and-parity.md` only. | `quickstart.md:57`; `platform-checklist.md:95`; maintenance record §9. |
+| Note | **n-7 — The maintenance record status row is stale.** §Status says "Design frozen for round 3 review. No implementation yet." while the round-4 design is frozen at `f1a8c1a`. The §15 commit list still has the `(round 4 request commit)` placeholder (expected at freeze) and lists only `cc06a67` of the round-4 commits. | Maintenance record `:15`, §15. |
+| Note | **n-8 — The neutral focus pair is listed as a palette key but its Light/Dark values are not specified.** §3.4 says the palette overrides the keys in the table, including `SystemControlFocusVisualPrimaryBrush`/`SecondaryBrush`, but the design accepts the stock neutral pair in Light/Dark and only specifies the HC values; the current `Palette.axaml` does not define the pair. A test that requires every §3.4 key to resolve from the palette in Light/Dark would fall back to Fluent (which is the intended neutral pair). State the stock values or mark the pair HC-only. | Contract §3.4 `:149-172`, §3.5 `:204-205`; `Palette.axaml`; probe. |
+| Note | **n-9 — The splitter `FocusBrush` consumer is not in the realized test list.** The design says the three splitter `FocusAdorner` borders use `Mocassin.FocusBrush` (acceptance criterion 9), but §8.1 resolves the `FocusBrush` resource and the tab pipe only, and §8.2's realized list omits the splitter adorner. The m-8 role claim is therefore source-level, not realized-test-covered. | Record §8.1-§8.2, acceptance criterion 9; `ShellView.axaml:49-55,74-80,96-102`; contract §3.6 `:239-241`. |
+
+#### Verdict (round 4)
+
+**Changes required.** M-9, M-10, and M-12 are resolved; m-7, m-9, m-10, m-12, n-4, n-5, and n-6 are resolved;
+m-8 is design-resolved with a test-coverage note. One new Major remains: the HC unchecked-pressed CheckBox label
+is black on the black HC surface (M-13). Two Minors (m-14, m-15) and three Notes (n-7, n-8, n-9) also remain.
+The design must be corrected and re-frozen; no implementation code exists on the branch.
 
 Follow-up owner: Planner (design corrections); the implementor starts only after a fresh re-review passes.
 Follow-up step: — (out-of-step maintenance fix; no step tag).
