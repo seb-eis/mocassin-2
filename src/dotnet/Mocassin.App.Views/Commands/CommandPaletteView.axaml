@@ -18,6 +18,7 @@
                  Text="{Binding SearchText}"
                  PlaceholderText="Type a command" />
         <ListBox Grid.Row="1"
+                 Classes="scroll-gutter-right"
                  automation:AutomationProperties.Name="Filtered commands"
                  Background="Transparent"
                  BorderThickness="0"

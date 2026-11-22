@@ -12,7 +12,7 @@
             VerticalAlignment="Center">
       <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
         <TextBlock Text="Settings" FontSize="{DynamicResource Mocassin.TitleFontSize}" LineHeight="{DynamicResource Mocassin.TitleLineHeight}" FontWeight="SemiBold" Foreground="{DynamicResource Mocassin.ForegroundStrongBrush}" automation:AutomationProperties.Name="Settings" />
-        <ScrollViewer Grid.Row="1">
+        <ScrollViewer Grid.Row="1" Classes="scroll-gutter-right">
           <StackPanel Spacing="14">
             <Grid ColumnDefinitions="200,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
               <TextBlock Grid.Row="0" Text="Theme" VerticalAlignment="Center" />

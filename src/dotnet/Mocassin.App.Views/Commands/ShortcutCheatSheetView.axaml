@@ -16,7 +16,7 @@
                    LineHeight="{DynamicResource Mocassin.TitleLineHeight}"
                    FontWeight="SemiBold"
                    Foreground="{DynamicResource Mocassin.ForegroundStrongBrush}" />
-        <ScrollViewer Grid.Row="1">
+        <ScrollViewer Grid.Row="1" Classes="scroll-gutter-right">
           <ItemsControl ItemsSource="{Binding Groups}">
             <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="vm:ShortcutGroup">

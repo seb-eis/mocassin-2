@@ -12,6 +12,7 @@
                  Foreground="{DynamicResource Mocassin.ForegroundMutedBrush}" />
     </Grid>
     <ScrollViewer Grid.Row="1"
+                  Classes="scroll-gutter-bottom"
                   HorizontalScrollBarVisibility="Auto"
                   VerticalScrollBarVisibility="Disabled"
                   Margin="12,0,12,4">
@@ -71,6 +72,7 @@
     </Grid>
     <Grid Grid.Row="3">
       <ListBox x:Name="Entries"
+               Classes="scroll-gutter-right"
                ItemsSource="{Binding Items}"
                automation:AutomationProperties.Name="Validation entries"
                SelectionMode="Single"

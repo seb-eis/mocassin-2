@@ -348,6 +348,11 @@ public sealed class AccentDeliveryTests
                     var pipe = selectedTab.GetVisualDescendants().OfType<Border>()
                         .First(border => border.Name == "PART_SelectedPipe");
                     AssertColor(theme.Focus, pipe.Background);
+                    Assert.Equal(2d, pipe.Height);
+                    Assert.Equal(Avalonia.Layout.VerticalAlignment.Top, pipe.VerticalAlignment);
+                    Assert.Equal(new Thickness(4, 0, 4, 0), pipe.Margin);
+                    Assert.Equal(default, pipe.CornerRadius);
+                    Assert.Equal(new Thickness(0), selectedTab.Padding);
                     var surface = theme.Name switch
                     {
                         "light" => "#F3F3F3",

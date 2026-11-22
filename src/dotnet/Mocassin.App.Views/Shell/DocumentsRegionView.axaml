@@ -14,6 +14,15 @@
       <TabControl.ItemTemplate>
         <DataTemplate x:DataType="documents:DocumentViewModel">
           <StackPanel Orientation="Horizontal" Spacing="8">
+            <ContentControl Name="TabIconSlot"
+                            Width="16"
+                            Height="16"
+                            VerticalAlignment="Center"
+                            Content="{Binding Icon}"
+                            IsVisible="{Binding Icon, Converter={x:Static ObjectConverters.IsNotNull}}"
+                            IsHitTestVisible="False"
+                            Focusable="False"
+                            automation:AutomationProperties.AccessibilityView="Raw" />
             <TextBlock Text="{Binding Title}" ToolTip.Tip="{Binding ToolTip}" VerticalAlignment="Center" />
             <TextBlock Text="*"
                        IsVisible="{Binding IsDirty}"

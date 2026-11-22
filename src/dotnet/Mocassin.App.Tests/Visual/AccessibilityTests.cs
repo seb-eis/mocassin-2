@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 using System.Globalization;
+using Avalonia;
 using System.Text.RegularExpressions;
 using Avalonia.Automation;
 using Avalonia.Automation.Peers;
@@ -332,6 +333,74 @@ public sealed class AccessibilityTests
                 $"{file} contains the colour literal {literal.Value}; use a Mocassin.* role.");
         }
     }
+
+    [Fact]
+    public Task TabsShowAFocusRingAndReserveTheCollapsedIconSlot() =>
+        HeadlessSession.DispatchAsync(
+            () =>
+            {
+                using var workspace = new TempWorkspace();
+                using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+                HeadlessSession.Pump(window);
+
+                try
+                {
+                    var console = window.GetVisualDescendants()
+                        .OfType<TabControl>()
+                        .Single(control => AutomationProperties.GetName(control) == "Console tabs");
+                    var consoleTabs = console.GetVisualDescendants().OfType<TabItem>().ToList();
+                    Assert.Equal(["Console", "Validation"], consoleTabs.Select(tab => tab.Header?.ToString()).ToList());
+
+                    var documents = window.GetVisualDescendants()
+                        .OfType<TabControl>()
+                        .Single(control => AutomationProperties.GetName(control) == "Document tabs");
+                    var documentTabs = documents.GetVisualDescendants().OfType<TabItem>().ToList();
+                    Assert.NotEmpty(documentTabs);
+
+                    foreach (var tab in consoleTabs.Concat(documentTabs))
+                    {
+                        var slot = tab.GetVisualDescendants()
+                            .OfType<ContentControl>()
+                            .Single(control => control.Name == "TabIconSlot");
+                        Assert.Equal(16d, slot.Width);
+                        Assert.Equal(16d, slot.Height);
+                        Assert.False(slot.IsVisible);
+                        Assert.False(slot.Focusable);
+                        Assert.False(slot.IsHitTestVisible);
+                        Assert.Null(slot.Content);
+                        Assert.Empty(AutomationProperties.GetName(slot) ?? string.Empty);
+                        Assert.Equal(AccessibilityView.Raw, AutomationProperties.GetAccessibilityView(slot));
+                    }
+
+                    var selectedHeader = consoleTabs.Single(tab => tab.IsSelected).Header;
+                    var focusedTab = consoleTabs[0];
+                    focusedTab.Focus();
+                    HeadlessSession.Pump(window);
+                    Assert.True(focusedTab.IsFocused);
+                    Assert.NotNull(focusedTab.FocusAdorner);
+                    var adorner = Assert.IsType<Border>(focusedTab.FocusAdorner!.Build());
+                    var probe = new Window { Content = adorner, Width = 120, Height = 120 };
+                    probe.Show();
+                    HeadlessSession.Pump(probe);
+                    Assert.Equal(new Thickness(2), adorner.BorderThickness);
+                    Assert.Equal(new CornerRadius(4, 4, 0, 0), adorner.CornerRadius);
+                    var focusBrush = Assert.IsAssignableFrom<ISolidColorBrush>(adorner.BorderBrush);
+                    Assert.Equal(
+                        Assert.IsAssignableFrom<ISolidColorBrush>(
+                            Application.Current!.Resources.TryGetResource("Mocassin.FocusBrush", null, out var value)
+                                ? value
+                                : null).Color,
+                        focusBrush.Color);
+                    probe.Close();
+                    Assert.Equal(selectedHeader, consoleTabs.Single(tab => tab.IsSelected).Header);
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
 
     [Fact]
     public Task TabOrderIsDeterministic() =>

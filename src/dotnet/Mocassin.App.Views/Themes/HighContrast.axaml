@@ -7,7 +7,6 @@
     <SolidColorBrush x:Key="Mocassin.InputBackground" Color="#000000" />
     <SolidColorBrush x:Key="Mocassin.InputBorderBrush" Color="#FFD700" />
     <SolidColorBrush x:Key="Mocassin.MenuBackground" Color="#000000" />
-    <SolidColorBrush x:Key="Mocassin.TabStripBackground" Color="#000000" />
     <SolidColorBrush x:Key="Mocassin.TabActiveBackground" Color="#000000" />
     <SolidColorBrush x:Key="Mocassin.TabInactiveBackground" Color="#000000" />
     <SolidColorBrush x:Key="Mocassin.OverlayScrim" Color="#000000" />

@@ -25,9 +25,8 @@ public sealed class ThemeContrastTests
             ["Mocassin.InputBackground"] = ("#3C3C3C", "#FFFFFF"),
             ["Mocassin.InputBorderBrush"] = ("#3C3C3C", "#CECECE"),
             ["Mocassin.MenuBackground"] = ("#1E1E1E", "#F3F3F3"),
-            ["Mocassin.TabStripBackground"] = ("#1E1E1E", "#F3F3F3"),
             ["Mocassin.TabActiveBackground"] = ("#252526", "#FFFFFF"),
-            ["Mocassin.TabInactiveBackground"] = ("#1E1E1E", "#F3F3F3"),
+            ["Mocassin.TabInactiveBackground"] = ("#2D2D30", "#ECECEC"),
             ["Mocassin.OverlayScrim"] = ("#66000000", "#66000000"),
             ["Mocassin.ForegroundBrush"] = ("#D4D4D4", "#333333"),
             ["Mocassin.ForegroundStrongBrush"] = ("#FFFFFF", "#1F1F1F"),
@@ -39,7 +38,7 @@ public sealed class ThemeContrastTests
             ["Mocassin.OnAccentBrush"] = ("#FFFFFF", "#FFFFFF"),
             ["Mocassin.FocusBrush"] = ("#248DD3", "#007ACC"),
             ["Mocassin.TabActiveForeground"] = ("#FFFFFF", "#1F1F1F"),
-            ["Mocassin.TabInactiveForeground"] = ("#9D9D9D", "#6F6F6F"),
+            ["Mocassin.TabInactiveForeground"] = ("#9D9D9D", "#616161"),
             ["Mocassin.HoverBackground"] = ("#37373D", "#E8E8E8"),
             ["Mocassin.PressedBackground"] = ("#2A2D2E", "#DCDCDC"),
             ["Mocassin.SelectedBackground"] = ("#094771", "#CCE5FF"),
@@ -489,6 +488,35 @@ public sealed class ThemeContrastTests
         AssertAtLeast("#A15C00", "#FFF4CE", 4.5);
         AssertAtLeast("#FFFFFF", "#000000", 21.0);
         AssertAtLeast("#000000", "#FFD700", 4.5);
+    }
+
+    [Fact]
+    public void TabTextAndIndicatorPairsMeetTheContractFloor()
+    {
+        // Inactive chips, active fill, and the inactive hover/pressed states.
+        AssertAtLeast("#9D9D9D", "#2D2D30", 4.5);
+        AssertAtLeast("#616161", "#ECECEC", 4.5);
+        AssertAtLeast("#FFFFFF", "#252526", 4.5);
+        AssertAtLeast("#1F1F1F", "#FFFFFF", 4.5);
+        AssertAtLeast("#D4D4D4", "#37373D", 4.5);
+        AssertAtLeast("#333333", "#E8E8E8", 4.5);
+        AssertAtLeast("#D4D4D4", "#2A2D2E", 4.5);
+        AssertAtLeast("#333333", "#DCDCDC", 4.5);
+        AssertAtLeast("#FFFFFF", "#000000", 4.5);
+        AssertAtLeast("#E0E0E0", "#000000", 4.5);
+
+        // The 2 px indicator is a meaningful non-text boundary on the tab fill.
+        foreach (var surface in new[] { "#252526", "#2D2D30" })
+        {
+            AssertAtLeast("#248DD3", surface, 3.0);
+        }
+
+        foreach (var surface in new[] { "#FFFFFF", "#ECECEC" })
+        {
+            AssertAtLeast("#007ACC", surface, 3.0);
+        }
+
+        AssertAtLeast("#FFD700", "#000000", 3.0);
     }
 
     [Fact]

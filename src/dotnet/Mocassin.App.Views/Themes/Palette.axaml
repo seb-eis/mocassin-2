@@ -9,9 +9,8 @@
       <SolidColorBrush x:Key="Mocassin.InputBackground" Color="#FFFFFF" />
       <SolidColorBrush x:Key="Mocassin.InputBorderBrush" Color="#CECECE" />
       <SolidColorBrush x:Key="Mocassin.MenuBackground" Color="#F3F3F3" />
-      <SolidColorBrush x:Key="Mocassin.TabStripBackground" Color="#F3F3F3" />
       <SolidColorBrush x:Key="Mocassin.TabActiveBackground" Color="#FFFFFF" />
-      <SolidColorBrush x:Key="Mocassin.TabInactiveBackground" Color="#F3F3F3" />
+      <SolidColorBrush x:Key="Mocassin.TabInactiveBackground" Color="#ECECEC" />
       <SolidColorBrush x:Key="Mocassin.OverlayScrim" Color="#66000000" />
       <SolidColorBrush x:Key="Mocassin.ForegroundBrush" Color="#333333" />
       <SolidColorBrush x:Key="Mocassin.ForegroundStrongBrush" Color="#1F1F1F" />
@@ -22,7 +21,7 @@
       <SolidColorBrush x:Key="Mocassin.AccentTextBrush" Color="#005A9E" />
       <SolidColorBrush x:Key="Mocassin.OnAccentBrush" Color="#FFFFFF" />
       <SolidColorBrush x:Key="Mocassin.TabActiveForeground" Color="#1F1F1F" />
-      <SolidColorBrush x:Key="Mocassin.TabInactiveForeground" Color="#6F6F6F" />
+      <SolidColorBrush x:Key="Mocassin.TabInactiveForeground" Color="#616161" />
       <SolidColorBrush x:Key="Mocassin.HoverBackground" Color="#E8E8E8" />
       <SolidColorBrush x:Key="Mocassin.PressedBackground" Color="#DCDCDC" />
       <SolidColorBrush x:Key="Mocassin.SelectedBackground" Color="#CCE5FF" />
@@ -133,14 +132,14 @@
       <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedPointerOver" Color="#1F1F1F" />
       <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedPressed" Color="#1F1F1F" />
       <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedDisabled" Color="#9A9A9A" />
-      <SolidColorBrush x:Key="TabItemHeaderBackgroundUnselected" Color="#F3F3F3" />
+      <SolidColorBrush x:Key="TabItemHeaderBackgroundUnselected" Color="#ECECEC" />
       <SolidColorBrush x:Key="TabItemHeaderBackgroundUnselectedPointerOver" Color="#E8E8E8" />
       <SolidColorBrush x:Key="TabItemHeaderBackgroundUnselectedPressed" Color="#DCDCDC" />
       <SolidColorBrush x:Key="TabItemHeaderBackgroundSelected" Color="#FFFFFF" />
       <SolidColorBrush x:Key="TabItemHeaderBackgroundSelectedPointerOver" Color="#FFFFFF" />
       <SolidColorBrush x:Key="TabItemHeaderBackgroundSelectedPressed" Color="#FFFFFF" />
       <SolidColorBrush x:Key="TabItemHeaderBackgroundDisabled" Color="#EDEDED" />
-      <SolidColorBrush x:Key="TabItemHeaderForegroundUnselected" Color="#6F6F6F" />
+      <SolidColorBrush x:Key="TabItemHeaderForegroundUnselected" Color="#616161" />
       <SolidColorBrush x:Key="TabItemHeaderForegroundUnselectedPointerOver" Color="#333333" />
       <SolidColorBrush x:Key="TabItemHeaderForegroundUnselectedPressed" Color="#333333" />
       <SolidColorBrush x:Key="TabItemHeaderForegroundSelected" Color="#1F1F1F" />
@@ -205,9 +204,8 @@
       <SolidColorBrush x:Key="Mocassin.InputBackground" Color="#FFFFFF" />
       <SolidColorBrush x:Key="Mocassin.InputBorderBrush" Color="#CECECE" />
       <SolidColorBrush x:Key="Mocassin.MenuBackground" Color="#F3F3F3" />
-      <SolidColorBrush x:Key="Mocassin.TabStripBackground" Color="#F3F3F3" />
       <SolidColorBrush x:Key="Mocassin.TabActiveBackground" Color="#FFFFFF" />
-      <SolidColorBrush x:Key="Mocassin.TabInactiveBackground" Color="#F3F3F3" />
+      <SolidColorBrush x:Key="Mocassin.TabInactiveBackground" Color="#ECECEC" />
       <SolidColorBrush x:Key="Mocassin.OverlayScrim" Color="#66000000" />
       <SolidColorBrush x:Key="Mocassin.ForegroundBrush" Color="#333333" />
       <SolidColorBrush x:Key="Mocassin.ForegroundStrongBrush" Color="#1F1F1F" />
@@ -218,7 +216,7 @@
       <SolidColorBrush x:Key="Mocassin.AccentTextBrush" Color="#005A9E" />
       <SolidColorBrush x:Key="Mocassin.OnAccentBrush" Color="#FFFFFF" />
       <SolidColorBrush x:Key="Mocassin.TabActiveForeground" Color="#1F1F1F" />
-      <SolidColorBrush x:Key="Mocassin.TabInactiveForeground" Color="#6F6F6F" />
+      <SolidColorBrush x:Key="Mocassin.TabInactiveForeground" Color="#616161" />
       <SolidColorBrush x:Key="Mocassin.HoverBackground" Color="#E8E8E8" />
       <SolidColorBrush x:Key="Mocassin.PressedBackground" Color="#DCDCDC" />
       <SolidColorBrush x:Key="Mocassin.SelectedBackground" Color="#CCE5FF" />
@@ -329,14 +327,14 @@
       <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedPointerOver" Color="#1F1F1F" />
       <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedPressed" Color="#1F1F1F" />
       <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedDisabled" Color="#9A9A9A" />
-      <SolidColorBrush x:Key="TabItemHeaderBackgroundUnselected" Color="#F3F3F3" />
+      <SolidColorBrush x:Key="TabItemHeaderBackgroundUnselected" Color="#ECECEC" />
       <SolidColorBrush x:Key="TabItemHeaderBackgroundUnselectedPointerOver" Color="#E8E8E8" />
       <SolidColorBrush x:Key="TabItemHeaderBackgroundUnselectedPressed" Color="#DCDCDC" />
       <SolidColorBrush x:Key="TabItemHeaderBackgroundSelected" Color="#FFFFFF" />
       <SolidColorBrush x:Key="TabItemHeaderBackgroundSelectedPointerOver" Color="#FFFFFF" />
       <SolidColorBrush x:Key="TabItemHeaderBackgroundSelectedPressed" Color="#FFFFFF" />
       <SolidColorBrush x:Key="TabItemHeaderBackgroundDisabled" Color="#EDEDED" />
-      <SolidColorBrush x:Key="TabItemHeaderForegroundUnselected" Color="#6F6F6F" />
+      <SolidColorBrush x:Key="TabItemHeaderForegroundUnselected" Color="#616161" />
       <SolidColorBrush x:Key="TabItemHeaderForegroundUnselectedPointerOver" Color="#333333" />
       <SolidColorBrush x:Key="TabItemHeaderForegroundUnselectedPressed" Color="#333333" />
       <SolidColorBrush x:Key="TabItemHeaderForegroundSelected" Color="#1F1F1F" />
@@ -401,9 +399,8 @@
       <SolidColorBrush x:Key="Mocassin.InputBackground" Color="#3C3C3C" />
       <SolidColorBrush x:Key="Mocassin.InputBorderBrush" Color="#3C3C3C" />
       <SolidColorBrush x:Key="Mocassin.MenuBackground" Color="#1E1E1E" />
-      <SolidColorBrush x:Key="Mocassin.TabStripBackground" Color="#1E1E1E" />
       <SolidColorBrush x:Key="Mocassin.TabActiveBackground" Color="#252526" />
-      <SolidColorBrush x:Key="Mocassin.TabInactiveBackground" Color="#1E1E1E" />
+      <SolidColorBrush x:Key="Mocassin.TabInactiveBackground" Color="#2D2D30" />
       <SolidColorBrush x:Key="Mocassin.OverlayScrim" Color="#66000000" />
       <SolidColorBrush x:Key="Mocassin.ForegroundBrush" Color="#D4D4D4" />
       <SolidColorBrush x:Key="Mocassin.ForegroundStrongBrush" Color="#FFFFFF" />
@@ -525,7 +522,7 @@
       <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedPointerOver" Color="#FFFFFF" />
       <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedPressed" Color="#FFFFFF" />
       <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedDisabled" Color="#6B6B6B" />
-      <SolidColorBrush x:Key="TabItemHeaderBackgroundUnselected" Color="#1E1E1E" />
+      <SolidColorBrush x:Key="TabItemHeaderBackgroundUnselected" Color="#2D2D30" />
       <SolidColorBrush x:Key="TabItemHeaderBackgroundUnselectedPointerOver" Color="#37373D" />
       <SolidColorBrush x:Key="TabItemHeaderBackgroundUnselectedPressed" Color="#2A2D2E" />
       <SolidColorBrush x:Key="TabItemHeaderBackgroundSelected" Color="#252526" />

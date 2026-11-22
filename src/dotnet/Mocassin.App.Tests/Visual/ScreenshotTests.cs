@@ -1,14 +1,19 @@
 // SPDX-License-Identifier: MIT
 
 using Avalonia;
+using Avalonia.Automation;
+using Avalonia.Controls;
 using Avalonia.Headless;
-using System.Runtime.InteropServices;
+using Avalonia.Input;
 using Avalonia.Media.Imaging;
+using Avalonia.VisualTree;
+using System.Runtime.InteropServices;
 using Microsoft.Extensions.DependencyInjection;
 using Mocassin.App.Composition;
 using Mocassin.App.Tests.TestSupport;
 using Mocassin.App.ViewModels.Settings;
 using Mocassin.App.ViewModels.Shell;
+using Mocassin.App.Views.Commands;
 using Mocassin.App.Views.Shell;
 using Mocassin.App.Views.Theming;
 
@@ -75,14 +80,93 @@ public sealed class ScreenshotTests
                     (_, shell) => shell.Settings.Open());
             });
 
-    private static void Capture(string name, AppSettings settings, Action<ShellWindow, ShellViewModel>? configure = null)
+    [Fact]
+    public Task ThePaletteCheatSheetAndTabHoverHaveBaselines() =>
+        HeadlessSession.DispatchAsync(
+            () =>
+            {
+                if (!OperatingSystem.IsLinux())
+                {
+                    return;
+                }
+
+                foreach (var (name, theme) in new[]
+                {
+                    ("light-palette", ThemeSelection.Light),
+                    ("dark-palette", ThemeSelection.Dark),
+                })
+                {
+                    Capture(
+                        name,
+                        new AppSettings { Theme = theme },
+                        (_, shell) => shell.ShowPaletteCommand.Execute(null),
+                        (window, _) =>
+                        {
+                            var list = window.GetVisualDescendants().OfType<ListBox>()
+                                .Single(control => AutomationProperties.GetName(control) == "Filtered commands");
+                            var scroll = list.GetVisualDescendants().OfType<ScrollViewer>()
+                                .Single(viewer => viewer.Name == "PART_ScrollViewer");
+                            Assert.True(
+                                scroll.Extent.Height > scroll.Viewport.Height,
+                                $"{name}: the palette does not scroll.");
+                            scroll.Offset = new Vector(0, scroll.Extent.Height - scroll.Viewport.Height);
+                        });
+                }
+
+                foreach (var (name, theme) in new[]
+                {
+                    ("light-cheatsheet", ThemeSelection.Light),
+                    ("dark-cheatsheet", ThemeSelection.Dark),
+                })
+                {
+                    Capture(
+                        name,
+                        new AppSettings { Theme = theme },
+                        (_, shell) => shell.ShowShortcutsCommand.Execute(null),
+                        (window, _) =>
+                        {
+                            var view = window.GetVisualDescendants().OfType<ShortcutCheatSheetView>().Single();
+                            var scroll = view.GetVisualDescendants().OfType<ScrollViewer>().First();
+                            Assert.True(
+                                scroll.Extent.Height > scroll.Viewport.Height,
+                                $"{name}: the cheat sheet does not scroll.");
+                            scroll.Offset = new Vector(0, scroll.Extent.Height - scroll.Viewport.Height);
+                        });
+                }
+
+                Capture(
+                    "dark-tab-hover",
+                    new AppSettings { Theme = ThemeSelection.Dark },
+                    (window, _) =>
+                    {
+                        var inactive = window.GetVisualDescendants()
+                            .OfType<TabControl>()
+                            .Single(control => AutomationProperties.GetName(control) == "Console tabs")
+                            .GetVisualDescendants()
+                            .OfType<TabItem>()
+                            .Single(tab => !tab.IsSelected);
+                        var point = inactive.TranslatePoint(
+                            new Point(inactive.Bounds.Width / 2, inactive.Bounds.Height / 2),
+                            window);
+                        Assert.NotNull(point);
+                        window.MouseMove(point.Value, RawInputModifiers.None);
+                    });
+            });
+
+    private static void Capture(
+        string name,
+        AppSettings settings,
+        Action<ShellWindow, ShellViewModel>? configure = null,
+        Action<ShellWindow, ShellViewModel>? prepareRealized = null,
+        double width = 1000,
+        double height = 700)
     {
         using var workspace = new TempWorkspace();
         using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
         var window = host.Services.GetRequiredService<ShellWindow>();
         new AvaloniaThemeApplier().Apply(settings);
-        window.Width = 1000;
-        window.Height = 700;
+        window.Width = width;
+        window.Height = height;
         window.Show();
         HeadlessSession.Pump(window);
         try
@@ -90,6 +174,12 @@ public sealed class ScreenshotTests
             if (configure is not null)
             {
                 configure(window, Assert.IsType<ShellViewModel>(window.DataContext));
+                HeadlessSession.Pump(window);
+            }
+
+            if (prepareRealized is not null)
+            {
+                prepareRealized(window, Assert.IsType<ShellViewModel>(window.DataContext));
                 HeadlessSession.Pump(window);
             }
 

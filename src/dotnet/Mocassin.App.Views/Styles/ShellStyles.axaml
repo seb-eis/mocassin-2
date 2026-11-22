@@ -97,11 +97,50 @@
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Foreground" Value="{DynamicResource Mocassin.ForegroundBrush}" />
   </Style>
+  <!--
+    Stock Fluent TabItem: the header inset moves from the padded layout root to the content presenter so the
+    selected pipe can span the tab. Only the top corners are rounded; the selected fill equals the content.
+  -->
   <Style Selector="TabItem">
     <Setter Property="MinHeight" Value="{DynamicResource Mocassin.TabHeight}" />
-    <Setter Property="Padding" Value="{DynamicResource Mocassin.RegionHeaderPadding}" />
+    <Setter Property="Padding" Value="0" />
     <Setter Property="CornerRadius" Value="{DynamicResource Mocassin.RadiusTabTop}" />
     <Setter Property="FontSize" Value="{DynamicResource Mocassin.BodyFontSize}" />
+    <Setter Property="FocusAdorner">
+      <Template>
+        <Border BorderBrush="{DynamicResource Mocassin.FocusBrush}"
+                BorderThickness="{DynamicResource Mocassin.FocusThickness}"
+                CornerRadius="{DynamicResource Mocassin.RadiusTabTop}" />
+      </Template>
+    </Setter>
+  </Style>
+  <Style Selector="TabItem /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Margin" Value="{DynamicResource TabItemHeaderMargin}" />
+  </Style>
+  <Style Selector="TabItem:selected /template/ Border#PART_SelectedPipe">
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="Margin" Value="{DynamicResource Mocassin.TabIndicatorInset}" />
+    <Setter Property="CornerRadius" Value="0" />
+  </Style>
+
+  <!--
+    Scroll gutters. Fluent's auto-hiding scrollbar overlays the content, so the content is inset by the bar width
+    plus a 4 px margin. ListBox and TreeView forward Padding to their internal items presenter.
+  -->
+  <Style Selector="ScrollViewer.scroll-gutter-right, ListBox.scroll-gutter-right, TreeView.scroll-gutter-right">
+    <Setter Property="Padding" Value="{DynamicResource Mocassin.ScrollGutterRight}" />
+  </Style>
+  <Style Selector="ScrollViewer.scroll-gutter-bottom, ListBox.scroll-gutter-bottom, TreeView.scroll-gutter-bottom">
+    <Setter Property="Padding" Value="{DynamicResource Mocassin.ScrollGutterBottom}" />
+  </Style>
+  <Style Selector="ScrollViewer.scroll-gutter-both, ListBox.scroll-gutter-both, TreeView.scroll-gutter-both">
+    <Setter Property="Padding" Value="{DynamicResource Mocassin.ScrollGutterBoth}" />
+  </Style>
+  <Style Selector="TextBox.scroll-gutter-both /template/ ScrollViewer#PART_ScrollViewer">
+    <Setter Property="Padding" Value="{DynamicResource Mocassin.ScrollGutterBoth}" />
+  </Style>
+  <Style Selector="ComboBox /template/ ScrollViewer">
+    <Setter Property="Padding" Value="{DynamicResource Mocassin.ScrollGutterRight}" />
   </Style>
 
   <Style Selector="GridSplitter">

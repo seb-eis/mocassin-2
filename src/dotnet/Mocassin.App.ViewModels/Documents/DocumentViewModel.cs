@@ -30,6 +30,11 @@ internal abstract partial class DocumentViewModel : ObservableObject
     public abstract string Title { get; }
 
     /// <summary>
+    /// Gets the optional tab icon. The icon pass supplies it later; it is <see langword="null"/> today.
+    /// </summary>
+    public virtual object? Icon => null;
+
+    /// <summary>
     /// Gets the optional tooltip, normally the full path.
     /// </summary>
     public virtual string? ToolTip => null;
