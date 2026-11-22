@@ -52,7 +52,7 @@
       <SolidColorBrush x:Key="SystemControlDisabledBaseLowBrush" Color="#EDEDED" />
       <SolidColorBrush x:Key="SystemControlDisabledChromeDisabledLowBrush" Color="#9A9A9A" />
       <SolidColorBrush x:Key="SystemControlHighlightAccentBrush" Color="#007ACC" />
-      <SolidColorBrush x:Key="SystemControlHighlightAltBaseHighBrush" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="SystemControlHighlightAltBaseHighBrush" Color="#1F1F1F" />
       <SolidColorBrush x:Key="SystemControlHighlightListLowBrush" Color="#E8E8E8" />
       <SolidColorBrush x:Key="SystemControlHighlightListMediumBrush" Color="#DCDCDC" />
       <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="#CCE5FF" />
@@ -162,6 +162,40 @@
       <SolidColorBrush x:Key="MenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOver" Color="#333333" />
       <SolidColorBrush x:Key="MenuFlyoutItemKeyboardAcceleratorTextForegroundPressed" Color="#333333" />
       <SolidColorBrush x:Key="MenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled" Color="#9A9A9A" />
+
+      <SolidColorBrush x:Key="Mocassin.FocusBrush" Color="#007ACC" />
+      <Color x:Key="SystemAccentColorLight1">#0090F0</Color>
+      <Color x:Key="SystemAccentColorLight2">#0090F0</Color>
+      <Color x:Key="SystemAccentColorLight3">#0090F0</Color>
+      <Color x:Key="SystemAccentColorDark1">#005994</Color>
+      <Color x:Key="SystemAccentColorDark2">#003F6A</Color>
+      <Color x:Key="SystemAccentColorDark3">#002138</Color>
+      <SolidColorBrush x:Key="SystemControlForegroundAccentBrush" Color="#007ACC" />
+      <SolidColorBrush x:Key="SystemControlHighlightAccent2RevealBackgroundBrush" Color="#CCE5FF" />
+      <SolidColorBrush x:Key="SystemControlHighlightAccent3RevealBackgroundBrush" Color="#CCE5FF" />
+      <SolidColorBrush x:Key="SystemControlHighlightAltChromeWhiteBrush" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="SystemControlHighlightChromeWhiteBrush" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="SystemControlFocusVisualPrimaryBrush" Color="#000000" />
+      <SolidColorBrush x:Key="SystemControlFocusVisualSecondaryBrush" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillChecked" Color="#007ACC" />
+      <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillIndeterminate" Color="#007ACC" />
+      <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeIndeterminate" Color="#007ACC" />
+      <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundChecked" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedPointerOver" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedPressed" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundIndeterminate" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundIndeterminatePointerOver" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundIndeterminatePressed" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="CheckBoxForegroundUncheckedPressed" Color="#333333" />
+      <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillUncheckedPressed" Color="#007ACC" />
+      <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedDisabled" Color="#EDEDED" />
+      <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillIndeterminateDisabled" Color="#EDEDED" />
+      <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedDisabled" Color="#9A9A9A" />
+      <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundIndeterminateDisabled" Color="#9A9A9A" />
+      <SolidColorBrush x:Key="SliderThumbBackground" Color="#007ACC" />
+      <SolidColorBrush x:Key="SliderTrackValueFill" Color="#007ACC" />
+      <SolidColorBrush x:Key="SliderTrackValueFillPointerOver" Color="#0090F0" />
+      <SolidColorBrush x:Key="SliderTrackValueFillPressed" Color="#005994" />
     </ResourceDictionary>
     <ResourceDictionary x:Key="Light">
       <SolidColorBrush x:Key="Mocassin.ChromeBackground" Color="#F3F3F3" />
@@ -214,7 +248,7 @@
       <SolidColorBrush x:Key="SystemControlDisabledBaseLowBrush" Color="#EDEDED" />
       <SolidColorBrush x:Key="SystemControlDisabledChromeDisabledLowBrush" Color="#9A9A9A" />
       <SolidColorBrush x:Key="SystemControlHighlightAccentBrush" Color="#007ACC" />
-      <SolidColorBrush x:Key="SystemControlHighlightAltBaseHighBrush" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="SystemControlHighlightAltBaseHighBrush" Color="#1F1F1F" />
       <SolidColorBrush x:Key="SystemControlHighlightListLowBrush" Color="#E8E8E8" />
       <SolidColorBrush x:Key="SystemControlHighlightListMediumBrush" Color="#DCDCDC" />
       <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="#CCE5FF" />
@@ -324,6 +358,40 @@
       <SolidColorBrush x:Key="MenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOver" Color="#333333" />
       <SolidColorBrush x:Key="MenuFlyoutItemKeyboardAcceleratorTextForegroundPressed" Color="#333333" />
       <SolidColorBrush x:Key="MenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled" Color="#9A9A9A" />
+
+      <SolidColorBrush x:Key="Mocassin.FocusBrush" Color="#007ACC" />
+      <Color x:Key="SystemAccentColorLight1">#0090F0</Color>
+      <Color x:Key="SystemAccentColorLight2">#0090F0</Color>
+      <Color x:Key="SystemAccentColorLight3">#0090F0</Color>
+      <Color x:Key="SystemAccentColorDark1">#005994</Color>
+      <Color x:Key="SystemAccentColorDark2">#003F6A</Color>
+      <Color x:Key="SystemAccentColorDark3">#002138</Color>
+      <SolidColorBrush x:Key="SystemControlForegroundAccentBrush" Color="#007ACC" />
+      <SolidColorBrush x:Key="SystemControlHighlightAccent2RevealBackgroundBrush" Color="#CCE5FF" />
+      <SolidColorBrush x:Key="SystemControlHighlightAccent3RevealBackgroundBrush" Color="#CCE5FF" />
+      <SolidColorBrush x:Key="SystemControlHighlightAltChromeWhiteBrush" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="SystemControlHighlightChromeWhiteBrush" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="SystemControlFocusVisualPrimaryBrush" Color="#000000" />
+      <SolidColorBrush x:Key="SystemControlFocusVisualSecondaryBrush" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillChecked" Color="#007ACC" />
+      <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillIndeterminate" Color="#007ACC" />
+      <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeIndeterminate" Color="#007ACC" />
+      <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundChecked" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedPointerOver" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedPressed" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundIndeterminate" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundIndeterminatePointerOver" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundIndeterminatePressed" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="CheckBoxForegroundUncheckedPressed" Color="#333333" />
+      <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillUncheckedPressed" Color="#007ACC" />
+      <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedDisabled" Color="#EDEDED" />
+      <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillIndeterminateDisabled" Color="#EDEDED" />
+      <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedDisabled" Color="#9A9A9A" />
+      <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundIndeterminateDisabled" Color="#9A9A9A" />
+      <SolidColorBrush x:Key="SliderThumbBackground" Color="#007ACC" />
+      <SolidColorBrush x:Key="SliderTrackValueFill" Color="#007ACC" />
+      <SolidColorBrush x:Key="SliderTrackValueFillPointerOver" Color="#0090F0" />
+      <SolidColorBrush x:Key="SliderTrackValueFillPressed" Color="#005994" />
     </ResourceDictionary>
     <ResourceDictionary x:Key="Dark">
       <SolidColorBrush x:Key="Mocassin.ChromeBackground" Color="#1E1E1E" />
@@ -375,7 +443,7 @@
       <SolidColorBrush x:Key="SystemControlDisabledBaseMediumLowBrush" Color="#2A2A2A" />
       <SolidColorBrush x:Key="SystemControlDisabledBaseLowBrush" Color="#2A2A2A" />
       <SolidColorBrush x:Key="SystemControlDisabledChromeDisabledLowBrush" Color="#6B6B6B" />
-      <SolidColorBrush x:Key="SystemControlHighlightAccentBrush" Color="#007ACC" />
+      <SolidColorBrush x:Key="SystemControlHighlightAccentBrush" Color="#248DD3" />
       <SolidColorBrush x:Key="SystemControlHighlightAltBaseHighBrush" Color="#FFFFFF" />
       <SolidColorBrush x:Key="SystemControlHighlightListLowBrush" Color="#37373D" />
       <SolidColorBrush x:Key="SystemControlHighlightListMediumBrush" Color="#2A2D2E" />
@@ -417,7 +485,7 @@
       <SolidColorBrush x:Key="TextControlBackgroundDisabled" Color="#2A2A2A" />
       <SolidColorBrush x:Key="TextControlBorderBrush" Color="#3C3C3C" />
       <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="#3C3C3C" />
-      <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#007ACC" />
+      <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#248DD3" />
       <SolidColorBrush x:Key="TextControlBorderBrushDisabled" Color="#3C3C3C" />
       <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="#9D9D9D" />
       <SolidColorBrush x:Key="TextControlPlaceholderForegroundPointerOver" Color="#9D9D9D" />
@@ -471,7 +539,7 @@
       <SolidColorBrush x:Key="TabItemHeaderForegroundSelectedPointerOver" Color="#FFFFFF" />
       <SolidColorBrush x:Key="TabItemHeaderForegroundSelectedPressed" Color="#FFFFFF" />
       <SolidColorBrush x:Key="TabItemHeaderForegroundDisabled" Color="#6B6B6B" />
-      <SolidColorBrush x:Key="TabItemHeaderSelectedPipeFill" Color="#007ACC" />
+      <SolidColorBrush x:Key="TabItemHeaderSelectedPipeFill" Color="#248DD3" />
       <x:Double x:Key="TabItemMinHeight">32</x:Double>
       <Thickness x:Key="TabItemHeaderMargin">8,3</Thickness>
       <SolidColorBrush x:Key="MenuFlyoutPresenterBackground" Color="#2D2D30" />
@@ -486,6 +554,40 @@
       <SolidColorBrush x:Key="MenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOver" Color="#D4D4D4" />
       <SolidColorBrush x:Key="MenuFlyoutItemKeyboardAcceleratorTextForegroundPressed" Color="#D4D4D4" />
       <SolidColorBrush x:Key="MenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled" Color="#6B6B6B" />
+
+      <SolidColorBrush x:Key="Mocassin.FocusBrush" Color="#248DD3" />
+      <Color x:Key="SystemAccentColorLight1">#3A9CDD</Color>
+      <Color x:Key="SystemAccentColorLight2">#3A9CDD</Color>
+      <Color x:Key="SystemAccentColorLight3">#3A9CDD</Color>
+      <Color x:Key="SystemAccentColorDark1">#248CD1</Color>
+      <Color x:Key="SystemAccentColorDark2">#248CD1</Color>
+      <Color x:Key="SystemAccentColorDark3">#248CD1</Color>
+      <SolidColorBrush x:Key="SystemControlForegroundAccentBrush" Color="#007ACC" />
+      <SolidColorBrush x:Key="SystemControlHighlightAccent2RevealBackgroundBrush" Color="#094771" />
+      <SolidColorBrush x:Key="SystemControlHighlightAccent3RevealBackgroundBrush" Color="#094771" />
+      <SolidColorBrush x:Key="SystemControlHighlightAltChromeWhiteBrush" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="SystemControlHighlightChromeWhiteBrush" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="SystemControlFocusVisualPrimaryBrush" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="SystemControlFocusVisualSecondaryBrush" Color="#000000" />
+      <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillChecked" Color="#007ACC" />
+      <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillIndeterminate" Color="#007ACC" />
+      <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeIndeterminate" Color="#007ACC" />
+      <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundChecked" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedPointerOver" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedPressed" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundIndeterminate" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundIndeterminatePointerOver" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundIndeterminatePressed" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="CheckBoxForegroundUncheckedPressed" Color="#D4D4D4" />
+      <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillUncheckedPressed" Color="#007ACC" />
+      <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedDisabled" Color="#2A2A2A" />
+      <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillIndeterminateDisabled" Color="#2A2A2A" />
+      <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedDisabled" Color="#6B6B6B" />
+      <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundIndeterminateDisabled" Color="#6B6B6B" />
+      <SolidColorBrush x:Key="SliderThumbBackground" Color="#007ACC" />
+      <SolidColorBrush x:Key="SliderTrackValueFill" Color="#007ACC" />
+      <SolidColorBrush x:Key="SliderTrackValueFillPointerOver" Color="#3A9CDD" />
+      <SolidColorBrush x:Key="SliderTrackValueFillPressed" Color="#248CD1" />
     </ResourceDictionary>
   </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>

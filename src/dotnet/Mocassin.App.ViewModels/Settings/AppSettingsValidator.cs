@@ -32,13 +32,6 @@ internal static class AppSettingsValidator
             fontScale = SettingsDefaults.DefaultFontScale;
         }
 
-        var accent = settings.Accent;
-        if (accent is not null && !AccentPalette.IsKnown(accent))
-        {
-            warnings.Add($"The accent '{accent}' is not in the fixed palette; the default accent was used.");
-            accent = null;
-        }
-
         var layout = settings.Layout;
         var leftFraction = Fraction(
             layout.LeftFraction,
@@ -90,7 +83,6 @@ internal static class AppSettingsValidator
         {
             Format = SettingsDefaults.Format,
             SchemaVersion = SettingsDefaults.SchemaVersion,
-            Accent = accent,
             FontScale = fontScale,
             Culture = string.IsNullOrWhiteSpace(settings.Culture) ? "en" : settings.Culture,
             Layout = normalizedLayout,

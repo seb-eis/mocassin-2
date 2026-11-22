@@ -41,7 +41,7 @@
     <SolidColorBrush x:Key="SystemControlForegroundBaseMediumBrush" Color="#E0E0E0" />
     <SolidColorBrush x:Key="SystemControlForegroundBaseMediumLowBrush" Color="#FFD700" />
     <SolidColorBrush x:Key="SystemControlForegroundBaseLowBrush" Color="#FFD700" />
-    <SolidColorBrush x:Key="SystemControlForegroundChromeWhiteBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="SystemControlForegroundChromeWhiteBrush" Color="#000000" />
     <SolidColorBrush x:Key="SystemControlBackgroundAltHighBrush" Color="#000000" />
     <SolidColorBrush x:Key="SystemControlBackgroundChromeMediumLowBrush" Color="#000000" />
     <SolidColorBrush x:Key="SystemControlTransientBackgroundBrush" Color="#000000" />
@@ -157,6 +157,42 @@
     <SolidColorBrush x:Key="MenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOver" Color="#000000" />
     <SolidColorBrush x:Key="MenuFlyoutItemKeyboardAcceleratorTextForegroundPressed" Color="#000000" />
     <SolidColorBrush x:Key="MenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled" Color="#A0A0A0" />
+    <SolidColorBrush x:Key="Mocassin.FocusBrush" Color="#FFD700" />
+    <Color x:Key="SystemAccentColorLight1">#FFD700</Color>
+    <Color x:Key="SystemAccentColorLight2">#FFD700</Color>
+    <Color x:Key="SystemAccentColorLight3">#FFD700</Color>
+    <Color x:Key="SystemAccentColorDark1">#FFD700</Color>
+    <Color x:Key="SystemAccentColorDark2">#FFD700</Color>
+    <Color x:Key="SystemAccentColorDark3">#FFD700</Color>
+    <SolidColorBrush x:Key="SystemControlForegroundAccentBrush" Color="#FFD700" />
+    <SolidColorBrush x:Key="SystemControlHighlightAccent2RevealBackgroundBrush" Color="#FFD700" />
+    <SolidColorBrush x:Key="SystemControlHighlightAccent3RevealBackgroundBrush" Color="#FFD700" />
+    <SolidColorBrush x:Key="SystemControlHighlightAltChromeWhiteBrush" Color="#000000" />
+    <SolidColorBrush x:Key="SystemControlHighlightChromeWhiteBrush" Color="#000000" />
+    <SolidColorBrush x:Key="SystemControlFocusVisualPrimaryBrush" Color="#FFD700" />
+    <SolidColorBrush x:Key="SystemControlFocusVisualSecondaryBrush" Color="#000000" />
+    <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillChecked" Color="#FFD700" />
+    <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillIndeterminate" Color="#FFD700" />
+    <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeIndeterminate" Color="#FFD700" />
+    <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundChecked" Color="#000000" />
+    <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedPointerOver" Color="#000000" />
+    <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedPressed" Color="#000000" />
+    <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundIndeterminate" Color="#000000" />
+    <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundIndeterminatePointerOver" Color="#000000" />
+    <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundIndeterminatePressed" Color="#000000" />
+    <SolidColorBrush x:Key="CheckBoxForegroundUncheckedPressed" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="CheckBoxForegroundUncheckedDisabled" Color="#A0A0A0" />
+    <SolidColorBrush x:Key="CheckBoxForegroundCheckedDisabled" Color="#A0A0A0" />
+    <SolidColorBrush x:Key="CheckBoxForegroundIndeterminateDisabled" Color="#A0A0A0" />
+    <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillUncheckedPressed" Color="#FFD700" />
+    <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedDisabled" Color="#000000" />
+    <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillIndeterminateDisabled" Color="#000000" />
+    <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedDisabled" Color="#A0A0A0" />
+    <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundIndeterminateDisabled" Color="#A0A0A0" />
+    <SolidColorBrush x:Key="SliderThumbBackground" Color="#FFD700" />
+    <SolidColorBrush x:Key="SliderTrackValueFill" Color="#FFD700" />
+    <SolidColorBrush x:Key="SliderTrackValueFillPointerOver" Color="#FFD700" />
+    <SolidColorBrush x:Key="SliderTrackValueFillPressed" Color="#FFD700" />
     <Thickness x:Key="ButtonBorderThemeThickness">1</Thickness>
     <x:Double x:Key="TabItemMinHeight">32</x:Double>
     <Thickness x:Key="TabItemHeaderMargin">8,3</Thickness>

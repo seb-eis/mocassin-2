@@ -51,6 +51,8 @@
     <Setter Property="CornerRadius" Value="{DynamicResource Mocassin.RadiusControl}" />
     <Setter Property="BorderThickness" Value="{DynamicResource Mocassin.ControlBorderThickness}" />
     <Setter Property="Transitions" Value="{DynamicResource Mocassin.Transitions}" />
+    <Setter Property="SelectionBrush" Value="{DynamicResource Mocassin.AccentBrush}" />
+    <Setter Property="SelectionForegroundBrush" Value="{DynamicResource Mocassin.OnAccentBrush}" />
   </Style>
   <Style Selector="ComboBox">
     <Setter Property="MinHeight" Value="{DynamicResource Mocassin.ControlMinHeight}" />
@@ -59,6 +61,27 @@
   </Style>
   <Style Selector="ListBoxItem">
     <Setter Property="Padding" Value="{DynamicResource Mocassin.ItemPadding}" />
+  </Style>
+
+  <!--
+    Fluent captures TreeViewItemBackgroundSelected* in StaticResource aliases, and its header/chevron foreground
+    does not follow the palette alias. These targeted selected-state styles are the delivery point for the fixed
+    selected fill and text. They are styles, not a control template.
+  -->
+  <Style Selector="TreeViewItem:selected /template/ Border#PART_LayoutRoot">
+    <Setter Property="Background" Value="{DynamicResource Mocassin.SelectedBackground}" />
+  </Style>
+  <Style Selector="TreeViewItem:selected /template/ Border#PART_LayoutRoot:pointerover">
+    <Setter Property="Background" Value="{DynamicResource Mocassin.SelectedBackground}" />
+  </Style>
+  <Style Selector="TreeViewItem:pressed:selected /template/ Border#PART_LayoutRoot:pointerover">
+    <Setter Property="Background" Value="{DynamicResource Mocassin.SelectedBackground}" />
+  </Style>
+  <Style Selector="TreeViewItem:selected /template/ ContentPresenter#PART_HeaderPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource Mocassin.SelectedForeground}" />
+  </Style>
+  <Style Selector="TreeViewItem:selected /template/ ToggleButton#PART_ExpandCollapseChevron /template/ Path#ChevronPath">
+    <Setter Property="Fill" Value="{DynamicResource Mocassin.SelectedForeground}" />
   </Style>
 
   <Style Selector="Menu">

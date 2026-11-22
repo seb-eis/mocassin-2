@@ -20,8 +20,6 @@ internal sealed class AvaloniaThemeApplier : IThemeApplier
     private static readonly Uri resourceBaseUri = new("avares://Mocassin.App.Views/");
     private static readonly Color defaultAccent = Color.Parse("#007ACC");
     private static readonly Color highContrastAccent = Color.Parse("#FFD700");
-    private static readonly Color lightOnAccent = Color.Parse("#FFFFFF");
-    private static readonly Color darkOnAccent = Color.Parse("#000000");
 
     private static ResourceDictionary? highContrast;
     private static ResourceDictionary? compactDensity;
@@ -103,27 +101,12 @@ internal sealed class AvaloniaThemeApplier : IThemeApplier
 
     private static void ApplyAccent(Application application, AppSettings settings)
     {
-        if (settings.HighContrast)
-        {
-            application.Resources["SystemAccentColor"] = highContrastAccent;
-            application.Resources.Remove("Mocassin.AccentBrush");
-            application.Resources.Remove("Mocassin.OnAccentBrush");
-            return;
-        }
-
-        var color = AccentColor(settings.Accent) ?? defaultAccent;
-        application.Resources["SystemAccentColor"] = color;
-        if (settings.Accent is null)
-        {
-            // The palette owns the default accent; removing the direct resource keeps a theme dictionary able to
-            // supply the value and keeps the precedence rule in the visual contract intact.
-            application.Resources.Remove("Mocassin.AccentBrush");
-            application.Resources.Remove("Mocassin.OnAccentBrush");
-            return;
-        }
-
-        application.Resources["Mocassin.AccentBrush"] = new SolidColorBrush(color);
-        application.Resources["Mocassin.OnAccentBrush"] = new SolidColorBrush(OnAccent(color));
+        // The accent is a fixed family owned by the palette theme dictionaries. Only the Fluent base colour is a
+        // direct runtime resource; the fixed roles and aliases must stay in a theme dictionary so a Light/Dark
+        // switch can supply them.
+        application.Resources["SystemAccentColor"] = settings.HighContrast ? highContrastAccent : defaultAccent;
+        application.Resources.Remove("Mocassin.AccentBrush");
+        application.Resources.Remove("Mocassin.OnAccentBrush");
     }
 
     private static void SetDictionary(
@@ -132,15 +115,18 @@ internal sealed class AvaloniaThemeApplier : IThemeApplier
         ref ResourceDictionary? slot,
         bool enabled)
     {
-        if (enabled && slot is null)
+        if (enabled)
         {
-            if (AvaloniaXamlLoader.Load(uri, resourceBaseUri) is ResourceDictionary dictionary)
+            if (slot is null || !application.Resources.MergedDictionaries.Contains(slot))
             {
-                application.Resources.MergedDictionaries.Add(dictionary);
-                slot = dictionary;
+                if (AvaloniaXamlLoader.Load(uri, resourceBaseUri) is ResourceDictionary dictionary)
+                {
+                    application.Resources.MergedDictionaries.Add(dictionary);
+                    slot = dictionary;
+                }
             }
         }
-        else if (!enabled && slot is not null)
+        else if (slot is not null)
         {
             application.Resources.MergedDictionaries.Remove(slot);
             slot = null;
@@ -162,35 +148,4 @@ internal sealed class AvaloniaThemeApplier : IThemeApplier
 
         return transitions;
     }
-
-    private static Color OnAccent(Color accent) =>
-        Contrast(lightOnAccent, accent) >= Contrast(darkOnAccent, accent) ? lightOnAccent : darkOnAccent;
-
-    private static double Contrast(Color first, Color second)
-    {
-        var light = Math.Max(RelativeLuminance(first), RelativeLuminance(second));
-        var dark = Math.Min(RelativeLuminance(first), RelativeLuminance(second));
-        return (light + 0.05) / (dark + 0.05);
-    }
-
-    private static double RelativeLuminance(Color color) =>
-        (0.2126 * Linear(color.R)) + (0.7152 * Linear(color.G)) + (0.0722 * Linear(color.B));
-
-    private static double Linear(byte channel)
-    {
-        var value = channel / 255d;
-        return value <= 0.04045 ? value / 12.92 : Math.Pow((value + 0.055) / 1.055, 2.4);
-    }
-
-    private static Color? AccentColor(string? accent) =>
-        accent switch
-        {
-            "blue" => defaultAccent,
-            "teal" => Color.Parse("#008B8B"),
-            "green" => Color.Parse("#2E7D32"),
-            "amber" => Color.Parse("#B26A00"),
-            "violet" => Color.Parse("#6A4C93"),
-            "rose" => Color.Parse("#B0004F"),
-            _ => null,
-        };
 }

@@ -23,9 +23,6 @@ internal sealed partial class SettingsViewModel : ObservableObject
     private ThemeSelection theme;
 
     [ObservableProperty]
-    private string selectedAccent = "default";
-
-    [ObservableProperty]
     private Density density;
 
     [ObservableProperty]
@@ -104,11 +101,6 @@ internal sealed partial class SettingsViewModel : ObservableObject
     ];
 
     /// <summary>
-    /// Gets the accent choices, with <c>default</c> meaning the Fluent accent.
-    /// </summary>
-    public IReadOnlyList<string> Accents { get; } = ["default", .. AccentPalette.Keys];
-
-    /// <summary>
     /// Gets the editable recent-file list.
     /// </summary>
     public ObservableCollection<RecentFile> RecentFiles { get; } = [];
@@ -147,7 +139,6 @@ internal sealed partial class SettingsViewModel : ObservableObject
     public void LoadFrom(AppSettings value)
     {
         Theme = value.Theme;
-        SelectedAccent = value.Accent ?? "default";
         Density = value.Density;
         FontScale = value.FontScale;
         HighContrast = value.HighContrast;
@@ -187,7 +178,6 @@ internal sealed partial class SettingsViewModel : ObservableObject
         var updated = settings.Current with
         {
             Theme = Theme,
-            Accent = string.Equals(SelectedAccent, "default", StringComparison.Ordinal) ? null : SelectedAccent,
             Density = Density,
             FontScale = FontScale,
             HighContrast = HighContrast,
