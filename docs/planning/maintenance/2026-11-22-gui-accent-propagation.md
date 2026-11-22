@@ -434,7 +434,8 @@ Owner decisions:
 | Branch | `fix/gui-accent-propagation` |
 | Implementation commits | `8021cb9` (app), `e3a3f4e` (tests) |
 | Base | `main` at `19cb6ffe190e02449ce8b827706f365f2ea7afe2` |
-| Full gate | `./tools/verify.sh all --require` — exit 0 |
+| Full gate | `./tools/verify.sh all --require` — exit 0 on the final code+test+evidence tree (`4e49a23`); 301 App tests, 2,189 .NET tests |
+| Final docs re-check | `./tools/verify.sh docs --require` and `./tools/verify.sh policy --require` — exit 0 after the last evidence-only edit |
 | App tests | 301 passed, 0 failed (`Mocassin.App.Tests`, net11.0) |
 | All .NET tests | 2,189 passed, 0 failed |
 | Docs/policy | Part of the full gate: strict Zensical, DocFX, rustdoc, `check_docs_links.py`, `check_doc_math.py`, `check_process_consistency.py`, 60 policy tests, ApiCompat, contracts, SPDX, secret scan, `cargo-deny` — all clean |
