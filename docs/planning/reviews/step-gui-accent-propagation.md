@@ -12,7 +12,7 @@
 | --- | --- |
 | Review ID | `MAINT-2026-11-22-GUI-ACCENT` |
 | Type | Out-of-step maintenance design review (not a roadmap step) |
-| Target commit | `73a297ff7d73978a58c4f34d1eb24396a44457a2` |
+| Target commit | `f1a8c1a7d1ee704b121964a8c7d030773488d859` |
 | Docs branch | `fix/gui-accent-propagation` |
 | Request owner | Planner |
 | Orchestrator | — |
@@ -246,7 +246,7 @@ altering the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Changes required
+**State:** Re-review required
 
 Round 1 froze the design at `6ed4858f562ec9f29e1042b6ae4294bd3cac6fef`; its branch head
 `5fb01f8ee4aecd6bd20333ccc25995fb9f5cfbcd` differed only by the one-line review-target update. Round 2
@@ -340,6 +340,19 @@ Date:
 | m-6 | Resolved; inventory corrected and unshipped controls marked | Planner | `82d3422` |
 | n-2 | Resolved; commit list filled | Planner | `82d3422` |
 | n-3 | Resolved; neutral Fluent focus ring accepted and tested | Planner | `82d3422` |
+| M-9 | Resolved; exact direct TreeView selectors named | Planner | `f1a8c1a` |
+| M-10 | Resolved; HC focus pair `#FFD700`/`#000000` added and tested | Planner | `f1a8c1a` |
+| M-11 | Resolved; selected chevron `Fill` set and tested | Planner | `f1a8c1a` |
+| M-12 | Resolved; TextBox selection foreground pair set and tested | Planner | `f1a8c1a` |
+| m-7 | Resolved; dialog ProgressBar added to inventory/tests | Planner | `f1a8c1a` |
+| m-8 | Resolved; `FocusBrush` consumed by splitter and tab pipe | Planner | `f1a8c1a` |
+| m-9 | Resolved; paired focus surfaces stated | Planner | `f1a8c1a` |
+| m-10 | Resolved; palette `SystemAccentColor*` type stated | Planner | `f1a8c1a` |
+| m-11 | Resolved; HC unchecked-pressed/disabled sub-states specified | Planner | `f1a8c1a` |
+| m-12 | Resolved; Settings Tab-order delta documented and tested | Planner | `f1a8c1a` |
+| n-4 | Resolved; commit list and AltBaseHigh consumers updated | Planner | `f1a8c1a` |
+| n-5 | Resolved; stale testing/contract rows updated | Planner | `f1a8c1a` |
+| n-6 | Resolved; dead applier helpers listed for removal | Planner | `f1a8c1a` |
 
 The request owner fills this section after the verdict. Do not alter the reviewer-authored findings, evidence,
 or verdict.
@@ -486,6 +499,69 @@ not accent-coloured.
 **Re-review request.** The fixed-family design is frozen at
 `73a297ff7d73978a58c4f34d1eb24396a44457a2` on `fix/gui-accent-propagation`; the request commit adds only this
 record. A fresh planning auditor should verify the fixed-family contract and the M-6 delivery proof.
+
+### Round 4 delivery resolutions (request owner)
+
+**M-9 — exact TreeView selectors.** The contract now names the exact working selectors:
+`TreeViewItem:selected /template/ Border#PART_LayoutRoot`,
+`TreeViewItem:selected /template/ Border#PART_LayoutRoot:pointerover`,
+`TreeViewItem:pressed:selected /template/ Border#PART_LayoutRoot:pointerover`,
+`TreeViewItem:selected /template/ ContentPresenter#PART_HeaderPresenter` (direct descendant), and
+`TreeViewItem:selected /template/ ToggleButton#PART_ExpandCollapseChevron /template/ Path#ChevronPath`. The
+Fluent-shaped `Border#PART_LayoutRoot > ContentPresenter#PART_HeaderPresenter` is explicitly rejected because
+the presenter's visual parent is `Grid#PART_Header`; the probe confirmed the direct selector works and the `>`
+shape does not. Tests render the header foreground in Light, Dark, and HC.
+
+**M-10 — HC focus visual pair.** `HighContrast.axaml` now defines
+`SystemControlFocusVisualPrimaryBrush` `#FFD700` and `SystemControlFocusVisualSecondaryBrush` `#000000`, and
+§3.4 includes both. The 2 px primary is gold on black and the secondary is black on gold. A rendered focus
+adorner test in HC Light and Dark asserts 3:1.
+
+**M-11 — HC selected-tree chevron.** The targeted style now sets
+`Path#ChevronPath.Fill` from `Mocassin.SelectedForeground`; HC is `#000000` on `#FFD700`, not white on gold.
+The rendered selected-tree test reads the chevron fill in HC Light and Dark at 3:1.
+
+**M-12 — TextBox selection foreground.** `ShellStyles.axaml` sets
+`TextBox.SelectionBrush="{DynamicResource Mocassin.AccentBrush}"` and
+`TextBox.SelectionForegroundBrush="{DynamicResource Mocassin.OnAccentBrush}"`. The rendered pair is white on
+`#007ACC` (4.51:1) and black on HC gold (14.97:1). This is a fix, not a deferral.
+
+**m-7 — ProgressBar inventory.** The `ProgressDialog` `ProgressBar` is added to the shipped-control table and
+the realized-part tests; its `Foreground` is `#007ACC` light, `#248DD3` dark, and `#FFD700` HC through
+`SystemControlHighlightAccentBrush`.
+
+**m-8 — `Mocassin.FocusBrush` consumer.** The three splitter `FocusAdorner` borders now use
+`Mocassin.FocusBrush`, and `TabItemHeaderSelectedPipeFill` uses the same value (`#248DD3` dark / `#007ACC`
+light / `#FFD700` HC). The role is no longer unused.
+
+**m-9 — paired focus surfaces.** The record now states the paired test: dark focus values on `#3C3C3C`,
+`#37373D`, `#2D2D30`, `#252526`, `#1E1E1E`; light focus values on `#F3F3F3`/`#FFFFFF`. It is not an
+unsatisfiable cross-product.
+
+**m-10 — palette `SystemAccentColor*` type.** §3.4 and §3.6 state that the six keys are `Color` resources in
+`Default`/`Light`/`Dark` and HC; tests assert the type.
+
+**m-11 — HC check-box sub-states.** HC now defines `CheckBoxForegroundUncheckedPressed` `#000000`,
+`CheckBoxCheckBackgroundFillUncheckedPressed` `#FFD700`, checked/indeterminate disabled fills `#000000`, and
+disabled glyph aliases `#A0A0A0`; rendered tests cover unchecked-pressed and checked/indeterminate-disabled.
+
+**m-12 — Settings Tab order.** The Accent ComboBox removal is documented as an intentional accessibility
+delta: the focus stop and `Accent` automation name are gone; the new deterministic order is tested and no
+other focus target changes. The interaction-contract rules do not change.
+
+**n-4 — record accuracy.** The maintenance commit list now includes `82d3422`, `73a297f`, `7a8f5bc`,
+`7ba3600`, and the round-4 commits; the inventory names `TableViewRow*`/`DateTimePickerShared.xaml:63` and the
+unshipped `CalendarButton` `Dark2` consumer.
+
+**n-5 — stale documentation.** `testing-and-parity.md` no longer lists `OnAccentBrush` as a runtime resource,
+and the contract runtime-settings row no longer says “accent”.
+
+**n-6 — dead applier helpers.** The record lists `AccentColor`, `OnAccent`, `Contrast`, `RelativeLuminance`,
+`Linear`, and the `lightOnAccent`/`darkOnAccent` constants for removal with the accent path.
+
+**Re-review request.** The delivery-detail design is frozen at
+`f1a8c1a7d1ee704b121964a8c7d030773488d859` on `fix/gui-accent-propagation`; the request commit adds only this
+record. A fresh planning auditor should verify the fixed-family contract and the M-9–M-12 delivery details.
 
 ## Review rounds
 
