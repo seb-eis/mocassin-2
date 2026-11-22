@@ -289,16 +289,19 @@ Residual risks:
 - `chore: bind lead, design, dev-free, dev, and review agents` — adds
   `.opencode/agents/{lead,design,dev-free,dev,review}.md`, sets `opencode.json` `default_agent` to `lead`,
   updates `.opencode/commands/step-start.md` and `step-closeout.md`, and updates
-  `tools/check_process_consistency.py` and `tools/tests/test_opencode_binding.py`. Exact SHA: `PENDING-COMMIT-1`.
+  `tools/check_process_consistency.py` and `tools/tests/test_opencode_binding.py`. Exact SHA:
+  `ea8b4e512f9b7d54fddd7b4b096bb394a92174a7`.
 - `chore: remove superseded role bindings` — deletes `.opencode/agents/{orchestrator,planner,implementor,reviewer}.md`
-  after the new bindings are in place, and re-runs the policy gate. This commit is the branch tip at closeout.
+  after the new bindings are in place, and re-runs the policy gate. Exact SHA:
+  `38215fb5bc66fd7d8df9712d23a4f78e4e5f05e1`. This is the last binding commit on the branch; the §8 evidence
+  update that follows it is documentation-only.
 
 **Local gates:**
 
 | Command | Result |
 | --- | --- |
-| `python -m pytest tools/tests/test_opencode_binding.py tools/tests/test_process_consistency.py -q` | `14 passed, 11 subtests passed` before removal; re-run after removal |
-| `./tools/verify.sh policy --require` | `Process consistency: OK`; `Closeout gate completed with required checks enabled.` |
+| `python -m pytest tools/tests/test_opencode_binding.py tools/tests/test_process_consistency.py -q` | `14 passed, 11 subtests passed in 0.57s` before removal; re-run after removal: `14 passed, 11 subtests passed in 0.57s` |
+| `./tools/verify.sh policy --require` | On the tree after removal: `Process consistency: OK`; `Ran 62 tests ... OK`; `Closeout gate completed with required checks enabled.` |
 | `./tools/verify.sh docs --require` | `Build succeeded. 0 warning(s), 0 error(s)`; `Documentation built in /workspace/site` |
 | `./tools/verify.sh all --require` | `Process consistency: OK`; `Ran 62 tests ... OK`; `AOT passed`; `Closeout gate completed with required checks enabled.` |
 
