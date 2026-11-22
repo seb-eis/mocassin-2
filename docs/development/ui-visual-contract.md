@@ -398,6 +398,9 @@ scrollbar edge.
   styles that consume the same tokens; no other `TextBox` or `ComboBox` is affected.
 - The scrollbar keeps its 16 px width and hit target; the gutter changes only the content inset. `AllowAutoHide`
   stays at the Fluent default; a permanently reserved bar column is not the design.
+- The explorer `TreeView` keeps the combined gutter class but disables horizontal overflow; node labels trim
+  with a character ellipsis. It is vertical-only in practice, so the bottom inset is retained by the class and
+  the node icon never pushes content under the vertical bar at large font scales.
 - No custom scrollbar template is introduced. A surface whose scrollbar cannot be kept clear with a gutter is a
   contract change and needs a recorded decision, not a local template.
 - The tab strip has no scroll viewer in the Fluent `TabControl` template today, so it is not a scroll surface;
@@ -632,7 +635,9 @@ content surfaces differ in composition (a document view versus a channel view) b
   structure. Rows use `ItemPadding`; selected rows use `SelectedBackground`/`SelectedForeground`; captions use
   `ForegroundMutedBrush`. Each open-project row leads with a `ProjectRowIconSlot` (`project` key) and each
   explorer node leads with a `NodeIconSlot`, both under the §5.2 contract and mapping; a node with no icon key
-  renders no slot. The icons are decorative and never replace the row or node label.
+  renders no slot. The icons are decorative and never replace the row or node label. The explorer tree scrolls
+  vertically only; horizontal overflow is disabled and labels trim with a character ellipsis, so the icon never
+  pushes content under the vertical bar at 1.5× font scale.
 - Documents: see §7.4. The welcome document is inside this card.
 - Inspector: the heading, empty state, and summary use the card inset. The empty state is muted; the summary is
   body text.

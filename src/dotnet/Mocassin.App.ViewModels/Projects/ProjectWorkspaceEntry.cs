@@ -4,6 +4,7 @@ using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Mocassin.App.ViewModels.Documents;
 using Mocassin.App.ViewModels.Editing;
+using Mocassin.App.ViewModels.Icons;
 using Mocassin.Core.Project;
 
 namespace Mocassin.App.ViewModels.Projects;
@@ -61,6 +62,11 @@ internal sealed partial class ProjectWorkspaceEntry : ObservableObject
     /// Gets the project file path.
     /// </summary>
     public string Path => Session.Path;
+
+    /// <summary>
+    /// Gets the presentation icon for an open-project row.
+    /// </summary>
+    public AppIcon Icon { get; } = new(IconKeys.Project);
 
     /// <summary>
     /// Gets the immutable project value.

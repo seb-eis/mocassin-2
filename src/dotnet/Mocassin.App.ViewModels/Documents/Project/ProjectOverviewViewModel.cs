@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Mocassin.App.ViewModels.Diagnostics;
 using Mocassin.App.ViewModels.Editing;
+using Mocassin.App.ViewModels.Icons;
 using Mocassin.App.ViewModels.Navigation;
 using Mocassin.App.ViewModels.Projects;
 using Mocassin.App.ViewModels.Shell;
@@ -60,6 +61,9 @@ internal sealed partial class ProjectOverviewViewModel : DocumentViewModel, IIns
 
     /// <inheritdoc />
     public override string Title => $"Overview — {entry.Name}";
+
+    /// <inheritdoc />
+    public override object? Icon => new AppIcon(IconKeys.Overview);
 
     /// <inheritdoc />
     public override string? ToolTip => entry.Path;

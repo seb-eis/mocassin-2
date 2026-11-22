@@ -1,11 +1,13 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:icons="using:Mocassin.App.ViewModels.Icons"
              x:Class="Mocassin.App.App"
              RequestedThemeVariant="Default">
   <Application.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
         <ResourceInclude Source="avares://Mocassin.App.Views/Themes/Palette.axaml" />
+        <ResourceInclude Source="avares://Mocassin.App.Views/Icons/Icons.axaml" />
       </ResourceDictionary.MergedDictionaries>
 
       <x:Double x:Key="Mocassin.FontScale">1</x:Double>
@@ -30,6 +32,7 @@
       <Thickness x:Key="Mocassin.CompactButtonPadding">8,2</Thickness>
       <x:Double x:Key="Mocassin.CompactButtonMinHeight">26</x:Double>
       <x:Double x:Key="Mocassin.TabHeight">32</x:Double>
+      <x:Double x:Key="Mocassin.IconSize">16</x:Double>
       <Thickness x:Key="Mocassin.TabIndicatorInset">4,0,4,0</Thickness>
       <x:Double x:Key="Mocassin.MenuHeight">32</x:Double>
       <x:Double x:Key="Mocassin.StatusBarHeight">24</x:Double>
@@ -52,6 +55,28 @@
       <Thickness x:Key="Mocassin.FocusThickness">2</Thickness>
     </ResourceDictionary>
   </Application.Resources>
+
+  <!--
+    One implicit presentation template for every icon surface. The Path geometry is resolved from the committed
+    application resources; the resolved glyph follows the slot's Foreground, while an unresolved key shows the
+    Missing marker in ErrorForeground. The template adds no name, text, focus stop, or hit target.
+  -->
+  <Application.DataTemplates>
+    <DataTemplate DataType="icons:AppIcon">
+      <Panel Width="{DynamicResource Mocassin.IconSize}"
+             Height="{DynamicResource Mocassin.IconSize}">
+        <Path Data="{Binding Key, Converter={StaticResource IconGeometryConverter}}"
+              Fill="{Binding $parent[ContentControl].Foreground}"
+              IsVisible="{Binding IsKnown}"
+              Stretch="Uniform" />
+        <Path Data="{DynamicResource Mocassin.Icon.Missing}"
+              Fill="{DynamicResource Mocassin.ErrorForeground}"
+              IsVisible="{Binding !IsKnown}"
+              Stretch="Uniform" />
+      </Panel>
+    </DataTemplate>
+  </Application.DataTemplates>
+
   <Application.Styles>
     <FluentTheme />
     <StyleInclude Source="avares://Mocassin.App.Views/Styles/ShellStyles.axaml" />

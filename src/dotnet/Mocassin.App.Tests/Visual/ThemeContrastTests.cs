@@ -435,6 +435,21 @@ public sealed class ThemeContrastTests
     }
 
     [Fact]
+    public void MissingIconMarkerPairsMeetTheNonTextFloor()
+    {
+        // Dark marker on the workspace, card, active-tab, and inactive-tab surfaces.
+        AssertAtLeast("#F48771", "#252526", 3.0);
+        AssertAtLeast("#F48771", "#2D2D30", 3.0);
+
+        // Light marker on the workspace, card, active-tab, and inactive-tab surfaces.
+        AssertAtLeast("#A1260D", "#FFFFFF", 3.0);
+        AssertAtLeast("#A1260D", "#ECECEC", 3.0);
+
+        // High contrast marker on black.
+        AssertAtLeast("#FFFFFF", "#000000", 3.0);
+    }
+
+    [Fact]
     public void TheNeutralFocusPairMeetsTheLayeredFloor()
     {
         // Light: primary black against the light surfaces, inner secondary white against the primary.

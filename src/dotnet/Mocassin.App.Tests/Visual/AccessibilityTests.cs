@@ -13,6 +13,7 @@ using Avalonia.VisualTree;
 using Microsoft.Extensions.DependencyInjection;
 using Mocassin.App.Composition;
 using Mocassin.App.Tests.TestSupport;
+using Mocassin.App.ViewModels.Icons;
 using Mocassin.App.ViewModels.Settings;
 using Mocassin.App.ViewModels.Shell;
 using Mocassin.App.Views.Consoles;
@@ -31,6 +32,8 @@ public sealed class AccessibilityTests
 {
     private static readonly string[] regionNames =
         ["Projects panel", "Documents panel", "Inspector panel", "Console panel"];
+
+    private static readonly string[] explorerLabels = ["Overview", "Data (JSON)"];
 
     [Fact]
     public Task EveryPrimaryInteractiveControlHasAnAccessibleName() =>
@@ -335,7 +338,7 @@ public sealed class AccessibilityTests
     }
 
     [Fact]
-    public Task TabsShowAFocusRingAndReserveTheCollapsedIconSlot() =>
+    public Task TabsShowAFocusRingAndKeepTheIconSlotDecorative() =>
         HeadlessSession.DispatchAsync(
             () =>
             {
@@ -359,19 +362,24 @@ public sealed class AccessibilityTests
                     var documentTabs = documents.GetVisualDescendants().OfType<TabItem>().ToList();
                     Assert.NotEmpty(documentTabs);
 
-                    foreach (var tab in consoleTabs.Concat(documentTabs))
+                    foreach (var tab in consoleTabs)
                     {
                         var slot = tab.GetVisualDescendants()
                             .OfType<ContentControl>()
                             .Single(control => control.Name == "TabIconSlot");
-                        Assert.Equal(16d, slot.Width);
-                        Assert.Equal(16d, slot.Height);
+                        AssertDecorativeIconSlot(slot);
                         Assert.False(slot.IsVisible);
-                        Assert.False(slot.Focusable);
-                        Assert.False(slot.IsHitTestVisible);
                         Assert.Null(slot.Content);
-                        Assert.Empty(AutomationProperties.GetName(slot) ?? string.Empty);
-                        Assert.Equal(AccessibilityView.Raw, AutomationProperties.GetAccessibilityView(slot));
+                    }
+
+                    foreach (var tab in documentTabs)
+                    {
+                        var slot = tab.GetVisualDescendants()
+                            .OfType<ContentControl>()
+                            .Single(control => control.Name == "TabIconSlot");
+                        AssertDecorativeIconSlot(slot);
+                        Assert.True(slot.IsVisible);
+                        Assert.IsType<AppIcon>(slot.Content);
                     }
 
                     var selectedHeader = consoleTabs.Single(tab => tab.IsSelected).Header;
@@ -442,4 +450,75 @@ public sealed class AccessibilityTests
                 var second = CaptureOrder();
                 Assert.Equal(first, second);
             });
+
+    [Fact]
+    public Task ExplorerAndProjectRowIconSlotsAreDecorativeAndFixedAtScale() =>
+        HeadlessSession.DispatchAsync(
+            async () =>
+            {
+                using var workspace = new TempWorkspace();
+                using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+                HeadlessSession.Pump(window);
+
+                try
+                {
+                    var shell = Assert.IsType<ShellViewModel>(window.DataContext);
+                    var entry = await ProjectFixtures.LoadCeriaAsync();
+                    shell.Workspace.Add(entry);
+                    new AvaloniaThemeApplier().Apply(
+                        AppSettings.Default with { Density = Density.Compact, FontScale = 1.5 });
+                    HeadlessSession.Pump(window);
+
+                    var tree = window.GetVisualDescendants()
+                        .OfType<TreeView>()
+                        .Single(control => AutomationProperties.GetName(control) == "Project explorer");
+                    var nodes = tree.GetVisualDescendants().OfType<TreeViewItem>().ToList();
+                    Assert.Equal(2, nodes.Count);
+                    foreach (var node in nodes)
+                    {
+                        var slot = node.GetVisualDescendants()
+                            .OfType<ContentControl>()
+                            .Single(control => control.Name == "NodeIconSlot");
+                        AssertDecorativeIconSlot(slot);
+                        Assert.True(slot.IsEffectivelyVisible);
+                        Assert.Equal(16d, slot.Bounds.Width);
+                        Assert.Equal(16d, slot.Bounds.Height);
+                        var glyph = slot.GetVisualDescendants()
+                            .OfType<Avalonia.Controls.Shapes.Path>()
+                            .Single(path => path.IsVisible);
+                        Assert.True(glyph.Bounds.Width <= 16.5, $"Node glyph is clipped ({glyph.Bounds.Width}).");
+                        Assert.True(glyph.Bounds.Height <= 16.5, $"Node glyph is clipped ({glyph.Bounds.Height}).");
+                        var label = node.GetVisualDescendants().OfType<TextBlock>().First().Text;
+                        Assert.Contains(label, explorerLabels);
+                    }
+
+                    var projects = window.GetVisualDescendants()
+                        .OfType<ListBox>()
+                        .Single(control => AutomationProperties.GetName(control) == "Open projects");
+                    var row = Assert.Single(projects.GetVisualDescendants().OfType<ListBoxItem>());
+                    var rowSlot = row.GetVisualDescendants()
+                        .OfType<ContentControl>()
+                        .Single(control => control.Name == "ProjectRowIconSlot");
+                    AssertDecorativeIconSlot(rowSlot);
+                    Assert.True(rowSlot.IsEffectivelyVisible);
+                    Assert.Equal(16d, rowSlot.Bounds.Width);
+                    Assert.Equal(16d, rowSlot.Bounds.Height);
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+
+    private static void AssertDecorativeIconSlot(ContentControl slot)
+    {
+        Assert.Equal(16d, slot.Width);
+        Assert.Equal(16d, slot.Height);
+        Assert.False(slot.Focusable);
+        Assert.False(slot.IsHitTestVisible);
+        Assert.Empty(AutomationProperties.GetName(slot) ?? string.Empty);
+        Assert.Equal(AccessibilityView.Raw, AutomationProperties.GetAccessibilityView(slot));
+    }
 }
