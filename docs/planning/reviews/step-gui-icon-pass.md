@@ -293,7 +293,10 @@ Date:
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| n-1 | Accepted — documented request/status bookkeeping commit; no action | dev | `338a112` |
+| n-2 | Accepted — owner-confirmed narrow coverage (document tabs and projects surfaces; console tabs text-only) | dev | `338a112` |
+| n-3 | Resolved — §5/§9 wording corrected to five pairs and `ThemeContrastTests` asserts all five, including high contrast | dev | `338a112`; wording in the evidence commit |
+| n-4 | Resolved — the provenance test pins the exact §7 SHA-256 values and recomputes the committed licence hash | dev | `338a112`; evidence in maintenance record §17.6 |
 
 The dev fills this section after the verdict. Do not alter the review agent-authored findings, evidence, or
 verdict.

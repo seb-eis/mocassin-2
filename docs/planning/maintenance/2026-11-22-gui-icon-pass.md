@@ -12,8 +12,8 @@ small MIT-licensed Phosphor Icons subset as committed geometry.
 | Base | `main` at `2d9d5f487706ba946d6a027a1d668677b2535d19` |
 | Worktree | `/workspace` (clean, in place) |
 | Normative contract | [`docs/development/ui-visual-contract.md`](../../development/ui-visual-contract.md) §2, §5.2, §7.4, §7.6, §8, §11.3, §12, §13 |
-| Design review | [`step-gui-icon-pass.md`](../reviews/step-gui-icon-pass.md) — Light class, `Ready for review` |
-| Status | Design frozen for review; not implemented |
+| Design review | [`step-gui-icon-pass.md`](../reviews/step-gui-icon-pass.md) — Light class, `Ready for implementation` |
+| Status | Implemented; local gate green; owner merge approval pending |
 | Tracking | One branch; local gates; no per-feature CI; no step tag; no ADR |
 
 ## 1. Owner request and fixed decisions
@@ -117,7 +117,7 @@ existing roles: the dark inactive tab foreground `#9D9D9D` is the muted value, a
 keys are added. Every pair is an existing §11.1 contrast row. The missing marker additionally meets the 3:1
 non-text floor on every fill it can appear on (dark `#F48771` on `#252526` is 6.2:1, on `#2D2D30` 5.6:1; light
 `#A1260D` on `#FFFFFF` is 7.5:1, on `#ECECEC` 6.3:1; HC `#FFFFFF` on `#000000` is 21:1) — the test asserts
-these four pairs.
+these five pairs, including the high-contrast pair.
 
 ## 6. Slot contract and accessibility
 
@@ -251,7 +251,7 @@ screenshot rows are PR-medium. The assertions read realized controls, resources,
    slots stay collapsed — console tabs are text-only.
 6. **Excluded surfaces** (`IconAssetTests`, PR-fast): the welcome recent-project list, settings, dialogs,
    and notifications contain no icon slot.
-7. **Contrast** (`ThemeContrastTests`, PR-fast): add the four missing-marker pairs (`ErrorForeground` on
+7. **Contrast** (`ThemeContrastTests`, PR-fast): add the five missing-marker pairs (`ErrorForeground` on
    `TabActiveBackground`, `TabInactiveBackground`, and the row surfaces) at the 3:1 non-text floor; the muted
    and selected icon pairs are existing §11.1 rows and are not re-specified.
 8. **Provenance** (`IconAssetTests`, PR-fast unit): `Icons.axaml` contains the MIT SPDX header and the pinned
@@ -376,10 +376,133 @@ To be completed by the implementor:
 | Field | Value |
 | --- | --- |
 | Design commit | `34e7c18d71ee29ab5d81885ba13bb761758f1993` — `docs: define GUI icon pass contract and maintenance plan [skip ci]` |
-| Review verdict | — (pending; see the review record) |
-| Implementation commits | — |
-| Full gate | — |
-| App tests | — |
-| Baselines | — |
-| Platform runs | — (optional, not a merge gate) |
+| Review verdict | `Ready for implementation` — [`step-gui-icon-pass.md`](../reviews/step-gui-icon-pass.md), Light class, four Notes accepted; n-3 and n-4 resolved in §17 |
+| Implementation commits | `338a112943dc92456672fd933aa44814009bb7cf` — `gui: vendor Phosphor icons and populate icon slots`; the evidence commit follows |
+| Full gate | `./tools/verify.sh all --require` — exit 0, `Closeout gate completed with required checks enabled` |
+| App tests | `Mocassin.App.Tests`: 318 passed, 0 failed, 0 skipped |
+| Baselines | 15 Linux baselines: 12 regenerated, 3 new (`light-project.png`, `dark-project.png`, `highcontrast-project.png`) |
+| Platform runs | Not applicable: no platform-specific code; screenshots are Linux-only as today |
 | Merge commit | — (owner `--no-ff` approval pending) |
+
+## 17. Implementation evidence
+
+Implemented on `fix/gui-icon-pass` as out-of-step maintenance. **Model-economics fallback:** the `dev-free`
+binding reported its free usage limit exhausted earlier on 2026-11-22; per
+[`docs/development/model-economics.md`](../../development/model-economics.md) the lead assigned this
+implementation to the paid `dev` binding. The design class remains **Light** and the review verdict remains
+`Ready for implementation`.
+
+### 17.1 Commits
+
+| Commit | Message |
+| --- | --- |
+| `338a112943dc92456672fd933aa44814009bb7cf` | `gui: vendor Phosphor icons and populate icon slots` |
+| evidence commit | `docs: record GUI icon pass implementation evidence [skip ci]` (this record and the review resolutions) |
+
+### 17.2 Vendoring re-hash (2026-11-22)
+
+The five upstream SVGs and `LICENSE` were fetched once from
+`https://raw.githubusercontent.com/phosphor-icons/core/2b75f3ad12b420c9504ef05df8d2564a28f8500e/...` and
+re-hashed with `sha256sum` before anything was committed. **Every hash matches §7; no stop condition fired.**
+
+| Upstream file | Re-hashed SHA-256 | Result |
+| --- | --- | --- |
+| `assets/regular/hand-waving.svg` | `07c4c9d18c9a4c86508fde52cddaf95aa1499552c99bfeebc404d5b991fdf41f` | match |
+| `assets/regular/info.svg` | `438a1f319d53d86e840af73fb7b1d224c9224a437b9fa449a4e2cb45a82a3552` | match |
+| `assets/regular/brackets-curly.svg` | `170562ad2b247d86bf2b5fd727cf3f96681b0cbef92aab49346ec6e235802ca9` | match |
+| `assets/regular/cube.svg` | `7c0f13cb492d0dd212e48ab259dabec4627df32d71aa00ce31b3228c0f35112b` | match |
+| `assets/regular/warning-circle.svg` | `e48a90760a68659fd3f06dd9187e471aead4877c72e915339071b2c7f7bd714c` | match |
+| `LICENSE` | `b5b1f1da112d18ea2147decfd48ddc1bf2b5aeb6c265381579340e95b15a2bb2` | match — MIT, © 2023 Phosphor Icons |
+
+The licence is committed verbatim as `PhosphorLicense.txt`; the provenance test recomputes its SHA-256 and
+asserts the §7 value, so the copy cannot drift silently.
+
+### 17.3 Implemented files
+
+- Assets: `src/dotnet/Mocassin.App.Views/Icons/Icons.axaml` (five `StreamGeometry` resources, SPDX header and
+  pinned-source comment), `IconsProvenance.md`, `PhosphorLicense.txt`.
+- Resource binding: `Mocassin.IconSize` (`16`) and the `Icons.axaml` merge in `App.axaml`; the implicit
+  `AppIcon` template renders one `Path` from the committed geometry and the `Missing` marker from the
+  `ErrorForeground` role.
+- View models: `Icons/AppIcon.cs`, `Icons/IconKeys.cs`, `ExplorerNode.Icon`,
+  `ProjectWorkspaceEntry.Icon`, and the `Icon` overrides on the welcome, overview, and JSON documents. Console
+  channels keep `Icon` null.
+- Views/styles: `IconGeometryConverter`, `TabIconSlot` sizing from the token in both tab headers,
+  `NodeIconSlot` and `ProjectRowIconSlot` in `ProjectsRegionView.axaml`, and the targeted fill styles in
+  `ShellStyles.axaml`.
+- Documentation: `NOTICE.md`, `docs/development/ui-visual-contract.md` §5.1/§7.6, and
+  `docs/development/testing-and-parity.md`.
+
+### 17.4 Tests and results
+
+- `IconAssetTests` (new, six tests): five geometry resources resolve as `StreamGeometry`; the welcome,
+  Overview, and JSON tabs plus both explorer nodes and the open-projects row realize their mapped glyph; the
+  fill follows `TabInactiveForeground`/`TabActiveForeground` and
+  `ForegroundMutedBrush`/`SelectedForeground` in light, dark, and high contrast; an unresolved key renders the
+  `Missing` geometry in `ErrorForeground` and no shipped surface shows it; the excluded surfaces contain no
+  icon slot; the provenance/licence test pins the SPDX header, pinned commit, exact per-icon SHA-256 values,
+  verbatim licence hash, and the `NOTICE.md` entry.
+- `AccessibilityTests`: the three slots stay 16 × 16, `Raw`, unnamed, non-focusable, and non-hit-testable at
+  compact density and 1.5× font scale; document tabs are populated while console tabs stay collapsed; tab,
+  node, and row names are unchanged.
+- `ConsoleTabsTests`: both channels keep `Icon` null and both console slots stay collapsed and empty.
+- `ThemeContrastTests`: the five missing-marker pairs meet the 3:1 non-text floor, including high contrast
+  (**n-3**).
+- `ScreenshotTests`: 12 existing baselines regenerated and three added.
+- `TabTreatmentTests`, `ScrollGutterTests`, `AccentDeliveryTests`, and `WorkspaceRenderTests` pass unchanged.
+
+Commands and exact results:
+
+- `dotnet test src/dotnet/Mocassin.App.Tests/Mocassin.App.Tests.csproj -c Release --no-build` → **318 passed,
+  0 failed, 0 skipped**.
+- `./tools/verify.sh all --require` → **exit 0**, `Closeout gate completed with required checks enabled`
+  (all .NET suites green, `dotnet format` clean, docs strict, contracts current, 62 policy tests, SPDX in 1111
+  files, secret scan clean, cargo-deny clean).
+- `./tools/verify.sh docs --require` → exit 0, `Closeout gate completed with required checks enabled`.
+- `./tools/verify.sh policy --require` → exit 0, 62 policy tests, SPDX in 1111 files, no secret patterns,
+  `advisories ok, bans ok, licenses ok, sources ok`.
+
+### 17.5 Baselines and regeneration
+
+Command: `MOCASSIN_REGENERATE_VISUAL_BASELINES=1 dotnet test
+src/dotnet/Mocassin.App.Tests/Mocassin.App.Tests.csproj -c Release --no-build --filter
+"FullyQualifiedName~ScreenshotTests"`.
+
+Regenerated: `light.png`, `dark.png`, `highcontrast.png`, `light-validation.png`, `dark-validation.png`,
+`light-settings.png`, `dark-settings.png`, `light-palette.png`, `dark-palette.png`, `light-cheatsheet.png`,
+`dark-cheatsheet.png`, `dark-tab-hover.png`. Added: `light-project.png`, `dark-project.png`,
+`highcontrast-project.png` (active ceria project showing both explorer node icons, the project-row icon, and
+the Overview/JSON tab icons in each theme). The comparison tolerance and Linux-only rule are unchanged.
+
+### 17.6 Findings resolved
+
+- **n-3 resolved (documentation).** §5 and §9 now say five pairs, and `ThemeContrastTests` asserts all five,
+  including the high-contrast pair.
+- **n-4 resolved (evidence).** The provenance test now pins the exact §7 SHA-256 value for each icon and
+  recomputes the committed licence file's SHA-256, so the value match is machine-checked rather than only
+  recorded at vendoring time.
+- **n-1, n-2.** n-1 is the documented request/status bookkeeping commit; n-2 is the owner-confirmed narrow
+  coverage (document tabs and projects surfaces, console tabs text-only). No code change required.
+
+### 17.7 Deviation: explorer tree horizontal overflow
+
+The required 16 × 16 node icons widened the shipped Overview and Data (JSON) rows. At 1.5× font scale in
+compact density with a vertical scrollbar present, `ScrollGutterTests` measured the explorer content right edge
+at 192 px against the bar left edge at 179 px: the `ItemsPresenter` extended under the bar. Removing the icons
+restores the pass, so the gap is caused by the required icon width, not by unrelated layout drift.
+
+The lead approved the minimal fix during implementation: the explorer `TreeView` sets
+`ScrollViewer.HorizontalScrollBarVisibility="Disabled"` and node labels use `TextTrimming="CharacterEllipsis"`.
+`ScrollGutterTests` then passes unchanged, including its `scroll-gutter-both` assertion. This makes the tree a
+vertical-only scroll surface in practice; the combined gutter class is retained and the contract records the
+behaviour in §5.1 and §7.6. This is an owner-approved deviation from the original assumption that the tree
+would keep a horizontal axis, not a new control template or dependency.
+
+### 17.8 Residual risk
+
+- Node labels longer than the panel ellipsize instead of scrolling horizontally. This is the accepted cost of
+  the deviation in §17.7; the label remains the node's accessible name, so meaning is not lost.
+- Windows and macOS platform runs were not dispatched: the change contains no platform-specific code, and the
+  screenshots are Linux-only by policy. Recorded as an accepted risk, not a gate.
+- A future icon set that grows beyond this hand-vendored subset is still a Full-trigger reclassification
+  (§2); no generator, drift-check tool, or new dependency was added.
