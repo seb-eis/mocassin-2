@@ -54,7 +54,7 @@ a new file.
 
 ## Settings and appearance
 
-Choose **View → Settings…** (`Ctrl+,`) to change theme, accent, density, font scale, high contrast, reduced motion,
+Choose **View → Settings…** (`Ctrl+,`) to change theme, density, font scale, high contrast, reduced motion,
 the log level, external-change confirmation, the welcome document, and the recent-file list. Settings are saved
 atomically and applied without restarting the application. **View → Reset Layout** restores the default panel
 proportions without touching the appearance settings.

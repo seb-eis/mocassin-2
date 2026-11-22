@@ -12,7 +12,7 @@ not a user-selectable palette. The record is the design and test plan for one
 | Base | `main` at `19cb6ffe190e02449ce8b827706f365f2ea7afe2` |
 | Worktree | `/workspace` (clean, in place) |
 | Normative visual contract | [`docs/development/ui-visual-contract.md`](../../development/ui-visual-contract.md) §3.6 |
-| Status | Design frozen for round 3 review. No implementation yet. |
+| Status | Design frozen for round 5 review. No implementation yet. |
 | Tracking | One branch; local gates; one owner `--no-ff` merge approval; no per-feature CI |
 
 ## 1. Owner decision
@@ -122,10 +122,14 @@ The fixed-family delivery also resolves the remaining sub-surfaces:
   `TextBox.SelectionForegroundBrush="{DynamicResource Mocassin.OnAccentBrush}"`. The pair is
   `#FFFFFF` on `#007ACC` (4.51:1) and `#000000` on `#FFD700` in HC (14.97:1); the rendered `TextBox` test reads
   both properties.
-- **HC unchecked-pressed/disabled check-box sub-states (m-11).** HC defines
-  `CheckBoxForegroundUncheckedPressed` `#000000`, `CheckBoxCheckBackgroundFillUncheckedPressed` `#FFD700`,
-  `CheckBoxCheckBackgroundFillCheckedDisabled`/`IndeterminateDisabled` `#000000`, and the disabled
-  checked/indeterminate glyph aliases `#A0A0A0`; tests render those states.
+- **HC unchecked-pressed/disabled check-box sub-states (M-13/m-14).** The unchecked-pressed **box** fill is
+  `CheckBoxCheckBackgroundFillUncheckedPressed` `#FFD700`, but its label is `PART_ContentPresenter` on the
+  transparent row/card (`#000000`), so `CheckBoxForegroundUncheckedPressed` is `#FFFFFF`, not black. HC also
+  defines `CheckBoxForegroundUncheckedDisabled`/`CheckedDisabled`/`IndeterminateDisabled` `#A0A0A0`,
+  checked/indeterminate disabled fills `#000000`, and disabled glyph aliases `#A0A0A0`. No shipped surface
+  currently disables a CheckBox; the disabled-label overrides are component-level future-proofing, and the
+  already-captured Fluent aliases are explicitly overridden. Tests read the realized label foreground as well
+  as the box/glyph.
 - **ProgressBar (m-7).** The `ProgressDialog` `ProgressBar` is a shipped surface; its `Foreground` follows
   `SystemControlHighlightAccentBrush` (`#007ACC` light, `#248DD3` dark, `#FFD700` HC) and is in the
   realized-part test list.
@@ -191,7 +195,7 @@ High contrast is a merged dictionary applied after the palette. It defines the b
 
 | Area | Change |
 | --- | --- |
-| `Palette.axaml` | Fixed accent family in `Default`/`Light`/`Dark`: base roles, derived `Color` keys, CheckBox/Slider alias keys, ComboBox selected keys, `TabItemHeaderSelectedPipeFill` = `FocusBrush`, focus/status values. No per-accent overlay. |
+| `Palette.axaml` | Fixed accent family in `Default`/`Light`/`Dark`: base roles, derived `Color` keys, CheckBox/Slider alias keys, ComboBox selected keys, `TabItemHeaderSelectedPipeFill` = `FocusBrush`, `SystemControlFocusVisualPrimaryBrush`/`SecondaryBrush` (`#000000`/`#FFFFFF` light, `#FFFFFF`/`#000000` dark), focus/status values. No per-accent overlay. |
 | `HighContrast.axaml` | Fixed HC values for the same keys; six derived `Color` resources; alias keys as brushes; focus pair `#FFD700`/`#000000`; unchecked-pressed/disabled check-box sub-states; TextBox selection pair; tree selected background/foreground tokens. |
 | `AvaloniaThemeApplier` | Remove the per-accent overlay and the `AccentPalette` path. Set `SystemAccentColor` to `#007ACC` or `#FFD700` under HC; keep theme/density/high-contrast/typography application. Remove the now-dead `AccentColor`, `OnAccent`, `Contrast`, `RelativeLuminance`, `Linear` helpers and the `lightOnAccent`/`darkOnAccent` constants. No `ActualThemeVariantChanged` accent reapply. |
 | `ShellStyles.axaml` | Add the exact targeted `TreeViewItem` selectors in §4 for `Border#PART_LayoutRoot`, direct `ContentPresenter#PART_HeaderPresenter`, and `Path#ChevronPath`; set `TextBox.SelectionBrush`/`SelectionForegroundBrush` to `Mocassin.AccentBrush`/`Mocassin.OnAccentBrush`. |
@@ -217,18 +221,21 @@ All tests are PR-fast headless unless named PR-medium. They use the real palette
   the dark focus values (`#248DD3`, `#3A9CDD`, `#248CD1`) are tested on the dark surfaces (`#3C3C3C`,
   `#37373D`, `#2D2D30`, `#252526`, `#1E1E1E`); the light values (`#007ACC`, `#0090F0`, `#005994`) are tested
   on the light surfaces (`#F3F3F3`, `#FFFFFF`). This is a paired test, not a cross-product. HC pairs 7:1;
-  HC focus pair `#FFD700`/`#000000` 3:1; neutral focus ring 3:1.
+  HC focus pair `#FFD700`/`#000000` 3:1; the non-HC neutral pair is `#000000`/`#FFFFFF` light and
+  `#FFFFFF`/`#000000` dark, rendered at 3:1.
 
 ### 8.2 Realized template parts
 
 Create a real `ShellWindow`/Settings/Validation/Projects surface and read the rendered controls:
 
-- checked/indeterminate `CheckBox`: `NormalRectangle.Background`/`BorderBrush`, `CheckGlyph.Fill`, plus the
-  HC unchecked-pressed and checked/indeterminate disabled sub-states;
+- checked/indeterminate `CheckBox`: `NormalRectangle.Background`/`BorderBrush`, `CheckGlyph.Fill`,
+  `PART_ContentPresenter.Foreground` (label), plus the HC unchecked-pressed label (white on black) and the
+  component-level HC disabled labels/glyphs (`#A0A0A0`);
 - `Slider`: `Thumb.Background`, `PART_DecreaseButton.Background`;
 - selected `TreeViewItem`: `PART_LayoutRoot.Background`, direct `ContentPresenter#PART_HeaderPresenter.Foreground`,
   `Path#ChevronPath.Fill`;
 - selected `ComboBoxItem`: selected fill/text;
+- splitter `FocusAdorner` border brush (`Mocassin.FocusBrush`) and selected-tab pipe;
 - dialog `ProgressBar.Foreground`;
 - `TextBox.SelectionBrush`/`SelectionForegroundBrush`.
 
@@ -298,6 +305,13 @@ accent-text surface is claimed; `Mocassin.AccentTextBrush` remains resource-only
 16. This record is updated with the implementation commit SHAs, exact commands/results, screenshot list, and
     deviations.
 17. The parked freeze branch and record are untouched.
+18. HC unchecked-pressed check-box label is `#FFFFFF` on the black row/card; checked/indeterminate disabled
+    labels/glyphs are `#A0A0A0`; the realized `PART_ContentPresenter.Foreground` is tested.
+19. The splitter `FocusAdorner` and selected-tab pipe consume `Mocassin.FocusBrush` and are in the realized
+    test list.
+20. The neutral focus pair is explicit: light `#000000`/`#FFFFFF`, dark `#FFFFFF`/`#000000`, HC
+    `#FFD700`/`#000000`; the realized focus ring meets 3:1.
+21. Quickstart/platform checklist no longer mention the removed accent setting.
 
 ## 11. Risks
 
@@ -312,6 +326,10 @@ accent-text surface is claimed; `Mocassin.AccentTextBrush` remains resource-only
 | A targeted TreeView style selector misses the header or chevron | Use the direct `ContentPresenter#PART_HeaderPresenter` selector (the Fluent `Border > ContentPresenter` shape cannot match) and the nested `ToggleButton#PART_ExpandCollapseChevron /template/ Path#ChevronPath` selector; render header and chevron in Light/Dark/HC. |
 | HC focus visual pair is black on black | HC defines `SystemControlFocusVisualPrimaryBrush` `#FFD700` and `SecondaryBrush` `#000000`; render the realized adorner in HC Light/Dark at 3:1. |
 | HC selected-tree chevron is white on gold | The targeted `Path#ChevronPath` fill uses `Mocassin.SelectedForeground` (`#000000` HC); rendered chevron test. |
+| HC unchecked-pressed label is black on the black card | The label uses `CheckBoxForegroundUncheckedPressed` `#FFFFFF`; the box remains gold; the realized `PART_ContentPresenter.Foreground` is tested. |
+| HC disabled check-box labels are 1:1 | The three disabled label aliases are overridden to `#A0A0A0`; component-level HC tests cover them, and no shipped surface disables a CheckBox today. |
+| The neutral focus pair is unset outside HC | The palette defines light `#000000`/`#FFFFFF` and dark `#FFFFFF`/`#000000`; HC `#FFD700`/`#000000`; realized focus tests cover both. |
+| The splitter FocusAdorner is not tested | It consumes `Mocassin.FocusBrush` and is in the realized test list. |
 | TextBox selected text is the control foreground | `TextBox.SelectionForegroundBrush` is set to `Mocassin.OnAccentBrush`; rendered selection pair test. |
 | Removing the Accent control silently changes Tab order | Document the intentional delta; test the new deterministic order and absence of the `Accent` automation name. |
 | `Mocassin.FocusBrush` is an unused role | Consume it in the splitter focus adorner and the selected-tab pipe; palette `TabItemHeaderSelectedPipeFill` uses the same value. |
@@ -395,4 +413,8 @@ Owner decisions:
 | `7a8f5bc` | `docs: request fixed-accent round 3 review [skip ci]` — round 3 request |
 | `7ba3600` | `docs: record fixed-accent round 3 review [skip ci]` — round 3 findings |
 | `cc06a67` | `docs: resolve fixed-accent delivery findings [skip ci]` — selectors, HC focus/chevron, TextBox selection, FocusBrush |
-| (round 4 request commit) | `docs: request fixed-accent round 4 review [skip ci]` — review record at `Re-review required` |
+| `f1a8c1a` | `docs: record fixed-accent delivery commit [skip ci]` — commit list update |
+| `e8983ea` | `docs: request fixed-accent round 4 review [skip ci]` — round 4 request |
+| `657da5b` | `docs: record fixed-accent round 4 review [skip ci]` — round 4 findings |
+| (round 5 design commit) | `docs: resolve HC check-box label findings [skip ci]` — M-13/m-14 and docs/test gaps |
+| (round 5 request commit) | `docs: request fixed-accent round 5 review [skip ci]` — review record at `Re-review required` |

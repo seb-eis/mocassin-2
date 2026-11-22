@@ -159,7 +159,7 @@ These are the keys the palette is expected to override; adding a key is a contra
 | Combo box | `ComboBoxBackground`, `ComboBoxBackgroundPointerOver`, `ComboBoxBackgroundPressed`, `ComboBoxBackgroundDisabled`, `ComboBoxForeground`, `ComboBoxForegroundFocused`, `ComboBoxForegroundDisabled`, `ComboBoxBorderBrush`, `ComboBoxBorderBrushPointerOver`, `ComboBoxBorderBrushPressed`, `ComboBoxBorderBrushDisabled`, `ComboBoxDropDownBackground`, `ComboBoxDropDownBorderBrush`, `ComboBoxDropDownGlyphForeground`, `ComboBoxDropDownGlyphForegroundFocused`, `ComboBoxDropDownGlyphForegroundFocusedPressed`, `ComboBoxDropDownGlyphForegroundDisabled`, `ComboBoxItemBackground`, `ComboBoxItemBackgroundPointerOver`, `ComboBoxItemBackgroundPressed`, `ComboBoxItemBackgroundDisabled`, `ComboBoxItemBackgroundSelected`, `ComboBoxItemBackgroundSelectedPointerOver`, `ComboBoxItemBackgroundSelectedPressed`, `ComboBoxItemBackgroundSelectedDisabled`, `ComboBoxItemForeground`, `ComboBoxItemForegroundPointerOver`, `ComboBoxItemForegroundPressed`, `ComboBoxItemForegroundDisabled`, `ComboBoxItemForegroundSelected`, `ComboBoxItemForegroundSelectedPointerOver`, `ComboBoxItemForegroundSelectedPressed`, `ComboBoxItemForegroundSelectedDisabled` |
 | Tab item | `TabItemHeaderBackgroundUnselected`, `TabItemHeaderBackgroundUnselectedPointerOver`, `TabItemHeaderBackgroundUnselectedPressed`, `TabItemHeaderBackgroundSelected`, `TabItemHeaderBackgroundSelectedPointerOver`, `TabItemHeaderBackgroundSelectedPressed`, `TabItemHeaderBackgroundDisabled`, `TabItemHeaderForegroundUnselected`, `TabItemHeaderForegroundUnselectedPointerOver`, `TabItemHeaderForegroundUnselectedPressed`, `TabItemHeaderForegroundSelected`, `TabItemHeaderForegroundSelectedPointerOver`, `TabItemHeaderForegroundSelectedPressed`, `TabItemHeaderForegroundDisabled`, `TabItemHeaderSelectedPipeFill`, `TabItemMinHeight`, `TabItemHeaderMargin` |
 | Menu and flyout | `MenuFlyoutPresenterBackground`, `MenuFlyoutPresenterBorderBrush`, `MenuFlyoutItemBackgroundPointerOver`, `MenuFlyoutItemBackgroundPressed`, `MenuFlyoutItemForeground`, `MenuFlyoutItemForegroundPointerOver`, `MenuFlyoutItemForegroundPressed`, `MenuFlyoutItemForegroundDisabled`, `MenuFlyoutItemKeyboardAcceleratorTextForeground`, `MenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOver`, `MenuFlyoutItemKeyboardAcceleratorTextForegroundPressed`, `MenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled` |
-| Shipped-control aliases | `CheckBoxCheckBackgroundFillChecked`, `CheckBoxCheckBackgroundFillIndeterminate`, `CheckBoxCheckBackgroundStrokeIndeterminate`, `CheckBoxCheckGlyphForegroundChecked`, `CheckBoxCheckGlyphForegroundCheckedPointerOver`, `CheckBoxCheckGlyphForegroundCheckedPressed`, `CheckBoxCheckGlyphForegroundIndeterminate`, `CheckBoxCheckGlyphForegroundIndeterminatePointerOver`, `CheckBoxCheckGlyphForegroundIndeterminatePressed`, `SliderThumbBackground`, `SliderTrackValueFill`, `SliderTrackValueFillPointerOver`, `SliderTrackValueFillPressed`, `TreeViewItemBackgroundSelected`, `TreeViewItemBackgroundSelectedPointerOver`, `TreeViewItemBackgroundSelectedPressed`, `CheckBoxForegroundUncheckedPressed`, `CheckBoxCheckBackgroundFillUncheckedPressed`, `CheckBoxCheckBackgroundFillCheckedDisabled`, `CheckBoxCheckBackgroundFillIndeterminateDisabled`, `CheckBoxCheckGlyphForegroundCheckedDisabled`, `CheckBoxCheckGlyphForegroundIndeterminateDisabled` |
+| Shipped-control aliases | `CheckBoxCheckBackgroundFillChecked`, `CheckBoxCheckBackgroundFillIndeterminate`, `CheckBoxCheckBackgroundStrokeIndeterminate`, `CheckBoxCheckGlyphForegroundChecked`, `CheckBoxCheckGlyphForegroundCheckedPointerOver`, `CheckBoxCheckGlyphForegroundCheckedPressed`, `CheckBoxCheckGlyphForegroundIndeterminate`, `CheckBoxCheckGlyphForegroundIndeterminatePointerOver`, `CheckBoxCheckGlyphForegroundIndeterminatePressed`, `SliderThumbBackground`, `SliderTrackValueFill`, `SliderTrackValueFillPointerOver`, `SliderTrackValueFillPressed`, `TreeViewItemBackgroundSelected`, `TreeViewItemBackgroundSelectedPointerOver`, `TreeViewItemBackgroundSelectedPressed`, `CheckBoxForegroundUncheckedPressed`, `CheckBoxForegroundUncheckedDisabled`, `CheckBoxForegroundCheckedDisabled`, `CheckBoxForegroundIndeterminateDisabled`, `CheckBoxCheckBackgroundFillUncheckedPressed`, `CheckBoxCheckBackgroundFillCheckedDisabled`, `CheckBoxCheckBackgroundFillIndeterminateDisabled`, `CheckBoxCheckGlyphForegroundCheckedDisabled`, `CheckBoxCheckGlyphForegroundIndeterminateDisabled` |
 
 These keys are the fixed palette baseline. The fixed accent family, the six derived Fluent colours, and the
 shipped-control alias keys live in the palette `Light`/`Dark` theme dictionaries (with `Default` mirroring
@@ -204,8 +204,10 @@ defines `Mocassin.FocusBrush` (`#FFD700`), the six `SystemAccentColorLight1`/`Li
 (`#FFD700` fills/tracks and `#000000` glyphs/text), `SystemControlFocusVisualPrimaryBrush` (`#FFD700`),
 `SystemControlFocusVisualSecondaryBrush` (`#000000`), `SystemControlHighlightAltChromeWhiteBrush`
 (`#000000`), `SystemControlHighlightChromeWhiteBrush` (`#000000`), and
-`SystemControlForegroundChromeWhiteBrush` (`#000000`). The unchecked-pressed check-box fill is `#FFD700` with
-`#000000` label text; checked/indeterminate disabled fills are `#000000` with `#A0A0A0` glyphs. The
+`SystemControlForegroundChromeWhiteBrush` (`#000000`). The unchecked-pressed check-box **box** fill is `#FFD700`; its label sits on the transparent
+row/card (`#000000`), so the label foreground is `#FFFFFF`, not black. Checked/indeterminate disabled fills are
+`#000000` with `#A0A0A0` glyphs, and the disabled label aliases
+(`CheckBoxForegroundUncheckedDisabled`/`CheckedDisabled`/`IndeterminateDisabled`) are `#A0A0A0`. The
 high-contrast dictionary is merged after the palette, so it overrides the fixed accent family; the targeted
 TreeView style consumes `Mocassin.SelectedBackground`/`SelectedForeground`, which are black/gold in
 high contrast. There is no selected-accent state to leak.
@@ -227,6 +229,7 @@ tokens for the realized selected foreground.
 | `Mocassin.AccentBrush`, `Mocassin.StatusBarBackground` | `#007ACC` | `#007ACC` | fixed fill/status |
 | `Mocassin.OnAccentBrush`, `Mocassin.StatusBarForeground` | `#FFFFFF` | `#FFFFFF` | 4.51:1 on `#007ACC`; keep the white VS Code treatment |
 | `Mocassin.FocusBrush`, `SystemControlHighlightAccentBrush`, `TextControlBorderBrushFocused` | `#248DD3` | `#007ACC` | splitter focus adorner, tab selected pipe, text-input focus; 3:1+ on the paired surfaces |
+| `SystemControlFocusVisualPrimaryBrush` / `SecondaryBrush` | `#FFFFFF` / `#000000` | `#000000` / `#FFFFFF` | neutral Fluent focus ring; HC `#FFD700`/`#000000` |
 | `Mocassin.AccentTextBrush` | `#4DA6FF` | `#005A9E` | 4.5:1+ on chrome/workspace/card |
 | `Mocassin.SelectedBackground` / `SelectedForeground` | `#094771` / `#FFFFFF` | `#CCE5FF` / `#1F1F1F` | existing palette values |
 | `SystemControlHighlightAccent2/3RevealBackgroundBrush` | `#094771` | `#CCE5FF` | tree selected fill aliases |
@@ -282,8 +285,9 @@ are already palette keys and reach the ComboBox realized parts.
 the reveal brushes, `SystemControlFocusVisualPrimaryBrush` (`#FFD700`), `SystemControlFocusVisualSecondaryBrush`
 (`#000000`), `SystemControlHighlightAltChromeWhiteBrush`, `SystemControlHighlightChromeWhiteBrush`,
 `SystemControlForegroundChromeWhiteBrush` (`#000000`), and the shipped-control alias keys (`#FFD700`
-fills/tracks and `#000000` glyphs/text). The unchecked-pressed check-box fill is `#FFD700` with `#000000` label
-text; checked/indeterminate disabled fills are `#000000` with `#A0A0A0` glyphs. The palette alias keys are
+fills/tracks and `#000000` glyphs/text). The unchecked-pressed check-box **box** fill is `#FFD700`; its label
+sits on the black row/card and uses `#FFFFFF`. Checked/indeterminate disabled fills are `#000000` with
+`#A0A0A0` glyphs and labels. The palette alias keys are
 overridden by the merged high-contrast dictionary; the targeted TreeView style uses
 `Mocassin.SelectedBackground`/`SelectedForeground` (black/gold) and also sets the selected chevron `Fill`. The
 TextBox selection pair is `#FFD700`/`#000000`.
@@ -578,7 +582,7 @@ The following minimum ratios are measured on the final composited colours. Norma
 | Text selection pair (`SelectionBrush`/`SelectionForegroundBrush`) | `#FFFFFF` on `#007ACC`; HC `#000000` on `#FFD700` | `#FFFFFF` on `#007ACC`; HC `#000000` on `#FFD700` | 4.5:1 |
 | Error, warning, success, and info text on card | the dark semantic tokens | the light semantic tokens | 4.5:1 |
 | Focus ring, selected-pipe indicator, and Fluent state fill against adjacent surfaces | `#248DD3`/`#3A9CDD`/`#248CD1` on `#3C3C3C`/`#37373D`/`#2D2D30`/`#252526`/`#1E1E1E` | `#007ACC`/`#0090F0`/`#005994` on `#F3F3F3`/`#FFFFFF` | 3:1 |
-| Fluent default neutral focus ring (`SystemControlFocusVisualPrimaryBrush`/`SecondaryBrush`) against adjacent surfaces | the neutral Fluent pair; HC `#FFD700`/`#000000` | the neutral Fluent pair; HC `#FFD700`/`#000000` | 3:1 |
+| Fluent default neutral focus ring (`SystemControlFocusVisualPrimaryBrush`/`SecondaryBrush`) against adjacent surfaces | `#FFFFFF`/`#000000`; HC `#FFD700`/`#000000` | `#000000`/`#FFFFFF`; HC `#FFD700`/`#000000` | 3:1 |
 
 High contrast pairs are `#FFFFFF` on `#000000` (21:1), `#000000` on `#FFD700` (about 15:1), and `#FFD700`
 against `#000000` (about 15:1). They are tested separately.
@@ -643,7 +647,7 @@ requirement; the record supplies the implementation and evidence plan. At minimu
 | Palette role values, light/dark resolution, and high-contrast precedence | PR-fast headless |
 | WCAG contrast for the fixed family in §11.1, both themes and high contrast | PR-fast unit |
 | Fixed accent delivery: palette Light/Dark/Default, derived Fluent colours, shipped-control alias keys, status bar, accent text, focus, tab pipe, selection, high-contrast precedence | PR-fast headless |
-| Realized template-part brushes for the shipped CheckBox (`NormalRectangle`, `CheckGlyph`), Slider (`Thumb`, value track), TreeView (`PART_LayoutRoot`, direct `PART_HeaderPresenter`, `Path#ChevronPath`), dialog `ProgressBar.Foreground`, and `TextBox` selection pair in light, dark, and high contrast | PR-fast headless |
+| Realized template-part brushes for the shipped CheckBox (`NormalRectangle`, `CheckGlyph`, `PART_ContentPresenter` label), Slider (`Thumb`, value track), TreeView (`PART_LayoutRoot`, direct `PART_HeaderPresenter`, `Path#ChevronPath`), splitter `FocusAdorner`, dialog `ProgressBar.Foreground`, and `TextBox` selection pair in light, dark, and high contrast | PR-fast headless |
 | Theme switch changes the realized parts through the palette dictionaries; no runtime accent reapply; `#3C3C3C`/`#37373D` focus surfaces; HC focus pair `#FFD700`/`#000000`; neutral default focus ring | PR-fast headless |
 | The six `SystemAccentColor*` keys are `Color` in `Default`/`Light`/`Dark`/HC; no `InvalidCastException` | PR-fast headless |
 | Settings removal: no Accent control, no `AccentPalette` path; legacy `accent` values are accepted no-ops, not written; new Settings Tab order and absence of the `Accent` automation name are tested | PR-fast headless |
