@@ -67,7 +67,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 11 | [Simulation Package and `.msl` Writer](steps/step-11-simulation-package-and-msl-writer.md) | C. Compilation | Done | `step/11-simulation-package-and-msl-writer` (merged and deleted) | — (amendment 2 merged and tagged `step-11.1`) | [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43948410478) at `84ceb76`; [closeout](https://github.com/seb-eis/mocassin-2/actions/runs/43944825353) / [Windows platform](https://github.com/seb-eis/mocassin-2/actions/runs/43944396192) at `4197166`; amendment 2 closeout [44896189617](https://github.com/seb-eis/mocassin-2/actions/runs/44896189617) and [main green](https://github.com/seb-eis/mocassin-2/actions/runs/44912274715) at `58c8e9a` | `84ceb76`; amendment 2 `58c8e9a` | `step-11`; amendment 2 `step-11.1` | [Passed with notes](audits/step-11.md) — round 2 at `4197166` (`fda68e6`); N-1/N-4/N-6 accepted 2026-11-16. Amendment 2: [Passed with notes](audits/step-11-amend-2.md) at `ef568be` — accepted 2026-11-21, A2A-01–A2A-03 fixed | Ready with notes — accepted 2026-11-15 ([record](reviews/step-11.md)); amendment 1 `Ready with notes` — accepted 2026-11-15 ([record](reviews/step-11-amend-1.md)); amendment 2 round 4 `Ready for implementation` at `bf273ff` ([record](reviews/step-11-amend-2.md)) — merged and tagged |
 | 12 | [Build Orchestration and `mocassin` CLI](steps/step-12-build-orchestration-and-cli.md) | C. Compilation | Done | `step/12-build-orchestration-and-cli` (merged and deleted) | — | [Ubuntu](https://github.com/seb-eis/mocassin-2/actions/runs/44377851616) / [Windows](https://github.com/seb-eis/mocassin-2/actions/runs/44378270028) closeout green at `07851d8`; [main green](https://github.com/seb-eis/mocassin-2/actions/runs/44381922313) | `ec2e04a` | `step-12` | [Passed with notes](audits/step-12.md) at `07851d8` — accepted by the human owner 2026-11-18; F-9/N-4 fixed, N-5 accepted risk | Ready with notes — **accepted by the human owner 2026-11-17** at `1b6af90` ([record](reviews/step-12.md); round 5; R5-1–R5-3 resolved); implementation started 2026-11-17 |
 | 13 | [Rust Solver Foundation and Package Reader](steps/step-13-rust-solver-foundation-and-package-reader.md) | D. Solver | Done | `step/13-rust-solver-foundation-and-package-reader` (merged and deleted) | 7/7 + audit fix + centered fixture | [closeout](https://github.com/seb-eis/mocassin-2/actions/runs/44831177039) green at `3128121`; [main](https://github.com/seb-eis/mocassin-2/actions/runs/44834521989) green at `2613a0d` | `2613a0d` | `step-13` | [Passed with notes](audits/step-13.md) — accepted 2026-11-20; F-9/N-5–N-7 fixed | Ready with notes — accepted by the human owner 2026-11-18 at `b9cda11`; hold lifted 2026-11-19 |
-| 14 | [Simulation Context Initialization](steps/step-14-simulation-context-initialization.md) | D. Solver | Done | `step/14-simulation-context-initialization` (merged and deleted) | 6/6 squashed + audit accepted | [closeout 44922414484](https://github.com/seb-eis/mocassin-2/actions/runs/44922414484) green at `3fd4516`; [main 44924317743](https://github.com/seb-eis/mocassin-2/actions/runs/44924317743) green at `dd5a811` | `dd5a811` | `step-14` | [Passed with notes](audits/step-14.md) — accepted 2026-11-21; F-1–F-3/N-1–N-3 deferred to `fix/step-14-structure-and-tests` | Ready with notes — accepted by the human owner 2026-11-21 at `620f20a` (round 4; freeze `a430d64`); class High accepted; six features approved |
+| 14 | [Simulation Context Initialization](steps/step-14-simulation-context-initialization.md) | D. Solver | Done | `step/14-simulation-context-initialization` (merged and deleted) | 6/6 squashed + audit accepted | [closeout 44922414484](https://github.com/seb-eis/mocassin-2/actions/runs/44922414484) green at `3fd4516`; [main 44924317743](https://github.com/seb-eis/mocassin-2/actions/runs/44924317743) green at `dd5a811` | `dd5a811` | `step-14` | [Passed with notes](audits/step-14.md) — accepted 2026-11-21; F-1, F-3, N-1–N-3 closed on `fix/step-14-structure-and-tests` (2026-11-22); F-2 re-pointed to Step 15 | Ready with notes — accepted by the human owner 2026-11-21 at `620f20a` (round 4; freeze `a430d64`); class High accepted; six features approved |
 | 15 | [Energy Engine](steps/step-15-energy-engine.md) | D. Solver | Not started | — | — | — | — | — | Not requested | Not requested |
 | 16 | [Kinetic Monte Carlo Engine](steps/step-16-kmc-engine.md) | D. Solver | Not started | — | — | — | — | — | Not requested | Not requested |
 | 17 | [Metropolis Monte Carlo Engine](steps/step-17-mmc-engine.md) | D. Solver | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -182,8 +182,8 @@ and approved the merge and tag. The closeout gates are green at `07851d8`: Ubunt
 with `--no-ff` as `ec2e04a6b45fa14d9a88a9bd0eac9310949de69e`; automatic main CI
 [`44381922313`](https://github.com/seb-eis/mocassin-2/actions/runs/44381922313) is green at that merge commit;
 the annotated `step-12` tag is pushed; and the step branch is deleted locally and remotely. Step 13 — Rust
-Solver Foundation and Package Reader is **In progress** on `step/13-rust-solver-foundation-and-package-reader`
-from the design merge `056d8c1`.
+Solver Foundation and Package Reader is **Done**: merged into `main` as `2613a0d` (`--no-ff`, from the design
+merge `056d8c1`) and tagged `step-13`.
 
 ## Cross-cutting phase checkpoints
 
@@ -235,25 +235,26 @@ early-warning signal for the next cross-cutting review.
   branch on 2026-11-16; the merge into `main` is `f5a52e3` (`--no-ff`, `[skip ci]`). No CI run was dispatched
   for the merge: the change is documentation/containerfile-only and the owner's rebuild is the verification.
   The `step-11` tag is unchanged.
-- A bounded GUI visual refresh is implemented on `fix/gui-visual-refresh` from `main` at `89dbe22` (commits
-  `f7f5627`, `eb69292`, `c137421`, plus the evidence commit) and awaits the owner's `--no-ff` merge approval. It
-  adds the light/dark token palette and card chrome, the fixed Console/Validation tabs, the 20 %/22 %/32 % layout
-  defaults with the one-time `layout.defaultsRevision` upgrade, and **View → Reset Layout**. Windows
+- The bounded GUI visual refresh merged into `main` as `5592418` (`--no-ff`, 2026-11-21) from
+  `fix/gui-visual-refresh`, which was branched from `main` at `89dbe22` (commits `f7f5627`, `eb69292`,
+  `c137421`, plus the evidence commit). It adds the light/dark token palette and card chrome, the fixed
+  Console/Validation tabs, the 20 %/22 %/32 % layout defaults with the one-time `layout.defaultsRevision`
+  upgrade, and **View → Reset Layout**. Windows
   [44961539734](https://github.com/seb-eis/mocassin-2/actions/runs/44961539734) and macOS
   [44961806131](https://github.com/seb-eis/mocassin-2/actions/runs/44961806131) platform gates are green;
-  `./tools/verify.sh all --require` passed locally. No step branch, step tag, parity row, ADR, or amendment is
+  `./tools/verify.sh all --require` passed locally. No step branch, step tag, parity row, ADR, or amendment was
   created; the implementation evidence is in
   [`maintenance/2026-11-21-gui-visual-refresh.md`](maintenance/2026-11-21-gui-visual-refresh.md).
-- The fixed accent family GUI maintenance fix is implemented on `fix/gui-accent-propagation` from `main` at
-  `19cb6ffe190e02449ce8b827706f365f2ea7afe2` (commits `8021cb9`, `e3a3f4e`, and the evidence commits) and
-  awaits the owner's `--no-ff` merge approval. It removes the Settings accent choice and the
-  `AccentPalette`/reader/validator path, delivers the fixed `#007ACC` palette and high-contrast family to the
-  realized CheckBox/Slider/TreeView/ProgressBar/TextBox parts with targeted selected-state styles, and accepts
-  a legacy `accent` property as a silent no-op. Windows
+- The fixed accent family GUI maintenance fix merged into `main` as `033da6f` (`--no-ff`, 2026-11-22) from
+  `fix/gui-accent-propagation`, which was branched from `main` at
+  `19cb6ffe190e02449ce8b827706f365f2ea7afe2` (commits `8021cb9`, `e3a3f4e`, and the evidence commits). It
+  removes the Settings accent choice and the `AccentPalette`/reader/validator path, delivers the fixed `#007ACC`
+  palette and high-contrast family to the realized CheckBox/Slider/TreeView/ProgressBar/TextBox parts with
+  targeted selected-state styles, and accepts a legacy `accent` property as a silent no-op. Windows
   [45016997359](https://github.com/seb-eis/mocassin-2/actions/runs/45016997359) and macOS
   [45017296087](https://github.com/seb-eis/mocassin-2/actions/runs/45017296087) platform gates are green;
   `./tools/verify.sh all --require` passed locally with 301 App tests. No step branch, step tag, parity row,
-  ADR, interaction-contract, or format change is created; the implementation evidence is in
+  ADR, interaction-contract, or format change was created; the implementation evidence is in
   [`maintenance/2026-11-22-gui-accent-propagation.md`](maintenance/2026-11-22-gui-accent-propagation.md).
 - Step 08 received a maintenance fix on 2026-11-20 on branch `fix/step-08-equivalent-start-mapping` (commits
   `1899421`, `85e27b2`, `4f5059e`), merged into `main` as `1f5b473` with the owner's approval. A centered group

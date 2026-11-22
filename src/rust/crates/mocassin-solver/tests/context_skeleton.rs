@@ -24,6 +24,26 @@ fn fixture_job(job_id: u32) -> JobPackage {
         .expect("the fixture job maps")
 }
 
+fn populated_mmc_job() -> JobPackage {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../../../tests/contracts/packages/step-13-populated/step-13-populated.msl");
+    Package::open_readonly(path, ReaderLimits::default())
+        .expect("the populated fixture opens")
+        .load_job(2)
+        .expect("the MMC job maps")
+}
+
+fn with_model(
+    job: JobPackage,
+    mutate: impl FnOnce(&mut mocassin_types::ParameterizedModel),
+) -> JobPackage {
+    let mut job = job;
+    let mut model = (*job.model).clone();
+    mutate(&mut model);
+    job.model = Arc::new(model);
+    job
+}
+
 fn initialize(job: JobPackage, options: &ContextOptions) -> SimulationContext {
     match SimulationContext::initialize(job, options, None).expect("the job initializes") {
         InitOutcome::Ready(context) => *context,
@@ -263,4 +283,66 @@ fn a_particle_outside_the_table_is_rejected_as_invalid_input() {
             ..
         }
     ));
+}
+
+#[test]
+fn a_truncated_environment_vector_is_rejected_before_it_is_indexed() {
+    let job = with_model(fixture_job(1), |model| {
+        model.structure.environments.pop();
+    });
+
+    let error = SimulationContext::initialize(job, &ContextOptions::default(), None)
+        .expect_err("the pool shape indexes one environment per P1 position");
+
+    assert!(matches!(
+        error,
+        ContextError::InvalidInput {
+            what: "position count",
+            ..
+        }
+    ));
+    assert_eq!(error.exit_code().code(), 12);
+}
+
+#[test]
+fn a_truncated_position_vector_is_rejected_before_it_is_indexed() {
+    let job = with_model(fixture_job(1), |model| {
+        model.structure.positions.pop();
+    });
+
+    let error = SimulationContext::initialize(job, &ContextOptions::default(), None)
+        .expect_err("the structure has fewer positions than the model counts");
+
+    assert!(matches!(
+        error,
+        ContextError::InvalidInput {
+            what: "position count",
+            ..
+        }
+    ));
+    assert_eq!(error.exit_code().code(), 12);
+}
+
+#[test]
+fn a_truncated_direction_vector_is_rejected_for_kmc_and_mmc() {
+    for (kind, job) in [("kmc", fixture_job(1)), ("mmc", populated_mmc_job())] {
+        let job = with_model(job, |model| {
+            model.transitions.directions.pop();
+        });
+
+        let error = SimulationContext::initialize(job, &ContextOptions::default(), None)
+            .expect_err("the direction count exceeds the direction vector");
+
+        assert!(
+            matches!(
+                error,
+                ContextError::InvalidInput {
+                    what: "direction count",
+                    ..
+                }
+            ),
+            "{kind}: unexpected error {error}"
+        );
+        assert_eq!(error.exit_code().code(), 12, "{kind}");
+    }
 }
