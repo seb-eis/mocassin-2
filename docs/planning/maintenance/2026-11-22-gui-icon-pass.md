@@ -12,7 +12,7 @@ small MIT-licensed Phosphor Icons subset as committed geometry.
 | Base | `main` at `2d9d5f487706ba946d6a027a1d668677b2535d19` |
 | Worktree | `/workspace` (clean, in place) |
 | Normative contract | [`docs/development/ui-visual-contract.md`](../../development/ui-visual-contract.md) §2, §5.2, §7.4, §7.6, §8, §11.3, §12, §13 |
-| Design review | Requested — Light class; the record `docs/planning/reviews/step-gui-icon-pass.md` follows the design-freeze commit |
+| Design review | [`step-gui-icon-pass.md`](../reviews/step-gui-icon-pass.md) — Light class, `Ready for review` |
 | Status | Design frozen for review; not implemented |
 | Tracking | One branch; local gates; no per-feature CI; no step tag; no ADR |
 
@@ -327,7 +327,7 @@ screenshot rows are PR-medium. The assertions read realized controls, resources,
 | New dependency | **None.** Vendored committed assets; no NuGet package, no font, no network. `verify.sh api` (NuGet audit) is unchanged. |
 | Format / contracts | **None.** No `contracts/manifest.json`, project/package/results/state change. |
 | Public API | **None.** All touched types are internal; no `PublicAPI.*.txt` change. |
-| Design review | **Required — Light class.** Recorded in `docs/planning/reviews/step-gui-icon-pass.md`. The reviewer binding can only write `step-*.md` records, so the record uses the `step-` prefix while remaining a maintenance review, not a roadmap step. |
+| Design review | **Required — Light class.** Recorded in [`step-gui-icon-pass.md`](../reviews/step-gui-icon-pass.md). The reviewer binding can only write `step-*.md` records, so the record uses the `step-` prefix while remaining a maintenance review, not a roadmap step. |
 | Step tag / parity / amendment | **None.** Out-of-step maintenance under §3.5. |
 | Merge | One owner `--no-ff` approval after the local gates and the evidence below. No per-feature CI. |
 | Platform runs | Not a merge gate; screenshots are Linux-only, as today. Dispatch the focused Windows/macOS platform runs only if the dev or owner wants the platform evidence, as in the tab-header pass. |
@@ -375,8 +375,8 @@ To be completed by the implementor:
 
 | Field | Value |
 | --- | --- |
-| Design commit | — (this commit) |
-| Review verdict | — (see the review record) |
+| Design commit | `34e7c18d71ee29ab5d81885ba13bb761758f1993` — `docs: define GUI icon pass contract and maintenance plan [skip ci]` |
+| Review verdict | — (pending; see the review record) |
 | Implementation commits | — |
 | Full gate | — |
 | App tests | — |
