@@ -394,5 +394,5 @@ Owner decisions:
 | `73a297f` | `docs: clarify fixed accent precedence [skip ci]` — precedence clarification |
 | `7a8f5bc` | `docs: request fixed-accent round 3 review [skip ci]` — round 3 request |
 | `7ba3600` | `docs: record fixed-accent round 3 review [skip ci]` — round 3 findings |
-| (round 4 design commit) | `docs: resolve fixed-accent delivery findings [skip ci]` — selectors, HC focus/chevron, TextBox selection, FocusBrush |
+| `cc06a67` | `docs: resolve fixed-accent delivery findings [skip ci]` — selectors, HC focus/chevron, TextBox selection, FocusBrush |
 | (round 4 request commit) | `docs: request fixed-accent round 4 review [skip ci]` — review record at `Re-review required` |
