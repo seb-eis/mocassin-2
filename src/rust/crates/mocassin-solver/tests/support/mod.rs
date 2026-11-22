@@ -56,6 +56,11 @@ pub fn ceria() -> JobPackage {
     fixture_job("msl-v1", "ceria-temperature-sweep.msl", 1)
 }
 
+/// The pre-amendment `net10.0` compatibility copy of the ceria fixture (logically identical to [`ceria`]).
+pub fn amend1_net10() -> JobPackage {
+    fixture_job("amend-1-net10", "ceria-temperature-sweep.msl", 1)
+}
+
 /// Clones the validated model, applies a mutation, and returns the job.
 pub fn with_model(mut job: JobPackage, mutate: impl FnOnce(&mut ParameterizedModel)) -> JobPackage {
     let mut model = (*job.model).clone();

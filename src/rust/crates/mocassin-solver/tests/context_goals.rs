@@ -9,7 +9,7 @@ use mocassin_solver::context::{
 };
 use mocassin_types::JobPackage;
 
-use support::{ceria, initialize, populated_kmc, populated_mmc, with_model};
+use support::{amend1_net10, ceria, initialize, populated_kmc, populated_mmc, with_model};
 
 fn expect_invalid(job: JobPackage, what: &'static str, exit: u8) {
     let error = SimulationContext::initialize(job, &ContextOptions::default(), None)
@@ -69,6 +69,65 @@ fn the_msl_v1_ceria_job_matches_the_acceptance_values() {
     assert_eq!(context.normalization.dof, 2);
     assert_eq!(context.normalization.nu_max, 1.0e13);
     assert!((context.normalization.dt - 2.0 / (1.0e13 * 432.0)).abs() < 1e-20);
+}
+
+#[test]
+fn the_amend_1_net10_ceria_job_matches_the_same_acceptance_values() {
+    let context = initialize(amend1_net10());
+
+    assert_eq!(context.dimensions.lattice_size(), [6, 6, 6]);
+    assert_eq!(context.dimensions.p(), 4);
+    assert_eq!(context.dimensions.pc(), 5);
+    assert_eq!(context.dimensions.environment_count(), 864);
+    assert_eq!(context.lattice.mobile_count(), 648);
+    assert_eq!(context.pools.selectable_jump_count, 432);
+    assert_eq!(
+        context.goals,
+        mocassin_solver::context::Goals {
+            prerun: 162_000,
+            main: 97_200,
+            total: 259_200,
+            cycles_per_block: 2_592,
+        }
+    );
+    assert_eq!(context.goals.cycles_per_block, 2_592);
+    assert_eq!(context.normalization.dof, 2);
+    assert_eq!(context.normalization.nu_max, 1.0e13);
+    assert!((context.normalization.dt - 2.0 / (1.0e13 * 432.0)).abs() < 1e-20);
+
+    // Tracker counts: one mobile id per non-void environment, 16 static trackers per cell, 2 globals.
+    assert_eq!(context.mobile_positions().len(), 648);
+    assert_eq!(
+        context.mobile_positions().len(),
+        context.lattice.mobile_count() as usize
+    );
+    assert_eq!(context.trackers.static_trackers_per_cell, 16);
+    assert_eq!(context.trackers.static_tracker_count, 3_456);
+    assert_eq!(
+        context.trackers.static_tracker_count,
+        context.dimensions.cell_count() * 16
+    );
+    assert_eq!(context.trackers.global_tracker_count, 2);
+    assert_eq!(
+        context.trackers.global_tracker_count,
+        context.job.model.structure.global_tracker_count
+    );
+    assert_eq!(
+        context.static_tracker_mapping().len(),
+        context.dimensions.p() as usize * context.dimensions.pc() as usize
+    );
+    assert_eq!(
+        context.global_tracker_mapping().len(),
+        context.job.model.counts.collection_count as usize * context.dimensions.pc() as usize
+    );
+
+    // The compatibility copy is logically identical to `msl-v1`.
+    let msl_v1 = initialize(ceria());
+    assert_eq!(context.goals, msl_v1.goals);
+    assert_eq!(context.normalization, msl_v1.normalization);
+    assert_eq!(context.trackers, msl_v1.trackers);
+    assert_eq!(context.pools, msl_v1.pools);
+    assert_eq!(context.lattice_energy_ev, msl_v1.lattice_energy_ev);
 }
 
 #[test]

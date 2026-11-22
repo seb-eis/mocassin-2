@@ -302,13 +302,25 @@ pub(crate) fn resolve_node(
     ))
 }
 
+/// The fixed path-node scratch bound of the jump-status build.
+///
+/// The build resolves a direction's nodes into a fixed `[Option<EnvId>; MAX_PATH_NODES]` scratch, so
+/// [`ContextLimits::max_path_nodes`] may lower the accepted path length but never raise it above this bound; the
+/// plan rejects a larger configured cap instead of silently truncating an 11+-node status.
+pub(crate) const MAX_PATH_NODES: u8 = 10;
+
 fn path_nodes(
     dimensions: &Dimensions,
     selected: EnvId,
     direction: &JumpDirection,
-) -> [Option<EnvId>; 10] {
-    let mut nodes = [None; 10];
-    for (node, _) in direction.path.iter().enumerate().take(10) {
+) -> [Option<EnvId>; MAX_PATH_NODES as usize] {
+    let mut nodes = [None; MAX_PATH_NODES as usize];
+    for (node, _) in direction
+        .path
+        .iter()
+        .enumerate()
+        .take(MAX_PATH_NODES as usize)
+    {
         nodes[node] = resolve_node(dimensions, selected, direction, node as u8);
     }
     nodes

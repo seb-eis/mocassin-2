@@ -108,20 +108,53 @@ impl Dimensions {
         })
     }
 
-    /// Derives the dimensions from a validated job.
+    /// Derives the dimensions from a validated job and checks the model vectors the context indexes.
     ///
-    /// The lattice array and the model are validated separately by the input phase; this constructor only
-    /// reads the declared counts.
+    /// The phase-0 memory plan reads `structure.environments[position]` for every P1 position and the invariant
+    /// sweep reads `directions[direction_index]` for every compiled direction, so both vectors and the P1
+    /// position count are checked here, before any phase indexes them. A hand-built job with a short vector is
+    /// therefore rejected as invalid input instead of panicking.
     ///
     /// # Errors
     ///
-    /// See [`Dimensions::new`].
+    /// See [`Dimensions::new`]; additionally `InvalidInput` when the model counts, the structure vectors, or the
+    /// direction vector disagree with the declared counts.
     pub fn from_job(job: &JobPackage) -> Result<Self, ContextError> {
-        Self::new(
+        let dimensions = Self::new(
             job.lattice.lattice_size,
             job.lattice.position_count,
             job.model.counts.particle_count,
-        )
+        )?;
+
+        let positions = dimensions.p as usize;
+        let structure = &job.model.structure;
+        if job.model.counts.position_count != dimensions.p
+            || structure.positions.len() != positions
+            || structure.environments.len() != positions
+        {
+            return Err(ContextError::InvalidInput {
+                what: "position count",
+                detail: format!(
+                    "the model counts imply {} positions, the structure has {} positions and {} environments",
+                    dimensions.p,
+                    structure.positions.len(),
+                    structure.environments.len()
+                ),
+            });
+        }
+
+        let directions = job.model.transitions.directions.len();
+        if job.model.counts.direction_count as usize != directions {
+            return Err(ContextError::InvalidInput {
+                what: "direction count",
+                detail: format!(
+                    "the model declares {} directions but the transitions hold {directions}",
+                    job.model.counts.direction_count
+                ),
+            });
+        }
+
+        Ok(dimensions)
     }
 
     /// Returns the `a` supercell extent.

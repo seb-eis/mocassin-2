@@ -45,6 +45,9 @@ pub struct ContextLimits {
     /// Maximum selectable jump count the RNG may draw against (default `u32::MAX`).
     pub max_selectable_jump_count: u64,
     /// Maximum path nodes of one jump direction (default 10, the state-code bound).
+    ///
+    /// This may be lowered but not raised above the fixed 10-node jump-status scratch
+    /// (`jumps::MAX_PATH_NODES`); a larger value is rejected as invalid input before any allocation.
     pub max_path_nodes: u8,
     /// Byte cap for the site table plus the site+pair vectors (default 512 MiB).
     pub max_energy_vector_bytes: u64,
@@ -127,9 +130,20 @@ impl MemoryPlan {
     /// # Errors
     ///
     /// Returns [`ContextError::LimitExceeded`] when a dimension product overflows, when a count exceeds its
-    /// configured cap, or when the summed bytes exceed `max_context_bytes`, and
-    /// [`ContextError::InvalidInput`] for a cluster link that references a missing table.
+    /// configured cap, or when the summed bytes exceed `max_context_bytes`,
+    /// [`ContextError::InvalidInput`] for an unrepresentable package (including a `max_path_nodes` value above
+    /// the fixed jump-status scratch).
     pub fn plan(job: &JobPackage, limits: &ContextLimits) -> Result<Self, ContextError> {
+        if limits.max_path_nodes > super::jumps::MAX_PATH_NODES {
+            return Err(ContextError::InvalidInput {
+                what: "max_path_nodes",
+                detail: format!(
+                    "the jump-status scratch holds {} path nodes; max_path_nodes is {}",
+                    super::jumps::MAX_PATH_NODES,
+                    limits.max_path_nodes
+                ),
+            });
+        }
         let dimensions = Dimensions::from_job(job)?;
         let mut entries = core_entries(&dimensions, limits)?;
         entries.extend(energy_entries(&dimensions, limits)?);
@@ -720,144 +734,4 @@ pub(crate) fn checked_add(
 }
 
 #[cfg(test)]
-mod tests {
-    use core::mem::size_of;
-
-    use super::{ContextLimits, MemoryPlan, MemoryReport};
-    use crate::context::ContextError;
-    use crate::context::dimensions::Dimensions;
-
-    fn ceria() -> Dimensions {
-        Dimensions::new([6, 6, 6], 4, 5).expect("valid ceria dimensions")
-    }
-
-    #[test]
-    fn the_default_limits_are_the_documented_budgets() {
-        let limits = ContextLimits::default();
-        assert_eq!(limits.max_positions, 500_000);
-        assert_eq!(limits.max_particles, 64);
-        assert_eq!(limits.max_pair_links, 16_000_000);
-        assert_eq!(limits.max_links_per_position, 65_536);
-        assert_eq!(limits.max_cluster_tables, 1_000_000);
-        assert_eq!(limits.max_cluster_instances, 100_000);
-        assert_eq!(limits.max_pools, 65_536);
-        assert_eq!(limits.max_selectable_jump_count, u64::from(u32::MAX));
-        assert_eq!(limits.max_path_nodes, 10);
-        assert_eq!(limits.max_energy_vector_bytes, 512 * 1024 * 1024);
-        assert_eq!(limits.max_link_bytes, 768 * 1024 * 1024);
-        assert_eq!(limits.max_cluster_state_bytes, 256 * 1024 * 1024);
-        assert_eq!(limits.max_cluster_energy_bytes, 256 * 1024 * 1024);
-        assert_eq!(limits.max_pool_bytes, 256 * 1024 * 1024);
-        assert_eq!(limits.max_status_count, 4_000_000);
-        assert_eq!(limits.max_jump_links, 8_000_000);
-        assert_eq!(limits.max_jump_status_bytes, 256 * 1024 * 1024);
-        assert_eq!(limits.max_context_bytes, 1024 * 1024 * 1024);
-    }
-
-    #[test]
-    fn the_plan_sizes_the_lattice_and_counter_arrays() {
-        let plan = MemoryPlan::for_core_dimensions(&ceria(), &ContextLimits::default())
-            .expect("the ceria plan fits");
-
-        let entries = plan.entries();
-        assert_eq!(entries.len(), 5);
-        assert_eq!(entries[0].what, "lattice.particles");
-        assert_eq!(entries[0].elements, 864);
-        assert_eq!(entries[0].bytes, 864);
-        assert_eq!(entries[1].what, "lattice.flags");
-        assert_eq!(entries[1].bytes, 864);
-        assert_eq!(entries[2].what, "lattice.mobile_tracker");
-        assert_eq!(entries[2].bytes, 864 * 4);
-        assert_eq!(entries[3].what, "counters.per_particle");
-        assert_eq!(entries[3].elements, 5);
-        assert_eq!(
-            entries[3].bytes,
-            5 * size_of::<crate::context::goals::ParticleCounters>() as u64
-        );
-        assert_eq!(entries[4].what, "counters.scalars");
-        assert_eq!(entries[4].bytes, 16);
-        assert_eq!(plan.total_bytes(), 864 + 864 + 3456 + 240 + 16);
-    }
-
-    #[test]
-    fn every_entry_is_a_whole_number_of_elements() {
-        let plan = MemoryPlan::for_core_dimensions(&ceria(), &ContextLimits::default())
-            .expect("the ceria plan fits");
-
-        for planned in plan.entries() {
-            assert_ne!(planned.elements, 0, "{}", planned.what);
-            assert_eq!(planned.bytes % planned.elements, 0, "{}", planned.what);
-        }
-    }
-
-    #[test]
-    fn the_report_equals_the_plan_on_lengths_and_bytes() {
-        let plan = MemoryPlan::for_core_dimensions(&ceria(), &ContextLimits::default())
-            .expect("the ceria plan fits");
-        let report = MemoryReport::from_plan(&plan, plan.total_bytes() + 512);
-
-        assert_eq!(report.entries(), plan.entries());
-        assert_eq!(report.total_bytes(), plan.total_bytes());
-        assert!(report.capacity_bytes() >= report.total_bytes());
-    }
-
-    #[test]
-    fn the_position_cap_rejects_before_allocation() {
-        let limits = ContextLimits {
-            max_positions: 863,
-            ..ContextLimits::default()
-        };
-        let error = MemoryPlan::for_core_dimensions(&ceria(), &limits).expect_err("864 > 863");
-        assert!(matches!(
-            error,
-            ContextError::LimitExceeded {
-                what: "max_positions",
-                value: 864,
-                limit: 863,
-            }
-        ));
-    }
-
-    #[test]
-    fn a_tightened_particle_cap_rejects() {
-        let limits = ContextLimits {
-            max_particles: 4,
-            ..ContextLimits::default()
-        };
-        let error = MemoryPlan::for_core_dimensions(&ceria(), &limits).expect_err("5 > 4");
-        assert!(matches!(
-            error,
-            ContextError::LimitExceeded {
-                what: "max_particles",
-                value: 5,
-                limit: 4,
-            }
-        ));
-    }
-
-    #[test]
-    fn the_total_cap_is_the_binding_limit() {
-        for cap in [0, 100, 5439] {
-            let limits = ContextLimits {
-                max_context_bytes: cap,
-                ..ContextLimits::default()
-            };
-            let error = MemoryPlan::for_core_dimensions(&ceria(), &limits)
-                .expect_err("the total exceeds the cap");
-            assert!(matches!(
-                error,
-                ContextError::LimitExceeded {
-                    what: "max_context_bytes",
-                    value: 5440,
-                    limit,
-                } if limit == cap
-            ));
-        }
-
-        let limits = ContextLimits {
-            max_context_bytes: 5440,
-            ..ContextLimits::default()
-        };
-        assert!(MemoryPlan::for_core_dimensions(&ceria(), &limits).is_ok());
-    }
-}
+mod tests;
