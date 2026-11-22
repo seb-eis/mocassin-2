@@ -508,4 +508,7 @@ adorner/selected-tab pipe. No realized shipped part is `#0078D7`.
   overridden (`#A0A0A0`), because no shipped surface disables a CheckBox. This is the recorded future-only risk.
 - The ComboBox selected fill is read on the realized `PART_ContentPresenter.Background`; the `ComboBoxItem`
   itself delegates its fill to that presenter.
-- Platform Windows/macOS runs are not a merge gate; if dispatched, their results are added here.
+- Platform Windows/macOS runs are not a merge gate. Both manual platform gates were dispatched on this branch
+  and passed:
+  - Windows: run `45016997359` — success (`https://github.com/seb-eis/mocassin-2/actions/runs/45016997359`).
+  - macOS: run `45017296087` — success (`https://github.com/seb-eis/mocassin-2/actions/runs/45017296087`).
