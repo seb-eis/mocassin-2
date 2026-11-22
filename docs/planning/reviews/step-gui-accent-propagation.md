@@ -1212,3 +1212,13 @@ Note (n-10) remain; no Major remains, and no implementation code exists on the b
 Follow-up owner: Planner (clarify m-16/n-10 or record their acceptance); the human owner may accept the notes
 and approve the start.
 Follow-up step: — (out-of-step maintenance fix; no step tag).
+
+## Note acceptance (2026-11-22)
+
+The owner accepted the round-5 **Ready with notes** verdict and approved starting the implementor. The two
+notes are resolved by this documentation commit: **m-16** now states the focus-ring layer pairing (2 px primary
+against the adjacent surface; inner 1 px secondary against the primary, not the surface) in the contract §3.6/
+§11.1 and the maintenance record §8.1/§8.2; **n-10** now states `CheckBoxForegroundUncheckedPressed` at
+`#D4D4D4` dark / `#333333` light / `#FFFFFF` HC and marks the three `CheckBoxForeground*Disabled` label
+aliases as HC-only overrides, not palette Light/Dark keys. No reviewer finding, evidence, or verdict text is
+changed, and no re-review is requested.

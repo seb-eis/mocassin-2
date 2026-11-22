@@ -124,12 +124,13 @@ The fixed-family delivery also resolves the remaining sub-surfaces:
   both properties.
 - **HC unchecked-pressed/disabled check-box sub-states (M-13/m-14).** The unchecked-pressed **box** fill is
   `CheckBoxCheckBackgroundFillUncheckedPressed` `#FFD700`, but its label is `PART_ContentPresenter` on the
-  transparent row/card (`#000000`), so `CheckBoxForegroundUncheckedPressed` is `#FFFFFF`, not black. HC also
-  defines `CheckBoxForegroundUncheckedDisabled`/`CheckedDisabled`/`IndeterminateDisabled` `#A0A0A0`,
-  checked/indeterminate disabled fills `#000000`, and disabled glyph aliases `#A0A0A0`. No shipped surface
-  currently disables a CheckBox; the disabled-label overrides are component-level future-proofing, and the
-  already-captured Fluent aliases are explicitly overridden. Tests read the realized label foreground as well
-  as the box/glyph.
+  transparent row/card (`#000000`), so `CheckBoxForegroundUncheckedPressed` is `#FFFFFF`, not black. The
+  non-HC pressed-label alias is `#D4D4D4` dark / `#333333` light. HC defines the three disabled label aliases
+  `CheckBoxForegroundUncheckedDisabled`/`CheckedDisabled`/`IndeterminateDisabled` `#A0A0A0`; these are
+  **HC-only overrides**, not palette Light/Dark keys, because no shipped surface disables a CheckBox and the
+  non-HC captured values are low contrast. Checked/indeterminate disabled fills are `#000000` and disabled
+  glyphs `#A0A0A0`. The disabled-label overrides are component-level future-proofing; tests read the realized
+  pressed label foreground as well as the box/glyph, and the HC disabled component states.
 - **ProgressBar (m-7).** The `ProgressDialog` `ProgressBar` is a shipped surface; its `Foreground` follows
   `SystemControlHighlightAccentBrush` (`#007ACC` light, `#248DD3` dark, `#FFD700` HC) and is in the
   realized-part test list.
@@ -204,8 +205,10 @@ High contrast is a merged dictionary applied after the palette. It defines the b
 | Tests | Add fixed-family resource, realized-template-part, theme-switch, high-contrast, and settings-removal/compatibility tests in §8. |
 | Documentation | Visual contract §2/§3.2–§3.6/§6/§7.3/§11.1/§13; user settings page; this record. |
 
-No control template, no new dependency, no `contracts/manifest.json` change, no ADR, no interaction-contract
-change, no public API change.
+`CheckBoxForegroundUncheckedPressed` is a palette `Light`/`Dark` alias at `#333333`/`#D4D4D4` (HC
+`#FFFFFF`). The three `CheckBoxForeground*Disabled` label aliases are HC-only overrides (`#A0A0A0`), not
+palette `Light`/`Dark` keys. No control template, no new dependency, no `contracts/manifest.json` change, no
+ADR, no interaction-contract change, no public API change.
 
 ## 8. Test plan
 
@@ -222,7 +225,8 @@ All tests are PR-fast headless unless named PR-medium. They use the real palette
   `#37373D`, `#2D2D30`, `#252526`, `#1E1E1E`); the light values (`#007ACC`, `#0090F0`, `#005994`) are tested
   on the light surfaces (`#F3F3F3`, `#FFFFFF`). This is a paired test, not a cross-product. HC pairs 7:1;
   HC focus pair `#FFD700`/`#000000` 3:1; the non-HC neutral pair is `#000000`/`#FFFFFF` light and
-  `#FFFFFF`/`#000000` dark, rendered at 3:1.
+  `#FFFFFF`/`#000000` dark. Measure by layer: the 2 px primary against the adjacent surface; the inner 1 px
+  secondary against the 2 px primary, not against the card surface.
 
 ### 8.2 Realized template parts
 
@@ -240,8 +244,9 @@ Create a real `ShellWindow`/Settings/Validation/Projects surface and read the re
 - `TextBox.SelectionBrush`/`SelectionForegroundBrush`.
 
 Assert Light/Dark/HC values and that the parts are not the platform `#0078D7`. The tests must read the
-realized part, not only `TryGetResource`. Render the HC focus adorner (primary/secondary) on a real control
-and assert 3:1; render the selected tree header/chevron in HC Light and Dark.
+realized part, not only `TryGetResource`. Render the neutral focus adorner on a real control and assert the
+2 px primary against the adjacent surface and the inner 1 px secondary against the primary; render the
+selected tree header/chevron in HC Light and Dark.
 
 ### 8.3 Theme switch, HC, and settings
 
@@ -310,7 +315,8 @@ accent-text surface is claimed; `Mocassin.AccentTextBrush` remains resource-only
 19. The splitter `FocusAdorner` and selected-tab pipe consume `Mocassin.FocusBrush` and are in the realized
     test list.
 20. The neutral focus pair is explicit: light `#000000`/`#FFFFFF`, dark `#FFFFFF`/`#000000`, HC
-    `#FFD700`/`#000000`; the realized focus ring meets 3:1.
+    `#FFD700`/`#000000`. The realized test measures the 2 px primary against the adjacent surface and the
+    1 px secondary against the primary, both at 3:1.
 21. Quickstart/platform checklist no longer mention the removed accent setting.
 
 ## 11. Risks
@@ -328,7 +334,7 @@ accent-text surface is claimed; `Mocassin.AccentTextBrush` remains resource-only
 | HC selected-tree chevron is white on gold | The targeted `Path#ChevronPath` fill uses `Mocassin.SelectedForeground` (`#000000` HC); rendered chevron test. |
 | HC unchecked-pressed label is black on the black card | The label uses `CheckBoxForegroundUncheckedPressed` `#FFFFFF`; the box remains gold; the realized `PART_ContentPresenter.Foreground` is tested. |
 | HC disabled check-box labels are 1:1 | The three disabled label aliases are overridden to `#A0A0A0`; component-level HC tests cover them, and no shipped surface disables a CheckBox today. |
-| The neutral focus pair is unset outside HC | The palette defines light `#000000`/`#FFFFFF` and dark `#FFFFFF`/`#000000`; HC `#FFD700`/`#000000`; realized focus tests cover both. |
+| The neutral focus pair is unset outside HC | The palette defines light `#000000`/`#FFFFFF` and dark `#FFFFFF`/`#000000`; HC `#FFD700`/`#000000`. Realized tests measure the primary against the surface and the secondary against the primary. |
 | The splitter FocusAdorner is not tested | It consumes `Mocassin.FocusBrush` and is in the realized test list. |
 | TextBox selected text is the control foreground | `TextBox.SelectionForegroundBrush` is set to `Mocassin.OnAccentBrush`; rendered selection pair test. |
 | Removing the Accent control silently changes Tab order | Document the intentional delta; test the new deterministic order and absence of the `Accent` automation name. |
