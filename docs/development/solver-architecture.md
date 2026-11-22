@@ -137,8 +137,9 @@ The reader produces the types Step 14 consumes:
 - Environment pairs are one entry per periodic image: `target_position`, relative integer `offset`, and the
   shared pair-table index (payload `energy_id`). Step 14 expands `cell + offset` into the supercell target;
   Step 13 does not.
-- Energy tables keep payload order and strides; the pair table is `particle_count²` per table. Step 15 converts
-  eV to kT.
+- Energy tables keep payload order and strides; the pair table is `particle_count²` per table. Step 14
+  converts the site table, environment vectors, and cluster rows to kT once and exposes `ev_to_kt`; Step 15
+  scales each remaining model-table read (a pair delta or a raw-tuple cluster energy) exactly once per read.
 - Transitions keep collections, directions, rules, `jump_count`, the derived prefix-sum `jump_offsets`,
   `jump_mapping`, and the tracker mappings. `tracker_order` is variable-length with a `0xFF` sentinel.
 - `DirectionPool` was the Step 13 placeholder (`direction_count`, P1 `(PositionId, ParticleId)` members, and a

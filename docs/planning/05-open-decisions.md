@@ -137,6 +137,7 @@ expansion` row below). Follow-up (owner: planner, trigger: next maintenance bran
 | 23A complexity class | 23A start gate | 23A is class **High** on cross-step interfaces and test-matrix breadth; accept it as one High unit per §3.1, or propose a further split | Accept; no further split is viable (host/workspace versus settings/lifecycle leaves unusable halves) |
 | 23B complexity class | 23B start gate | 23B is class **High** on cross-step interface and test-matrix breadth; accept it as one High unit per §3.1, or propose a further split. The class was reconfirmed at the 23B design freeze (2026-11-21) | Accept; no further split is viable (editing versus recovery strands autosave/validation) |
 | Step 14 complexity class | Step 14 start gate | Step 14 is class **High** on cross-step interfaces, behavioural irreversibility, and test-matrix breadth; accept it as one High unit per §3.1, or split context skeleton from acceptance | Accept as one High unit; the boundaries would leave Step 15 a half-context or duplicate the fixtures/benchmark evidence and both halves stay High |
+| Step 15 complexity class | Step 15 start gate | Step 15 is class **High** on cross-step interfaces (Steps 16–18 consume the engine API) and behavioural irreversibility (the owner-major delta application, the read-only S2 evaluation, the field-term application, the incremental lattice-energy bookkeeping; the S0/S1/S2 formulas and the 0.5/field/cluster conventions are frozen plan content the step restates). Accept as one High unit per §3.1, or propose a split. The start gate also requires `fix/step-14-structure-and-tests` (the Step 14 audit deferrals, incl. the F-3 context file split) to be merged into `main` first | Accept as one High unit; the seams strand the read-only delta sums from the committing delta pass or split one shared kernel at its smallest consumer, and both halves stay High |
 
 ## 4. Deferred scope
 
@@ -152,6 +153,7 @@ These are intentionally out of the first parity release. They must remain marked
 | Advanced 3D effects (SSAO/shadows) | post-1.0 | Quality subset first |
 | Localization | post-1.0 | English first; resources structured for later |
 | Time-lagged MSD | post-1.0 | Origin-based MSD matches the original; separate API later |
+| Static S2 corrections | post-v1 `.msl` revision, with the Step 29 optimization pass | The v1 payload writes `static_correction = null` for every rule (step-08-amend-1 excludes it from the `model-v1` projection), so dynamic S2 is the only v1 mode and a present value fails closed in the engine (undefined non-null semantics: the original's correction is a scalar, the payload field is a 3-vector). Landing the optimization needs a compiler-side computation, a defined payload projection (a new `model-v1` projection version per step-08-amend-1), and dynamic-vs-static equivalence tests |
 | Remote deploy | post-1.0 | Local + HPC scripts first |
 | Unified docs search across narrative + APIs | post-1.0 | Each generated API keeps its own search |
 | PDF/offline documentation | post-1.0 | Current-version site first |

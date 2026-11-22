@@ -225,6 +225,29 @@ map and the `ClusterTable::lookup` reader/runtime contract). The design contract
 acceptance criterion. The Step 14 start gate is expected after `step-11.1` is merged and tagged; feature 1 may
 start earlier, but feature 2's cluster work must not.
 
+#### Recorded class — Step 15 (design freeze 2026-11-22)
+
+Step 15 (**Energy engine**) is class **High** on two dimensions: cross-step interfaces (Steps 16, 17, and 18
+consume the engine API — `EnergyEngine`, `TransitionEnergies`, `ExchangeEnergies` — and the behavioural
+conventions it freezes: the owner-major delta application, the read-only S2 evaluation, the field-term
+application, and the incremental lattice-energy bookkeeping) and irreversibility (those conventions are
+scientific/behavioural decisions expensive to change after merge; the S0/S1/S2 formulas, the 0.5 pair
+convention, the field sign, and the cluster-centre convention are frozen plan content the step restates, not
+re-decides). Its contracts/format surface is Medium (no persisted-format change, but a new public Rust library
+API), it adds no dependency, its test matrix is broad (hand-computed, real-package, property, allocation,
+benchmark), it has **one** independent acceptance story, and its evidence set is bounded (four features, no
+new fixture packages). Per this section a High step needs either a split or explicit owner acceptance as one
+unit.
+
+**No split is proposed.** The candidate seams strand a half-engine: "transition evaluation" vs. "state
+application" would separate the read-only delta sums from the committing delta pass that shares the
+owner-major rule and the cluster rebuild, and "KMC" vs. "MMC" would split one shared kernel at its smallest
+consumer; both halves stay High on cross-step interfaces. The owner-acceptance request, the fallback, and the
+convention guard are recorded on the [Step 15 page](steps/step-15-energy-engine.md) §0.2 and in
+[`05-open-decisions.md`](05-open-decisions.md) §3. This note records the class request; it does not itself
+approve it. The Step 15 start gate additionally requires the `fix/step-14-structure-and-tests` maintenance
+branch (the Step 14 audit F-1–F-3/N-1–N-3 deferrals) to be merged into `main` before the step branch is cut.
+
 #### Historical exceptions (previous time-based rule)
 
 The three exceptions below were approved under the previous **four-week** time trigger. They are historical
