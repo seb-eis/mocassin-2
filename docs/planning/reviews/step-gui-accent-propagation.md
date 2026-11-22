@@ -19,7 +19,7 @@
 | Step agent (implementor) | — (no step; the fix is a bounded maintenance branch) |
 | Review initiated by | Orchestrator, on request of the planner |
 | Review date | 2026-11-22 |
-| Reviewer | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh context, no shared conversation with the planner, implementor, or orchestrator |
+| Reviewer | Round 1: DeepSeek V4.1 Flash 1017 (opencode-go), fresh context. Round 2: DeepSeek V4.1 Flash 1017 (opencode-go), a separate fresh context with no shared conversation with round 1, the planner, implementor, or orchestrator |
 
 Maintenance record:
 [`2026-11-22-gui-accent-propagation.md`](../maintenance/2026-11-22-gui-accent-propagation.md)
@@ -51,14 +51,14 @@ Non-goals of the design review:
 
 ## Design decisions reviewed
 
-- [x] Accent overlay completeness and precedence (default/`blue`, optional accents, high contrast) — Reviewed; the precedence model is sound, but the overlay set is incomplete for Fluent-derived states (M-3) and the shared selected-text key (M-4); the inventory is inaccurate (m-2).
-- [x] `OnAccent`, `AccentText`, `FocusAccent`, `SelectedFill`, and `SelectedText` derivation — Reviewed and recomputed. `OnAccent`, `AccentText`, `FocusAccent`, and `SelectedText` match the table and the stated floors; `SelectedFill` does not match its own formula (M-2). Focus floors are based on the wrong worst surface (M-5).
-- [x] `Mocassin.FocusBrush` as the contrast-safe focus/indicator role — Reviewed; the role is well motivated, but the dark input/hover surfaces are not in the contrast oracle (M-5).
+- [x] Accent overlay completeness and precedence (default/`blue`, optional accents, high contrast) — Reviewed; the precedence model is sound, but the overlay set is incomplete for Fluent-derived states (M-3) and the shared selected-text key (M-4); the inventory is inaccurate (m-2). Round 2: the two-group model is present, but §2 still says the overlay is optional-accent-only (M-7) and Fluent alias capture defeats the base-key overlays (M-6).
+- [x] `OnAccent`, `AccentText`, `FocusAccent`, `SelectedFill`, and `SelectedText` derivation — Reviewed and recomputed. `OnAccent`, `AccentText`, `FocusAccent`, and `SelectedText` match the table and the stated floors; `SelectedFill` does not match its own formula (M-2). Focus floors are based on the wrong worst surface (M-5). Round 2: `FocusAccent`, `AccentText`, and all 24 `FluentState` values reproduce exactly; the light `green` `SelectedFill` still does not (m-3).
+- [x] `Mocassin.FocusBrush` as the contrast-safe focus/indicator role — Reviewed; the role is well motivated, but the dark input/hover surfaces are not in the contrast oracle (M-5). Round 2: every `FocusAccent` and `#248DD3` passes 3:1 on `#3C3C3C`, `#37373D`, `#2D2D30`, `#252526`, `#1E1E1E`, and the light surfaces; the Fluent slider thumb does not receive `FocusAccent` (M-6).
 - [x] Status-bar background/foreground and progress contrast — Reviewed; all six accents pass 4.5:1 (`blue` 4.511 white, `teal`/`amber` black, `green`/`violet`/`rose` white) and the progress bar uses `StatusBarForeground` on a transparent track.
-- [x] Selected list/tree/combo and text-selection treatment — Reviewed; combo and TextBox pairs are coherent, but list/tree selected and hover text share `SystemControlHighlightAltBaseHighBrush` with Fluent accent-control glyphs (M-4), and tree selected fill uses the Fluent Reveal keys rather than the documented list keys (m-2).
-- [x] Default restoration and live reapply — Reviewed; the remove-then-publish logic and `StartupCoordinator.Changed` reapply are sound for explicit `Light`/`Dark`. `ThemeSelection.System` is not a fixed light fallback (M-1).
-- [x] Test plan, contrast matrix, and screenshot scope — Reviewed; the matrix and screenshots are a good start, but the omissions would let the M-3/M-4/M-5 surfaces ship (m-1).
-- [x] Documentation plan and acceptance criteria — Reviewed; the documentation touches the right sections, but acceptance criteria 1 and 4 are not met by the design as written (M-4, M-5).
+- [x] Selected list/tree/combo and text-selection treatment — Reviewed; combo and TextBox pairs are coherent, but list/tree selected and hover text share `SystemControlHighlightAltBaseHighBrush` with Fluent accent-control glyphs (M-4), and tree selected fill uses the Fluent Reveal keys rather than the documented list keys (m-2). Round 2: `AltBaseHigh` is removed from the overlays and the list/combo text passes; Fluent captures the tree/reveal aliases at load, so the reveal overlay does not set the tree fill and the HC tree text/glyph values do not reach the controls (M-6).
+- [x] Default restoration and live reapply — Reviewed; the remove-then-publish logic and `StartupCoordinator.Changed` reapply are sound for explicit `Light`/`Dark`. `ThemeSelection.System` is not a fixed light fallback (M-1). Round 2: the initial System resolution now uses `Application.ActualThemeVariant`; a live OS Light/Dark switch still has no reapply trigger (M-8).
+- [x] Test plan, contrast matrix, and screenshot scope — Reviewed; the matrix and screenshots are a good start, but the omissions would let the M-3/M-4/M-5 surfaces ship (m-1). Round 2: the matrix and rendered cases were expanded, but there is no rendered high-contrast Fluent-control check and no realized-template-part assertion, and the System seam can bypass the production read (m-5); `SystemControlHighlightChromeWhiteBrush` is still missing (m-6).
+- [x] Documentation plan and acceptance criteria — Reviewed; the documentation touches the right sections, but acceptance criteria 1 and 4 are not met by the design as written (M-4, M-5). Round 2: acceptance criteria 1/3/4 are still not established for the aliased Fluent controls (M-6), and §2 was not updated to match the two-group model (M-7).
 - [x] Owner decisions A1–A3 and the superseded refresh wording — Reviewed; A1–A3 are recorded, internally consistent, and the supersession of the fixed-white status-bar and maximum-contrast `blue` wording is explicit.
 - [x] No ADR, interaction-contract, control-template, dependency, or format change — Reviewed; no ADR, interaction-contract, control-template, dependency, `contracts/manifest.json`, or format change is proposed. The `TextBox` selection pair is a property setter, not a template.
 
@@ -246,12 +246,15 @@ altering the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-review required
+**State:** Changes required
 
-The design is frozen for round 1 at `6ed4858f562ec9f29e1042b6ae4294bd3cac6fef`; the branch head
-`5fb01f8ee4aecd6bd20333ccc25995fb9f5cfbcd` differs only by the one-line review-target update.
+Round 1 froze the design at `6ed4858f562ec9f29e1042b6ae4294bd3cac6fef`; its branch head
+`5fb01f8ee4aecd6bd20333ccc25995fb9f5cfbcd` differed only by the one-line review-target update. Round 2
+reviewed the revised design at `e7a62275c372d5f7485b6310646ea66b8fed2c78`; the re-review request at
+`0b8beeac086d460349f4e49a10d031c06b60e3c4` adds only the request-owner resolutions and the re-review
+request to this record.
 
-`Re-review required` is a record state, not a verdict.
+`Changes required` is the round-2 verdict; `Re-review required` was the request state before round 2.
 
 ## Reviewer independence
 
@@ -448,3 +451,116 @@ n-1 (Note): `Mocassin.AccentTextBrush` is resource-only under A3; it has no rend
 rule/table contradiction (M-2), the missing Fluent-derived accent states (M-3), the shared
 selected-text key conflict (M-4), and the focus-floor surface error (M-5). The design must be corrected and
 re-frozen before implementation; no implementation code exists on the branch.
+
+---
+
+### Re-review round 2
+
+#### Independence and frozen state
+
+I am a separate fresh context. I did not author, plan, implement, or review round 1; I have no shared
+conversation with round 1, the planner, the implementor, or the orchestrator. I read the repository at the
+revised frozen design and worked only in `docs/planning/reviews/step-gui-accent-propagation.md`. I did not edit
+the visual contract, the maintenance record, code, tests, configuration, or any other record.
+
+- Revised design freeze: `e7a62275c372d5f7485b6310646ea66b8fed2c78`.
+- Branch head / re-review request: `0b8beeac086d460349f4e49a10d031c06b60e3c4`.
+- `git diff --name-status e7a6227..0b8beea` reported only
+  `M docs/planning/reviews/step-gui-accent-propagation.md`. The diff is the request-target update, the
+  resolution-status table, the request-owner resolutions, and the re-review request; round 1's findings,
+  evidence, verdict, and finding details are unchanged. No contract, record, code, test, or configuration
+  change was made after the revised freeze.
+- Base `main` is `19cb6ffe190e02449ce8b827706f365f2ea7afe2`; the branch is based on it.
+
+#### Resolution verification
+
+| Finding | Round-2 status | Evidence |
+| --- | --- | --- |
+| M-1 | **Resolved for the initial apply.** The derivation reads the resolved `Application.ActualThemeVariant` after `RequestedThemeVariant` is set; `ThemeVariant.UpdateActualThemeVariant` resolves `Default` through the platform and updates synchronously. A live OS Light/Dark switch is still unhandled (M-8), and the test-seam wiring is not specified to fail a requested-variant regression (m-5). | Contract §3.6 `:342-347`; Avalonia 12.1.6 `src/Avalonia.Base/Styling/ThemeVariant.cs` `UpdateActualThemeVariant`; record §4.1/§4.2/§6.4. |
+| M-2 | **Partially resolved.** The 30 % accent / 70 % chrome rule is retained and eight of the ten optional rows match. Light `green` is wrong (`#AAD0B9` instead of `#B8D0B9`); dark `green` depends on an unspecified rounding mode (`#233B24` table, `#233A24` with .NET's default `Math.Round`). `SelectedText` is correct: dark white on every fill, light `#1F1F1F` on every fill including light `rose` `#DFAAC2` (8.37:1). | Contract §3.6 `:227-231`, `:315-328`; record §4.1 `:184-191`; recomputation below. |
+| M-3 | **Partially resolved.** The six derived `SystemAccentColor` colours and the clamped `FluentState` table are exact, and `Light1`/`Dark1` reach checkbox/radio/toggle/slider hover/press through Fluent's dynamic `Color` bindings. The `SystemControlForegroundAccentBrush` (slider thumb) and `SystemControlHighlightAccentBrush` (accent-control fill) overlays do not reach the controls, because Fluent captures those keys in `StaticResource` aliases; the reveal fill and glyph overlays have the same problem (M-6). | Probe; Avalonia 12.1.6 `BaseResources.xaml:105,132,201-203`; `FluentControlResources.xaml:348,520,711-727`; `Controls/CheckBox.xaml:147-152`; `Controls/Slider.xaml:179,319,345`; `Controls/TreeViewItem.xaml:137-159`. |
+| M-4 | **Partially resolved.** `SystemControlHighlightAltBaseHighBrush` is removed from both overlays and the palette is corrected to `#FFFFFF` dark / `#1F1F1F` light / `#000000` HC. The ListBoxItem/ComboBox/MenuFlyout/TabItem dynamic consumers pass 4.5:1; tree text uses the Fluent-captured value (black light / white dark), which still passes non-HC. In high contrast, the HC `#000000` value does not reach the captured tree/checkbox glyph aliases, so the HC tree text and checked glyph can fail (M-6). | Contract §3.6 `:307-313`; record §4.2; recomputation; probe. |
+| M-5 | **Values resolved; delivery not resolved.** Every `FocusAccent` and the default dark `Mocassin.FocusBrush` `#248DD3` passes 3:1 on `#3C3C3C`, `#37373D`, `#2D2D30`, `#252526`, `#1E1E1E` and on light `#F3F3F3`/`#FFFFFF` (lowest: amber 3.001 on `#3C3C3C`; light teal 3.736). The Fluent slider thumb/track receives the raw accent instead of `FocusAccent`, so the shipped Settings slider is below 3:1 for dark `violet` (2.01), `rose` (1.93), and `green` (2.68) on the card (M-6). | Recomputation below; probe; contract §11.1 `:635`. |
+| m-1 | **Partially resolved.** The rendered matrix now covers checkbox/radio/toggle/slider normal/hover/press, tree/list/combo selected and hover, the actual System Light/Dark cases, and the bright dark focus surfaces. Missing: a rendered high-contrast Fluent-control check, an assertion on the realized template-part brush (not only `TryGetResource`), and a System seam that would fail a requested-variant regression (m-5). | Record §6.1-§6.4; checklist notes above. |
+| m-2 | **Partially resolved.** The reveal/Accent2-3, `SystemControlForegroundAccentBrush`, `SystemControlHighlightAltChromeWhiteBrush`, the six derived keys, and the real `AltBaseHigh` consumers are now listed. Still missing: `SystemControlHighlightChromeWhiteBrush` (toggle-knob pointer-over), the alias keys the controls actually consume, and the claim that `Light2`/`Light3`/`Dark2`/`Dark3` have no 12.1.6 consumer is false (`CalendarButton.xaml` uses `SystemAccentColorDark2`) (m-6). | Record §2.2; Avalonia 12.1.6 `Controls/CalendarButton.xaml:59,79,88`. |
+| n-1 | **Confirmed honest.** The contract and record say `Mocassin.AccentTextBrush` is resource-only, the overlay and contrast test prove only the token, and no rendered link/accent-text surface is claimed; the screenshot section repeats the restriction. | Contract §3.6 `:355-357`; record §6.4-§6.5; no `DynamicResource Mocassin.AccentTextBrush` consumer in `src/dotnet/Mocassin.App.Views`. |
+
+#### Commands and results (round 2)
+
+- `git rev-parse HEAD` — `0b8beeac086d460349f4e49a10d031c06b60e3c4`.
+- `git rev-parse e7a62275c372d5f7485b6310646ea66b8fed2c78` — the revised frozen design commit.
+- `git rev-parse main` — `19cb6ffe190e02449ce8b827706f365f2ea7afe2`; `git merge-base --is-ancestor main HEAD` — exit 0.
+- `git diff --name-status e7a6227..0b8beea` — only
+  `M docs/planning/reviews/step-gui-accent-propagation.md`; the diff contains only the target metadata,
+  the resolution table/resolutions, and the re-review request.
+- `git diff --check` — clean; `git status --short` — clean before the record edit.
+- `python3 tools/check_docs_links.py` — `Documentation links OK (204 files scanned)`.
+- `python3 tools/check_doc_math.py` — `Documentation math conventions OK (201 files scanned)`.
+- `python3 tools/check_process_consistency.py` — `Process consistency: OK`.
+- `python3 -m unittest discover -s tools/tests -t .` — 60 tests, all passed.
+- `./tools/verify.sh docs` — exit 0; strict Zensical build, DocFX 465 models with 0 warnings and 0 errors,
+  rustdoc workspace built.
+- `./tools/verify.sh policy` — exit 0; ApiCompat no breaking changes, contract artifacts current,
+  space-group catalog current, process consistency OK, 60 policy tests passed, SPDX/secret scan/`cargo-deny`
+  clean.
+- WCAG recomputation (below) for every table row, the `SelectedText` pairs, every `FocusAccent` on every
+  listed surface, the `FluentState` clamp, and the raw-accent slider surfaces.
+- Avalonia 12.1.6 source inspection for `SystemAccentColors`, `ThemeVariant`, `BaseResources`,
+  `FluentControlResources`, `CheckBox`, `Slider`, `TreeViewItem`, `RadioButton`, `ToggleSwitch`, and
+  `CalendarButton`.
+- A scratch Avalonia 12.1.6 headless probe (not committed, under `/home/node/tmp/aliasprobe`) applied an
+  app-level `SystemAccentColor` `#B26A00` and red brush overrides for the base keys, then read the alias keys.
+  Exact results: `CheckBoxCheckBackgroundFillChecked` and `SliderThumbBackground` resolved to `#B26A00`, not
+  the red `SystemControlHighlightAccentBrush`/`SystemControlForegroundAccentBrush`; `TreeViewItemBackgroundSelected`
+  and `...PointerOver` resolved to `#B26A00` at opacity 0.6/0.8, not the red reveal brushes;
+  `CheckBoxCheckGlyphForegroundChecked` and `...PointerOver` stayed `#FFFFFF`, not the red
+  `SystemControlHighlightAltChromeWhiteBrush`/`SystemControlForegroundChromeWhiteBrush`; and
+  `SliderThumbBackgroundPointerOver` followed the red `SystemAccentColorLight1` (so the derived-state overlay
+  does work). Writing a brush into a `SystemAccentColor*` key produced
+  `InvalidCastException: Unable to cast object of type 'Avalonia.Media.SolidColorBrush' to type
+  'Avalonia.Media.Color'` from the Fluent brush's `Color` binding.
+
+#### Recomputation
+
+- `SelectedFill(a, theme) = round(0.30 * a + 0.70 * chrome)`, `chrome(dark) = #1E1E1E`,
+  `chrome(light) = #F3F3F3`. Teal `#153F3F`/`#AAD4D4`, amber `#4A3515`/`#E0CAAA`, violet
+  `#352C41`/`#CAC1D6`, and rose `#4A152D`/`#DFAAC2` match exactly. Green: dark `#233A24` (table
+  `#233B24`; the channel value is 58.5), light `#B8D0B9` (table `#AAD0B9`; R is 183.9, not 170).
+- `SelectedText`: dark `#FFFFFF` on every dark fill is 11.57–14.62:1; light `#1F1F1F` on every light fill is
+  8.37–10.36:1; light `rose` `#1F1F1F` on `#DFAAC2` is 8.37:1; white on `#DFAAC2` is 1.97:1.
+- `FocusAccent` and `#248DD3`: dark values pass 3:1 on `#3C3C3C`/`#37373D`/`#2D2D30`/`#252526`/`#1E1E1E`
+  (blue 3.060/3.280/3.809/4.248/4.625; teal 3.031/3.248; green 3.021/3.237; amber 3.001/3.217;
+  violet 3.011/3.227; rose 3.020/3.237). Light values pass on `#F3F3F3`/`#FFFFFF` (blue 4.065/4.511,
+  teal 3.736/4.145, green 4.621/5.127, amber 3.820/4.238, violet 6.169/6.845, rose 6.396/7.097).
+- `AccentText` and the clamped `FluentState` values reproduce the contract table exactly (all 6 × 2
+  `AccentText` and all 6 × 2 × 2 `Dark1`/`Light1` values, using the HSL offsets and the clamp toward the base).
+- Raw accents on the Settings card `#2D2D30`: blue 3.04, teal 3.31, green 2.68, amber 3.24, violet 2.01,
+  rose 1.93. On `#3C3C3C`: blue 2.45, teal 2.66, green 2.15, amber 2.60, violet 1.61, rose 1.55. The Fluent
+  slider thumb/track uses the raw accent, so the 3:1 non-text floor is not met for the dark violet/rose/green
+  cases on the card (and for all six on the input surface).
+- High contrast: `#FFFFFF` on `#FFD700` is 1.35:1; `#FFFFFF` on the composited 60 % `#FFD700` over `#000000`
+  (`#998100`) is 3.8:1; `#000000` on `#FFD700` is about 15.5:1.
+
+#### Findings (round 2)
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| Major | **M-6 — The base-key overlays do not reach Fluent controls that consume captured alias keys.** Fluent's `StaticResource` aliases (`CheckBoxCheckBackgroundFillChecked`, `SliderThumbBackground`, `SliderTrackValueFill`, `TreeViewItemBackgroundSelected*`, `CheckBoxCheckGlyphForeground*`, `RadioButtonCheckGlyphFill*`, `ToggleSwitchKnobFillOn*`) capture the base brush objects when the Fluent theme loads. Overlaying `SystemControlHighlightAccentBrush`, `SystemControlForegroundAccentBrush`, the reveal brushes, or the ChromeWhite brushes at application level therefore does not change the rendered controls. The normal checkbox/toggle/radio/slider fill is the raw `SystemAccentColor`, not `FocusAccent`; the slider thumb/track is below 3:1 for dark violet/rose/green on the card; the tree fill is the raw accent at 0.6/0.8, not `SelectedFill`; and the HC `AltChromeWhite`/`ForegroundChromeWhite`/`AltBaseHigh`/reveal values do not reach the captured aliases, leaving a white checked-checkbox glyph on gold (1.35:1) and, with HC + Dark, white tree selected text on 60 % gold (`#998100`, 3.8:1). The rendered test-plan wording ("assert the fill resolves to ...") does not require the realized template-part brush, so a `TryGetResource` assertion would pass while the control uses the captured brush. | Probe output above; Avalonia 12.1.6 `BaseResources.xaml:105,132,150-151,195-205`; `FluentControlResources.xaml:348-355,488-506,520-522,552-566,711-727`; `Controls/CheckBox.xaml:147-152`; `Controls/Slider.xaml:179,319,345`; `Controls/TreeViewItem.xaml:137-159`; contract `:263,276,301-305,313`; record §6.3. |
+| Major | **M-7 — Contract §2 and §3.4 still describe the overlay as optional-accent-only and removed for `null`/`blue`, contradicting §3.6's two-group model.** §2 says "The accent overlay is an optional-accent-only direct-resource layer" and "For `null`, the explicit `blue` key, and high contrast, the applier removes every overlay key". §3.6 says the derived Fluent state group is published for every non-high-contrast accent, including `null`/`blue`, and the record §4.2 step 3 repeats that. §3.4's note also says the applier "for an optional accent" adds the §3.6 subset. An implementor following §2 would remove the derived group for `null`/`blue` and reintroduce M-3 for the default accent. | Contract `:57-67`, `:159-162`, `:201-206`, `:289-291`, `:349-351`; record §4.2 `:207-224`. |
+| Major | **M-8 — A live OS Light/Dark switch is not reapplied to the accent overlay.** `StartupCoordinator` subscribes only to `settingsService.Changed`; it has no `ActualThemeVariantChanged` hook, and `AvaloniaThemeApplier.Apply` is only called for initial settings and settings changes. With `ThemeSelection.System`, the palette theme changes when the OS variant changes but the direct accent overlay keeps the old column. That reproduces the M-1 mismatch at runtime: light `AccentText` `#005A9E` on the dark card `#2D2D30` is 1.93:1, and the light `SelectedFill`/`FocusAccent`/`FluentState` values remain. The contract says "A theme switch with the same accent recomputes both groups", but no trigger or test is defined. | `src/dotnet/Mocassin.App/Startup/StartupCoordinator.cs:48-50`; `AvaloniaThemeApplier.cs:104-127`; contract §3.6 `:342-353`; record §6.4 `:326-331`; contrast computation. |
+| Minor | **m-3 — Light `green` `SelectedFill` still does not match the 30/70 formula; dark `green` exposes an unspecified rounding mode.** Formula `round(0.30 * #2E7D32 + 0.70 * #F3F3F3)` = `#B8D0B9`; the contract and record both say `#AAD0B9`. Dark `green` is `#233A24` with .NET's default `Math.Round(58.5)` (banker's) and `#233B24` with round-half-up; the contract does not state which. `SelectedText` is unaffected (both light fills pass with `#1F1F1F`), so M-2 is not fully closed but not a contrast failure. | Contract `:227-229`, `:315-328`; record §4.1 `:184-191`; recomputation above. |
+| Minor | **m-4 — The high-contrast six derived keys must be `Color`, but the design does not say so and the HC file's pattern is all brushes.** `SystemAccentColorLight1`/`Light2`/`Light3`/`Dark1`/`Dark2`/`Dark3` are consumed by `Color="{DynamicResource ...}"` bindings; a `SolidColorBrush` value throws `InvalidCastException` (observed in the probe). The contract §3.6 table says `Color` for the overlay, but record §5's "add ... as `#FFD700`" and the HC dictionary's existing `SolidColorBrush` entries do not state the type, and the HC test plan only asserts that the keys resolve. | Contract §3.6 `:293-305`; record §5 `:252`; `HighContrast.axaml` value pattern; probe exception. |
+| Minor | **m-5 — The test plan still lacks rendered high-contrast Fluent controls and a realized-template-part oracle, and the System seam can bypass the production read.** §6.4 enumerates resources only; it does not render a checked CheckBox, slider, or tree in HC. The rendered cases say "assert the fill resolves to ..." without saying they read the realized control's brush, so M-6 would not be caught. The `System` seam "only supplies the resolved variant"; if it replaces the `Application.ActualThemeVariant` read, a regression to `RequestedThemeVariant` would still pass the System-dark test. | Record §6.1-§6.4, especially §6.4 `:328-339`; `ThemeContrastTests.cs` `TryGetResource` pattern; contract `:346-347`. |
+| Minor | **m-6 — The inventory is still incomplete and one consumer claim is wrong.** `SystemControlHighlightChromeWhiteBrush` (the toggle-knob pointer-over glyph, Fluent `FluentControlResources.xaml:565,1411`) is absent from the inventory and the HC mapping, so it stays Fluent white in HC (white on gold, 1.35:1). `SystemAccentColorDark2` is consumed by `CalendarButton.xaml` (pointer-over/pressed border), so "no 12.1.6 consumer" for `Dark2` is false; `Light2`/`Light3`/`Dark3` also have no listed consumer, but the design overlays all six anyway. The `AltBaseHigh` consumer list also omits `TableViewRow*` and `DateTimePickerShared.xaml:63`. The app does not ship ToggleSwitch/RadioButton/Calendar/TableView today, so this is inventory/test accuracy, not a shipped-surface regression beyond the M-6 items. | Record §2.2 `:85`; Avalonia 12.1.6 `FluentControlResources.xaml:564-566`; `CalendarButton.xaml:59,79,88`; `BaseResources.xaml:150-151`; `DateTimePickerShared.xaml:63`; `FluentControlResources.xaml:838-846`. |
+| Note | **n-2 — The maintenance record's commit list still has placeholders.** §13 says "(resolution design commit)" and "(re-review request commit)" instead of `e7a6227` and `0b8beea` (and `d359839` is also unlisted). The reviewer cannot edit the maintenance record; the planner should fill the SHAs at closeout. | Record `:481-492`. |
+| Note | **n-3 — The Fluent default focus adorner is not `SystemControlHighlightAccentBrush`.** Contract §6 says the default adorner is acceptable "where it resolves to `SystemControlHighlightAccentBrush`"; Avalonia 12.1.6's default `FocusAdornerTemplate` uses `SystemControlFocusVisualPrimaryBrush`/`SecondaryBrush` (`SystemBaseHighColor`/`SystemAltMediumColor`), so the accent overlay does not colour it. The neutral ring still meets the 3:1 floor, but the §6 sentence should be corrected or the default ring explicitly accepted. | Contract `:421-425`; Avalonia 12.1.6 `Controls/AdornerLayer.xaml:9-17`; `BaseResources.xaml:102-104`. |
+
+#### Verdict (round 2)
+
+**Changes required.** M-1 and M-5 are now correct as values, and M-2/M-3/M-4 are materially improved, but three
+Majors remain: the Fluent alias-capture gap (M-6), the §2/§3.4 precedence contradiction (M-7), and the missing
+live OS-variant reapply (M-8). The design must be corrected and re-frozen. No implementation code exists on the
+branch.
+
+Follow-up owner: Planner (design corrections); the implementor starts only after a fresh re-review passes.
+Follow-up step: — (out-of-step maintenance fix; no step tag).
