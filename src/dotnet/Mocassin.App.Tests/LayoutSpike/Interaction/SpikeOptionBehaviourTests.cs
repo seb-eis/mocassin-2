@@ -158,6 +158,24 @@ public sealed class SpikeOptionBehaviourTests
                     }
                 }
 
+                // A narrow window keeps the same column policy; the row and header drift together, not apart.
+                if (option != SpikeOption.TreeDetail)
+                {
+                    host.Window.Width = 720;
+                    host.Pump();
+                    headerCells = SpikeInteractions.HeaderCells(host);
+                    rowGrid = SpikeInteractions.RowGrid(host, workspace.ActiveDomain.SelectedRow!);
+                    for (var column = 0; column < headerCells.Count; column++)
+                    {
+                        var headerX = SpikeInteractions.X(headerCells[column], host.Window);
+                        var cellX = SpikeInteractions.X(rowGrid.Children[column], host.Window);
+                        Assert.InRange(cellX - headerX, -1.5, 1.5);
+                    }
+
+                    host.Window.Width = 1280;
+                    host.Pump();
+                }
+
                 // Search narrows the same row set on every option.
                 workspace.ActiveDomain.SearchText = "O01";
                 host.Pump();
