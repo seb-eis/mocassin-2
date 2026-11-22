@@ -34,7 +34,7 @@ provenance and legal boundary are in §12.
 | Palette | `src/dotnet/Mocassin.App.Views/Themes/Palette.axaml` | `Mocassin.*` colour roles and the Fluent keys in §3.4, with `Light`, `Dark`, and a `Default` fallback |
 | High contrast | `src/dotnet/Mocassin.App.Views/Themes/HighContrast.axaml` | every colour role and every overridden Fluent key, with the high-contrast values in §3.5 |
 | Compact density | `src/dotnet/Mocassin.App.Views/Themes/Density.axaml` | compact spacing and control-height values |
-| Runtime settings | `AvaloniaThemeApplier` | theme variant, font scale, accent, comfortable/compact spacing, border thickness, and motion |
+| Runtime settings | `AvaloniaThemeApplier` | theme variant, font scale, fixed `SystemAccentColor`, comfortable/compact spacing, border thickness, and motion |
 | Control styles | `src/dotnet/Mocassin.App.Views/Styles/ShellStyles.axaml` | padding, alignment, radius, border, and state setters that consume the tokens |
 
 Rules:
@@ -152,22 +152,24 @@ These are the keys the palette is expected to override; adding a key is a contra
 | Group | Keys |
 | --- | --- |
 | Global text and surfaces | `SystemControlForegroundBaseHighBrush`, `SystemControlForegroundBaseMediumBrush`, `SystemControlForegroundBaseMediumLowBrush`, `SystemControlForegroundBaseLowBrush`, `SystemControlForegroundChromeWhiteBrush`, `SystemControlBackgroundAltHighBrush`, `SystemControlBackgroundChromeMediumLowBrush`, `SystemControlTransientBackgroundBrush`, `SystemControlTransientBorderBrush`, `SystemControlDisabledBaseMediumLowBrush`, `SystemControlDisabledBaseLowBrush`, `SystemControlDisabledChromeDisabledLowBrush` |
-| Accent and selection | `SystemAccentColorLight1`, `SystemAccentColorLight2`, `SystemAccentColorLight3`, `SystemAccentColorDark1`, `SystemAccentColorDark2`, `SystemAccentColorDark3`, `SystemControlHighlightAccentBrush`, `SystemControlHighlightAltBaseHighBrush`, `SystemControlForegroundAccentBrush`, `SystemControlHighlightAccent2RevealBackgroundBrush`, `SystemControlHighlightAccent3RevealBackgroundBrush`, `SystemControlHighlightAltChromeWhiteBrush`, `SystemControlHighlightChromeWhiteBrush`, `SystemControlHighlightListLowBrush`, `SystemControlHighlightListMediumBrush`, `SystemControlHighlightListAccentLowBrush`, `SystemControlHighlightListAccentMediumBrush`, `SystemControlHighlightListAccentHighBrush` |
+| Accent and selection | `SystemAccentColorLight1`, `SystemAccentColorLight2`, `SystemAccentColorLight3`, `SystemAccentColorDark1`, `SystemAccentColorDark2`, `SystemAccentColorDark3`, `SystemControlHighlightAccentBrush`, `SystemControlHighlightAltBaseHighBrush`, `SystemControlForegroundAccentBrush`, `SystemControlHighlightAccent2RevealBackgroundBrush`, `SystemControlHighlightAccent3RevealBackgroundBrush`, `SystemControlHighlightAltChromeWhiteBrush`, `SystemControlHighlightChromeWhiteBrush`, `SystemControlFocusVisualPrimaryBrush`, `SystemControlFocusVisualSecondaryBrush`, `SystemControlHighlightListLowBrush`, `SystemControlHighlightListMediumBrush`, `SystemControlHighlightListAccentLowBrush`, `SystemControlHighlightListAccentMediumBrush`, `SystemControlHighlightListAccentHighBrush` |
 | Button | `ButtonBackground`, `ButtonBackgroundPointerOver`, `ButtonBackgroundPressed`, `ButtonBackgroundDisabled`, `ButtonForeground`, `ButtonForegroundPointerOver`, `ButtonForegroundPressed`, `ButtonForegroundDisabled`, `ButtonBorderBrush`, `ButtonBorderBrushPointerOver`, `ButtonBorderBrushPressed`, `ButtonBorderBrushDisabled`, `ButtonBorderThemeThickness` |
 | Accent button | `AccentButtonBackground`, `AccentButtonBackgroundPointerOver`, `AccentButtonBackgroundPressed`, `AccentButtonBackgroundDisabled`, `AccentButtonForeground`, `AccentButtonForegroundPointerOver`, `AccentButtonForegroundPressed`, `AccentButtonForegroundDisabled`, `AccentButtonBorderBrush`, `AccentButtonBorderBrushPointerOver`, `AccentButtonBorderBrushPressed`, `AccentButtonBorderBrushDisabled` |
 | Text input | `TextControlForeground`, `TextControlForegroundPointerOver`, `TextControlForegroundFocused`, `TextControlForegroundDisabled`, `TextControlBackground`, `TextControlBackgroundPointerOver`, `TextControlBackgroundFocused`, `TextControlBackgroundDisabled`, `TextControlBorderBrush`, `TextControlBorderBrushPointerOver`, `TextControlBorderBrushFocused`, `TextControlBorderBrushDisabled`, `TextControlPlaceholderForeground`, `TextControlPlaceholderForegroundPointerOver`, `TextControlPlaceholderForegroundFocused`, `TextControlPlaceholderForegroundDisabled`, `TextControlSelectionHighlightColor` |
 | Combo box | `ComboBoxBackground`, `ComboBoxBackgroundPointerOver`, `ComboBoxBackgroundPressed`, `ComboBoxBackgroundDisabled`, `ComboBoxForeground`, `ComboBoxForegroundFocused`, `ComboBoxForegroundDisabled`, `ComboBoxBorderBrush`, `ComboBoxBorderBrushPointerOver`, `ComboBoxBorderBrushPressed`, `ComboBoxBorderBrushDisabled`, `ComboBoxDropDownBackground`, `ComboBoxDropDownBorderBrush`, `ComboBoxDropDownGlyphForeground`, `ComboBoxDropDownGlyphForegroundFocused`, `ComboBoxDropDownGlyphForegroundFocusedPressed`, `ComboBoxDropDownGlyphForegroundDisabled`, `ComboBoxItemBackground`, `ComboBoxItemBackgroundPointerOver`, `ComboBoxItemBackgroundPressed`, `ComboBoxItemBackgroundDisabled`, `ComboBoxItemBackgroundSelected`, `ComboBoxItemBackgroundSelectedPointerOver`, `ComboBoxItemBackgroundSelectedPressed`, `ComboBoxItemBackgroundSelectedDisabled`, `ComboBoxItemForeground`, `ComboBoxItemForegroundPointerOver`, `ComboBoxItemForegroundPressed`, `ComboBoxItemForegroundDisabled`, `ComboBoxItemForegroundSelected`, `ComboBoxItemForegroundSelectedPointerOver`, `ComboBoxItemForegroundSelectedPressed`, `ComboBoxItemForegroundSelectedDisabled` |
 | Tab item | `TabItemHeaderBackgroundUnselected`, `TabItemHeaderBackgroundUnselectedPointerOver`, `TabItemHeaderBackgroundUnselectedPressed`, `TabItemHeaderBackgroundSelected`, `TabItemHeaderBackgroundSelectedPointerOver`, `TabItemHeaderBackgroundSelectedPressed`, `TabItemHeaderBackgroundDisabled`, `TabItemHeaderForegroundUnselected`, `TabItemHeaderForegroundUnselectedPointerOver`, `TabItemHeaderForegroundUnselectedPressed`, `TabItemHeaderForegroundSelected`, `TabItemHeaderForegroundSelectedPointerOver`, `TabItemHeaderForegroundSelectedPressed`, `TabItemHeaderForegroundDisabled`, `TabItemHeaderSelectedPipeFill`, `TabItemMinHeight`, `TabItemHeaderMargin` |
 | Menu and flyout | `MenuFlyoutPresenterBackground`, `MenuFlyoutPresenterBorderBrush`, `MenuFlyoutItemBackgroundPointerOver`, `MenuFlyoutItemBackgroundPressed`, `MenuFlyoutItemForeground`, `MenuFlyoutItemForegroundPointerOver`, `MenuFlyoutItemForegroundPressed`, `MenuFlyoutItemForegroundDisabled`, `MenuFlyoutItemKeyboardAcceleratorTextForeground`, `MenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOver`, `MenuFlyoutItemKeyboardAcceleratorTextForegroundPressed`, `MenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled` |
-| Shipped-control aliases | `CheckBoxCheckBackgroundFillChecked`, `CheckBoxCheckBackgroundFillIndeterminate`, `CheckBoxCheckBackgroundStrokeIndeterminate`, `CheckBoxCheckGlyphForegroundChecked`, `CheckBoxCheckGlyphForegroundCheckedPointerOver`, `CheckBoxCheckGlyphForegroundCheckedPressed`, `CheckBoxCheckGlyphForegroundIndeterminate`, `CheckBoxCheckGlyphForegroundIndeterminatePointerOver`, `CheckBoxCheckGlyphForegroundIndeterminatePressed`, `SliderThumbBackground`, `SliderTrackValueFill`, `SliderTrackValueFillPointerOver`, `SliderTrackValueFillPressed`, `TreeViewItemBackgroundSelected`, `TreeViewItemBackgroundSelectedPointerOver`, `TreeViewItemBackgroundSelectedPressed` |
+| Shipped-control aliases | `CheckBoxCheckBackgroundFillChecked`, `CheckBoxCheckBackgroundFillIndeterminate`, `CheckBoxCheckBackgroundStrokeIndeterminate`, `CheckBoxCheckGlyphForegroundChecked`, `CheckBoxCheckGlyphForegroundCheckedPointerOver`, `CheckBoxCheckGlyphForegroundCheckedPressed`, `CheckBoxCheckGlyphForegroundIndeterminate`, `CheckBoxCheckGlyphForegroundIndeterminatePointerOver`, `CheckBoxCheckGlyphForegroundIndeterminatePressed`, `SliderThumbBackground`, `SliderTrackValueFill`, `SliderTrackValueFillPointerOver`, `SliderTrackValueFillPressed`, `TreeViewItemBackgroundSelected`, `TreeViewItemBackgroundSelectedPointerOver`, `TreeViewItemBackgroundSelectedPressed`, `CheckBoxForegroundUncheckedPressed`, `CheckBoxCheckBackgroundFillUncheckedPressed`, `CheckBoxCheckBackgroundFillCheckedDisabled`, `CheckBoxCheckBackgroundFillIndeterminateDisabled`, `CheckBoxCheckGlyphForegroundCheckedDisabled`, `CheckBoxCheckGlyphForegroundIndeterminateDisabled` |
 
 These keys are the fixed palette baseline. The fixed accent family, the six derived Fluent colours, and the
 shipped-control alias keys live in the palette `Light`/`Dark` theme dictionaries (with `Default` mirroring
 `Light`); `HighContrast.axaml` overrides the same keys. There is no per-accent overlay and no
 `ActualThemeVariantChanged` reapply. The `TreeViewItemForegroundSelected*` aliases are deliberately not in this
 table: the palette alias key does not reach `PART_HeaderPresenter.Foreground`, so §3.6 delivers the selected
-TreeView foreground with targeted styles instead. Adding a key to this table remains a contract change and a
-test update.
+TreeView foreground with targeted styles instead. The six `SystemAccentColorLight1`/`Light2`/`Light3`/
+`Dark1`/`Dark2`/`Dark3` keys are **`Color`** resources in `Default`, `Light`, `Dark`, and high contrast, not
+`SolidColorBrush` resources; the tests assert the type. Adding a key to this table remains a contract change
+and a test update.
 
 Check boxes, radio buttons, sliders, toggles, progress bars, and tooltips keep their Fluent templates. Their
 text, accent, and selection keys resolve through the global entries above; the CheckBox/Slider alias keys are
@@ -198,12 +200,14 @@ The existing `HighContrast` and `Density` dictionaries remain merged dictionarie
 `AvaloniaThemeApplier`; their precedence over the palette is mandatory and tested. `HighContrast.axaml` also
 defines `Mocassin.FocusBrush` (`#FFD700`), the six `SystemAccentColorLight1`/`Light2`/`Light3`/
 `Dark1`/`Dark2`/`Dark3` colours as `<Color>` resources (`#FFD700`), `SystemControlForegroundAccentBrush`
-(`#FFD700`), the two accent
-reveal brushes (`#FFD700`), the shipped-control alias keys from §3.6 (`#FFD700` fills/tracks and `#000000`
-glyphs/text), `SystemControlHighlightAltChromeWhiteBrush` (`#000000`),
-`SystemControlHighlightChromeWhiteBrush` (`#000000`), and `SystemControlForegroundChromeWhiteBrush`
-(`#000000`). The high-contrast dictionary is merged after the palette, so it overrides the fixed accent family;
-the targeted TreeView style consumes `Mocassin.SelectedBackground`/`SelectedForeground`, which are black/gold in
+(`#FFD700`), the two accent reveal brushes (`#FFD700`), the shipped-control alias keys from §3.6
+(`#FFD700` fills/tracks and `#000000` glyphs/text), `SystemControlFocusVisualPrimaryBrush` (`#FFD700`),
+`SystemControlFocusVisualSecondaryBrush` (`#000000`), `SystemControlHighlightAltChromeWhiteBrush`
+(`#000000`), `SystemControlHighlightChromeWhiteBrush` (`#000000`), and
+`SystemControlForegroundChromeWhiteBrush` (`#000000`). The unchecked-pressed check-box fill is `#FFD700` with
+`#000000` label text; checked/indeterminate disabled fills are `#000000` with `#A0A0A0` glyphs. The
+high-contrast dictionary is merged after the palette, so it overrides the fixed accent family; the targeted
+TreeView style consumes `Mocassin.SelectedBackground`/`SelectedForeground`, which are black/gold in
 high contrast. There is no selected-accent state to leak.
 
 ### 3.6 Accent propagation
@@ -222,13 +226,20 @@ tokens for the realized selected foreground.
 | --- | --- | --- | --- |
 | `Mocassin.AccentBrush`, `Mocassin.StatusBarBackground` | `#007ACC` | `#007ACC` | fixed fill/status |
 | `Mocassin.OnAccentBrush`, `Mocassin.StatusBarForeground` | `#FFFFFF` | `#FFFFFF` | 4.51:1 on `#007ACC`; keep the white VS Code treatment |
-| `Mocassin.FocusBrush`, `SystemControlHighlightAccentBrush`, `TextControlBorderBrushFocused` | `#248DD3` | `#007ACC` | 3:1+ on `#3C3C3C`/`#37373D`/dark surfaces and light surfaces |
+| `Mocassin.FocusBrush`, `SystemControlHighlightAccentBrush`, `TextControlBorderBrushFocused` | `#248DD3` | `#007ACC` | splitter focus adorner, tab selected pipe, text-input focus; 3:1+ on the paired surfaces |
 | `Mocassin.AccentTextBrush` | `#4DA6FF` | `#005A9E` | 4.5:1+ on chrome/workspace/card |
 | `Mocassin.SelectedBackground` / `SelectedForeground` | `#094771` / `#FFFFFF` | `#CCE5FF` / `#1F1F1F` | existing palette values |
 | `SystemControlHighlightAccent2/3RevealBackgroundBrush` | `#094771` | `#CCE5FF` | tree selected fill aliases |
-| `SystemAccentColorLight1` / `Light2` / `Light3` | `#3A9CDD` | `#0090F0` | derived hover states |
-| `SystemAccentColorDark1` | `#248CD1` | `#005994` | derived pressed state |
-| `SystemAccentColorDark2` / `Dark3` | `#248CD1` | `#003F6A` / `#002138` | completeness; no shipped consumer beyond `Dark2` inventory |
+| `TextBox.SelectionBrush` / `SelectionForegroundBrush` | `#007ACC` / `#FFFFFF` | `#007ACC` / `#FFFFFF` | text selection pair |
+| `ProgressBar.Foreground` (dialog progress) | `#248DD3` | `#007ACC` | `SystemControlHighlightAccentBrush` |
+| `SystemAccentColorLight1` / `Light2` / `Light3` | `#3A9CDD` | `#0090F0` | derived hover states; type `Color` |
+| `SystemAccentColorDark1` | `#248CD1` | `#005994` | derived pressed state; type `Color` |
+| `SystemAccentColorDark2` / `Dark3` | `#248CD1` | `#003F6A` / `#002138` | completeness; type `Color`; `Dark2` has an unshipped `CalendarButton` consumer |
+
+`Mocassin.FocusBrush` is consumed by the splitter focus adorners, the document/console selected-tab pipe, and
+the text-input focus border; it is not an unused role. The `TabItemHeaderSelectedPipeFill` palette value is the
+same `FocusBrush` value in each theme. The dialog `ProgressBar` uses `SystemControlHighlightAccentBrush`, which
+is the same fixed focus/control value.
 
 **Fluent alias delivery (M-6).** Avalonia 12.1.6 resolves the shipped control template parts through alias keys
 that Fluent defines as `StaticResource` aliases. Overlaying only the upstream base key does not reach the
@@ -249,23 +260,33 @@ realized part. The design uses three proven mechanisms:
    the alias key is the correct delivery point.
 3. **Targeted `TreeViewItem` styles for the realized selected foreground.** A probe confirmed the palette alias
    key reaches `PART_LayoutRoot.Background`, but not `PART_HeaderPresenter.Foreground`. `ShellStyles.axaml`
-   therefore mirrors Fluent's selectors:
-   `TreeViewItem:selected /template/ Border#PART_LayoutRoot`,
-   `TreeViewItem:selected /template/ Border#PART_LayoutRoot:pointerover`,
-   `TreeViewItem:pressed:selected /template/ Border#PART_LayoutRoot:pointerover`, and the corresponding
-   `ContentPresenter#PART_HeaderPresenter` selectors, setting `Background` from
-   `Mocassin.SelectedBackground` and `Foreground` from `Mocassin.SelectedForeground`. The probe reached both
-   realized parts. This is a targeted style, not a control template.
+   therefore uses these exact selectors:
+   - `TreeViewItem:selected /template/ Border#PART_LayoutRoot`
+   - `TreeViewItem:selected /template/ Border#PART_LayoutRoot:pointerover`
+   - `TreeViewItem:pressed:selected /template/ Border#PART_LayoutRoot:pointerover`
+   - `TreeViewItem:selected /template/ ContentPresenter#PART_HeaderPresenter` (direct descendant; **not**
+     `Border#PART_LayoutRoot > ContentPresenter#PART_HeaderPresenter`, which cannot match because the
+     presenter's visual parent is `Grid#PART_Header`)
+   - `TreeViewItem:selected /template/ ToggleButton#PART_ExpandCollapseChevron /template/ Path#ChevronPath`
+     (the chevron uses `TreeViewItemForeground`, so the selected row must set the chevron `Fill` explicitly)
+
+   The row styles set `Background` from `Mocassin.SelectedBackground`; the header and chevron styles set
+   `Foreground`/`Fill` from `Mocassin.SelectedForeground`. The probes reached the realized layout root, header
+   presenter, and chevron. This is a targeted style, not a control template.
 
 No shipped control keeps the platform accent. No broad custom template is required. The `ComboBoxItem*` keys
 are already palette keys and reach the ComboBox realized parts.
 
 **High contrast.** `HighContrast.axaml` defines the same fixed family: base roles, `SystemAccentColorLight1`/
 `Light2`/`Light3`/`Dark1`/`Dark2`/`Dark3` as **`Color`** resources (`#FFD700`), `SystemControlForegroundAccentBrush`,
-the reveal brushes, `SystemControlHighlightAltChromeWhiteBrush`, `SystemControlHighlightChromeWhiteBrush`,
-`SystemControlForegroundChromeWhiteBrush` (`#000000`), and the shipped-control alias keys (`#FFD700` fills/tracks
-and `#000000` glyphs/text). The palette alias keys are overridden by the merged high-contrast dictionary; the
-targeted TreeView style uses `Mocassin.SelectedBackground`/`SelectedForeground`, which are black/gold in HC.
+the reveal brushes, `SystemControlFocusVisualPrimaryBrush` (`#FFD700`), `SystemControlFocusVisualSecondaryBrush`
+(`#000000`), `SystemControlHighlightAltChromeWhiteBrush`, `SystemControlHighlightChromeWhiteBrush`,
+`SystemControlForegroundChromeWhiteBrush` (`#000000`), and the shipped-control alias keys (`#FFD700`
+fills/tracks and `#000000` glyphs/text). The unchecked-pressed check-box fill is `#FFD700` with `#000000` label
+text; checked/indeterminate disabled fills are `#000000` with `#A0A0A0` glyphs. The palette alias keys are
+overridden by the merged high-contrast dictionary; the targeted TreeView style uses
+`Mocassin.SelectedBackground`/`SelectedForeground` (black/gold) and also sets the selected chevron `Fill`. The
+TextBox selection pair is `#FFD700`/`#000000`.
 
 **Theme switch.** The fixed Light/Dark role values live in the palette theme dictionaries, so an actual
 Light/Dark switch updates the base roles, the derived Fluent colours, and the CheckBox/Slider alias keys
@@ -342,10 +363,11 @@ set must not claim one. Adding a link surface is deferred.
 Focus indicators for splitters keep the existing adorner but use `FocusBrush` and `FocusThickness`. Fluent
 12.1.6's default focus adorner uses the neutral `SystemControlFocusVisualPrimaryBrush` /
 `SystemControlFocusVisualSecondaryBrush` pair, not `SystemControlHighlightAccentBrush`; the neutral ring is
-accepted and must meet 3:1 against the adjacent surface. It is deliberately not accent-coloured. Controls with
-an explicit accent focus border or adorner (text inputs and splitters) use `FocusBrush`. A control without a
-visible focus ring gets an explicit `FocusAdorner` from `ShellStyles.axaml`. Replacing a control template to
-obtain focus is not acceptable in this pass.
+accepted and must meet 3:1 against the adjacent surface. It is deliberately not accent-coloured. High contrast
+overrides the pair to `#FFD700`/`#000000`, so the 2 px primary is gold on black and the secondary is black on
+gold. Controls with an explicit accent focus border or adorner (text inputs and splitters) use `FocusBrush`. A
+control without a visible focus ring gets an explicit `FocusAdorner` from `ShellStyles.axaml`. Replacing a
+control template to obtain focus is not acceptable in this pass.
 
 `Enter`, `Escape`, Tab order, and layer modality do not change. In particular, a `TabControl` selects with
 arrow keys or a click and ignores plain `Enter`, as specified in
@@ -406,7 +428,8 @@ arrow keys or a click and ignores plain `Enter`, as specified in
 
 - Height `TabHeight`; background `TabStripBackground`; tabs use `RadiusTab` on the top corners only.
 - Inactive tab: `TabInactiveBackground`, `TabInactiveForeground`. Active tab: `TabActiveBackground`,
-  `TabActiveForeground`, plus a 2 px `FocusBrush` indicator along the top edge. The existing dirty
+  `TabActiveForeground`, plus a 2 px `TabItemHeaderSelectedPipeFill` indicator along the top edge. The palette
+  value is `FocusBrush` (`#248DD3` dark, `#007ACC` light, `#FFD700` HC). The existing dirty
   `*` and close button remain.
 - Tabs keep their current order, close button, context menu, and keyboard shortcuts. Drag-reorder remains
   deferred.
@@ -552,10 +575,10 @@ The following minimum ratios are measured on the final composited colours. Norma
 | On-accent glyphs on Fluent accent controls and derived states | `#FFFFFF` on `#248DD3`/`#3A9CDD`/`#248CD1` | `#FFFFFF` on `#007ACC`/`#0090F0`/`#005994` | 3:1 |
 | Selected-row text on selected fill | `#FFFFFF` on `#094771` | `#1F1F1F` on `#CCE5FF` | 4.5:1 |
 | Status-bar text, glyphs, and progress on status bar | `#FFFFFF` on `#007ACC` | `#FFFFFF` on `#007ACC` | 4.5:1 |
-| Text selection pair (`SelectionBrush`/`SelectionForegroundBrush`) | `#FFFFFF` on `#007ACC` | `#FFFFFF` on `#007ACC` | 4.5:1 |
+| Text selection pair (`SelectionBrush`/`SelectionForegroundBrush`) | `#FFFFFF` on `#007ACC`; HC `#000000` on `#FFD700` | `#FFFFFF` on `#007ACC`; HC `#000000` on `#FFD700` | 4.5:1 |
 | Error, warning, success, and info text on card | the dark semantic tokens | the light semantic tokens | 4.5:1 |
-| Focus ring, selected-pipe indicator, and Fluent state fill against adjacent surfaces | `#248DD3`/`#3A9CDD`/`#248CD1` on `#3C3C3C` (worst dark) | `#007ACC`/`#0090F0`/`#005994` on `#F3F3F3` (worst light) | 3:1 |
-| Fluent default neutral focus ring (`SystemControlFocusVisualPrimaryBrush`/`SecondaryBrush`) against adjacent surfaces | the neutral Fluent pair | the neutral Fluent pair | 3:1 |
+| Focus ring, selected-pipe indicator, and Fluent state fill against adjacent surfaces | `#248DD3`/`#3A9CDD`/`#248CD1` on `#3C3C3C`/`#37373D`/`#2D2D30`/`#252526`/`#1E1E1E` | `#007ACC`/`#0090F0`/`#005994` on `#F3F3F3`/`#FFFFFF` | 3:1 |
+| Fluent default neutral focus ring (`SystemControlFocusVisualPrimaryBrush`/`SecondaryBrush`) against adjacent surfaces | the neutral Fluent pair; HC `#FFD700`/`#000000` | the neutral Fluent pair; HC `#FFD700`/`#000000` | 3:1 |
 
 High contrast pairs are `#FFFFFF` on `#000000` (21:1), `#000000` on `#FFD700` (about 15:1), and `#FFD700`
 against `#000000` (about 15:1). They are tested separately.
@@ -567,7 +590,9 @@ against `#000000` (about 15:1). They are tested separately.
 - Focus is not indicated by colour alone: the ring has thickness. Selected state is not indicated by colour
   alone: tabs have an indicator and list rows have a fill.
 - The interaction contract's initial-focus, `Escape`, `Enter`, and layer rules are unchanged. A visual change
-  must not add a new focus target or remove an existing one.
+  must not add a new focus target or remove an existing one, except for the owner-approved accent-setting
+  removal: the Settings `Accent` ComboBox focus stop and its `Accent` automation name are intentionally gone,
+  the remaining order is tested, and no other focus target changes.
 - Disabled controls are skipped by Tab and never receive focus.
 
 ### 11.3 Names and roles
@@ -618,9 +643,10 @@ requirement; the record supplies the implementation and evidence plan. At minimu
 | Palette role values, light/dark resolution, and high-contrast precedence | PR-fast headless |
 | WCAG contrast for the fixed family in §11.1, both themes and high contrast | PR-fast unit |
 | Fixed accent delivery: palette Light/Dark/Default, derived Fluent colours, shipped-control alias keys, status bar, accent text, focus, tab pipe, selection, high-contrast precedence | PR-fast headless |
-| Realized template-part brushes for the shipped CheckBox (`NormalRectangle`, `CheckGlyph`), Slider (`Thumb`, value track), and TreeView (`PART_LayoutRoot`, `PART_HeaderPresenter`) in light, dark, and high contrast | PR-fast headless |
-| Theme switch changes the realized parts through the palette dictionaries; no runtime accent reapply; `#3C3C3C`/`#37373D` focus surfaces; neutral default focus ring | PR-fast headless |
-| Settings removal: no Accent control, no `AccentPalette` path; legacy `accent` values are accepted no-ops, not written | PR-fast headless |
+| Realized template-part brushes for the shipped CheckBox (`NormalRectangle`, `CheckGlyph`), Slider (`Thumb`, value track), TreeView (`PART_LayoutRoot`, direct `PART_HeaderPresenter`, `Path#ChevronPath`), dialog `ProgressBar.Foreground`, and `TextBox` selection pair in light, dark, and high contrast | PR-fast headless |
+| Theme switch changes the realized parts through the palette dictionaries; no runtime accent reapply; `#3C3C3C`/`#37373D` focus surfaces; HC focus pair `#FFD700`/`#000000`; neutral default focus ring | PR-fast headless |
+| The six `SystemAccentColor*` keys are `Color` in `Default`/`Light`/`Dark`/HC; no `InvalidCastException` | PR-fast headless |
+| Settings removal: no Accent control, no `AccentPalette` path; legacy `accent` values are accepted no-ops, not written; new Settings Tab order and absence of the `Accent` automation name are tested | PR-fast headless |
 | Region card radius/border/gap, tab labels/order, removed channel combo | PR-fast headless |
 | Console tab persistence, unknown-id fallback, `Enter` no-op, focus order | PR-fast headless |
 | Welcome button label centring at comfortable and compact density | PR-fast headless |

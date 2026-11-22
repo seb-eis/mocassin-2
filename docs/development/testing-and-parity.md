@@ -183,9 +183,10 @@ or SQLite. Prefer real temporary directories and real files produced by the real
   the recorded run. That is automated evidence, not a manual checklist.
 - Appearance resources carry their effect through `Themes/Palette.axaml`, the merged
   `HighContrast.axaml`/`Density.axaml` dictionaries, the typography/spacing/shape keys, the
-  `Mocassin.Transitions` resource (empty when reduce motion is on), and `SystemAccentColor`/`OnAccentBrush`.
-  `ThemeContrastTests` resolves every role and Fluent key in both themes and the default fallback, computes the
-  WCAG pairs, and covers high-contrast/density precedence and the fixed accent family.
+  `Mocassin.Transitions` resource (empty when reduce motion is on), and the fixed `SystemAccentColor`; the
+  accent/selection roles including `OnAccentBrush` come from the palette. `ThemeContrastTests` resolves every
+  role and Fluent key in both themes and the default fallback, computes the WCAG pairs, and covers
+  high-contrast/density precedence and the fixed accent family.
 
 ## Avalonia editing, diagnostics, and recovery (Step 23B)
 

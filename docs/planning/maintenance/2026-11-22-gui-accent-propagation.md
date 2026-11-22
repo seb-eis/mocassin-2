@@ -49,9 +49,12 @@ The shipped controls are:
 | Validation | `CheckBox` | `ProblemsView.axaml` |
 | Validation | `ComboBox` | `ProblemsView.axaml` |
 | Projects | `TreeView` | `ProjectsRegionView.axaml` |
+| Progress dialog | `ProgressBar` | `ProgressDialogView.axaml:11` |
 
 `ToggleSwitch`, `RadioButton`, `Calendar`, and `TableView` are not shipped. Their Fluent aliases remain
-inventory/test accuracy only.
+inventory/test accuracy only. The shared selected/hover text key `SystemControlHighlightAltBaseHighBrush` also
+has `TableViewRow*` and `DateTimePickerShared.xaml:63` consumers; `SystemAccentColorDark2` has an unshipped
+`CalendarButton` consumer. These are listed for inventory accuracy, not as app surfaces.
 
 ## 3. Fixed values
 
@@ -93,8 +96,39 @@ Avalonia 12.1.6 headless (scratch, uncommitted):
    `Background` as a local value; the alias key is the correct delivery point.
 3. **Targeted TreeView styles.** The palette alias key reached `PART_LayoutRoot.Background` but **not**
    `PART_HeaderPresenter.Foreground` (the probe kept `#FFFFFF`/`#000000` instead of the palette alias value).
-   A targeted style in `ShellStyles.axaml`, mirroring Fluent's selectors, reached both the realized background
-   and foreground. This is a targeted style, not a control template.
+   The exact working selectors are:
+   - `TreeViewItem:selected /template/ Border#PART_LayoutRoot`
+   - `TreeViewItem:selected /template/ Border#PART_LayoutRoot:pointerover`
+   - `TreeViewItem:pressed:selected /template/ Border#PART_LayoutRoot:pointerover`
+   - `TreeViewItem:selected /template/ ContentPresenter#PART_HeaderPresenter` (direct; the Fluent-shaped
+     `Border#PART_LayoutRoot > ContentPresenter#PART_HeaderPresenter` does **not** match because the presenter's
+     visual parent is `Grid#PART_Header`)
+   - `TreeViewItem:selected /template/ ToggleButton#PART_ExpandCollapseChevron /template/ Path#ChevronPath`
+     (the chevron uses `TreeViewItemForeground`, so its `Fill` must be set explicitly)
+
+   The probes reached the realized layout root, header presenter, and chevron. This is a targeted style, not a
+   control template.
+
+The fixed-family delivery also resolves the remaining sub-surfaces:
+
+- **HC neutral focus pair (M-10).** `HighContrast.axaml` defines
+  `SystemControlFocusVisualPrimaryBrush` `#FFD700` and `SystemControlFocusVisualSecondaryBrush` `#000000`; the
+  2 px primary is gold on black and the secondary is black on gold. Tests render the focus adorner in HC Light
+  and Dark.
+- **HC selected-tree chevron (M-11).** The targeted `Path#ChevronPath` fill uses
+  `Mocassin.SelectedForeground` (`#000000` in HC), so the chevron is not white on gold.
+- **TextBox selection foreground (M-12).** `ShellStyles.axaml` sets
+  `TextBox.SelectionBrush="{DynamicResource Mocassin.AccentBrush}"` and
+  `TextBox.SelectionForegroundBrush="{DynamicResource Mocassin.OnAccentBrush}"`. The pair is
+  `#FFFFFF` on `#007ACC` (4.51:1) and `#000000` on `#FFD700` in HC (14.97:1); the rendered `TextBox` test reads
+  both properties.
+- **HC unchecked-pressed/disabled check-box sub-states (m-11).** HC defines
+  `CheckBoxForegroundUncheckedPressed` `#000000`, `CheckBoxCheckBackgroundFillUncheckedPressed` `#FFD700`,
+  `CheckBoxCheckBackgroundFillCheckedDisabled`/`IndeterminateDisabled` `#000000`, and the disabled
+  checked/indeterminate glyph aliases `#A0A0A0`; tests render those states.
+- **ProgressBar (m-7).** The `ProgressDialog` `ProgressBar` is a shipped surface; its `Foreground` follows
+  `SystemControlHighlightAccentBrush` (`#007ACC` light, `#248DD3` dark, `#FFD700` HC) and is in the
+  realized-part test list.
 
 The concrete delivery is therefore:
 
@@ -130,6 +164,11 @@ same no-op path. There is no schema bump: `Mocassin.Settings.json` is app-local,
 results/state contract. The next settings save removes the property. No migration code is required beyond
 ignoring the key.
 
+Removing the Accent ComboBox also removes one Settings focus stop and the `Accent` automation name. This is an
+intentional, owner-approved accessibility delta: the remaining Settings Tab order is unchanged relative to
+itself, the new deterministic order is tested, and no other focus target changes. The interaction-contract
+rules themselves do not change.
+
 ## 6. Theme switch and high contrast
 
 The fixed Light/Dark values live in the palette theme dictionaries. An actual Light/Dark switch updates the
@@ -138,22 +177,25 @@ TreeView styles consume the same palette tokens and update with the theme. `Syst
 `#007ACC` (or `#FFD700` under high contrast); there is no `ActualThemeVariantChanged` accent reapply and no
 runtime accent overlay. Fluent's default neutral focus ring uses
 `SystemControlFocusVisualPrimaryBrush`/`SecondaryBrush`, is accepted as a neutral ring, and is tested at 3:1;
-it is not accent-coloured.
+it is not accent-coloured. High contrast overrides the pair to `#FFD700`/`#000000`.
 
 High contrast is a merged dictionary applied after the palette. It defines the base roles, the six
 `SystemAccentColor*` values as **`Color`** resources (`#FFD700`), the derived-state brushes, the
-`CheckBoxCheck*`/`Slider*` alias keys (`#FFD700` fills/tracks, `#000000` glyphs), and the tree selected
-background (`#FFD700`) plus targeted style foreground (`#000000`). A high-contrast brush written into a
-`SystemAccentColor*` key throws `InvalidCastException`; the design and tests keep the type distinction.
+`CheckBoxCheck*`/`Slider*` alias keys (`#FFD700` fills/tracks, `#000000` glyphs), the focus pair
+(`#FFD700`/`#000000`), the unchecked-pressed/disabled check-box sub-states, the TextBox selection pair
+(`#FFD700`/`#000000`), and the tree selected background (`#FFD700`) plus targeted style foreground
+(`#000000`) and chevron fill. A high-contrast brush written into a `SystemAccentColor*` key throws
+`InvalidCastException`; the design and tests keep the type distinction.
 
 ## 7. Implementation shape
 
 | Area | Change |
 | --- | --- |
-| `Palette.axaml` | Fixed accent family in `Default`/`Light`/`Dark`: base roles, derived `Color` keys, CheckBox/Slider alias keys, ComboBox selected keys, tab pipe, focus/status values. No per-accent overlay. |
-| `HighContrast.axaml` | Fixed HC values for the same keys; six derived `Color` resources; alias keys as brushes; tree selected background/foreground tokens. |
-| `AvaloniaThemeApplier` | Remove the per-accent overlay and the `AccentPalette` path. Set `SystemAccentColor` to `#007ACC` or `#FFD700` under HC; keep theme/density/high-contrast/typography application. No `ActualThemeVariantChanged` accent reapply. |
-| `ShellStyles.axaml` | Add targeted `TreeViewItem:selected` / `:pointerover` / `:pressed` styles for `Border#PART_LayoutRoot` and `ContentPresenter#PART_HeaderPresenter`, using `Mocassin.SelectedBackground`/`SelectedForeground`. |
+| `Palette.axaml` | Fixed accent family in `Default`/`Light`/`Dark`: base roles, derived `Color` keys, CheckBox/Slider alias keys, ComboBox selected keys, `TabItemHeaderSelectedPipeFill` = `FocusBrush`, focus/status values. No per-accent overlay. |
+| `HighContrast.axaml` | Fixed HC values for the same keys; six derived `Color` resources; alias keys as brushes; focus pair `#FFD700`/`#000000`; unchecked-pressed/disabled check-box sub-states; TextBox selection pair; tree selected background/foreground tokens. |
+| `AvaloniaThemeApplier` | Remove the per-accent overlay and the `AccentPalette` path. Set `SystemAccentColor` to `#007ACC` or `#FFD700` under HC; keep theme/density/high-contrast/typography application. Remove the now-dead `AccentColor`, `OnAccent`, `Contrast`, `RelativeLuminance`, `Linear` helpers and the `lightOnAccent`/`darkOnAccent` constants. No `ActualThemeVariantChanged` accent reapply. |
+| `ShellStyles.axaml` | Add the exact targeted `TreeViewItem` selectors in §4 for `Border#PART_LayoutRoot`, direct `ContentPresenter#PART_HeaderPresenter`, and `Path#ChevronPath`; set `TextBox.SelectionBrush`/`SelectionForegroundBrush` to `Mocassin.AccentBrush`/`Mocassin.OnAccentBrush`. |
+| `ShellView.axaml` | Use `Mocassin.FocusBrush` for the three splitter `FocusAdorner` borders, so the focus role has a consumer. |
 | Settings | Remove the UI, model property, palette class, reader/validator path, and writer output; add legacy-ignore tests. |
 | Tests | Add fixed-family resource, realized-template-part, theme-switch, high-contrast, and settings-removal/compatibility tests in §8. |
 | Documentation | Visual contract §2/§3.2–§3.6/§6/§7.3/§11.1/§13; user settings page; this record. |
@@ -170,22 +212,29 @@ All tests are PR-fast headless unless named PR-medium. They use the real palette
 
 - Resolve the fixed base roles, six derived `Color` keys, CheckBox/Slider alias keys, ComboBox selected keys,
   status bar, and tab pipe in Light, Dark, and high contrast.
-- Assert the six derived keys are `Color`, not `ISolidColorBrush`, in both palette and high contrast.
+- Assert the six derived keys are `Color`, not `ISolidColorBrush`, in `Default`, `Light`, `Dark`, and HC.
 - Contrast: accent text 4.5:1; on-accent white on `#007ACC` 4.5:1; selected text 4.5:1; status bar 4.5:1;
-  focus `#248DD3`/`#007ACC` and derived states 3:1 on `#3C3C3C`, `#37373D`, `#2D2D30`, `#252526`, `#1E1E1E`,
-  `#F3F3F3`, `#FFFFFF`; HC pairs 7:1; neutral focus ring 3:1.
+  the dark focus values (`#248DD3`, `#3A9CDD`, `#248CD1`) are tested on the dark surfaces (`#3C3C3C`,
+  `#37373D`, `#2D2D30`, `#252526`, `#1E1E1E`); the light values (`#007ACC`, `#0090F0`, `#005994`) are tested
+  on the light surfaces (`#F3F3F3`, `#FFFFFF`). This is a paired test, not a cross-product. HC pairs 7:1;
+  HC focus pair `#FFD700`/`#000000` 3:1; neutral focus ring 3:1.
 
 ### 8.2 Realized template parts
 
 Create a real `ShellWindow`/Settings/Validation/Projects surface and read the rendered controls:
 
-- checked/indeterminate `CheckBox`: `NormalRectangle.Background`/`BorderBrush`, `CheckGlyph.Fill`;
+- checked/indeterminate `CheckBox`: `NormalRectangle.Background`/`BorderBrush`, `CheckGlyph.Fill`, plus the
+  HC unchecked-pressed and checked/indeterminate disabled sub-states;
 - `Slider`: `Thumb.Background`, `PART_DecreaseButton.Background`;
-- selected `TreeViewItem`: `PART_LayoutRoot.Background`, `PART_HeaderPresenter.Foreground`;
-- selected `ComboBoxItem`: selected fill/text.
+- selected `TreeViewItem`: `PART_LayoutRoot.Background`, direct `ContentPresenter#PART_HeaderPresenter.Foreground`,
+  `Path#ChevronPath.Fill`;
+- selected `ComboBoxItem`: selected fill/text;
+- dialog `ProgressBar.Foreground`;
+- `TextBox.SelectionBrush`/`SelectionForegroundBrush`.
 
 Assert Light/Dark/HC values and that the parts are not the platform `#0078D7`. The tests must read the
-realized part, not only `TryGetResource`.
+realized part, not only `TryGetResource`. Render the HC focus adorner (primary/secondary) on a real control
+and assert 3:1; render the selected tree header/chevron in HC Light and Dark.
 
 ### 8.3 Theme switch, HC, and settings
 
@@ -195,6 +244,8 @@ realized part, not only `TryGetResource`.
 - High contrast: realized CheckBox/Slider/Tree parts are `#FFD700`/`#000000`; HC glyph/tree text meets contrast.
 - Settings removal: no Accent control; `AppSettings` has no `Accent`; legacy JSON with
   `accent: "teal"`/`"orange"`/non-string loads without an accent surface, and a save omits `accent`.
+- Settings accessibility: the new deterministic Tab order is asserted; the `Accent` automation name is absent;
+  no other focus target changes.
 - Grep/source scan: no `AccentPalette`, `SelectedAccent`, `Accents`, or `AppSettings.Accent` references remain.
 
 ### 8.4 Screenshots
@@ -222,21 +273,31 @@ accent-text surface is claimed; `Mocassin.AccentTextBrush` remains resource-only
 3. The fixed family resolves in Light, Dark, and high contrast: `#007ACC` fill/status, white on-accent,
    `#248DD3` dark focus, `#007ACC` light focus, `#4DA6FF`/`#005A9E` accent text, selected
    `#094771`/white and `#CCE5FF`/`#1F1F1F`.
-4. The realized shipped CheckBox, Slider, and TreeView parts use the fixed family in Light, Dark, and HC; no
-   shipped control keeps the platform `#0078D7` accent.
-5. The six `SystemAccentColor*` HC keys are `Color`; no `InvalidCastException`; HC glyph/tree text meets 3:1
-   and selected text 4.5:1.
-6. Theme switch updates the realized parts through the palette dictionaries; no runtime accent overlay or
-   `ActualThemeVariantChanged` accent reapply.
-7. Contrast floors pass, including `#3C3C3C`/`#37373D` focus, neutral Fluent ring, status bar, selected text,
-   accent text, and HC.
-8. No control template, new dependency, `contracts/manifest.json` change, ADR, interaction-contract change, or
-   public API change.
-9. `Mocassin.AccentTextBrush` is recorded as resource-only; no rendered accent-text surface is claimed.
-10. `./tools/verify.sh all --require` passes; the branch is pushed for owner review.
-11. This record is updated with the implementation commit SHAs, exact commands/results, screenshot list, and
+4. The realized shipped CheckBox, Slider, TreeView, dialog ProgressBar, and TextBox selection parts use the
+   fixed family in Light, Dark, and HC; no shipped control keeps the platform `#0078D7` accent.
+5. The selected TreeView styles use the exact direct `ContentPresenter#PART_HeaderPresenter` selector (not the
+   Fluent `Border > ContentPresenter` shape) and set the chevron `Fill`; the realized header and chevron meet
+   3:1 in HC Light and Dark.
+6. The six `SystemAccentColor*` keys are `Color` in `Default`/`Light`/`Dark`/HC; no `InvalidCastException`;
+   HC glyph/tree text meets 3:1 and selected text 4.5:1.
+7. HC defines `SystemControlFocusVisualPrimaryBrush`/`SecondaryBrush` gold/black; the realized focus adorner
+   meets 3:1 in HC Light and Dark.
+8. `TextBox.SelectionForegroundBrush` is set to `Mocassin.OnAccentBrush`; the rendered selection pair is
+   white on `#007ACC` and black on HC gold at 4.5:1.
+9. `Mocassin.FocusBrush` is consumed by the splitter focus adorner and the selected-tab pipe, not unused.
+10. Theme switch updates the realized parts through the palette dictionaries; no runtime accent overlay or
+    `ActualThemeVariantChanged` accent reapply.
+11. Contrast floors pass with the paired surfaces (dark values on dark surfaces, light values on light
+    surfaces), including `#3C3C3C`/`#37373D` focus, HC focus pair, status bar, selected text, accent text.
+12. Removing the Accent control intentionally changes the Settings Tab order and removes the `Accent`
+    automation name; the new order is tested and no other focus target changes.
+13. No control template, new dependency, `contracts/manifest.json` change, ADR, interaction-contract change,
+    or public API change.
+14. `Mocassin.AccentTextBrush` is recorded as resource-only; no rendered accent-text surface is claimed.
+15. `./tools/verify.sh all --require` passes; the branch is pushed for owner review.
+16. This record is updated with the implementation commit SHAs, exact commands/results, screenshot list, and
     deviations.
-12. The parked freeze branch and record are untouched.
+17. The parked freeze branch and record are untouched.
 
 ## 11. Risks
 
@@ -248,7 +309,12 @@ accent-text surface is claimed; `Mocassin.AccentTextBrush` remains resource-only
 | HC tree selected text is white on gold | The targeted TreeView style uses `Mocassin.SelectedForeground` (`#000000` in HC); rendered HC test. |
 | Settings removal breaks existing files | `accent` is accepted as a silent no-op and omitted on save; legacy tests cover string/unknown/non-string. |
 | Theme switch leaves captured alias values | Fixed alias keys live in palette theme dictionaries; probe confirms Light/Dark realized-part switch; no runtime overlay. |
-| A targeted TreeView style selector misses hover/press | Mirror Fluent selectors for selected, selected pointer-over, and pressed; render all three states. |
+| A targeted TreeView style selector misses the header or chevron | Use the direct `ContentPresenter#PART_HeaderPresenter` selector (the Fluent `Border > ContentPresenter` shape cannot match) and the nested `ToggleButton#PART_ExpandCollapseChevron /template/ Path#ChevronPath` selector; render header and chevron in Light/Dark/HC. |
+| HC focus visual pair is black on black | HC defines `SystemControlFocusVisualPrimaryBrush` `#FFD700` and `SecondaryBrush` `#000000`; render the realized adorner in HC Light/Dark at 3:1. |
+| HC selected-tree chevron is white on gold | The targeted `Path#ChevronPath` fill uses `Mocassin.SelectedForeground` (`#000000` HC); rendered chevron test. |
+| TextBox selected text is the control foreground | `TextBox.SelectionForegroundBrush` is set to `Mocassin.OnAccentBrush`; rendered selection pair test. |
+| Removing the Accent control silently changes Tab order | Document the intentional delta; test the new deterministic order and absence of the `Accent` automation name. |
+| `Mocassin.FocusBrush` is an unused role | Consume it in the splitter focus adorner and the selected-tab pipe; palette `TabItemHeaderSelectedPipeFill` uses the same value. |
 | The fixed family is mistaken for a selectable palette | Contract §3.6 and the record say one fixed family; no `AccentPalette`/per-accent tests remain. |
 | Scope grows into broad templates or a redesign | No broad template; only the targeted TreeView selected styles. Stop if a shipped part cannot be delivered without one. |
 
@@ -279,9 +345,10 @@ accent-text surface is claimed; `Mocassin.AccentTextBrush` remains resource-only
 | --- | --- |
 | ADR | **Not required.** App-local visual tokens and settings removal; no format, dependency, architecture, or public API change. |
 | Amendment | **Not applicable.** Out-of-step maintenance under `AGENTS.md` §3.5. |
-| `ui-interaction-contract.md` | **No change.** Focus, `Escape`, `Enter`, layers, Tab order, and splitter behaviour are unchanged. |
+| `ui-interaction-contract.md` | **No change.** The interaction rules are unchanged; the Settings Accent focus stop is intentionally removed with its control. |
+| Settings Tab order | **Intentional accessibility delta.** The Accent ComboBox focus stop and `Accent` automation name are gone; the remaining order is tested and no other focus target changes. |
 | Control templates | **None.** Targeted TreeView selected-state styles only; no control templates. |
-| Design review | **Round 3 requested.** The optional-accent design is withdrawn; the fixed-family design and M-6 proof are the new target. |
+| Design review | **Round 4 requested.** The fixed-family design and M-6 proof are accepted; the delivery-detail corrections are the new target. |
 | Step tag | **None.** |
 | Parity matrix | **No change.** |
 | Merge | One owner `--no-ff` approval after local gates and the evidence below. No per-feature CI. |
@@ -323,4 +390,9 @@ Owner decisions:
 | `787c4ed` | `docs: resolve GUI accent propagation round 2 findings [skip ci]` — optional-accent corrections, now superseded |
 | `c7532fb` | `docs: record round 2 resolution commit [skip ci]` — reviewed, now superseded |
 | `6db42cf` | `docs: replace optional accent with fixed family [skip ci]` — fixed-family contract and record |
-| (round 3 request commit) | `docs: request GUI accent propagation round 3 review [skip ci]` — review record at `Re-review required` |
+| `82d3422` | `docs: record fixed-accent design commit [skip ci]` — commit list update |
+| `73a297f` | `docs: clarify fixed accent precedence [skip ci]` — precedence clarification |
+| `7a8f5bc` | `docs: request fixed-accent round 3 review [skip ci]` — round 3 request |
+| `7ba3600` | `docs: record fixed-accent round 3 review [skip ci]` — round 3 findings |
+| (round 4 design commit) | `docs: resolve fixed-accent delivery findings [skip ci]` — selectors, HC focus/chevron, TextBox selection, FocusBrush |
+| (round 4 request commit) | `docs: request fixed-accent round 4 review [skip ci]` — review record at `Re-review required` |
