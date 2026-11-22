@@ -34,6 +34,7 @@ provenance and legal boundary are in §12.
 | Palette | `src/dotnet/Mocassin.App.Views/Themes/Palette.axaml` | `Mocassin.*` colour roles and the Fluent keys in §3.4, with `Light`, `Dark`, and a `Default` fallback |
 | High contrast | `src/dotnet/Mocassin.App.Views/Themes/HighContrast.axaml` | every colour role and every overridden Fluent key, with the high-contrast values in §3.5 |
 | Compact density | `src/dotnet/Mocassin.App.Views/Themes/Density.axaml` | compact spacing and control-height values |
+| Icon geometry | `src/dotnet/Mocassin.App.Views/Icons/Icons.axaml` | theme-independent `Mocassin.Icon.*` `StreamGeometry` resources and their provenance (§5.2) |
 | Runtime settings | `AvaloniaThemeApplier` | theme variant, font scale, fixed `SystemAccentColor`, comfortable/compact spacing, border thickness, and motion |
 | Control styles | `src/dotnet/Mocassin.App.Views/Styles/ShellStyles.axaml` | padding, alignment, radius, border, and state setters that consume the tokens |
 
@@ -397,10 +398,86 @@ scrollbar edge.
   styles that consume the same tokens; no other `TextBox` or `ComboBox` is affected.
 - The scrollbar keeps its 16 px width and hit target; the gutter changes only the content inset. `AllowAutoHide`
   stays at the Fluent default; a permanently reserved bar column is not the design.
+- The explorer `TreeView` keeps the combined gutter class but disables horizontal overflow; node labels trim
+  with a character ellipsis. It is vertical-only in practice, so the bottom inset is retained by the class and
+  the node icon never pushes content under the vertical bar at large font scales.
 - No custom scrollbar template is introduced. A surface whose scrollbar cannot be kept clear with a gutter is a
   contract change and needs a recorded decision, not a local template.
 - The tab strip has no scroll viewer in the Fluent `TabControl` template today, so it is not a scroll surface;
   tab-strip scrolling is a separate change.
+
+### 5.2 Icon slots and glyphs
+
+Explorer tree nodes, open-project rows, and document tabs carry a 16 × 16 monochrome glyph from a vendored
+Phosphor Icons subset. The glyphs are decorative structure: the label or title always carries the meaning and an
+icon never does. The `TabIconSlot` reserved in §7.4 is populated by this section; the tree node and the
+open-project row gain a slot with the same contract.
+
+**Geometry and slots.**
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `Mocassin.IconSize` | `16` | every icon slot, comfortable and compact density, every font scale |
+
+- The slot is a `Mocassin.IconSize` square box, vertically centred in its row or header, with the glyph
+  stretched uniformly (`Stretch="Uniform"`) from the upstream 256-unit Phosphor grid. There is no compact
+  density variant and no font-scale scaling: the glyph is fixed structure, like the 16 px scrollbar, and the row
+  or header grows around it (§11.4). The tab header's existing 8 px item spacing and the row content's 4 px gap
+  are unchanged.
+- Slot contract, identical on every surface: `IsHitTestVisible="False"`, `Focusable="False"`,
+  `AutomationProperties.AccessibilityView="Raw"`, no accessible name, and collapsed while the bound icon value
+  is null. A slot never adds or removes a focus stop and never contributes text to a name.
+- Slot names: `TabIconSlot` (document and console tab headers, existing), `NodeIconSlot` (explorer tree node
+  content), `ProjectRowIconSlot` (open-projects row).
+- The geometry resources carry no colour. They are `StreamGeometry` resources keyed `Mocassin.Icon.<Name>` in
+  `src/dotnet/Mocassin.App.Views/Icons/Icons.axaml`, merged once from `App.axaml` like the palette, and are
+  theme- and density-independent.
+
+**Icon keys and mapping.** One icon key names one semantic target; the tree node and the document tab for the
+same target share one glyph.
+
+| Icon key | Resource | Phosphor source (regular weight) | Consumers today |
+| --- | --- | --- | --- |
+| `welcome` | `Mocassin.Icon.Welcome` | `hand-waving` | welcome document tab |
+| `overview` | `Mocassin.Icon.Overview` | `info` | `project.overview` explorer node; project overview tab |
+| `json` | `Mocassin.Icon.Json` | `brackets-curly` | `project.json` explorer node; project JSON tab |
+| `project` | `Mocassin.Icon.Project` | `cube` | open-projects row; future project-scope nodes |
+| — | `Mocassin.Icon.Missing` | `warning-circle` | the missing-asset marker; never mapped from a kind or node |
+
+A new document kind or explorer node maps through a new row in this table plus a vendored geometry. An
+unresolved reference is the missing-asset state below, not a silently blank glyph.
+
+**Colour.** The fill is a §3 role realized per surface and state; icons add no colour keys.
+
+| Surface / state | Fill role |
+| --- | --- |
+| Tab, inactive | `Mocassin.TabInactiveForeground` |
+| Tab, selected | `Mocassin.TabActiveForeground` |
+| Tree row and project row, unselected | `Mocassin.ForegroundMutedBrush` |
+| Tree row and project row, selected | `Mocassin.SelectedForeground` |
+| Missing-asset marker, any surface and state | `Mocassin.ErrorForeground` |
+
+Icons are muted by default and upgrade with their surface's selected or active state. High contrast resolves
+through the same roles; there are no icon-specific overrides. Every pair above is an existing §11.1 row, so the
+icon pass adds no contrast pairs.
+
+**Missing-asset marker.** A non-null icon value whose key has no vendored geometry renders the
+`Mocassin.Icon.Missing` marker in `Mocassin.ErrorForeground`. The marker is a wiring defect made visible: no
+shipped surface may show it, and the tests assert its absence on every shipped icon surface. A null icon value
+is not the missing case: it collapses the slot and leaves the surface text-only, which is the console tabs'
+deliberate state.
+
+**Coverage.** Explorer tree nodes, open-projects rows, and document tabs carry icons. Console/Validation tabs,
+the welcome recent-project list, settings, dialogs, and notifications stay text-only: no slot is added to them,
+and the console strip's existing `TabIconSlot` stays collapsed because `ConsoleChannelViewModel.Icon` remains
+null.
+
+**Provenance.** The glyphs are a vendored subset of Phosphor Icons (MIT), committed as geometry resources with
+the pinned source release and commit, per-icon SHA-256 checksums, the upstream licence copy, and a `NOTICE.md`
+entry, all under `src/dotnet/Mocassin.App.Views/Icons/`. No icon package, icon font, runtime download, or
+network access is introduced; §12 records the boundary. The vendoring procedure, the exact subset, and the
+checksums are normative in the icon-pass maintenance record
+(`docs/planning/maintenance/2026-11-22-gui-icon-pass.md`).
 
 ## 6. Interaction states
 
@@ -535,11 +612,12 @@ remain for inventory.
 - The strip keeps the names `Document tabs` and `Console tabs`; each tab's accessible name is its visible
   header. No icon-only meaning is introduced.
 
-**Icon slot (reserved for the later icon pass).** Each item template starts with a 16 × 16 `TabIconSlot`
-`ContentControl`, vertically centred, bound to `Icon` on the view model, collapsed while `Icon` is null,
-`IsHitTestVisible="False"`, `Focusable="False"`, and `AutomationProperties.AccessibilityView="Raw"`. No icon
-asset, package, or visible slot is added in this pass; the later Phosphor pass only supplies the icon source.
-The slot carries no accessible name and no text, so the visible header remains the tab's meaning and name.
+**Icon slot.** Each item template starts with a 16 × 16 `TabIconSlot` `ContentControl`, vertically centred,
+bound to `Icon` on the view model, collapsed while `Icon` is null, `IsHitTestVisible="False"`,
+`Focusable="False"`, and `AutomationProperties.AccessibilityView="Raw"`. The slot's size comes from
+`Mocassin.IconSize` (§5.2). The document tabs' slot is populated per the §5.2 mapping; the console tabs' slot
+stays collapsed because `ConsoleChannelViewModel.Icon` remains null, so console tabs stay text-only. The slot
+carries no accessible name and no text, so the visible header remains the tab's meaning and name.
 
 **Overflow.** Tabs never wrap to a second row. The Fluent `TabControl` template has no strip scroll viewer, so
 horizontal overflow is a known gap recorded in the maintenance record; it is not changed by this pass.
@@ -555,7 +633,11 @@ content surfaces differ in composition (a document view versus a channel view) b
 
 - Projects: the project switcher list, "Explorer" heading, tree, and pinned "Open selected" button keep their
   structure. Rows use `ItemPadding`; selected rows use `SelectedBackground`/`SelectedForeground`; captions use
-  `ForegroundMutedBrush`.
+  `ForegroundMutedBrush`. Each open-project row leads with a `ProjectRowIconSlot` (`project` key) and each
+  explorer node leads with a `NodeIconSlot`, both under the §5.2 contract and mapping; a node with no icon key
+  renders no slot. The icons are decorative and never replace the row or node label. The explorer tree scrolls
+  vertically only; horizontal overflow is disabled and labels trim with a character ellipsis, so the icon never
+  pushes content under the vertical bar at 1.5× font scale.
 - Documents: see §7.4. The welcome document is inside this card.
 - Inspector: the heading, empty state, and summary use the card inset. The empty state is muted; the summary is
   body text.
@@ -633,8 +715,9 @@ The console region has exactly two fixed tabs, in this order:
 - The old `ComboBox` labelled "Console channel" is removed. Its focus stop and automation name disappear; the
   console filter field, clear button, and validation filters keep their existing names and tab order relative
   to each other. No overlay or dialog captures or restores the removed combo box.
-- The console tab header uses the same `TabItem` treatment as §7.4 and reserves the same 16 px leading icon
-  slot, collapsed until the later icon pass supplies `ConsoleChannelViewModel.Icon`.
+- The console tab header uses the same `TabItem` treatment as §7.4 and the same leading icon slot, which stays
+  collapsed: `ConsoleChannelViewModel.Icon` remains null, so console tabs are text-only by the §5.2 coverage
+  decision.
 - The console card has no separate title row and no extra strip padding. The tab strip is the header; each tab
   header carries its own `TabItemHeaderMargin` inset (§7.4).
 
@@ -723,9 +806,10 @@ against `#000000` (about 15:1). They are tested separately.
   `Console panel`.
 - The document tab strip keeps `Document tabs`; the console strip is `Console tabs`. Each tab's accessible name
   is its visible header.
-- The 16 px leading icon slot is decorative: it has no accessible name and no text, and
-  `AutomationProperties.AccessibilityView="Raw"`. A tab is never identified by an icon alone; the visible header
-  stays its name.
+- The 16 px leading icon slots — `TabIconSlot`, `NodeIconSlot`, and `ProjectRowIconSlot` — are decorative:
+  each has no accessible name and no text, and
+  `AutomationProperties.AccessibilityView="Raw"`. A tab, tree node, or project row is never identified by an
+  icon alone; the visible header or label stays its name.
 - The validation content uses `Validation` in user-facing automation names; the tab itself is `Validation`.
 - Overlay roots keep `Command palette`, `Keyboard shortcuts`, and `Settings`; `DialogHost` keeps the active
   dialog title; the notification host is never announced as a dialog and never takes focus.
@@ -755,7 +839,11 @@ against `#000000` (about 15:1). They are tested separately.
 - No Visual Studio Code asset, icon, font, trademark, screenshot, theme file, or stylesheet content is copied
   into the repository. The implementation uses Avalonia Fluent 12.1.6 control templates and the token values
   above.
-- No new dependency, font download, icon package, or third-party theme is introduced.
+- The one third-party asset family is the vendored Phosphor Icons subset of §5.2: MIT-licensed geometry
+  committed under `src/dotnet/Mocassin.App.Views/Icons/` with the pinned upstream release and commit, per-icon
+  SHA-256 checksums, the upstream licence copy, and a `NOTICE.md` entry — the same provenance boundary as the
+  spglib catalog. No icon font, icon package, or third-party theme is introduced, and nothing is downloaded at
+  build or run time.
 - The palette values are application tokens. They are not part of `contracts/manifest.json`, a project,
   package, results, or state format, and they have no cross-language fixtures.
 - The high-contrast and compact dictionaries are first-party and remain the precedence overrides described in
@@ -779,9 +867,11 @@ requirement; the record supplies the implementation and evidence plan. At minimu
 | Realized tab geometry and state: top-only `4,4,0,0` radius, active fill equal to the content surface, inactive/hover/pressed fills and text, 2 px top indicator with the `TabIndicatorInset` end inset, no strip/content gap, no bottom border, and the 2 px tab focus adorner, for document and console strips in light, dark, and high contrast | PR-fast headless |
 | `Mocassin.Tab*` roles equal the realized `TabItemHeader*` keys per theme; `Mocassin.TabStripBackground` is absent; the retired token is not claimed anywhere | PR-fast headless |
 | Icon-slot reservation: 16 × 16 `TabIconSlot` in both headers, collapsed while `Icon` is null, `AccessibilityView=Raw`, not focusable, not hit-testable, tab name unchanged | PR-fast headless |
+| Icon pass (§5.2): the five `Mocassin.Icon.*` geometries resolve; the mapping realizes on every shipped tree node, project row, and document tab; the fill follows the §5.2 roles per state and theme including high contrast; the `Missing` marker renders in `ErrorForeground` for an unresolved key and is absent from every shipped surface; the slots keep the §5.2 contract at both densities and 1.5× font scale; console tabs stay text-only | PR-fast headless |
+| Icon provenance: `Icons.axaml` carries the MIT SPDX header and pinned source line, the provenance table lists exactly the vendored keys with SHA-256 checksums, the licence copy is present, and the `NOTICE.md` entry exists | PR-fast unit |
 | Scroll gutter: the realized content edge is at least 3 px clear of the realized scrollbar edge for every §5.1 surface at 1000 × 700, 900 × 600, and 1.5× compact, with the palette and cheat sheet actually scrolled | PR-fast headless |
 | Console tab persistence, unknown-id fallback, `Enter` no-op, focus order | PR-fast headless |
 | Welcome button label centring at comfortable and compact density | PR-fast headless |
 | 1.5× font scale with compact density: no clipping on primary surfaces; the tab header grows above `TabHeight` | PR-fast headless |
-| Screenshot baselines for light, dark, high contrast, console tabs, settings, palette, cheat sheet, and the dark tab-hover state | PR-medium |
+| Screenshot baselines for light, dark, high contrast, console tabs, settings, palette, cheat sheet, and the dark tab-hover state; the icon-pass regeneration adds the icon surfaces and open-project captures per §5.2 | PR-medium |
 | Screen-reader pass, 125 %/150 % display scaling, Windows/macOS keyboard pass | Manual; recorded as platform evidence |

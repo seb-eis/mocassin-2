@@ -173,10 +173,12 @@ or SQLite. Prefer real temporary directories and real files produced by the real
   step page.
 - Screenshot baselines are checked in at `src/dotnet/Mocassin.App.Tests/Visual/Baselines/` for light, dark,
   high contrast, light/dark Validation, light/dark Settings, light/dark command palette, light/dark shortcut
-  cheat sheet, and one dark tab-hover state. The shell captures show the welcome document and the two console
-  tabs at 1000 × 700; high contrast keeps compact density. Linux compares them with a documented 5 % pixel
-  tolerance; Windows/macOS do not pixel-compare. Regenerate with
-  `MOCASSIN_REGENERATE_VISUAL_BASELINES=1` on the Linux reference environment.
+  cheat sheet, one dark tab-hover state, and the light/dark/high-contrast open-project captures. The shell
+  captures show the welcome document and the two console tabs at 1000 × 700; high contrast keeps compact
+  density. The open-project captures show an active project with both explorer node icons, the project-row icon,
+  and the Overview/JSON tab icons. Linux compares them with a documented 5 % pixel tolerance; Windows/macOS do
+  not pixel-compare. Regenerate with `MOCASSIN_REGENERATE_VISUAL_BASELINES=1` on the Linux reference
+  environment.
 - The accessibility sweep asserts an accessible name on every primary interactive control type in the real
   shell, the expected automation role for the menu, tabs, project lists, explorer, and console filter, and a
   deterministic Tab order. The Xvfb harness captures the real X11 window for light, dark, high-contrast,
@@ -193,7 +195,8 @@ or SQLite. Prefer real temporary directories and real files produced by the real
   inset, the removed strip/content gap, and the 2 px tab focus adorner, for the document and console strips in
   light, dark, and high contrast. Palette/realized-key equality guards keep `Mocassin.Tab*` and
   `TabItemHeader*` in step; `Mocassin.TabStripBackground` is retired. An icon-slot test asserts the 16 × 16
-  `TabIconSlot` is present, collapsed while `Icon` is null, unnamed, and not a focus stop.
+  `TabIconSlot` is present, `Raw`, unnamed, and not a focus stop, collapsed on the console tabs and populated on
+  the document tabs.
 - Scroll-gutter tests measure the realized bounds: for every application scroll surface the content edge stays
   at least 3 px clear of the realized scrollbar edge at 1000 × 700, 900 × 600, and 1.5× compact density, with
   the palette and cheat sheet actually scrolled. The multi-line `TextBox` and `ComboBox` popup assert the
@@ -287,6 +290,27 @@ screenshot coverage.
 - **Screenshots.** The seven Linux baselines are regenerated for the refresh and reviewed against the visual
   contract; the comparison normalizes the actual frame through a PNG round-trip so the baseline and capture use
   the same channel order.
+
+## GUI icon pass (2026-11-22)
+
+The out-of-step icon pass vendors five Phosphor regular-weight glyphs as committed `StreamGeometry` resources
+and populates the reserved document-tab slot plus new explorer-node and open-project-row slots.
+
+- **Assets, mapping, and provenance.** `IconAssetTests` reads the realized resources and slots: the five
+  geometries resolve; the welcome/Overview/JSON tabs, both explorer nodes, and the open-projects row realize
+  their mapped glyph; the fill follows the §5.2 active/inactive/selected/muted roles in light, dark, and high
+  contrast; the `Missing` marker renders in `ErrorForeground` for an unresolved key and is absent from every
+  shipped surface; the excluded surfaces contain no slot. The provenance test pins the MIT SPDX header, the
+  pinned commit, the exact per-icon SHA-256 values, the verbatim licence-file hash, and the `NOTICE.md` entry.
+- **Accessibility.** `AccessibilityTests` keeps the three slots 16 × 16, `Raw`, unnamed, non-focusable, and
+  non-hit-testable at compact density and 1.5× scale; the tab, node, and row names stay their visible labels.
+  `ConsoleTabsTests` proves the console channels keep `Icon` null and the console slots stay collapsed.
+- **Scroll gutter.** The explorer tree disables horizontal overflow and trims node labels with a character
+  ellipsis, so the required 16 px node icons stay clear of the vertical scrollbar at 1.5× compact. This is the
+  owner-approved deviation recorded in the icon-pass maintenance record.
+- **Screenshots.** The shell and overlay baselines are regenerated and `light-project.png`, `dark-project.png`,
+  and `highcontrast-project.png` are added. The open-project captures show both explorer node icons, the
+  project-row icon, and the Overview/JSON tab icons in light, dark, and high contrast.
 
 ## Test tiers
 

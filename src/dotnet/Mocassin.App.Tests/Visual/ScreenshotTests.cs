@@ -11,11 +11,13 @@ using System.Runtime.InteropServices;
 using Microsoft.Extensions.DependencyInjection;
 using Mocassin.App.Composition;
 using Mocassin.App.Tests.TestSupport;
+using Mocassin.App.ViewModels.Navigation;
 using Mocassin.App.ViewModels.Settings;
 using Mocassin.App.ViewModels.Shell;
 using Mocassin.App.Views.Commands;
 using Mocassin.App.Views.Shell;
 using Mocassin.App.Views.Theming;
+using Mocassin.Core.Diagnostics;
 
 namespace Mocassin.App.Tests.Visual;
 
@@ -78,6 +80,49 @@ public sealed class ScreenshotTests
                     "dark-settings",
                     new AppSettings { Theme = ThemeSelection.Dark },
                     (_, shell) => shell.Settings.Open());
+            });
+
+    [Fact]
+    public Task TheOpenProjectIconSurfacesHaveLightDarkAndHighContrastBaselines() =>
+        HeadlessSession.DispatchAsync(
+            async () =>
+            {
+                if (!OperatingSystem.IsLinux())
+                {
+                    return;
+                }
+
+                foreach (var (name, settings) in new[]
+                {
+                    ("light-project", new AppSettings { Theme = ThemeSelection.Light }),
+                    ("dark-project", new AppSettings { Theme = ThemeSelection.Dark }),
+                    (
+                        "highcontrast-project",
+                        new AppSettings
+                        {
+                            Theme = ThemeSelection.Dark,
+                            HighContrast = true,
+                            Density = Density.Compact,
+                            ReduceMotion = true,
+                        }),
+                })
+                {
+                    var entry = await ProjectFixtures.LoadCeriaAsync();
+                    Capture(
+                        name,
+                        settings,
+                        (_, shell) =>
+                        {
+                            shell.Workspace.Add(entry);
+                            shell.Navigation.NavigateToAsync(
+                                new ModelPath("project", entry.Id, "overview"),
+                                NavigationIntent.Activate).GetAwaiter().GetResult();
+                            shell.Navigation.NavigateToAsync(
+                                new ModelPath("project", entry.Id, "json"),
+                                NavigationIntent.Activate).GetAwaiter().GetResult();
+                            shell.Explorer.SelectedNode = shell.Explorer.Nodes[0];
+                        });
+                }
             });
 
     [Fact]

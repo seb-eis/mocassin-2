@@ -15,9 +15,11 @@
         <DataTemplate x:DataType="documents:DocumentViewModel">
           <StackPanel Orientation="Horizontal" Spacing="8">
             <ContentControl Name="TabIconSlot"
-                            Width="16"
-                            Height="16"
+                            Width="{DynamicResource Mocassin.IconSize}"
+                            Height="{DynamicResource Mocassin.IconSize}"
                             VerticalAlignment="Center"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"
                             Content="{Binding Icon}"
                             IsVisible="{Binding Icon, Converter={x:Static ObjectConverters.IsNotNull}}"
                             IsHitTestVisible="False"

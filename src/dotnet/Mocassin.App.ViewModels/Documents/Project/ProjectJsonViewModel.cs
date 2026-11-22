@@ -3,6 +3,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Mocassin.App.ViewModels.Editing;
+using Mocassin.App.ViewModels.Icons;
 using Mocassin.App.ViewModels.Navigation;
 using Mocassin.App.ViewModels.Projects;
 using Mocassin.App.ViewModels.Shell;
@@ -37,6 +38,9 @@ internal sealed partial class ProjectJsonViewModel : DocumentViewModel, IInspect
 
     /// <inheritdoc />
     public override string Title => $"Project JSON — {entry.Name}";
+
+    /// <inheritdoc />
+    public override object? Icon => new AppIcon(IconKeys.Json);
 
     /// <inheritdoc />
     public override string? ToolTip => entry.Path;

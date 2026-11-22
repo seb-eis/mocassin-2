@@ -61,8 +61,10 @@ public sealed class ConsoleTabsTests
                             Assert.False(slot.IsVisible);
                             Assert.False(slot.Focusable);
                             Assert.False(slot.IsHitTestVisible);
+                            Assert.Null(slot.Content);
                             Assert.Equal(16d, slot.Width);
                             Assert.Equal(16d, slot.Height);
+                            Assert.Null(Assert.IsAssignableFrom<ConsoleChannelViewModel>(tab.Header).Icon);
                         });
                     Assert.Equal("application", Assert.IsAssignableFrom<ConsoleChannelViewModel>(tabs[0].Header).Id);
                     Assert.Equal("problems", Assert.IsAssignableFrom<ConsoleChannelViewModel>(tabs[1].Header).Id);

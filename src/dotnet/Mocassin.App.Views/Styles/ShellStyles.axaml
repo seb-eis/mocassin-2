@@ -124,6 +124,30 @@
   </Style>
 
   <!--
+    Decorative icon fills. The implicit icon template binds the glyph Path to its slot's Foreground, so these
+    targeted styles are the only colour points: tabs follow the active/inactive role, and tree/project rows are
+    muted at rest and upgrade through the existing selected-state delivery. No icon-specific colour key exists.
+  -->
+  <Style Selector="TabItem ContentControl#TabIconSlot">
+    <Setter Property="Foreground" Value="{DynamicResource Mocassin.TabInactiveForeground}" />
+  </Style>
+  <Style Selector="TabItem:selected ContentControl#TabIconSlot">
+    <Setter Property="Foreground" Value="{DynamicResource Mocassin.TabActiveForeground}" />
+  </Style>
+  <Style Selector="ContentControl#NodeIconSlot">
+    <Setter Property="Foreground" Value="{DynamicResource Mocassin.ForegroundMutedBrush}" />
+  </Style>
+  <Style Selector="TreeViewItem:selected ContentControl#NodeIconSlot">
+    <Setter Property="Foreground" Value="{DynamicResource Mocassin.SelectedForeground}" />
+  </Style>
+  <Style Selector="ContentControl#ProjectRowIconSlot">
+    <Setter Property="Foreground" Value="{DynamicResource Mocassin.ForegroundMutedBrush}" />
+  </Style>
+  <Style Selector="ListBoxItem:selected ContentControl#ProjectRowIconSlot">
+    <Setter Property="Foreground" Value="{DynamicResource Mocassin.SelectedForeground}" />
+  </Style>
+
+  <!--
     Scroll gutters. Fluent's auto-hiding scrollbar overlays the content, so the content is inset by the bar width
     plus a 4 px margin. ListBox and TreeView forward Padding to their internal items presenter.
   -->

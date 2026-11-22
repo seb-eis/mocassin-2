@@ -45,6 +45,16 @@ KaTeX 0.19.1 (https://katex.org/) is used by the documentation site for math ren
 under the MIT licence. The assets are loaded from the pinned unpkg CDN; the version is pinned in
 `zensical.toml`.
 
+### Phosphor Icons (vendored icon subset)
+
+The desktop application embeds a small subset of Phosphor Icons as Avalonia `StreamGeometry` resources
+(`src/dotnet/Mocassin.App.Views/Icons/Icons.axaml`). Phosphor Icons is distributed under the MIT licence
+(https://github.com/phosphor-icons/core, package `@phosphor-icons/core` 2.1.1, pinned commit
+`2b75f3ad12b420c9504ef05df8d2564a28f8500e`). The pinned source, per-icon checksums, and the licence copy are
+recorded in `src/dotnet/Mocassin.App.Views/Icons/IconsProvenance.md`; the licence text is
+`src/dotnet/Mocassin.App.Views/Icons/PhosphorLicense.txt`. © 2023 Phosphor Icons. No icon font, package
+dependency, or runtime download is used.
+
 NuGet dependencies are checked by `tools/contracts/check_nuget_licenses.py` and the CI licence/vulnerability
 gate. The project policy allows MIT-compatible licences; any exception is recorded here.
 

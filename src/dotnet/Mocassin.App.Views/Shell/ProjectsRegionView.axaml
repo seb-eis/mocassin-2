@@ -24,22 +24,36 @@
                Margin="4,0,4,8">
         <ListBox.ItemTemplate>
           <DataTemplate x:DataType="projects:ProjectWorkspaceEntry">
-            <StackPanel>
-              <StackPanel Orientation="Horizontal" Spacing="4">
-                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
-                <TextBlock Text="*"
-                           IsVisible="{Binding IsDirty}"
-                           automation:AutomationProperties.Name="Unsaved changes"
-                           FontWeight="Bold" />
+            <Grid ColumnDefinitions="Auto,*">
+              <ContentControl Name="ProjectRowIconSlot"
+                              Width="{DynamicResource Mocassin.IconSize}"
+                              Height="{DynamicResource Mocassin.IconSize}"
+                              Margin="0,0,4,0"
+                              VerticalAlignment="Center"
+                              HorizontalContentAlignment="Stretch"
+                              VerticalContentAlignment="Stretch"
+                              Content="{Binding Icon}"
+                              IsVisible="{Binding Icon, Converter={x:Static ObjectConverters.IsNotNull}}"
+                              IsHitTestVisible="False"
+                              Focusable="False"
+                              automation:AutomationProperties.AccessibilityView="Raw" />
+              <StackPanel Grid.Column="1">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                  <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                  <TextBlock Text="*"
+                             IsVisible="{Binding IsDirty}"
+                             automation:AutomationProperties.Name="Unsaved changes"
+                             FontWeight="Bold" />
+                </StackPanel>
+                <TextBlock Text="{Binding Path}"
+                           Classes="caption"
+                           TextTrimming="CharacterEllipsis" />
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <TextBlock Text="{Binding LockStateText}" Classes="caption" />
+                  <TextBlock Text="{Binding LastDocumentTitle}" Classes="caption" />
+                </StackPanel>
               </StackPanel>
-              <TextBlock Text="{Binding Path}"
-                         Classes="caption"
-                         TextTrimming="CharacterEllipsis" />
-              <StackPanel Orientation="Horizontal" Spacing="8">
-                <TextBlock Text="{Binding LockStateText}" Classes="caption" />
-                <TextBlock Text="{Binding LastDocumentTitle}" Classes="caption" />
-              </StackPanel>
-            </StackPanel>
+            </Grid>
           </DataTemplate>
         </ListBox.ItemTemplate>
       </ListBox>
@@ -51,6 +65,7 @@
                  Margin="{DynamicResource Mocassin.RegionHeaderPadding}" />
       <TreeView Grid.Row="3"
                 Classes="scroll-gutter-both"
+                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                 automation:AutomationProperties.Name="Project explorer"
                 x:Name="ExplorerTree"
                 ItemsSource="{Binding Explorer.Nodes}"
@@ -61,7 +76,24 @@
                 DoubleTapped="OnExplorerDoubleTapped">
         <TreeView.ItemTemplate>
           <TreeDataTemplate x:DataType="navigation:ExplorerNode" ItemsSource="{Binding ChildNodes}">
-            <TextBlock Text="{Binding Label}" />
+            <Grid ColumnDefinitions="Auto,*">
+              <ContentControl Name="NodeIconSlot"
+                              Width="{DynamicResource Mocassin.IconSize}"
+                              Height="{DynamicResource Mocassin.IconSize}"
+                              Margin="0,0,4,0"
+                              VerticalAlignment="Center"
+                              HorizontalContentAlignment="Stretch"
+                              VerticalContentAlignment="Stretch"
+                              Content="{Binding Icon}"
+                              IsVisible="{Binding Icon, Converter={x:Static ObjectConverters.IsNotNull}}"
+                              IsHitTestVisible="False"
+                              Focusable="False"
+                              automation:AutomationProperties.AccessibilityView="Raw" />
+              <TextBlock Grid.Column="1"
+                         Text="{Binding Label}"
+                         VerticalAlignment="Center"
+                         TextTrimming="CharacterEllipsis" />
+            </Grid>
           </TreeDataTemplate>
         </TreeView.ItemTemplate>
       </TreeView>

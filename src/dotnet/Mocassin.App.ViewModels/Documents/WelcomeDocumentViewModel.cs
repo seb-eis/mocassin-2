@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 using System.Windows.Input;
+using Mocassin.App.ViewModels.Icons;
 using Mocassin.App.ViewModels.Projects;
 
 namespace Mocassin.App.ViewModels.Documents;
@@ -41,6 +42,9 @@ internal sealed class WelcomeDocumentViewModel : DocumentViewModel
 
     /// <inheritdoc />
     public override string Title => "Welcome";
+
+    /// <inheritdoc />
+    public override object? Icon => new AppIcon(IconKeys.Welcome);
 
     /// <summary>
     /// Gets the command that opens the shortcut cheat sheet.

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 
+using Mocassin.App.ViewModels.Icons;
 using Mocassin.Core.Diagnostics;
 
 namespace Mocassin.App.ViewModels.Navigation;
@@ -23,4 +24,9 @@ internal sealed record ExplorerNode(
     /// Gets the child nodes, never <see langword="null"/>.
     /// </summary>
     public IReadOnlyList<ExplorerNode> ChildNodes => Children ?? [];
+
+    /// <summary>
+    /// Gets the presentation icon, or <see langword="null"/> when the node has no icon key.
+    /// </summary>
+    public AppIcon? Icon => IconKey is null ? null : new AppIcon(IconKey);
 }
