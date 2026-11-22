@@ -16,7 +16,7 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
 - **Main CI:** [44924317743](https://github.com/seb-eis/mocassin-2/actions/runs/44924317743) — green at `dd5a811`
 - **Main merge:** `dd5a811` (`--no-ff`)
 - **Step tag:** `step-14` (annotated, on `dd5a811`)
-- **Audit:** `Passed with notes` — accepted by the owner 2026-11-21; F-1–F-3/N-1–N-3 deferred to `fix/step-14-structure-and-tests` ([record](../audits/step-14.md))
+- **Audit:** `Passed with notes` — accepted by the owner 2026-11-21; F-1–F-3/N-1–N-3 deferred to `fix/step-14-structure-and-tests` ([record](../audits/step-14.md)). **Maintenance 2026-11-22:** F-1, F-3, N-1, N-2, and N-3 closed on `fix/step-14-structure-and-tests`; F-2 (owner-major delta) re-pointed to Step 15. No public API, format, contract, or dependency change; see the maintenance evidence below.
 - **Design review:** `Ready with notes` — accepted by the human owner 2026-11-21. Round 4 at record `620f20a`
   (freeze `a430d64`) closed F-29 and F-30–F-38; F-39–F-43 are minor/note corrections the step agent records
   with the start-gate status. Rounds 1–3 returned `Changes required` (F-1–F-38). Record:
@@ -32,7 +32,7 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
   gate.
 - **Sizing:** Complexity class **High** — accepted by the human owner at the start gate 2026-11-21 as one
   unit; no split proposed. See §4.
-- **Last updated:** 2026-11-21 (merged as `dd5a811`, main CI green, tagged `step-14`)
+- **Last updated:** 2026-11-22 (audit findings closed on `fix/step-14-structure-and-tests`)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
@@ -404,6 +404,54 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
   deferred to `fix/step-14-structure-and-tests`). The step branch was merged into `main` as `dd5a811` and tagged
   `step-14`; automatic main CI [44924317743](https://github.com/seb-eis/mocassin-2/actions/runs/44924317743) is
   green at `dd5a811`.
+
+### Maintenance evidence — `fix/step-14-structure-and-tests`
+
+- **Branch:** `fix/step-14-structure-and-tests` from `main` at `536c8b3` — an out-of-step maintenance branch
+  (AGENTS.md §3.5). It is not merged into `main` and creates no tag; the owner approves the merge after the lead
+  reports. No CI run is dispatched for a maintenance branch (local gates only).
+- **Scope:** the owner-accepted deferred audit findings F-1, F-3, N-1, N-2, and N-3. F-2 needs no Step 14 code:
+  the owner-major delta itself belongs to Step 15, so the asymmetric-table criterion is re-pointed to that step's
+  test plan.
+- **F-1 (Minor) — direct `amend-1-net10` coverage.** `tests/context_goals.rs` gains
+  `the_amend_1_net10_ceria_job_matches_the_same_acceptance_values`: it opens
+  `tests/contracts/packages/amend-1-net10/ceria-temperature-sweep.msl` job 1 and asserts mobile 648, selectable
+  432, goals 162000/97200/259200, block 2592, `dt = 2/(1e13·432)`, and the tracker counts (mobile 648, 16 static
+  trackers per cell / 3456 total, 2 global). It also asserts `goals`, `normalization`, `trackers`, `pools`, and
+  the initial energy equal the `msl-v1` context's, which is the logical equality the fixture README records.
+- **F-3 (Minor) — file-length split.** `context/mod.rs` (1,502 lines) keeps the public types and accessors and
+  moves the phase pipeline and input validation to `context/build.rs` (448 lines) and the invariant sweep to
+  `context/invariants.rs` (384). `context/limits.rs` (863) keeps the plan and moves its unit tests to
+  `context/limits/tests.rs` (194). Every `src/context` file is now under the 800-line limit (largest:
+  `clusters.rs` 793, `mod.rs` 770, `limits.rs` 737). Internal module moves only: the `pub use` surface,
+  signatures, error values, and behaviour are unchanged, so Step 15's interface is intact.
+- **N-2 (Note) — `max_path_nodes` cap.** `jumps::MAX_PATH_NODES` (10) is now the single source of the fixed
+  jump-status scratch, and `MemoryPlan::plan` rejects a caller-raised `max_path_nodes` above it with
+  `InvalidInput { what: "max_path_nodes" }` (exit 12) before any allocation instead of silently truncating an
+  11+-node status. Tests cover the rejection and the 10/9 boundary.
+- **N-3 (Note) — phase-0 length checks.** `Dimensions::from_job` now validates `counts.position_count`,
+  `structure.positions.len()`, `structure.environments.len()`, and `counts.direction_count` against
+  `transitions.directions.len()` before the plan or the sweep indexes them; the jump-link sweep also uses a
+  checked `directions.get` and returns `Invariant` rather than panicking. Regression tests truncate the
+  `environments`, `positions`, and `directions` vectors and assert exit-12 `InvalidInput` on KMC and MMC jobs
+  (the MMC case is the one that skipped `JumpRuntime::build`).
+- **N-1 (Note) and status corrections.** The parity row and the dashboard now agree on `Done` + merge/tag and
+  record the maintenance closure; the stale "implementation pending/Partial until Step 14 is implemented" wording
+  in the parity "Selection optimizers" row is corrected. In the same dashboard edit, the stale Step 13 "In
+  progress" sentence is corrected and the two GUI maintenance notes record their completed `--no-ff` merges
+  (`5592418`, `033da6f`).
+- **Public surface / format:** unchanged — no public Rust API change, no `.msl`/`.mcs`/manifest/signature change,
+  no new dependency, and no generated artifact change.
+- **Local gates (2026-11-22, exact commands):** `./tools/verify.sh rust` → exit 0 (fmt and clippy clean;
+  workspace tests green, including the `mocassin-solver` lib 40, `context_goals` 16, `context_skeleton` 12,
+  `context_fixtures` 3, `allocation` 1, and both `context` doctests); `cargo build --manifest-path
+  src/rust/Cargo.toml --workspace --release` → exit 0; `./tools/verify.sh docs` → exit 0 (math 207 files, links
+  210 files, DocFX 0 warnings / 0 errors, rustdoc clean, Zensical strict). No CI run was dispatched: maintenance
+  branches are validated locally only (AGENTS.md §3.5/§3.13).
+- **Known limitations:** the mechanical Rust file-length/layout check remains deferred to Step 29 (the local
+  structure gate is .NET-only); F-2's delta assertion is owned by Step 15. The F-3 split is structural only and
+  adds no test beyond the existing suite; the new N-2/N-3/F-1 tests are the regression coverage for the audit
+  findings.
 
 ## Goal
 
@@ -1477,6 +1525,9 @@ row (§7.2). A link that is absent in both directions means the two environments
 
 - [x] `msl-v1` job 1 (6×6×6 ceria) and `amend-1-net10` initialize a context whose mobile count, selectable count,
       `prerun`/`main`/`total` goals, block size, `dt`, and tracker counts are asserted against computed values.
+      — *`msl-v1`: `context_goals::the_msl_v1_ceria_job_matches_the_acceptance_values`; `amend-1-net10`:
+      `context_goals::the_amend_1_net10_ceria_job_matches_the_same_acceptance_values` (added by the audit F-1
+      maintenance fix).*
 - [x] `step-13-populated` KMC and MMC jobs initialize; the pair link set and the inverse set equal a brute-force
       expansion of the payload for every supercell cell; the clustered energy vectors equal a direct table
       lookup; the MMC context has no pools/jump status/time.
@@ -1567,6 +1618,10 @@ signature), which exercises the owner-major/inverse links, clusters, and pools a
 second fixture. Because the ceria writer fixture has no pair or cluster tables, this clone is the recorded
 measurement for the pair/cluster-scale budget (§20), not the real-writer fixture.
 
+`amend-1-net10` is opened directly by `tests/context_goals.rs` (audit F-1): it asserts the same mobile, selectable,
+goal, block, `dt`, and tracker counts as `msl-v1` and the logical equality of the two contexts' goals,
+normalization, trackers, pools, and initial energy. The compatibility copy is read-only and never regenerated.
+
 Feature 6 also adds `tests/contracts/packages/step-14-multi-centre-cluster/`, a real-writer test artifact built
 from the committed `samples/step-14-multi-centre-cluster/step-14-multi-centre-cluster.mocprj` (a derivation of
 the centred sample, which stays byte-identical, so the `step-13-centered` golden does not move) with one cluster
@@ -1605,7 +1660,7 @@ map), not a second multi-centre package: two images of one member site are the a
 | `Send`/`!Sync` | A `compile_fail` doctest cannot assert `SimulationContext: Sync`; a positive assertion requires `Send` | PR-fast (doctest) |
 | Mobile assumption | A non-void particle outside every active KMC mobile mask is still `MOBILE`, gets a mobile tracker, and is counted in `mobile_count` | PR-fast |
 | Allocation | Zero allocations in hot accessors and pool helpers after construction | PR-fast (own test binary) |
-| Real packages | `msl-v1`, `amend-1-net10`, `step-13-populated` (KMC+MMC), `step-13-centered`, `step-11-amend-2`, `amend-2-pre-map`, `step-14-multi-centre-cluster` initialize (or return the documented pre-map error) and satisfy §17 | PR-medium |
+| Real packages | `msl-v1`, `amend-1-net10`, `step-13-populated` (KMC+MMC), `step-13-centered`, `step-11-amend-2`, `amend-2-pre-map`, `step-14-multi-centre-cluster` initialize (or return the documented pre-map error) and satisfy §17; `amend-1-net10` is opened directly by the context goals test (audit F-1) | PR-medium |
 | 10×10×10 acceptance | The real-writer fixture initializes in `< 100 ms`; the memory report is within budget | PR-medium |
 | Populated 10×10×10 clone | The populated model cloned to 10×10×10 (3,000 positions) is measured for init time and memory; recorded next to the table-free fixture because the ceria model has no pair/cluster tables | PR-medium |
 | Determinism snapshot | The context summary is identical across two initializations (insta inline snapshot) | PR-fast |

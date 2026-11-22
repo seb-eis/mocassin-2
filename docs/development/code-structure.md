@@ -151,7 +151,9 @@ crates/mocassin-solver/
   Cargo.toml
   README.md
   src/lib.rs                     # crate entry: module declarations, re-exports, crate docs
-  src/context/mod.rs             # SimulationContext, InitOutcome, the phase pipeline
+  src/context/mod.rs             # SimulationContext, InitOutcome, ContextOptions, accessors, cancellation
+  src/context/build.rs           # the phased pipeline and the input validation
+  src/context/invariants.rs      # the post-build invariant sweep
   src/context/dimensions.rs      # [A,B,C,P], checked index/wrap helpers
   src/context/lattice.rs         # particle/flag/tracker SoA arenas
   src/context/links.rs           # compact per-P1 link CSR + target resolution
@@ -161,7 +163,8 @@ crates/mocassin-solver/
   src/context/jumps.rs           # per-(P1,direction) jump status + path resolution
   src/context/goals.rs           # counters, goals, normalization, dt
   src/context/resume.rs          # ResumeState/ResumePhase validation
-  src/context/limits.rs          # ContextLimits, MemoryReport
+  src/context/limits.rs          # ContextLimits, MemoryPlan, MemoryReport
+  src/context/limits/tests.rs    # unit tests for the limits and the phase-0 plan
   src/context/error.rs
   tests/context_acceptance.rs
   tests/allocation.rs            # own test binary with the counting global allocator
@@ -176,7 +179,9 @@ crates/mocassin-solver/
 - No `utils`/`helpers`/`common` module. The index/wrap helpers live in `dimensions.rs` because they are the
   dimension contract.
 - Keep every file below 800 lines and the `context/` directory below 20 direct files; split by sub-concept if a
-  file grows.
+  file grows. The Step 14 audit F-3 maintenance split moved the phase pipeline to `build.rs`, the invariant sweep
+  to `invariants.rs`, and the limits unit tests to `limits/tests.rs`, so `mod.rs`/`limits.rs` stay under the
+  limit while the public `context` surface is unchanged.
 - Public items carry doc comments; every new file starts with `SPDX-License-Identifier: MIT`.
 
 ### 2.3 `Mocassin.App*` layout (Steps 23A/23B)

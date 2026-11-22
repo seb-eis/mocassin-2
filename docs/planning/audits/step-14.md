@@ -379,12 +379,12 @@ the mechanical Rust layout check and the same-class benchmark/context regression
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| F-1 | Deferred — owner-accepted | Step agent on `fix/step-14-structure-and-tests` before Step 15 | — |
-| F-2 | Deferred — owner-accepted (Step 15 owns the delta itself) | Step agent on `fix/step-14-structure-and-tests` before Step 15 | — |
-| F-3 | Deferred — owner-accepted | Step agent on `fix/step-14-structure-and-tests` before Step 15 | — |
-| N-1 | Deferred — owner-accepted (the Done commit makes the dashboard parity state consistent) | Step agent on `fix/step-14-structure-and-tests` before Step 15 | — |
-| N-2 | Deferred — owner-accepted | Step agent on `fix/step-14-structure-and-tests` before Step 15 | — |
-| N-3 | Deferred — owner-accepted | Step agent on `fix/step-14-structure-and-tests` before Step 15 | — |
+| F-1 | **Closed** — `tests/context_goals.rs` now opens `amend-1-net10` directly and asserts mobile 648, selectable 432, goals 162000/97200/259200, block 2592, `dt = 2/(1e13·432)`, and the static (16 per cell, 3456 total) and global (2) tracker counts; it also ties the values to the logically identical `msl-v1` context. | Step agent on `fix/step-14-structure-and-tests` | `29cc85e` |
+| F-2 | **Re-pointed to Step 15** — the asymmetric-table owner-major delta criterion is a test/claim gap, not a context defect; the Energy Engine step owns the delta itself and its test plan now carries the owner-vs-sender assertion. No Step 14 code change. | Step 15 step agent | — (Step 15 feature branch) |
+| F-3 | **Closed** — `context/mod.rs` (1,502) is split into `context/build.rs` (phase pipeline and input validation) and `context/invariants.rs` (invariant sweep); `context/limits.rs` (863) keeps the plan and moves its unit tests to `context/limits/tests.rs`. Every `context` file is now under the 800-line limit; the public API surface is unchanged (internal module moves only). | Step agent on `fix/step-14-structure-and-tests` | `beb1943` |
+| N-1 | **Closed** — the Step 14 parity row and the status dashboard now both record `Done` + merge/tag and the maintenance closure; the stale "implementation pending/Partial until Step 14 is implemented" wording in the "Selection optimizers" row is corrected; the dashboard's stale Step 13 "In progress" line and the two GUI maintenance notes are corrected in the same edit. | Step agent on `fix/step-14-structure-and-tests` | documentation commit on this branch |
+| N-2 | **Closed** — `ContextLimits::max_path_nodes` above the fixed 10-node jump-status scratch (`jumps::MAX_PATH_NODES`) is rejected by `MemoryPlan::plan` with exit-12 `InvalidInput { what: "max_path_nodes" }` before any allocation; tests cover the rejection and the 10/9 boundary. | Step agent on `fix/step-14-structure-and-tests` | `beb1943` |
+| N-3 | **Closed** — the P1 position/environment and direction-count length checks moved into `Dimensions::from_job` (phase 0), so the plan's `structure.environments[position]` read and the sweep's `directions[direction_index]` read cannot panic; the jump-link sweep also uses a checked `directions.get`. Tests cover a truncated `environments`, `positions`, and `directions` vector on KMC and MMC jobs. | Step agent on `fix/step-14-structure-and-tests` | `beb1943` |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
@@ -429,12 +429,17 @@ Findings and resolutions:
 | Finding | Severity | Issue | Resolution | Commit | Status |
 | --- | --- | --- | --- | --- | --- |
 | Design F-1…F-43 | Major/Minor/Note | Pool representation, owner-major orientation, memory plan, cluster instance/code contract, fixtures, status/doc drift | Closed across design rounds 2–4; F-39–F-43 corrected in the start-gate/step-page update | `b6dc503`, `87be9de`, `a430d64` | Closed |
-| F-1 | Minor | `amend-1-net10` not opened by a Step 14 test | Deferred to `fix/step-14-structure-and-tests` | — | Owner-accepted |
-| F-2 | Minor | Owner-major delta criterion not exercised (Step 15 owns the delta) | Deferred to `fix/step-14-structure-and-tests`/Step 15 | — | Owner-accepted |
-| F-3 | Minor | `context/mod.rs` and `context/limits.rs` exceed 800 lines | Deferred to `fix/step-14-structure-and-tests` | — | Owner-accepted |
-| N-1 | Note | Parity `Done` vs dashboard `In progress` | Done commit makes the dashboard consistent; wording follow-up on the maintenance branch | — | Owner-accepted |
-| N-2 | Note | Caller-raised `max_path_nodes > 10` vs fixed scratch | Deferred to `fix/step-14-structure-and-tests` | — | Owner-accepted |
-| N-3 | Note | Phase-0 length reads before phase-1 validation | Deferred to `fix/step-14-structure-and-tests` | — | Owner-accepted |
+| F-1 | Minor | `amend-1-net10` not opened by a Step 14 test | Direct context test with the computed values and tracker counts, tied to the `msl-v1` context | `29cc85e` | Closed |
+| F-2 | Minor | Owner-major delta criterion not exercised (Step 15 owns the delta) | Re-pointed to Step 15's test plan; no Step 14 code change | — (Step 15) | Re-pointed |
+| F-3 | Minor | `context/mod.rs` and `context/limits.rs` exceed 800 lines | Split into `build.rs`/`invariants.rs` and `limits/tests.rs`; public surface unchanged | `beb1943` | Closed |
+| N-1 | Note | Parity `Done` vs dashboard `In progress` | Parity/dashboard wording made consistent; stale status and GUI notes corrected | documentation commit on `fix/step-14-structure-and-tests` | Closed |
+| N-2 | Note | Caller-raised `max_path_nodes > 10` vs fixed scratch | Plan rejects `max_path_nodes > 10` with exit-12 `InvalidInput`; boundary tested | `beb1943` | Closed |
+| N-3 | Note | Phase-0 length reads before phase-1 validation | Length checks moved into `Dimensions::from_job`; truncated vectors tested on KMC and MMC | `beb1943` | Closed |
+
+Post-audit maintenance (2026-11-22, `fix/step-14-structure-and-tests`, from `main` `536c8b3`): the five deferred
+findings above are closed and F-2 is re-pointed to Step 15. The change is internal-only — no public Rust API,
+format, contract, or dependency change, no CI dispatch for a maintenance branch — and the local gates are
+recorded in the Step 14 page's maintenance evidence.
 
 ## Human approval
 
