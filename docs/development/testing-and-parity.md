@@ -172,9 +172,10 @@ or SQLite. Prefer real temporary directories and real files produced by the real
   middle-click close, the close button, and the context menu are tested. The drag limitation is recorded in the
   step page.
 - Screenshot baselines are checked in at `src/dotnet/Mocassin.App.Tests/Visual/Baselines/` for light, dark,
-  high contrast, light/dark Validation, and light/dark Settings. The shell captures show the welcome document and
-  the two console tabs at 1000 × 700; high contrast keeps compact density. Linux compares them with a documented
-  5 % pixel tolerance; Windows/macOS do not pixel-compare. Regenerate with
+  high contrast, light/dark Validation, light/dark Settings, light/dark command palette, light/dark shortcut
+  cheat sheet, and one dark tab-hover state. The shell captures show the welcome document and the two console
+  tabs at 1000 × 700; high contrast keeps compact density. Linux compares them with a documented 5 % pixel
+  tolerance; Windows/macOS do not pixel-compare. Regenerate with
   `MOCASSIN_REGENERATE_VISUAL_BASELINES=1` on the Linux reference environment.
 - The accessibility sweep asserts an accessible name on every primary interactive control type in the real
   shell, the expected automation role for the menu, tabs, project lists, explorer, and console filter, and a
@@ -187,6 +188,16 @@ or SQLite. Prefer real temporary directories and real files produced by the real
   accent/selection roles including `OnAccentBrush` come from the palette. `ThemeContrastTests` resolves every
   role and Fluent key in both themes and the default fallback, computes the WCAG pairs, and covers
   high-contrast/density precedence and the fixed accent family.
+- Tab treatment tests read the realized `TabItem` parts: the top-only `4,4,0,0` radius, the active fill equal to
+  the content surface, the active/inactive/hover/pressed fills and text, the 2 px top indicator and its end
+  inset, the removed strip/content gap, and the 2 px tab focus adorner, for the document and console strips in
+  light, dark, and high contrast. Palette/realized-key equality guards keep `Mocassin.Tab*` and
+  `TabItemHeader*` in step; `Mocassin.TabStripBackground` is retired. An icon-slot test asserts the 16 × 16
+  `TabIconSlot` is present, collapsed while `Icon` is null, unnamed, and not a focus stop.
+- Scroll-gutter tests measure the realized bounds: for every application scroll surface the content edge stays
+  at least 3 px clear of the realized scrollbar edge at 1000 × 700, 900 × 600, and 1.5× compact density, with
+  the palette and cheat sheet actually scrolled. The multi-line `TextBox` and `ComboBox` popup assert the
+  realized scroll-presenter padding because their content edge is clipped.
 
 ## Avalonia editing, diagnostics, and recovery (Step 23B)
 

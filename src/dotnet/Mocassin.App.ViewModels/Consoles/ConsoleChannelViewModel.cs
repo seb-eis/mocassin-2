@@ -53,6 +53,11 @@ internal partial class ConsoleChannelViewModel : ObservableObject
     public string TabTitle { get; }
 
     /// <summary>
+    /// Gets the optional tab icon. The icon pass supplies it later; it is <see langword="null"/> today.
+    /// </summary>
+    public object? Icon { get; init; }
+
+    /// <summary>
     /// Returns the visible tab title so the tab automation peer announces the same label as the header.
     /// </summary>
     /// <returns>The visible tab title.</returns>

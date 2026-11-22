@@ -51,6 +51,19 @@ public sealed class ConsoleTabsTests
                     var tabs = FindTabs(window);
                     Assert.Equal(2, tabs.Count);
                     Assert.Equal(["Console", "Validation"], TabLabels(tabs));
+                    Assert.All(
+                        tabs,
+                        tab =>
+                        {
+                            var slot = tab.GetVisualDescendants()
+                                .OfType<ContentControl>()
+                                .Single(control => control.Name == "TabIconSlot");
+                            Assert.False(slot.IsVisible);
+                            Assert.False(slot.Focusable);
+                            Assert.False(slot.IsHitTestVisible);
+                            Assert.Equal(16d, slot.Width);
+                            Assert.Equal(16d, slot.Height);
+                        });
                     Assert.Equal("application", Assert.IsAssignableFrom<ConsoleChannelViewModel>(tabs[0].Header).Id);
                     Assert.Equal("problems", Assert.IsAssignableFrom<ConsoleChannelViewModel>(tabs[1].Header).Id);
                     Assert.DoesNotContain(

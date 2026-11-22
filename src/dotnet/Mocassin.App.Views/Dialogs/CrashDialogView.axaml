@@ -10,7 +10,7 @@
     <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
     <TextBlock Text="{Binding LogFilePath}" Classes="caption" TextWrapping="Wrap" />
     <Expander Header="Crash details" IsVisible="{Binding HasDetails}">
-      <ScrollViewer MaxHeight="220">
+      <ScrollViewer MaxHeight="220" Classes="scroll-gutter-right">
         <SelectableTextBlock Text="{Binding Details}" TextWrapping="Wrap" />
       </ScrollViewer>
     </Expander>

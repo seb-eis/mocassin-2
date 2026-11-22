@@ -11,6 +11,7 @@
                  VerticalAlignment="Center" />
     </StackPanel>
     <TextBox Grid.Row="1"
+             Classes="scroll-gutter-both"
              Text="{Binding JsonText, Mode=OneWay}"
              IsReadOnly="True"
              AcceptsReturn="True"

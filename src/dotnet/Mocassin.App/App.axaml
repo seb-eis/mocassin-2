@@ -30,8 +30,18 @@
       <Thickness x:Key="Mocassin.CompactButtonPadding">8,2</Thickness>
       <x:Double x:Key="Mocassin.CompactButtonMinHeight">26</x:Double>
       <x:Double x:Key="Mocassin.TabHeight">32</x:Double>
+      <Thickness x:Key="Mocassin.TabIndicatorInset">4,0,4,0</Thickness>
       <x:Double x:Key="Mocassin.MenuHeight">32</x:Double>
       <x:Double x:Key="Mocassin.StatusBarHeight">24</x:Double>
+      <Thickness x:Key="Mocassin.ScrollGutterRight">0,0,20,0</Thickness>
+      <Thickness x:Key="Mocassin.ScrollGutterBottom">0,0,0,20</Thickness>
+      <Thickness x:Key="Mocassin.ScrollGutterBoth">0,0,20,20</Thickness>
+
+      <!--
+        The tab strip shares the content surface. Fluent puts a 2 px margin on the top-placement items presenter;
+        removing it makes the selected tab's bottom edge meet the content's top edge.
+      -->
+      <Thickness x:Key="TabControlTopPlacementItemMargin">0</Thickness>
 
       <CornerRadius x:Key="Mocassin.RadiusCard">6</CornerRadius>
       <CornerRadius x:Key="Mocassin.RadiusControl">4</CornerRadius>
