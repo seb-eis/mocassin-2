@@ -576,6 +576,7 @@ To be completed by the implementor:
 | .NET tests | 2,197 passed, 0 failed (nine test projects) |
 | Screenshots | Seven shell/overlay baselines regenerated; five new baselines added (see §14) |
 | `docs`/`policy` on the final tree | `./tools/verify.sh docs --require` and `./tools/verify.sh policy --require` — passed 2026-11-22 |
+| Platform gates | Windows `45024050867` and macOS `45024363111` — both success on `6650e08` (see §14) |
 | Merge commit | — (owner `--no-ff` approval pending) |
 
 ## 14. Implementation evidence
@@ -638,6 +639,17 @@ passing tests. The screenshot comparison was re-run without regeneration and pas
   strip `ScrollViewer` or drag reorder.
 - Menu/context-menu flyouts and tooltips remain excluded per §4.2; no custom scrollbar or control template is
   added and `AllowAutoHide` stays `true`.
-- Screenshot comparison remains Linux-only; Windows/macOS platform runs are recommended but not a merge gate.
+- Screenshot comparison remains Linux-only; the manual platform gates below cover the focused platform tests,
+  not pixel comparison.
 - The icon slot is a collapsed placeholder only; the Phosphor pass still supplies the source and any icon
   template.
+
+**Platform evidence (recommended, not a merge gate).** Both were dispatched one at a time on
+`fix/gui-tabs-scroll-gutters` at `6650e08e0834bcf6687b7a2c0d0f01457891266f`, so the workflow concurrency group
+did not cancel either run; the focused platform job in each run passed and the non-platform jobs were skipped by
+the workflow conditions:
+
+| Platform | CI run | Jobs | Result |
+| --- | --- | --- | --- |
+| Windows | [`45024050867`](https://github.com/seb-eis/mocassin-2/actions/runs/45024050867) | Detect changes, `.NET (windows-latest)` | success |
+| macOS | [`45024363111`](https://github.com/seb-eis/mocassin-2/actions/runs/45024363111) | Detect changes, `.NET (macos-latest)` | success |
