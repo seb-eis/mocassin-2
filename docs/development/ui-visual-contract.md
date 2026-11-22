@@ -245,7 +245,10 @@ the first `t` that meets the floor is used. Tests assert the resolved values in 
 intermediate search.
 
 **Base accent overlay.** For an optional accent, the applier writes these direct resources. For `null`,
-`blue`, and high contrast it removes them, so the palette or the high-contrast dictionary wins.
+`blue`, and high contrast it removes them, so the palette or the high-contrast dictionary wins. The default
+palette's dark `SystemControlHighlightAccentBrush` and `TextControlBorderBrushFocused` are the default
+`FocusAccent` `#248DD3` (light `#007ACC`), so the default focus/input-focus ring passes the 3:1 floor on
+`#3C3C3C` without the optional-accent overlay.
 
 | Resource | Type | Value | Consumed by |
 | --- | --- | --- | --- |

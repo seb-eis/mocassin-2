@@ -128,7 +128,9 @@ Related high-contrast entries are in
 `SystemAccentColorLight1`/`Dark1` family, no `SystemControlForegroundAccentBrush`, no accent reveal brush, and
 no `SystemControlHighlightAltChromeWhiteBrush` entry today. The light palette
 `SystemControlHighlightAltBaseHighBrush` is `#FFFFFF` at line `217`; it must become `#1F1F1F` for selected/hover
-text contrast.
+text contrast. The dark `SystemControlHighlightAccentBrush` and `TextControlBorderBrushFocused` are `#007ACC`
+at lines `378` and `420`; they must become the default `FocusAccent` `#248DD3` so `null`/`blue` focus passes
+3:1 on `#3C3C3C` without the optional-accent overlay.
 
 The accent is selected through
 [`AccentPalette.cs:8-20`](../../../src/dotnet/Mocassin.App.ViewModels/Settings/AccentPalette.cs),
@@ -246,7 +248,7 @@ palette's existing resource type. This is a property setter, not a control templ
 | Area | Change |
 | --- | --- |
 | `AvaloniaThemeApplier` | Add both overlay/removal groups; add `AccentText`, `FocusAccent`, `SelectedFill`, `SelectedText`, `AccentGlyph`, `FluentState`, and a white-first `OnAccent`; resolve the theme column from `Application.ActualThemeVariant` (internal test seam for System-light/System-dark). |
-| `Palette.axaml` | Add `Mocassin.FocusBrush` = `#248DD3` (Dark) / `#007ACC` (Light/Default). Correct `SystemControlHighlightAltBaseHighBrush` in Light/Default from `#FFFFFF` to `#1F1F1F`; Dark stays `#FFFFFF`. Do not change the five optional accent hex values or any other approved palette value. |
+| `Palette.axaml` | Add `Mocassin.FocusBrush` = `#248DD3` (Dark) / `#007ACC` (Light/Default). Set the dark `SystemControlHighlightAccentBrush` and `TextControlBorderBrushFocused` to the default `FocusAccent` `#248DD3` (light stays `#007ACC`) so default/`blue` focus passes on `#3C3C3C`. Correct `SystemControlHighlightAltBaseHighBrush` in Light/Default from `#FFFFFF` to `#1F1F1F`; Dark stays `#FFFFFF`. Do not change the five optional accent hex values or any other approved palette value. |
 | `HighContrast.axaml` | Add `Mocassin.FocusBrush` = `#FFD700`; add `SystemAccentColorLight1`/`Light2`/`Light3`/`Dark1`/`Dark2`/`Dark3`, `SystemControlForegroundAccentBrush`, and `SystemControlHighlightAccent2RevealBackgroundBrush`/`Accent3RevealBackgroundBrush` as `#FFD700`; add `SystemControlHighlightAltChromeWhiteBrush` = `#000000` and change `SystemControlForegroundChromeWhiteBrush` to `#000000`. The existing high-contrast entries cover the other base keys. |
 | `ShellStyles.axaml` | Add the `TextBox.SelectionBrush` / `SelectionForegroundBrush` pair. |
 | `ShellView.axaml` | Use `Mocassin.FocusBrush` for the three splitter focus adorners. |
