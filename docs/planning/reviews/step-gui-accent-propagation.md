@@ -12,7 +12,7 @@
 | --- | --- |
 | Review ID | `MAINT-2026-11-22-GUI-ACCENT` |
 | Type | Out-of-step maintenance design review (not a roadmap step) |
-| Target commit | `e7a62275c372d5f7485b6310646ea66b8fed2c78` |
+| Target commit | `73a297ff7d73978a58c4f34d1eb24396a44457a2` |
 | Docs branch | `fix/gui-accent-propagation` |
 | Request owner | Planner |
 | Orchestrator | — |
@@ -246,7 +246,7 @@ altering the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Changes required
+**State:** Re-review required
 
 Round 1 froze the design at `6ed4858f562ec9f29e1042b6ae4294bd3cac6fef`; its branch head
 `5fb01f8ee4aecd6bd20333ccc25995fb9f5cfbcd` differed only by the one-line review-target update. Round 2
@@ -320,6 +320,15 @@ Date:
 | m-1 | Resolved in design | Planner | `e7a6227` |
 | m-2 | Resolved in design | Planner | `e7a6227` |
 | n-1 | Recorded; no design change required | Planner | `e7a6227` |
+| M-6 | Resolved by fixed-family delivery proof | Planner | `82d3422` |
+| M-7 | Superseded by the fixed-family precedence | Planner | `82d3422` |
+| M-8 | Superseded; palette theme dictionaries switch automatically | Planner | `82d3422` |
+| m-3 | Superseded; no per-accent 30/70 blend remains | Planner | `82d3422` |
+| m-4 | Resolved; HC derived keys are `Color` | Planner | `82d3422` |
+| m-5 | Resolved; realized-part and production theme-switch tests specified | Planner | `82d3422` |
+| m-6 | Resolved; inventory corrected and unshipped controls marked | Planner | `82d3422` |
+| n-2 | Resolved; commit list filled | Planner | `82d3422` |
+| n-3 | Resolved; neutral Fluent focus ring accepted and tested | Planner | `82d3422` |
 
 The request owner fills this section after the verdict. Do not alter the reviewer-authored findings, evidence,
 or verdict.
@@ -388,6 +397,84 @@ no rendered link/accent-text surface is claimed and no new link surface is added
 `fix/gui-accent-propagation`. The branch head before this record update is `e7a6227`; the review request commit
 adds only this record. A fresh planning auditor should verify the corrected contract and record against these
 resolutions.
+
+### Scope change and round 2 resolutions (request owner)
+
+**Owner decision (2026-11-22).** Accent selectability is removed. The design is one fixed `#007ACC` family:
+fill/status `#007ACC`, on-accent white, dark focus `#248DD3`, light focus `#007ACC`, accent text
+`#4DA6FF`/`#005A9E`, selected `#094771`/white dark and `#CCE5FF`/`#1F1F1F` light. The Settings choice,
+`AccentPalette`, `AppSettings.Accent`, the reader accent branch, and the validator path are removed. Existing
+settings with an `accent` value are accepted as a silent no-op and are not written; no schema bump.
+
+**M-3 — per-accent derived states: superseded.** There is no selectable accent and no per-accent overlay. The
+fixed derived Fluent values remain for the shipped controls (dark `Light1` `#3A9CDD`, `Dark1` `#248CD1`; light
+`Light1` `#0090F0`, `Dark1` `#005994`), but they live in the palette theme dictionaries rather than a runtime
+overlay.
+
+**M-4 — shared selected/hover text: resolved by the fixed family.** `SystemControlHighlightAltBaseHighBrush`
+stays the shared selected/hover text role at `#FFFFFF` dark / `#1F1F1F` light / `#000000` HC. The TreeView
+selected foreground is delivered by the targeted `PART_HeaderPresenter` style, so it no longer depends on the
+captured alias.
+
+**M-5 — focus values: retained, per-accent matrix removed.** Dark focus is `#248DD3`, light focus `#007ACC`;
+the values pass 3:1 on `#3C3C3C`/`#37373D` and the light surfaces. The optional-accent focus matrix is
+withdrawn.
+
+**M-7 — precedence contradiction: superseded.** There are no overlay groups. The fixed base roles, derived
+Fluent colours, and CheckBox/Slider alias keys live in the palette `Light`/`Dark`/`Default` dictionaries;
+`HighContrast.axaml` overrides them; the only direct runtime accent resource is `SystemAccentColor`
+(`#007ACC`/`#FFD700` HC). §2, §3.4, and §3.6 now state the same model.
+
+**M-8 — live OS variant: superseded.** With a fixed family in palette theme dictionaries, an actual Light/Dark
+switch updates the base roles, derived colours, and alias keys automatically. There is no runtime accent
+overlay and no `ActualThemeVariantChanged` accent reapply. Tests switch the theme and assert the realized
+CheckBox/Slider/Tree parts.
+
+**M-6 — Fluent alias capture: gating finding, now resolved by proof.** The design includes the concrete
+delivery proof:
+
+- Load-order probe: defining `SystemAccentColor` before `FluentTheme` loaded made
+  `CheckBoxCheckBackgroundFillChecked`, `SliderThumbBackground`, `SliderTrackValueFill`, and
+  `TreeViewItemBackgroundSelected*` capture the app colour, but glyphs stayed white and the tree captured
+  0.6/0.8 opacity; it cannot express the distinct selected/focus values or follow Light/Dark/HC. Rejected as
+  the sole mechanism.
+- Palette alias keys: `CheckBoxCheckBackgroundFillChecked`/`Indeterminate`,
+  `CheckBoxCheckBackgroundStrokeIndeterminate`, the checked/indeterminate `CheckBoxCheckGlyphForeground*`,
+  `SliderThumbBackground`, and `SliderTrackValueFill*` reached the realized `NormalRectangle`,
+  `CheckGlyph`, `Thumb`, and `PART_DecreaseButton` in the probe, and switched with the Light/Dark theme
+  dictionaries. The high-contrast merged dictionary reached the same CheckBox/Slider parts as
+  `#FFD700`/`#000000`.
+- Targeted TreeView styles: the palette alias key reached `PART_LayoutRoot.Background` but not
+  `PART_HeaderPresenter.Foreground`; the targeted `ShellStyles.axaml` selectors reached both realized parts.
+  Mirroring Fluent's selected/pointer-over/pressed selectors is in the plan.
+
+No broad custom template is required, and no shipped control keeps the platform accent.
+
+**m-3 — 30/70 blend:** superseded; the fixed selected fill/text are the existing palette values, so the
+green row and rounding-mode finding no longer apply.
+
+**m-4 — HC `Color` type:** the six `SystemAccentColor*` HC keys are specified as `<Color>` resources, not
+brushes; tests assert the type and a brush would throw `InvalidCastException`.
+
+**m-5 — realized HC and production System path:** the test plan renders CheckBox/Slider/Tree in HC and reads
+the realized parts; theme-switch tests read the palette dictionaries and realized parts. There is no runtime
+seam that bypasses the production theme path.
+
+**m-6 — inventory:** `SystemControlHighlightChromeWhiteBrush` is added to the inventory/HC mapping;
+`SystemAccentColorDark2` is recorded as a `CalendarButton` consumer; `TableViewRow*` and
+`DateTimePickerShared.xaml:63` are added to the `AltBaseHigh` consumer list; unshipped controls are marked as
+inventory-only.
+
+**n-2 — commit list:** `d359839`, `e7a6227`, `0b8beea`, `cbf2d90`, `787c4ed`, `c7532fb`, `6db42cf`, and
+`82d3422` are recorded in the maintenance record's commit list.
+
+**n-3 — neutral focus ring:** the contract now states that Fluent's default focus adorner uses
+`SystemControlFocusVisualPrimaryBrush`/`SecondaryBrush`, accepts the neutral ring, and tests it at 3:1. It is
+not accent-coloured.
+
+**Re-review request.** The fixed-family design is frozen at
+`73a297ff7d73978a58c4f34d1eb24396a44457a2` on `fix/gui-accent-propagation`; the request commit adds only this
+record. A fresh planning auditor should verify the fixed-family contract and the M-6 delivery proof.
 
 ## Review rounds
 
