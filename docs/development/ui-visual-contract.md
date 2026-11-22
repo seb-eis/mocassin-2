@@ -78,21 +78,26 @@ Rules:
 
 | Token | Dark | Light | Use |
 | --- | --- | --- | --- |
-| `Mocassin.ChromeBackground` | `#1E1E1E` | `#F3F3F3` | shell backdrop, menu bar, tab strips, splitter gaps |
-| `Mocassin.WorkspaceBackground` | `#252526` | `#FFFFFF` | region cards, document content, editor surface |
+| `Mocassin.ChromeBackground` | `#1E1E1E` | `#F3F3F3` | shell backdrop, menu bar, splitter gaps |
+| `Mocassin.WorkspaceBackground` | `#252526` | `#FFFFFF` | region cards, document content, editor surface, tab strips |
 | `Mocassin.CardBackground` | `#2D2D30` | `#F3F3F3` | palette, settings, dialogs, notifications, nested cards |
 | `Mocassin.BorderBrush` | `#3C3C3C` | `#E0E0E0` | 1 px card and control borders |
 | `Mocassin.InputBackground` | `#3C3C3C` | `#FFFFFF` | `TextBox` and `ComboBox` fill |
 | `Mocassin.InputBorderBrush` | `#3C3C3C` | `#CECECE` | input border when not focused |
 | `Mocassin.MenuBackground` | `#1E1E1E` | `#F3F3F3` | menu bar |
-| `Mocassin.TabStripBackground` | `#1E1E1E` | `#F3F3F3` | document and console tab strips |
-| `Mocassin.TabActiveBackground` | `#252526` | `#FFFFFF` | selected tab |
-| `Mocassin.TabInactiveBackground` | `#1E1E1E` | `#F3F3F3` | unselected tab |
+| `Mocassin.TabActiveBackground` | `#252526` | `#FFFFFF` | selected tab; equals `WorkspaceBackground` |
+| `Mocassin.TabInactiveBackground` | `#2D2D30` | `#ECECEC` | unselected tab |
 | `Mocassin.OverlayScrim` | `#66000000` | `#66000000` | modal scrim behind palette, settings, and dialogs |
 
 The shell backdrop and the gaps between cards use `ChromeBackground`. A region card uses
 `WorkspaceBackground` and a 1 px `BorderBrush`. A nested card or modal surface uses `CardBackground`. This is
 what makes the separated parts read as raised boxes without shadows.
+
+The tab strip is **not** a separate surface. It shares `WorkspaceBackground` with the open document or console
+content, so the selected tab is continuous with the content (no gap, no bottom border, no strip colour). The
+former `Mocassin.TabStripBackground` role is retired; a tab strip on another surface is a contract change, not
+a new token. The realized tab fills and text come from the Fluent `TabItemHeader*` keys in §3.4; each pair must
+equal the `Mocassin.Tab*` role of the same state (§7.4).
 
 ### 3.2 Text and accent
 
@@ -108,7 +113,7 @@ what makes the separated parts read as raised boxes without shadows.
 | `Mocassin.OnAccentBrush` | `#FFFFFF` | `#FFFFFF` | text and glyphs on an accent fill |
 | `Mocassin.FocusBrush` | `#248DD3` | `#007ACC` | focus ring, focus border, selected-pipe indicator |
 | `Mocassin.TabActiveForeground` | `#FFFFFF` | `#1F1F1F` | selected tab text |
-| `Mocassin.TabInactiveForeground` | `#9D9D9D` | `#6F6F6F` | unselected tab text |
+| `Mocassin.TabInactiveForeground` | `#9D9D9D` | `#616161` | unselected tab text |
 
 The accent family is fixed: `AccentBrush` is `#007ACC`; `OnAccentBrush` is white; `FocusBrush` is `#248DD3`
 dark / `#007ACC` light; `AccentTextBrush` is `#4DA6FF` dark / `#005A9E` light. These are contrast-safe roles,
@@ -247,10 +252,11 @@ tokens for the realized selected foreground.
 The neutral focus pair is measured by layer: the **2 px primary** ring must meet 3:1 against the adjacent
 control surface, and the **inner 1 px secondary** ring must meet 3:1 against the 2 px primary, not against the
 card surface. The secondary values are not expected to pass against the surface. `Mocassin.FocusBrush` is
-consumed by the splitter focus adorners, the document/console selected-tab pipe, and the text-input focus
-border; it is not an unused role. The `TabItemHeaderSelectedPipeFill` palette value is the
-same `FocusBrush` value in each theme. The dialog `ProgressBar` uses `SystemControlHighlightAccentBrush`, which
-is the same fixed focus/control value.
+consumed by the splitter focus adorners, the document/console selected-tab top indicator (the existing
+`PART_SelectedPipe`, moved to the tab's top edge), the tab focus adorner, and the text-input focus border; it is
+not an unused role. The `TabItemHeaderSelectedPipeFill` palette value is the same `FocusBrush` value in each
+theme. The dialog `ProgressBar` uses `SystemControlHighlightAccentBrush`, which is the same fixed
+focus/control value.
 
 **Fluent alias delivery (M-6).** Avalonia 12.1.6 resolves the shipped control template parts through alias keys
 that Fluent defines as `StaticResource` aliases. Overlaying only the upstream base key does not reach the
@@ -343,7 +349,8 @@ set must not claim one. Adding a link surface is deferred.
 | `Mocassin.ItemPadding` | `4,2` | `2,1` | list, tree, and combo item padding |
 | `Mocassin.CompactButtonPadding` | `8,2` | `6,2` | dense row buttons such as recent-project Open/Remove |
 | `Mocassin.CompactButtonMinHeight` | `26` | `22` | dense row buttons |
-| `Mocassin.TabHeight` | `32` | `28` | document and console tab strip height |
+| `Mocassin.TabHeight` | `32` | `28` | minimum document and console tab header height |
+| `Mocassin.TabIndicatorInset` | `4,0,4,0` | `4,0,4,0` | end inset of the selected-tab 2 px top indicator; equals `RadiusTab` |
 | `Mocassin.MenuHeight` | `32` | `28` | menu bar height |
 | `Mocassin.StatusBarHeight` | `24` | `22` | status bar height |
 | `Mocassin.RadiusCard` | `6` | `6` | region cards, modals, notifications |
@@ -359,6 +366,41 @@ set must not claim one. Adding a link surface is deferred.
   cards, so the regions keep their full fractions and minima.
 - High contrast sets card and control border thickness to `2`; it does not change radius, gap, or padding except
   through density.
+- `Mocassin.TabHeight` is a minimum, not a maximum. At 1.5× font scale the header grows rather than clipping
+  (§11.4).
+
+### 5.1 Scroll gutters
+
+`ScrollBarSize` is 16 px in Fluent 12.1.6, and `AllowAutoHide` is `true` by default, so the scrollbar is
+painted over the content presenter rather than reserving a column. Every application-authored scroll surface
+must therefore inset its content by a gutter that keeps the realized content edge outside the realized
+scrollbar edge.
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `Mocassin.ScrollGutterRight` | `0,0,20,0` | surface with a vertical scroll axis only |
+| `Mocassin.ScrollGutterBottom` | `0,0,0,20` | surface with a horizontal scroll axis only |
+| `Mocassin.ScrollGutterBoth` | `0,0,20,20` | surface with both axes |
+
+- The gutter is the 16 px scrollbar plus a 4 px margin on the 4 px grid. It is theme- and density-independent;
+  high contrast changes the bar colours, not its extent.
+- The minimum requirement is a **3 px clear gap** between the realized content edge and the realized scrollbar
+  edge (the 20 px gutter against the 16 px bar gives 4 px; 3 px absorbs sub-pixel rounding).
+- The rule applies to every `ScrollViewer`, scrollable `ListBox`, scrollable `TreeView`, multi-line `TextBox`,
+  and `ComboBox` drop-down owned by an application view. An existing content inset of at least 20 px satisfies
+  it; the project overview's `Margin="20"` is the one such surface and adds no class.
+- `ShellStyles.axaml` defines `scroll-gutter-right`, `scroll-gutter-bottom`, and `scroll-gutter-both` classes
+  that set `Padding` from the tokens for `ScrollViewer`, `ListBox`, and `TreeView`.
+  `ListBox`/`TreeView` forward `Padding` to the internal items presenter, so the item edge and the row
+  highlight stop before the bar. `TextBox` does not forward `Padding` to its internal scroll viewer and the
+  `ComboBox` popup scroll viewer has no padding binding, so those two use class-scoped/template-targeted
+  styles that consume the same tokens; no other `TextBox` or `ComboBox` is affected.
+- The scrollbar keeps its 16 px width and hit target; the gutter changes only the content inset. `AllowAutoHide`
+  stays at the Fluent default; a permanently reserved bar column is not the design.
+- No custom scrollbar template is introduced. A surface whose scrollbar cannot be kept clear with a gutter is a
+  contract change and needs a recorded decision, not a local template.
+- The tab strip has no scroll viewer in the Fluent `TabControl` template today, so it is not a scroll surface;
+  tab-strip scrolling is a separate change.
 
 ## 6. Interaction states
 
@@ -367,7 +409,7 @@ set must not claim one. Adding a link surface is deferred.
 | Normal | `CardBackground` or `InputBackground`; `BorderBrush`; `ForegroundBrush`. |
 | Hover | `HoverBackground`; the border stays `BorderBrush`; text stays `ForegroundBrush`. |
 | Pressed | `PressedBackground`; no scale transform; text stays `ForegroundBrush`. |
-| Selected | `SelectedBackground` and `SelectedForeground` for list, tree, and combo rows; the TreeView selected foreground is delivered by the targeted style in §3.6. The active tab uses `TabActiveBackground`, `TabActiveForeground`, and a 2 px `FocusBrush` indicator. |
+| Selected | `SelectedBackground` and `SelectedForeground` for list, tree, and combo rows; the TreeView selected foreground is delivered by the targeted style in §3.6. The active tab uses `TabActiveBackground`, `TabActiveForeground`, and a 2 px `FocusBrush` line on its top edge, inset by `TabIndicatorInset`; it has no bottom border and its fill equals the content surface. |
 | Focus | A visible 2 px `FocusBrush` ring, inside or outside the control, with at least 3:1 contrast against the adjacent surface. Focus is never removed for a keyboard-reachable control. |
 | Disabled | `DisabledBackground` and `DisabledForeground`; the control stays legible. Opacity alone is not a disabled treatment. |
 | Dirty/unsaved | The existing `*` marker plus its accessible name; no new colour-only signal. |
@@ -377,9 +419,14 @@ Focus indicators for splitters keep the existing adorner but use `FocusBrush` an
 `SystemControlFocusVisualSecondaryBrush` pair, not `SystemControlHighlightAccentBrush`; the neutral ring is
 accepted and must meet 3:1 against the adjacent surface. It is deliberately not accent-coloured. High contrast
 overrides the pair to `#FFD700`/`#000000`, so the 2 px primary is gold on black and the secondary is black on
-gold. Controls with an explicit accent focus border or adorner (text inputs and splitters) use `FocusBrush`. A
-control without a visible focus ring gets an explicit `FocusAdorner` from `ShellStyles.axaml`. Replacing a
-control template to obtain focus is not acceptable in this pass.
+gold. Controls with an explicit accent focus border or adorner (text inputs, splitters, and tabs) use
+`FocusBrush`. A control without a visible focus ring gets an explicit `FocusAdorner` from `ShellStyles.axaml`;
+`TabItem` has no Fluent focus visual, so the tab styles add a 2 px `FocusBrush` adorner with the tab's top
+corner radius. Replacing a control template to obtain focus is not acceptable in this pass.
+
+Tabs change fill on pointer-over and press for the inactive state only (`HoverBackground`/`PressedBackground`);
+the selected tab keeps its fill in both states. The selected tab's 2 px line is a selection cue, not a focus
+cue; the tab focus ring is separate and is never removed for a keyboard-reachable tab.
 
 `Enter`, `Escape`, Tab order, and layer modality do not change. In particular, a `TabControl` selects with
 arrow keys or a click and ignores plain `Enter`, as specified in
@@ -409,10 +456,12 @@ arrow keys or a click and ignores plain `Enter`, as specified in
   so the outer card radius is visible; this inset is chrome and does not change the fraction model.
 - The splitter is transparent at rest. Hover shows a 1 px `AccentBrush` line; focus shows the 2 px
   `FocusBrush` ring.
-- The documents card contains the tab strip and the active document. The document surface uses
-  `WorkspaceBackground`; the tab strip uses `ChromeBackground`.
+- The documents card contains the tab strip and the active document. The card, the strip, and the document
+  content all use `WorkspaceBackground`, so the selected tab is continuous with the open content; the strip is
+  not a separate chrome surface.
 - The console card contains the console tab strip and the active channel. The former separate "Console" title
-  is removed; the tab strip is the header.
+  is removed; the tab strip is the header and follows the same treatment as the document strip, and the channel
+  views paint `WorkspaceBackground` so the seam is identical.
 - The inspector and projects cards use the same header rhythm: `RegionHeaderPadding`, `SemiBold` heading, then
   the content inset.
 
@@ -438,19 +487,69 @@ arrow keys or a click and ignores plain `Enter`, as specified in
 
 ### 7.4 Document tab strip
 
-- Height `TabHeight`; background `TabStripBackground`; tabs use `RadiusTab` on the top corners only.
-- Inactive tab: `TabInactiveBackground`, `TabInactiveForeground`. Active tab: `TabActiveBackground`,
-  `TabActiveForeground`, plus a 2 px `TabItemHeaderSelectedPipeFill` indicator along the top edge. The palette
-  value is `FocusBrush` (`#248DD3` dark, `#007ACC` light, `#FFD700` HC). The existing dirty
-  `*` and close button remain.
-- Tabs keep their current order, close button, context menu, and keyboard shortcuts. Drag-reorder remains
-  deferred.
-- The tab strip scrolls horizontally; it never wraps to a second row.
+The document and console strips share one treatment. The geometry is the stock Fluent `TabItem` with app
+styles; no `TabItem` control template is introduced.
+
+**Surface and geometry.**
+
+- The strip is not a separate surface: the card, the strip, and the content are `WorkspaceBackground`. The
+  2 px gap that Fluent puts between the strip and the content is removed, so the selected tab's bottom edge
+  meets the content's top edge.
+- `TabItem.MinHeight` is `TabHeight` (32 comfortable / 28 compact); `TabItemMinHeight` mirrors it. The header
+  is a minimum, not a maximum: at 1.5× scale it grows rather than clipping.
+- Only the top corners are rounded: `CornerRadius` = `RadiusTabTop` (`4,4,0,0`). The inactive fill makes the
+  rounding visible; the selected tab's fill is the content's, so its shape is carried by the top line and by
+  the contrast against an adjacent inactive tab.
+- `TabItem.Padding` is `0` and the header content is inset by `TabItemHeaderMargin` (`8,3` comfortable /
+  `6,2` compact) on `PART_ContentPresenter`. This lets the indicator span the tab width instead of the padded
+  content box.
+- The indicator is the existing `PART_SelectedPipe`: 2 px `TabItemHeaderSelectedPipeFill` (`FocusBrush`) on the
+  **top** edge, stretched, inset by `TabIndicatorInset` (`4,0,4,0`) at the ends so it does not cross the
+  rounded corners, with no corner radius. It is visible only on the selected tab. The selected tab has no
+  bottom border and no separate strip background.
+- The dirty `*` marker, the close button, and the per-tab context menu remain.
+
+**States.** The realized values come from the Fluent `TabItemHeader*` keys; each must equal the matching
+`Mocassin.Tab*` role, and tests assert the equality so the two sources cannot drift.
+
+| State | Dark fill / text | Light fill / text | High contrast |
+| --- | --- | --- | --- |
+| Inactive | `#2D2D30` / `#9D9D9D` | `#ECECEC` / `#616161` | `#000000` / `#E0E0E0` |
+| Inactive pointer-over | `#37373D` / `#D4D4D4` | `#E8E8E8` / `#333333` | `#FFD700` / `#000000` |
+| Inactive pressed | `#2A2D2E` / `#D4D4D4` | `#DCDCDC` / `#333333` | `#FFD700` / `#000000` |
+| Selected | `#252526` / `#FFFFFF` | `#FFFFFF` / `#1F1F1F` | `#000000` / `#FFFFFF` |
+| Selected pointer-over/pressed | selected values (no fill change) | selected values | selected values |
+| Selected indicator | `#248DD3` | `#007ACC` | `#FFD700` |
+
+Hover and pressed use `HoverBackground` and `PressedBackground` for the inactive state; the selected tab keeps
+its fill. High contrast keeps every fill black and carries the selected state with the gold line and white
+text; the line has thickness, so the state is not colour-only. No shipped tab is disabled; the disabled keys
+remain for inventory.
+
+**Keyboard, focus, and names.**
+
+- Arrow keys select, a click selects, `Tab` leaves the strip, and plain `Enter` is a no-op, as in the
+  interaction contract §5.2. The visual change does not add or remove a focus stop.
+- A focused tab shows a 2 px `FocusBrush` `FocusAdorner` with the tab's top corner radius. `TabItem` has no
+  Fluent focus visual; the app supplies the adorner. The indicator is not a focus cue.
+- The strip keeps the names `Document tabs` and `Console tabs`; each tab's accessible name is its visible
+  header. No icon-only meaning is introduced.
+
+**Icon slot (reserved for the later icon pass).** Each item template starts with a 16 × 16 `TabIconSlot`
+`ContentControl`, vertically centred, bound to `Icon` on the view model, collapsed while `Icon` is null,
+`IsHitTestVisible="False"`, `Focusable="False"`, and `AutomationProperties.AccessibilityView="Raw"`. No icon
+asset, package, or visible slot is added in this pass; the later Phosphor pass only supplies the icon source.
+The slot carries no accessible name and no text, so the visible header remains the tab's meaning and name.
+
+**Overflow.** Tabs never wrap to a second row. The Fluent `TabControl` template has no strip scroll viewer, so
+horizontal overflow is a known gap recorded in the maintenance record; it is not changed by this pass.
 
 ### 7.5 Console tab strip
 
-See §8. The console tab strip uses the same tab tokens as the document strip so the two surfaces read as one
-system.
+See §8. The console tab strip uses the same `TabItem` styles, tokens, geometry, states, indicator, focus
+adorner, and icon-slot reservation as the document strip, so the two surfaces read as one system. Their
+content surfaces differ in composition (a document view versus a channel view) but both are
+`WorkspaceBackground`, which is what makes the selected tab continuous in both cards.
 
 ### 7.6 Regions
 
@@ -534,8 +633,10 @@ The console region has exactly two fixed tabs, in this order:
 - The old `ComboBox` labelled "Console channel" is removed. Its focus stop and automation name disappear; the
   console filter field, clear button, and validation filters keep their existing names and tab order relative
   to each other. No overlay or dialog captures or restores the removed combo box.
-- The console card has no separate title row. The tab strip is the header, with `RegionHeaderPadding` applied
-  to the strip.
+- The console tab header uses the same `TabItem` treatment as §7.4 and reserves the same 16 px leading icon
+  slot, collapsed until the later icon pass supplies `ConsoleChannelViewModel.Icon`.
+- The console card has no separate title row and no extra strip padding. The tab strip is the header; each tab
+  header carries its own `TabItemHeaderMargin` inset (§7.4).
 
 ## 9. Welcome page
 
@@ -567,7 +668,10 @@ The console region has exactly two fixed tabs, in this order:
 | Error and status banners | Use the matching background, border, and foreground tokens. The old hard-coded light-only banner colours are removed. |
 
 Overlay layout, focus, modality, `Escape`, and `Enter` remain governed by the interaction contract. This section
-changes only colour, border, radius, padding, and type.
+changes only colour, border, radius, padding, and type. Every scroll surface in these overlays also follows
+§5.1: the palette results, the shortcut list, the settings content, the crash details, and the choice list
+reserve a right gutter, and the Validation filter row reserves a bottom gutter. Content never sits under a
+scrollbar.
 
 ## 11. Accessibility floor
 
@@ -586,6 +690,7 @@ The following minimum ratios are measured on the final composited colours. Norma
 | Selected and hover text (`SystemControlHighlightAltBaseHighBrush`) on selected/hover fills | `#FFFFFF` | `#1F1F1F` | 4.5:1 |
 | On-accent glyphs on Fluent accent controls and derived states | `#FFFFFF` on `#248DD3`/`#3A9CDD`/`#248CD1` | `#FFFFFF` on `#007ACC`/`#0090F0`/`#005994` | 3:1 |
 | Selected-row text on selected fill | `#FFFFFF` on `#094771` | `#1F1F1F` on `#CCE5FF` | 4.5:1 |
+| Tab text on its own fill | `#FFFFFF` on `#252526` (active), `#9D9D9D` on `#2D2D30` (inactive) | `#1F1F1F` on `#FFFFFF` (active), `#616161` on `#ECECEC` (inactive) | 4.5:1 |
 | Status-bar text, glyphs, and progress on status bar | `#FFFFFF` on `#007ACC` | `#FFFFFF` on `#007ACC` | 4.5:1 |
 | Text selection pair (`SelectionBrush`/`SelectionForegroundBrush`) | `#FFFFFF` on `#007ACC`; HC `#000000` on `#FFD700` | `#FFFFFF` on `#007ACC`; HC `#000000` on `#FFD700` | 4.5:1 |
 | Error, warning, success, and info text on card | the dark semantic tokens | the light semantic tokens | 4.5:1 |
@@ -600,8 +705,12 @@ against `#000000` (about 15:1). They are tested separately.
 
 - Every keyboard-reachable control shows a visible focus ring. This includes buttons, inputs, combo boxes,
   list and tree rows, tabs, splitters, check boxes, sliders, and the document close button.
+- The tab focus ring is the 2 px `FocusBrush` adorner with the tab's top corner radius; the selected-tab top
+  line is a selection cue, not a focus cue. `TabItem` has no Fluent focus visual, so the app supplies the
+  adorner.
 - Focus is not indicated by colour alone: the ring has thickness. Selected state is not indicated by colour
   alone: tabs have an indicator and list rows have a fill.
+- The §5.1 scroll gutter does not change the scrollbar's 16 px hit target and does not add a focus stop.
 - The interaction contract's initial-focus, `Escape`, `Enter`, and layer rules are unchanged. A visual change
   must not add a new focus target or remove an existing one, except for the owner-approved accent-setting
   removal: the Settings `Accent` ComboBox focus stop and its `Accent` automation name are intentionally gone,
@@ -614,6 +723,9 @@ against `#000000` (about 15:1). They are tested separately.
   `Console panel`.
 - The document tab strip keeps `Document tabs`; the console strip is `Console tabs`. Each tab's accessible name
   is its visible header.
+- The 16 px leading icon slot is decorative: it has no accessible name and no text, and
+  `AutomationProperties.AccessibilityView="Raw"`. A tab is never identified by an icon alone; the visible header
+  stays its name.
 - The validation content uses `Validation` in user-facing automation names; the tab itself is `Validation`.
 - Overlay roots keep `Command palette`, `Keyboard shortcuts`, and `Settings`; `DialogHost` keeps the active
   dialog title; the notification host is never announced as a dialog and never takes focus.
@@ -625,7 +737,10 @@ against `#000000` (about 15:1). They are tested separately.
 ### 11.4 Density, scale, and motion
 
 - At 1.5× font scale in compact density, no primary surface clips its label, tab header, status text, or
-  dialog button. Text wraps or the surface scrolls; it never overlaps.
+  dialog button. The tab header grows above `TabHeight` rather than clipping. Text wraps or the surface
+  scrolls; it never overlaps.
+- Every scroll surface keeps the §5.1 gutter at every window size and font scale, so content is never under a
+  scrollbar and never overlaps the scrollbar's hit target.
 - Reduce motion disables the non-essential opacity transition. No state change depends on an animation
   completing.
 - High contrast keeps the 2 px border and focus thickness and never falls back to a palette colour.
@@ -661,8 +776,12 @@ requirement; the record supplies the implementation and evidence plan. At minimu
 | The six `SystemAccentColor*` keys are `Color` in `Default`/`Light`/`Dark`/HC; no `InvalidCastException` | PR-fast headless |
 | Settings removal: no Accent control, no `AccentPalette` path; legacy `accent` values are accepted no-ops, not written; new Settings Tab order and absence of the `Accent` automation name are tested | PR-fast headless |
 | Region card radius/border/gap, tab labels/order, removed channel combo | PR-fast headless |
+| Realized tab geometry and state: top-only `4,4,0,0` radius, active fill equal to the content surface, inactive/hover/pressed fills and text, 2 px top indicator with the `TabIndicatorInset` end inset, no strip/content gap, no bottom border, and the 2 px tab focus adorner, for document and console strips in light, dark, and high contrast | PR-fast headless |
+| `Mocassin.Tab*` roles equal the realized `TabItemHeader*` keys per theme; `Mocassin.TabStripBackground` is absent; the retired token is not claimed anywhere | PR-fast headless |
+| Icon-slot reservation: 16 × 16 `TabIconSlot` in both headers, collapsed while `Icon` is null, `AccessibilityView=Raw`, not focusable, not hit-testable, tab name unchanged | PR-fast headless |
+| Scroll gutter: the realized content edge is at least 3 px clear of the realized scrollbar edge for every §5.1 surface at 1000 × 700, 900 × 600, and 1.5× compact, with the palette and cheat sheet actually scrolled | PR-fast headless |
 | Console tab persistence, unknown-id fallback, `Enter` no-op, focus order | PR-fast headless |
 | Welcome button label centring at comfortable and compact density | PR-fast headless |
-| 1.5× font scale with compact density: no clipping on primary surfaces | PR-fast headless |
-| Screenshot baselines for light, dark, high contrast, console tabs, and settings | PR-medium |
+| 1.5× font scale with compact density: no clipping on primary surfaces; the tab header grows above `TabHeight` | PR-fast headless |
+| Screenshot baselines for light, dark, high contrast, console tabs, settings, palette, cheat sheet, and the dark tab-hover state | PR-medium |
 | Screen-reader pass, 125 %/150 % display scaling, Windows/macOS keyboard pass | Manual; recorded as platform evidence |
