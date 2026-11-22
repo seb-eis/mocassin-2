@@ -41,7 +41,7 @@ or SQLite. Prefer real temporary directories and real files produced by the real
   and 9); bytes may be re-captured with a recorded note, and the level mapping must not change.
 - Schema, payload mapping, signature, atomicity, immutability, and `PKG` checks are PR-fast. A rebuild-and-compare
   of the canonical summary and the Step 13 cross-language read are PR-medium. The 10⁴-job budget is nightly/
-  release. The Step 11 `.msl` fuzz harness is deferred to Step 29 (owner: Step 29 implementor) with the SharpFuzz
+  release. The Step 11 `.msl` fuzz harness is deferred to Step 29 (owner: Step 29 dev) with the SharpFuzz
   targets; Step 11 keeps the fixed corruption, truncation, wrong-signature, foreign-key, and decompression-bound
   tests and claims no fuzz run.
 - The canonical summary is the golden. Package bytes are recorded by SHA-256 and compared only as an observation,

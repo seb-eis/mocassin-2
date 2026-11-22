@@ -1,39 +1,38 @@
 # Step Audits
 
 This directory records the independent audit gate between finishing a step and merging it into `main`.
-Audits are separate from the step agent's self-checks: the implementer may test and review its own work, but
+Audits are separate from the dev's self-checks: the dev may test and review its own work, but
 a fresh, out-of-context audit context decides whether the step is ready for approval.
 
 ## 1. Roles
 
 | Role | Responsibility |
 | --- | --- |
-| Step agent (implementor) | Implement, self-check, create/update the audit record's request fields, fix findings, add resolutions, update status/docs/parity |
-| Audit agent (reviewer) | Independent review of the frozen commit; writes evidence, findings, and verdict directly into the audit record |
-| Orchestrator (spawner) | Provides the frozen audit request and spawns a fresh auditor on behalf of the step agent; relays the verdict; does not review or approve |
+| Dev (`dev-free`/`dev`) | Implement, self-check, create/update the audit record's request fields, fix findings, add resolutions, update status/docs/parity |
+| Review agent (audit) | Independent review of the frozen commit; writes evidence, findings, and verdict directly into the audit record |
+| Lead (spawner) | Provides the frozen audit request and spawns a fresh review agent on behalf of the dev; relays the verdict; does not review or approve |
 | Human owner | Approve fixes, merge, and tag |
 
-The audit request, its scope, and its acceptance checklist are owned by the step agent. The audit agent may
-edit only the audit record's reviewer-owned metadata, evidence, findings, and verdict. It must not change code,
-configuration, tests, scope, checklists, resolutions, status dashboard, step page, parity matrix, or the step
-branch. If the auditor starts fixing code, it becomes an implementer and a new auditor is required for the final
-pass. The reviewer writes directly into `docs/planning/audits/step-NN.md`; there is no handoff file and no
-transcription step.
+The audit request, its scope, and its acceptance checklist are owned by the dev. The review agent may edit only
+the audit record's own metadata, evidence, findings, and verdict. It must not change code, configuration, tests,
+scope, checklists, resolutions, status dashboard, step page, parity matrix, or the step branch. If the review
+agent starts fixing code, it becomes a dev and a new review agent is required for the final pass. The review
+agent writes directly into `docs/planning/audits/step-NN.md`; there is no handoff file and no transcription step.
 
-### 1.1 Auditor spawning
+### 1.1 Review agent spawning
 
-The orchestrator is the only spawner. The step agent asks the orchestrator for an audit; the owner does not spawn
-an auditor directly. The spawner must not be the auditor.
+The lead is the only spawner. The dev asks the lead for an audit; the owner does not spawn
+a review agent directly. The spawner must not be the review agent.
 
-- The auditor is a fresh context with no shared conversation with the implementor, planner, or orchestrator.
-- The orchestrator provides only the frozen commit, the audit request, repository links, and the required
+- The review agent is a fresh context with no shared conversation with the design agent, dev, or lead.
+- The lead provides only the frozen commit, the audit request, repository links, and the required
   commands/scope. It must not supply a desired verdict, pass on its conversation history, or substitute a
   summary for reading the repository.
-- The auditor writes findings and verdict directly into the record. The orchestrator and step agent do not edit
+- The review agent writes findings and verdict directly into the record. The lead and dev do not edit
   them.
-- The human owner approves the final verdict and the merge/tag gate. The orchestrator must not mark a verdict,
+- The human owner approves the final verdict and the merge/tag gate. The lead must not mark a verdict,
   waive findings, merge, tag, or push `main`.
-- A re-audit requires a new commit with fixes, made by the step agent. Do not re-spawn auditors until a
+- A re-audit requires a new commit with fixes, made by the dev. Do not re-spawn review agents until a
   preferred verdict appears.
 
 ## 2. Audit status values
@@ -42,7 +41,7 @@ an auditor directly. The spawner must not be the auditor.
 | --- | --- |
 | **Not requested** | No audit request yet. |
 | **Ready for audit** | Step branch is frozen at a specific commit and the request is complete. |
-| **In audit** | The step branch is frozen at the audit request; a fresh audit context is pending or reviewing the frozen commit. |
+| **In audit** | The step branch is frozen at the audit request; a fresh context is pending or reviewing the frozen commit. |
 | **Fixes required** | The audit found blocking or material issues. |
 | **Re-audit required** | Fixes were applied and the new commit needs verification. |
 | **Passed** | The audit found no blocking issues at the recorded commit. |
@@ -51,59 +50,66 @@ an auditor directly. The spawner must not be the auditor.
 
 ## 3. Required sequence
 
-1. The step agent finishes all features, the closeout feature, documentation, status, and parity updates,
+1. The dev finishes all features, the closeout feature, documentation, status, and parity updates,
    merges current `main` into the step branch, and runs `./tools/verify.sh all --require`.
-2. The step branch is pushed and one closeout CI run is green. Do not run CI per feature; the closeout run is
+2. The dev runs the **pre-audit gate** in
+   [`../../development/design-proportionality.md`](../../development/design-proportionality.md) §3: every ticked
+   acceptance criterion names its evidence, the step page/status/feature log/closeout evidence agree, the
+   structure/link/secret/licence checks pass, and the design class and any waiver are recorded. Record the result
+   in the step page. An audit request without this is incomplete.
+3. The step branch is pushed and one closeout CI run is green. Do not run CI per feature; the closeout run is
    the only step-branch CI run.
-3. The step agent creates `docs/planning/audits/step-NN.md` on demand from the current template:
+4. The dev creates `docs/planning/audits/step-NN.md` on demand from the current template:
    - record state: `Ready for audit`
+   - design class and pre-audit gate result
    - a link to the closeout evidence file, which holds the audited commit, closeout CI run ID and `head_sha`,
      `main` SHA at freeze, merge candidate, merge-tree CI, platform CI, and tag
    - scope and acceptance criteria
    - known limitations
-4. Fill `docs/planning/closeout/step-NN.json` from `_template.json` and run
+5. Fill `docs/planning/closeout/step-NN.json` from `_template.json` and run
    `python tools/check_closeout_evidence.py docs/planning/closeout/step-NN.json`. The evidence must bind the
    audited commit, the closeout CI `head_sha`, the `main` SHA at freeze, and the merge candidate.
-5. The step branch is frozen at the audited commit. After a passing audit, only the reviewer's record commit
-   and the step agent's resolution/status commit may follow; neither may change code, tests, configuration, or
-   the reviewer's text. If fixes are needed, the step agent uses a new feature branch and the new commit is
+6. The step branch is frozen at the audited commit. After a passing audit, only the review agent's record commit
+   and the dev's resolution/status commit may follow; neither may change code, tests, configuration, or
+   the review agent's text. If fixes are needed, the dev uses a new feature branch and the new commit is
    re-audited.
-6. If `main` moves after the freeze, apply the **merge-tree rule** in
+7. If `main` moves after the freeze, apply the **merge-tree rule** in
    [`../closeout/README.md`](../closeout/README.md): merge the new `main`, run the full local gate, dispatch a
    replacement closeout CI run, and re-audit; or record an equivalent merge-tree CI run for the final merge
    candidate. Never merge an untested combination.
-7. A fresh audit agent reads:
+8. A fresh review agent reads:
    - `AGENTS.md`
    - the step page
    - the audit request
    - the closeout evidence
    - `docs/planning/status.md`
    - relevant ADRs, contracts, and quality strategy
-8. The auditor runs the required builds/tests and reviews the diff and artifacts.
-9. The auditor writes the evidence, findings, and verdict directly into
-   `docs/planning/audits/step-NN.md` and commits only that file with a documentation-only message and
-   `[skip ci]`. The audited commit is the parent of the record commit. The auditor does not merge, tag, push
-   `main`, or change any other file. If the auditor cannot commit, it writes the record and the step agent
-   commits it unchanged.
-10. If fixes are required:
-    - the step agent adds the resolutions to the record;
-    - the step agent fixes the findings on a new feature branch;
+9. The review agent runs the required builds/tests and reviews the diff and artifacts. The pre-audit gate has
+   already covered the bookkeeping; the review agent spends its pass on judgment and verifies the gate.
+10. The review agent writes the evidence, findings, and verdict directly into
+    `docs/planning/audits/step-NN.md` and commits only that file with a documentation-only message and
+    `[skip ci]`. The audited commit is the parent of the record commit. The review agent does not merge, tag, push
+    `main`, or change any other file. If the review agent cannot commit, it writes the record and the dev
+    commits it unchanged.
+11. If fixes are required:
+    - the dev adds the resolutions to the record;
+    - the dev fixes the findings on a new feature branch;
     - squash-merges into the step branch, merges current `main`, and updates the evidence;
     - dispatches one new closeout CI run and waits for it;
     - updates the audit record to `Re-audit required` with the new commit.
-11. The auditor re-audits the new commit and appends a new round to the record. The same auditor may continue if
-    it stayed within the reviewer write scope; otherwise start a fresh audit context. Keep every earlier round
+12. The review agent re-audits the new commit and appends a new round to the record. The same review agent may
+    continue if it stayed within the review write scope; otherwise start a fresh context. Keep every earlier round
     in the record.
-12. On `Passed`, the human owner gives merge approval. The approval request includes the cumulative approval
-    report in section 10, covering every audit and review round, finding, resolution, note, waiver, and residual
-    risk. A verdict acceptance on its own does not need it.
-13. Merge the step branch into `main` with `--no-ff`, wait for the automatic `main` CI run, tag `step-NN` only
+13. On `Passed`, or an owner-accepted `Passed with notes`, the human owner gives merge approval. The approval
+    request includes the cumulative approval report in section 10, covering every audit and review round,
+    finding, resolution, note, waiver, and residual risk. A verdict acceptance on its own does not need it.
+14. Merge the step branch into `main` with `--no-ff`, wait for the automatic `main` CI run, tag `step-NN` only
     when it is green, push, and delete the step branch.
 
 ### 3.1 Post-merge amendment audits
 
 A **post-merge amendment** (`step-NN-amend-M`, integrated and tagged after the parent step is merged) is not a
-step and has no step branch closeout. Its audit follows the same independent-auditor rules, with this evidence
+step and has no step branch closeout. Its audit follows the same independent-review agent rules, with this evidence
 rule:
 
 - The audit record `docs/planning/audits/step-NN-amend-M.md` is the **single evidence source** for the audited
@@ -150,12 +156,21 @@ See [`AGENTS.md` §3.13](../../../AGENTS.md) and [`docs/planning/ci-policy.md`](
 | **Minor** | Small defect or hygiene issue; fix or explicitly accept. |
 | **Note** | Observation or future improvement; no merge block. |
 
+Record each finding's **origin** as design, implementation, evidence, or documentation. At a phase boundary the
+distribution feeds the metric in
+[`../../development/design-proportionality.md`](../../development/design-proportionality.md) §4. A finding that
+the pre-audit gate should have caught is an evidence finding, not a design finding.
+
 ## 6. Verdict
 
 - **Passed** — no blockers or majors remain.
 - **Fixes required** — blockers or majors remain.
 - **Passed with notes** — only minor/note findings remain; human owner accepts them explicitly.
 - **Waived** — human owner records a temporary exception and its follow-up.
+
+A `Passed` audit stops at no Blocker or Major. Minor and Note findings are accepted or deferred; they do not
+justify another audit round by themselves. A re-audit is for Blocker/Major fixes or a failed evidence check, not
+for note-only findings. A third audit round on the same issue needs an owner decision and a recorded reason.
 
 ## 7. Audit request files
 
@@ -169,38 +184,38 @@ docs/planning/audits/step-01.md
 
 Create `docs/planning/audits/step-NN.md` on demand when the step reaches `Ready for audit`, using
 [`step-audit-template.md`](step-audit-template.md). Do not pre-seed records for steps that have not started;
-templates rot faster than they are used. The step agent owns the request fields, scope, checklists, and
-resolutions. The auditor writes the evidence, findings, and verdict directly into this file.
+templates rot faster than they are used. The dev owns the request fields, scope, checklists, and
+resolutions. The review agent writes the evidence, findings, and verdict directly into this file.
 
 The audit record is the durable record. Do not rely on chat history, and do not use a separate handoff file.
 The closeout evidence is a separate machine-checkable file; see
 [`../closeout/README.md`](../closeout/README.md).
 
-## 8. Reviewer write scope
+## 8. Review agent write scope
 
-- The reviewer may edit only `docs/planning/audits/step-NN.md`.
-- Within that file, the reviewer may edit its own metadata (`Auditor`, `Audit date`) and the `Record state` field, the `Standard audit checklist` completion marks and inline verification notes (not item
+- The review agent may edit only `docs/planning/audits/step-NN.md`.
+- Within that file, the review agent may edit its own metadata (`Review agent`, `Audit date`) and the `Record state` field, the `Standard audit checklist` completion marks and inline verification notes (not item
   text), the `Evidence` section, the `Findings` section, and the `Verdict` section for the current round.
-- The reviewer must not edit the request scope, checklist item text, known notes, or resolutions owned by the
-  step agent, and must not edit any other file.
-- Checklist marks record what the reviewer actually audited; the step agent owns the checklist item text.
-- The reviewer may commit that one file with a documentation-only message and `[skip ci]`; it must not merge,
-  tag, push `main`, or delete branches. If it cannot commit, it writes the record and the step agent commits it
+- The review agent must not edit the request scope, checklist item text, known notes, or resolutions owned by the
+  dev, and must not edit any other file.
+- Checklist marks record what the review agent actually audited; the dev owns the checklist item text.
+- The review agent may commit that one file with a documentation-only message and `[skip ci]`; it must not merge,
+  tag, push `main`, or delete branches. If it cannot commit, it writes the record and the dev commits it
   unchanged.
-- The implementor adds resolutions and status updates after the record commit without altering the reviewer's
+- The dev adds resolutions and status updates after the record commit without altering the review agent's
   findings, evidence, or verdict. That resolution/status commit is documentation-only and does not invalidate
-  the audit; the audited commit remains the parent of the reviewer's record commit.
+  the audit; the audited commit remains the parent of the review agent's record commit.
 - The record keeps each round: `### Audit round 1`, `### Re-audit round 2`, etc. Never overwrite an earlier
   round.
-- A record commit that touches any other file is invalid; the verdict must be re-run by a fresh reviewer.
+- A record commit that touches any other file is invalid; the verdict must be re-run by a fresh review agent.
 - The audit is invalidated when the audited branch moves after the freeze except for documented
-  documentation-only request/resolution commits, when the reviewer edits code or design docs, or when an earlier
-  round is overwritten. Re-run the audit with a fresh reviewer.
+  documentation-only request/resolution commits, when the review agent edits code or design docs, or when an earlier
+  round is overwritten. Re-run the audit with a fresh review agent.
 - `Re-audit required` is a record state, not a verdict. Keep it in the record state field, not in the verdict
   checklist.
-- The auditor must not approve its own report. The human owner approves the merge and tag.
-- The auditor records that it is a fresh context with no shared conversation with the implementor, planner, or
-  orchestrator.
+- The review agent must not approve its own report. The human owner approves the merge and tag.
+- The review agent records that it is a fresh context with no shared conversation with the design agent, dev, or
+  lead.
 
 ## 9. Step amendments
 
@@ -209,7 +224,7 @@ The closeout evidence is a separate machine-checkable file; see
   created.
 - A post-merge amendment needs its own maintenance audit and a new tag with owner approval. Never move or
   delete the existing `step-NN` tag.
-- The amendment page links to the parent audit record. The auditor still edits only the audit record and
+- The amendment page links to the parent audit record. The review agent still edits only the audit record and
   commits only that file.
 
 ## 10. Approval report

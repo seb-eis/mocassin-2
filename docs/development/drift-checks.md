@@ -11,7 +11,7 @@ Run a drift check:
 
 Running one before a phase boundary is optional; the cross-cutting review covers the same ground.
 
-A drift check should take about 15–30 minutes and does not require a fresh reviewer. Record the result in
+A drift check should take about 15–30 minutes and does not require a fresh review agent. Record the result in
 [`docs/planning/status.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/status.md) and escalate to a full cross-cutting review when you find
 Blocker/Major drift. Use [`docs/planning/drift-checks/_template.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/drift-checks/_template.md).
 
@@ -20,7 +20,7 @@ Blocker/Major drift. Use [`docs/planning/drift-checks/_template.md`](https://git
 ### Policy and process
 
 - [ ] `AGENTS.md`, `docs/development/orchestration.md`, `docs/development/agent-workflow.md`, and
-      `docs/development/contributing.md` agree on branches, approvals, gates, orchestrator routing, and reviewer
+      `docs/development/contributing.md` agree on branches, approvals, gates, lead routing, and reviewer
       roles.
 - [ ] The CI workflow matches the run matrix and `tools/verify.sh`.
 - [ ] No documented command, path, mode, or tag is stale.

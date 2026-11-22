@@ -23,7 +23,7 @@ minimum controls for MOCASSIN.
 | **Command injection** | A repository script or generated command executes untrusted input. |
 | **Dependency compromise** | A new or updated dependency has a malicious install hook or licence problem. |
 | **Data exfiltration** | The agent sends repository or user data to an external service. |
-| **Reviewer manipulation** | A record or diff is crafted to make a reviewer approve without reading the code. |
+| **Review agent manipulation** | A record or diff is crafted to make a review agent approve without reading the code. |
 | **Process bypass** | The agent marks a gate as passed, edits an audit record, or merges without approval. |
 
 ## 3. Minimum controls
@@ -57,7 +57,7 @@ minimum controls for MOCASSIN.
 
 ### Review and approval
 
-- A reviewer is a fresh, read-only context and does not fix findings.
+- A review agent is a fresh, read-only context and does not fix findings.
 - The human owner approves merges, tags, waivers, and high-risk operations.
 - Do not let an agent approve its own work, edit its own audit record, or merge to `main`.
 - Keep approval evidence in durable records; do not rely on chat.
@@ -80,7 +80,7 @@ Require explicit human approval before:
 - adding a dependency, install hook, or external service;
 - running migrations, deployments, or destructive data operations;
 - changing authentication, authorization, cryptography, or payment code;
-- editing process or audit records outside the reviewer's write scope.
+- editing process or audit records outside the review agent's write scope.
 
 ## 5. Incident response
 

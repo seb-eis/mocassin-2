@@ -9,15 +9,17 @@ Use this page to prepare work, review agent output, and keep contexts small enou
 ## 1. Context policy
 
 - Start a **fresh context for each roadmap step**.
-- Reuse that context across the step’s feature branches.
+- Reuse that context across the step's feature branches.
 - Start a fresh context at the next step boundary.
 - Refresh mid-step if context compression loses important constraints, or if the agent begins mixing old and
   current decisions.
-- Do not carry a reviewer into the implementation context, or an implementor into the review context.
-- The **orchestrator** is the long-lived coordination context and the owner’s only direct interface. The role
-  agents it spawns (planner, step agent/implementor, planning auditor, auditor) are the fresh contexts.
-- Do not carry the orchestrator’s chat history into a reviewer. Pass the spawn card, the frozen commit, and
+- Do not carry a review agent into the implementation context, or a dev into the review context.
+- The **lead** is the long-lived coordination context and the owner's only direct interface. The role agents it
+  spawns (`design`, `dev-free`/`dev`, `review`) are the fresh contexts.
+- Do not carry the lead's chat history into a review agent. Pass the spawn card, the frozen commit, and
   repository links only.
+- The model tier for each role is in [`model-economics.md`](model-economics.md). The dev starts on `dev-free`;
+  the lead falls back to `dev` only on a rate limit, a degraded model, or unavailability.
 
 The repository is the memory, not the conversation. At the start of a step, read:
 
@@ -42,22 +44,22 @@ git status --short
 ### Agent roles and write scopes
 
 The normative matrix is in [`AGENTS.md`](https://github.com/seb-eis/mocassin-2/blob/main/AGENTS.md) §3.8 and the
-orchestration rules are in [`orchestration.md`](orchestration.md). In short: the orchestrator is the owner’s
-only direct interface and spawns every role agent; the planner and step agent edit their own artifacts
-directly; the reviewer may edit only its assigned review or audit record; the human owner approves gates. There
-is no scribe and no transcription step.
+orchestration rules are in [`orchestration.md`](orchestration.md). In short: the lead is the owner's only direct
+interface and spawns every role agent; the design agent and dev edit their own artifacts directly; the review
+agent may edit only its assigned review or audit record; the human owner approves gates. There is no scribe and
+no transcription step.
 
 | Role | Scope | Not |
 | --- | --- | --- |
-| Orchestrator | Intake, routing, spawning, handoffs, relaying, discussion, small non-normative docs fixes | Design, code, tests, configuration, records, verdicts, gates, merges, tags |
-| Planner | Design and planning docs; request scope in the review record | Code, tests, configuration, verdicts, step status, merges, tags |
-| Step agent (implementor) | Code, tests, configuration, contracts, step page, status, parity; request and resolutions in records | Reviewer findings, evidence, or verdict text; merges and tags without approval |
-| Reviewer (planning auditor or auditor) | Only the assigned record: own metadata, checklist marks, evidence, findings, verdict | Everything else, including code, design docs, request scope, resolutions, merges, tags |
+| Lead | Intake, routing, spawning, model-tier assignment, handoffs, relaying, discussion | Design, code, tests, configuration, records, verdicts, gates, merges, tags; any edit |
+| Design agent | Design and planning docs; request scope in the review record | Code, tests, configuration, verdicts, step status, merges, tags |
+| Dev (`dev-free`/`dev`) | Code, tests, configuration, contracts, step page, status, parity; request and resolutions in records | Review findings, evidence, or verdict text; merges and tags without approval |
+| Review agent (design review or audit) | Only the assigned record: own metadata, checklist marks, evidence, findings, verdict | Everything else, including code, design docs, request scope, resolutions, merges, tags |
 | Human owner | Approval of gates, waivers, merges, and tags | — |
 
-The orchestrator may edit documentation directly only for typos, links and navigation entries, handoff cards,
-and status notes that restate an already-recorded decision. Process rules, design, contracts, acceptance
-criteria, records, and status that asserts a gate passed belong to the owning role.
+The lead routes documentation edits to the dev, including typos, links and navigation entries, handoff cards, and
+status notes that restate an already-recorded decision. Process rules, design, contracts, acceptance criteria,
+records, and status that asserts a gate passed belong to the owning role.
 
 ## 2. Context handoff card
 
@@ -76,8 +78,8 @@ Open blockers:
 Next action:
 ```
 
-The role ending its context writes the card; the orchestrator relays it and the next context should not need the
-previous chat history.
+The role ending its context writes the card; the dev records it and the lead relays it. The next context should
+not need the previous chat history.
 
 ## 3. Step start checklist
 
@@ -85,7 +87,10 @@ Before implementation:
 
 - [ ] The step is the lowest unblocked step, or the owner assigned it.
 - [ ] Dependencies are complete.
-- [ ] The pre-implementation design review is `Ready for implementation`.
+- [ ] The design class is recorded: `Full`, `Light`, or `None` per
+      [`design-proportionality.md`](design-proportionality.md).
+- [ ] For `Full` and `Light`, the design review is `Ready for implementation` or an owner-accepted
+      `Ready with notes`. For `None`, the one-line design record is present.
 - [ ] The step page, acceptance criteria, tests, and risks were read.
 - [ ] The step page records its complexity class and split decision per
       `docs/planning/04-roadmap.md` §3.1 (internal planning), or the split is recorded with the owner
@@ -105,6 +110,7 @@ Step: 00 — Repository, Toolchain, and CI
 Feature: .NET solution skeleton
 Branch: feature/step-00-foundation/dotnet-skeleton
 Base: step/00-foundation, with current main merged in
+Design class: Full / Light / None
 
 Read:
 - AGENTS.md
@@ -145,18 +151,19 @@ full picture, including every earlier round. A verdict acceptance uses the recor
 Decision requested:
 Branch/frozen commit:
 Final verdict:
+Final state: closeout CI, main CI, docs build, policy/security gate
 Rounds:
-  1. date, commit, reviewer/auditor, verdict
+  1. date, commit, review agent, lead, verdict
   2. ...
 Findings and resolutions:
-  ID, severity, issue, evidence, resolution, fixing commit, status
+  ID, severity, origin (design/implementation/evidence/documentation), issue, evidence, resolution, fixing commit, status
 Accepted notes and waivers:
 Residual risks and follow-up owners:
 Diff summary:
 Tests/commands:
 CI:
 Docs build:
-Structure check:
+Structure/policy check:
 Docs/status updated:
 Gate statement (no Blocker/Major remains, or the exact exceptions being waived):
 Approval requested for:
@@ -220,6 +227,8 @@ Stop before proceeding when:
 - the original behaviour is unclear;
 - the change would cross from one step into another;
 - tests reveal a contradiction in the plan;
+- the design class would need to move down after the design is frozen;
+- the next action would need a third Full review round without an owner decision;
 - a role-agent spawn fails, errors, or is interrupted — stop, confirm the earlier context has stopped, and
   verify the branch tip, worktree, and working-tree status before re-spawning; the failed spawn may be partially
   applied or still live and writing ([`orchestration.md`](orchestration.md) §6 and §9);
@@ -229,6 +238,9 @@ Stop before proceeding when:
   §9);
 - the working tree is on `main` or a step branch with feature work;
 - the next action would merge, tag, push `main`, or delete a shared branch.
+
+Guessing is more expensive than asking. Record the question and the answer in the step page or the review/audit
+record.
 
 ## 9. Status and tags
 
@@ -305,17 +317,21 @@ Reject or stop on:
 - moving/deleting published tags;
 - rewriting shared history or force-pushing;
 - copying GPL code or data into the MIT implementation;
-- a scribe transcription step or a reviewer editing anything outside its assigned record;
-- bypassing the orchestrator to spawn a role agent directly, or letting the orchestrator design, implement,
-  review, approve, merge, or tag;
+- a scribe transcription step or a review agent editing anything outside its assigned record;
+- bypassing the lead to spawn a role agent directly, or letting the lead design, implement, review, approve,
+  merge, or tag;
 - a review/audit record commit that touches code, tests, configuration, status, or design docs;
 - pre-seeding review, audit, or cross-cutting records for work that has not started;
-- skipping a gate without a recorded waiver and a follow-up owner.
+- skipping a gate without a recorded waiver and a follow-up owner;
+- a new review round for Minor or Note findings alone;
+- using a premium model as a default or upgrading to it without the owner.
 
 ## 13. Gate references
 
 This playbook does not restate the gate sequences. The normative homes are:
 
+- design classes and the pre-audit gate: [`design-proportionality.md`](design-proportionality.md);
+- model tiers and free-first binding: [`model-economics.md`](model-economics.md);
 - design review: [`AGENTS.md` §3.9](https://github.com/seb-eis/mocassin-2/blob/main/AGENTS.md) and
   [`docs/planning/reviews/README.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/reviews/README.md);
 - step audit: [`AGENTS.md` §3.10](https://github.com/seb-eis/mocassin-2/blob/main/AGENTS.md) and
@@ -348,17 +364,18 @@ Process changes are normal documentation changes, but they have a wider blast ra
 Do not add a second copy of a rule to make it easier to find. Add a link from the new location to the normative
 page. `tools/check_process_consistency.py` is the mechanical backstop.
 
-## 15. Reviewer spawn card
+## 15. Review agent spawn card
 
-Use this when the orchestrator spawns a design reviewer or auditor on behalf of the request owner. Replace the
+Use this when the lead spawns a design review or audit agent on behalf of the request owner. Replace the
 bracketed values and do not add a desired verdict or a summary that replaces reading the repository.
 
 ```text
-You are a fresh, read-only [design reviewer / auditor]. You did not author or implement this work and have no
-shared conversation with the planner, implementor, or orchestrator.
+You are a fresh, read-only review agent for [a design review / a step audit / a cross-cutting review]. You did
+not author or implement this work and have no shared conversation with the design agent, dev, or lead.
 
 Frozen commit: [full commit]
 Request record: [docs/planning/reviews/step-NN.md or docs/planning/audits/step-NN.md]
+Design class: [Full / Light]
 Repository: /workspace/mocassin
 
 Read AGENTS.md, the request record, the step page, and the relevant design/contract docs. Do not rely on my
@@ -366,16 +383,17 @@ summary; inspect the repository at the frozen commit yourself.
 
 Run the required builds/tests and review the diff. Write evidence, findings, verdict, and checklist completion
 marks directly into the request record. You may check checklist boxes but not change item text. Do not edit any
-other file, merge, tag, push main, or delete branches.
+other file, merge, tag, push main, or delete branches. For a Full review, stop when no Blocker or Major remains;
+for a Light review, one pass is the whole review. Do not open a new round for Minor or Note findings alone.
 
 If you find issues, report them; do not fix them. The human owner approves the final verdict and gate.
-State in the record that you are a fresh context with no shared conversation with the planner, implementor,
-orchestrator, or other cross-cutting reviewers.
+State in the record that you are a fresh context with no shared conversation with the design agent, dev, lead,
+or other review agents.
 ```
 
-Rules for the orchestrator as spawner:
+Rules for the lead as spawner:
 
 - Do not ask for a specific verdict or re-spawn until a preferred verdict appears.
-- Do not edit the reviewer's findings, evidence, or verdict.
+- Do not edit the review agent's findings, evidence, or verdict.
 - Do not mark the review/audit accepted, waived, merged, or tagged.
-- Fixes require a new commit and a new review round, made by the step agent or planner.
+- Fixes require a new commit and a new review round, made by the dev or design agent.

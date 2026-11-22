@@ -17,33 +17,53 @@ does not review implementation code, because none exists yet.
 
 | Role | Responsibility |
 | --- | --- |
-| Planning agent (planner) | Facilitate decisions, write the review request, update design docs directly |
-| Step agent (implementor) | Own the step page and review record request, fix design findings, add resolutions |
-| Planning auditor (reviewer) | Fresh, out-of-context design review; writes evidence, findings, and verdict directly into the review record |
-| Orchestrator (spawner) | Provides the frozen request and spawns a fresh reviewer on behalf of the request owner; relays the verdict; does not review or approve |
+| Design agent | Facilitate decisions, write the review request, update design docs directly |
+| Dev (`dev-free`/`dev`) | Own the step page and review record request, fix design findings, add resolutions |
+| Review agent | Fresh, out-of-context design review; writes evidence, findings, and verdict directly into the review record |
+| Lead (spawner) | Provides the frozen request and spawns a fresh review agent on behalf of the request owner; relays the verdict; does not review or approve |
 | Human owner | Approve the verdict and the start of implementation |
 
-The planning auditor must not be the agent that authored the decisions or will implement the step. It may edit
-only the review record's reviewer-owned metadata, evidence, findings, and verdict. It must not edit design docs,
+The review agent must not be the agent that authored the decisions or will implement the step. It may edit
+only the review record's review-owned metadata, evidence, findings, and verdict. It must not edit design docs,
 the step page, status dashboard, parity matrix, request scope, checklists, resolutions, code, tests, or
-configuration. The auditor writes directly into `docs/planning/reviews/step-NN.md`; there is no handoff file
-and no transcription step.
+configuration. It writes directly into `docs/planning/reviews/step-NN.md`; there is no handoff file and no
+transcription step.
 
-### 2.1 Reviewer spawning
+### 2.1 Review agent spawning
 
-The orchestrator is the only spawner. The planner or step agent asks the orchestrator for a review; the owner
-does not spawn a reviewer directly. The spawner must not be the reviewer.
+The lead is the only spawner. The design agent or dev asks the lead for a review; the owner does not spawn a
+review agent directly. The spawner must not be the review agent.
 
-- The reviewer is a fresh context with no shared conversation with the planner, implementor, or orchestrator.
-- The orchestrator provides only the frozen commit, the review request, repository links, and the required
+- The review agent is a fresh context with no shared conversation with the design agent, dev, or lead.
+- The lead provides only the frozen commit, the review request, repository links, and the required
   commands/scope. It must not supply a desired verdict, pass on its conversation history, or substitute a
   summary for reading the repository.
-- The reviewer writes findings and verdict directly into the record. The orchestrator and request owner do not
+- The review agent writes findings and verdict directly into the record. The lead and request owner do not
   edit them.
-- The human owner approves the final verdict and the start gate. The orchestrator must not mark a verdict, waive
+- The human owner approves the final verdict and the start gate. The lead must not mark a verdict, waive
   findings, merge, tag, or push `main`.
-- A re-review requires a new commit with fixes, made by the planner or step agent. Do not re-spawn reviewers
+- A re-review requires a new commit with fixes, made by the design agent or dev. Do not re-spawn review agents
   until a preferred verdict appears.
+
+### 2.2 Design class and review depth
+
+The step page records a **design class** per
+[`../../development/design-proportionality.md`](../../development/design-proportionality.md):
+
+- **Full** — public API/contract, `.mocprj`/`.msl`/`.msr`/`.mcs` format or schema/version, dependency,
+  cross-package interface, data migration, security/concurrency, an irreversible decision, or an architecture
+  boundary. Full review checklist; stop when no Blocker or Major remains.
+- **Light** — an internal feature inside an existing boundary. One pass answering the five design questions;
+  Minor and Note findings are accepted and do not trigger a re-review. A Blocker or Major means the step was
+  misclassified and moves to Full.
+- **None** — documentation, typo, test-only change, mechanical refactor, or generated-file refresh. No design
+  review; a one-line record in the step page. Under `standard`, `None` is pre-authorized for these categories
+  and needs no per-item owner waiver.
+
+A Full review does not open another round for Minor or Note findings alone. A third Full round needs an owner
+decision and a recorded reason. Before the audit request, the dev runs the pre-audit gate in
+[`../../development/design-proportionality.md`](../../development/design-proportionality.md) §3; bookkeeping
+findings belong there, not in another review round.
 
 ## 3. Status values
 
@@ -51,7 +71,7 @@ does not spawn a reviewer directly. The spawner must not be the reviewer.
 | --- | --- |
 | **Not requested** | No design review yet. |
 | **Ready for review** | Design decisions and docs are frozen at a specific commit. |
-| **In review** | A fresh planning auditor is reviewing the frozen docs. |
+| **In review** | A fresh review agent is reviewing the frozen docs. |
 | **Changes required** | Blocking or material design issues were found. |
 | **Re-review required** | Docs were updated and need another review. |
 | **Ready with notes** | Only minor/note findings remain; the human owner explicitly accepts them. |
@@ -60,37 +80,51 @@ does not spawn a reviewer directly. The spawner must not be the reviewer.
 
 ## 4. Required sequence
 
-1. The planning agent and step agent finish the step's design decisions and update the step page, data
+1. The design agent and dev finish the step's design decisions and update the step page, data
    contracts, architecture, quality strategy, open decisions, parity matrix, and related docs. They apply those
-   edits directly.
+   edits directly. The step page records the design class.
 2. The docs are frozen at a specific commit.
-3. The step agent creates or updates `docs/planning/reviews/step-NN.md` from the template:
+3. The dev creates or updates `docs/planning/reviews/step-NN.md` from the template:
    - record state: `Ready for review`
    - reviewed commit
+   - design class (`Full` or `Light`)
    - design decisions and scope
    - known limitations
-4. The step agent asks the orchestrator to spawn a fresh planning auditor. The auditor reads the step page,
+4. The dev asks the lead to spawn a fresh review agent. The review agent reads the step page,
    decisions, dependency contracts, architecture, data contracts, ADRs, quality strategy, open decisions, parity
-   matrix, licensing records, and audit plan. The
-   auditor must not have authored or implemented the design.
-5. The planning auditor writes the evidence, findings, and verdict directly into
+   matrix, licensing records, and audit plan. It must not have authored or implemented the design. A `Light`
+   review answers the five design questions; a `Full` review also checks the full checklist.
+5. The review agent writes the evidence, findings, and verdict directly into
    `docs/planning/reviews/step-NN.md` and commits only that file with a documentation-only message and
-   `[skip ci]`. The reviewed commit is the parent of the record commit. The auditor does not merge, tag, push
-   `main`, or change any other file. If the auditor cannot commit, it writes the record and the step agent
-   commits it unchanged.
-6. If the verdict is `Changes required`, the planning agent and step agent update the design docs directly, the
-   step agent adds the resolutions and marks the review `Re-review required`, and a fresh planning auditor
-   re-reviews the new commit. The new round is appended; earlier rounds are not overwritten.
-7. On `Ready for implementation`, the human owner approves the start. The orchestrator presents the verdict and
-   the feature list; the cumulative approval report is for a merge, tag, or Blocker/Major waiver, not for this
-   gate. The step branch is created from the reviewed `main` commit.
-8. The post-implementation audit in `docs/planning/audits/` remains mandatory and separate.
+   `[skip ci]`. The reviewed commit is the parent of the record commit. It does not merge, tag, push `main`, or
+   change any other file. If it cannot commit, it writes the record and the dev commits it unchanged.
+6. If the verdict is `Changes required`, the design agent and dev update the design docs directly, the dev adds
+   the resolutions and marks the review `Re-review required`, and a fresh review agent re-reviews the new commit.
+   The new round is appended; earlier rounds are not overwritten. Do not open a new round for Minor or Note
+   findings alone.
+7. On `Ready for implementation`, or an owner-accepted `Ready with notes`, the human owner approves the start.
+   The lead presents the verdict and the feature list; the cumulative approval report is for a merge, tag, or
+   Blocker/Major waiver, not for this gate. The step branch is created from the reviewed `main` commit.
+8. A `None` step records the one-line design decision in the step page, skips the review record, and proceeds
+   under the normal branch, local-gate, and audit rules.
+9. The post-implementation audit in `docs/planning/audits/` remains mandatory and separate.
 
 ## 5. What the review must cover
+
+A design review answers five questions:
+
+1. Are the contracts this step touches resolved, with version and migration?
+2. Is every acceptance criterion testable, and does it name the test, command, or fixture that proves it?
+3. Are the non-goals and irreversible decisions explicit?
+4. Is the feature list complete, and does it fit one boundary?
+5. Are the risks real, with an owner?
+
+A `Light` review uses the five questions only. A `Full` review also checks the full-depth list:
 
 - Step scope, non-goals, and testable acceptance criteria.
 - Complexity class and split decision, recorded and justified per
   [`04-roadmap.md` §3.1](../04-roadmap.md#31-step-sizing-and-split-triggers).
+- The design class is recorded and consistent with the triggers.
 - All design decisions are recorded and internally consistent.
 - Cross-step interfaces, types, formats, and data versions are defined.
 - Dependencies are complete and their contracts are stable.
@@ -102,6 +136,9 @@ does not spawn a reviewer directly. The spawner must not be the reviewer.
 - Risks and mitigations are realistic.
 - No hidden scope, stale placeholders, or unowned decisions.
 
+Prose style, status bookkeeping, code layout, and file limits are not design findings. Route them to the
+pre-audit gate, not to another review round.
+
 ## 6. Finding severity
 
 | Severity | Meaning |
@@ -111,6 +148,11 @@ does not spawn a reviewer directly. The spawner must not be the reviewer.
 | **Minor** | Small inconsistency or missing detail; fix or explicitly accept. |
 | **Note** | Observation or future improvement; no start block. |
 
+Record each finding's **origin** as design, implementation, evidence, or documentation. At a phase boundary the
+distribution feeds the metric in
+[`../../development/design-proportionality.md`](../../development/design-proportionality.md) §4: design-origin
+findings are the only ones that justify more design effort.
+
 ## 7. Verdict
 
 - **Ready for implementation** — no blockers or majors remain.
@@ -118,35 +160,39 @@ does not spawn a reviewer directly. The spawner must not be the reviewer.
 - **Ready with notes** — only minor/note findings remain; the human owner accepts them explicitly.
 - **Waived** — the human owner records why no review is required.
 
+A Full review stops at `Ready for implementation` when no Blocker or Major remains. Minor and Note findings are
+accepted or deferred and do not trigger another round. A Light review is one pass; if it finds a Blocker or Major,
+the step is reclassified Full. A third Full round needs an owner decision and a recorded reason.
+
 `Re-review required` is a record state, not a verdict; it means the docs changed after a `Changes required`
 verdict and a fresh review is pending.
 
-## 8. Reviewer write scope
+## 8. Review agent write scope
 
-- The reviewer may edit only `docs/planning/reviews/step-NN.md`.
-- Within that file, the reviewer may edit its own metadata (`Reviewer`, `Review date`) and the `Record state` field, the three checklist sections (checkbox marks and short inline verification notes
+- The review agent may edit only `docs/planning/reviews/step-NN.md`.
+- Within that file, the review agent may edit its own metadata (`Review agent`, `Review date`) and the `Record state` field, the three checklist sections (checkbox marks and short inline verification notes
   only; not item text), the `Evidence` section, the `Findings` section, and the `Verdict` section for the current
   round.
-- The reviewer must not edit the request scope, checklist item text, known limitations, or resolutions owned by
-  the step agent, and must not edit any other file.
-- Checklist marks record what the reviewer actually reviewed; the step agent owns the checklist item text.
-- The reviewer may commit that one file with a documentation-only message and `[skip ci]`; it must not merge,
-  tag, push `main`, or delete branches. If it cannot commit, it writes the record and the step agent commits it
+- The review agent must not edit the request scope, checklist item text, known limitations, or resolutions owned by
+  the dev, and must not edit any other file.
+- Checklist marks record what the review agent actually reviewed; the dev owns the checklist item text.
+- The review agent may commit that one file with a documentation-only message and `[skip ci]`; it must not merge,
+  tag, push `main`, or delete branches. If it cannot commit, it writes the record and the dev commits it
   unchanged.
-- The implementor adds resolutions and status updates after the record commit without altering the reviewer's
+- The dev adds resolutions and status updates after the record commit without altering the review agent's
   findings, evidence, or verdict. That resolution/status commit is documentation-only and does not invalidate
-  the review; the reviewed commit remains the parent of the reviewer's record commit.
+  the review; the reviewed commit remains the parent of the review agent's record commit.
 - The record keeps each round: `### Review round 1`, `### Re-review round 2`, etc. Never overwrite an earlier
   round.
-- A record commit that touches any other file is invalid; the verdict must be re-run by a fresh reviewer.
+- A record commit that touches any other file is invalid; the verdict must be re-run by a fresh review agent.
 - Historical records keep the role names in force when they were written; do not rewrite them.
-- The planning auditor must not approve its own report. The human owner approves the start.
-- The reviewer records that it is a fresh context with no shared conversation with the planner or implementor.
+- The review agent must not approve its own report. The human owner approves the start.
+- The review agent records that it is a fresh context with no shared conversation with the design agent or dev.
 
 ### 8.1 What invalidates a review
 
-- The record commit touches any file other than the record. Re-run the review with a fresh reviewer.
-- The reviewer edits code, tests, configuration, or design docs. It has become an implementor; a fresh reviewer
+- The record commit touches any file other than the record. Re-run the review with a fresh review agent.
+- The review agent edits code, tests, configuration, or design docs. It has become a dev; a fresh review agent
   is required.
 - The docs branch moves after the frozen commit and before the record commit, except for documented
   documentation-only request/status commits. Record the delta as a note or re-review.
@@ -170,12 +216,12 @@ earlier round.
 
 ## 10. Step amendment reviews
 
-- Amendment reviews use the same statuses, severity, verdict, and reviewer write scope as a normal design
+- Amendment reviews use the same statuses, severity, verdict, and review agent write scope as a normal design
   review.
 - Record: `docs/planning/reviews/step-NN-amend-M.md`.
 - Scope: the amendment delta and its impact on the parent step, not a full re-review of the parent design.
 - The parent review record links to the amendment review record.
-- The reviewer still edits only the review record and commits only that file.
+- The review agent still edits only the review record and commits only that file.
 - The parent audit covers the combined solution; an integrated amendment does not get a separate audit or tag.
 
 ## 11. Approval report
@@ -202,7 +248,7 @@ the review is explicitly waived with a recorded rationale.
 
 The architecture and design status review must explicitly answer whether the phase made the corrections to the
 original that it intended, ported the good/clever original design aspects, and introduced a regression. The
-reviewer records each answer with code, test, benchmark, or side-by-side design evidence; an unrecorded
+review agent records each answer with code, test, benchmark, or side-by-side design evidence; an unrecorded
 regression, a missing intended correction, or a lost original strength is a finding.
 
 ### 12.1 Numbering
@@ -223,20 +269,20 @@ Phase A is waived because the process was introduced after it completed. Run the
 checks still apply. Create cross-cutting review records at the phase boundary; the Phase B records are
 historical. The registry and records are in [`cross-cutting/`](cross-cutting/README.md).
 
-### 12.2 Orchestration
+### 12.2 Coordination
 
-Each review is coordinated by the orchestrator, not by the reviewer:
+Each review is coordinated by the lead, not by the review agent:
 
-1. The planner or step agent freezes the request and target commit.
-2. The orchestrator spawns a fresh independent reviewer with the frozen commit, record, links, and scope; it does
+1. The design agent or dev freezes the request and target commit.
+2. The lead spawns a fresh independent review agent with the frozen commit, record, links, and scope; it does
    not request a verdict or substitute a summary for repository reading.
-3. The reviewer writes only its record and commits only that file with `[skip ci]`.
-4. If findings remain, the planner or step agent fixes the repository state on a maintenance branch, updates the
-   appropriate design/process/docs artifact, adds resolutions without altering reviewer text, records the new
-   commit, and asks the orchestrator for re-review.
-5. Repeat until the reviewer no longer identifies Blocker/Major issues. Use a fresh reviewer for the new round
-   unless the same reviewer stayed read-only and outside the remediation.
+3. The review agent writes only its record and commits only that file with `[skip ci]`.
+4. If findings remain, the design agent or dev fixes the repository state on a maintenance branch, updates the
+   appropriate design/process/docs artifact, adds resolutions without altering review agent text, records the new
+   commit, and asks the lead for re-review.
+5. Repeat until the review agent no longer identifies Blocker/Major issues. Use a fresh review agent for the new round
+   unless the same review agent stayed read-only and outside the remediation.
 6. The human owner approves the final verdict and the phase gate.
 
-The orchestrator must not fix findings, edit reviewer text, or approve the verdict. The reviewer must not fix
+The lead must not fix findings, edit review agent text, or approve the verdict. The review agent must not fix
 findings, merge, tag, push `main`, or delete branches. A record commit that touches any other file is invalid.

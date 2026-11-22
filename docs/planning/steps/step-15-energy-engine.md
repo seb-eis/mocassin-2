@@ -4,6 +4,10 @@
 **Depends on:** 14
 **Delivers:** The transition energy calculator: S0/S1/S2, pair/cluster deltas, electric-field terms,
 state application, and lattice-energy bookkeeping.
+**Design class:** To be recorded at design time (`Full` / `Light` / `None` per
+[`../../development/design-proportionality.md`](../../development/design-proportionality.md)). A `Full` class is
+required if the step changes a public API, contract, format/schema/version, dependency, cross-package interface,
+data migration, security/concurrency behaviour, an irreversible decision, or an architecture boundary.
 
 ## Implementation status
 
