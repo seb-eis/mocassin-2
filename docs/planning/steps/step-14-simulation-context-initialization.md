@@ -455,6 +455,21 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
   adds no test beyond the existing suite; the new N-2/N-3/F-1 tests are the regression coverage for the audit
   findings.
 
+**Merge closeout (2026-11-22).** The human owner approved the out-of-step `--no-ff` merge of
+`fix/step-14-structure-and-tests` at `4eb56c9` and decided that **no fresh independent audit** of this maintenance
+change is required: the Step 14 audit's owner acceptance (2026-11-21) plus the green local gates above are the
+basis.
+
+| Field | Value |
+| --- | --- |
+| Merge commit | `b63256564726dc965bf10ab4ddaa0d61a9aac6e8` |
+| Subject | `fix: close the deferred Step 14 audit findings` |
+| Parents | `536c8b3b095a4dd7b1725d759d98f9927465cab7` (`main` base); `4eb56c93caa8c2c540a8ba779406bca902ef10e4` (branch tip) |
+| Merge kind | `--no-ff` merge commit; the branch tip is preserved, not squashed or rebased |
+| Diff | 15 files changed, 1,352 insertions, 925 deletions against the `536c8b3` base |
+| Main CI | [`45048842289`](https://github.com/seb-eis/mocassin-2/actions/runs/45048842289) — automatic `push` run, `success` at `head_sha` `b632565`; Detect changes, Contracts and policy, and Rust succeeded; .NET, Python, and Public API compatibility skipped by their path filters (the merge changes no .NET, Python, or API file) |
+| Branch state | `fix/step-14-structure-and-tests` deleted locally and on `origin`; no tag created or moved — `step-14` stays on `dd5a811` and the Step 14 merge commit `dd5a811` is untouched |
+
 ## Goal
 
 Turn one validated `JobPackage` into the exact data structures the Monte Carlo loops need, once, before the
