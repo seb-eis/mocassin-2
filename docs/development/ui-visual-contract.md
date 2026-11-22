@@ -55,12 +55,16 @@ Rules:
   a `region-card`/`overlay-card` class. Do not keep a universal `Border` selector that adds a border to every
   nested `Border`, banner, or separator.
 - Effective precedence, highest first:
-  1. direct application resources written by `AvaloniaThemeApplier` (font scale, accent, runtime density,
-     border thickness, motion);
+  1. direct application resources written by `AvaloniaThemeApplier` (font scale, the accent overlay, runtime
+     density, border thickness, motion);
   2. the high-contrast merged dictionary;
   3. the compact-density merged dictionary;
   4. the active light/dark palette theme dictionary;
   5. the stock Fluent theme.
+- The accent overlay is an optional-accent-only direct-resource layer. It outranks the palette while an
+  optional accent is selected. For `null`, the explicit `blue` key, and high contrast, the applier removes every
+  overlay key so the palette or the high-contrast dictionary is authoritative again. Density never changes an
+  accent role. §3.6 is the complete accent model.
 
 ## 3. Colour roles
 
@@ -93,16 +97,20 @@ what makes the separated parts read as raised boxes without shadows.
 | `Mocassin.ForegroundMutedBrush` | `#9D9D9D` | `#6F6F6F` | captions, secondary text, inactive tabs |
 | `Mocassin.DisabledForegroundBrush` | `#6B6B6B` | `#9A9A9A` | disabled text |
 | `Mocassin.DisabledBackgroundBrush` | `#2A2A2A` | `#EDEDED` | disabled control fill |
-| `Mocassin.AccentBrush` | `#007ACC` | `#007ACC` | accent fill, selected pipe, focus ring |
+| `Mocassin.AccentBrush` | `#007ACC` | `#007ACC` | accent fill, accent-button fill, decorative splitter line |
 | `Mocassin.AccentTextBrush` | `#4DA6FF` | `#005A9E` | accent-coloured text and links on a card or workspace |
 | `Mocassin.OnAccentBrush` | `#FFFFFF` | `#FFFFFF` | text and glyphs on an accent fill |
+| `Mocassin.FocusBrush` | `#007ACC` | `#007ACC` | focus ring, focus border, selected-pipe indicator |
 | `Mocassin.TabActiveForeground` | `#FFFFFF` | `#1F1F1F` | selected tab text |
 | `Mocassin.TabInactiveForeground` | `#9D9D9D` | `#6F6F6F` | unselected tab text |
 
-`AccentBrush` is the only brand accent. `AccentTextBrush` is a contrast-safe text variant, not a second accent.
-A filled accent surface always uses `OnAccentBrush`. The five non-default optional settings accents (`teal`,
-`green`, `amber`, `violet`, `rose`) keep their existing keys; when one is selected, the applier publishes a
-contrast-safe `OnAccentBrush` for that accent. The default and the `blue` key are `#007ACC`.
+`AccentBrush` is the raw selected brand accent. `AccentTextBrush`, `FocusBrush`, and `OnAccentBrush` are
+contrast-safe derived roles, not additional brand accents. A filled accent surface always uses
+`OnAccentBrush`; a focus ring or selected-pipe indicator uses `FocusBrush`. The five non-default optional
+settings accents (`teal #008B8B`, `green #2E7D32`, `amber #B26A00`, `violet #6A4C93`, `rose #B0004F`) keep
+their existing keys and hex values. The default and the `blue` key are `#007ACC`, and they are treated
+identically, including `OnAccentBrush` = `#FFFFFF`. §3.6 defines the derivation, the complete runtime overlay
+set, and the optional-accent values.
 
 ### 3.3 States and status
 
@@ -125,9 +133,12 @@ contrast-safe `OnAccentBrush` for that accent. The default and the `blue` key ar
 | `Mocassin.StatusBarBackground` | `#007ACC` | `#007ACC` | status bar |
 | `Mocassin.StatusBarForeground` | `#FFFFFF` | `#FFFFFF` | status bar text, glyphs, and progress |
 
-The status bar is the one full-accent chrome surface. Severity is conveyed by its existing glyph and text, not
-by colour: all status-bar glyphs and text use `StatusBarForeground`. This deliberately replaces the old
-per-severity colours, which did not meet contrast on a dark bar.
+The table gives the default/`blue` values. Under an optional accent, §3.6 replaces `StatusBarBackground` with
+the selected accent and `StatusBarForeground` with its contrast-safe on-accent value; `SelectedBackground` and
+`SelectedForeground` become the accent-derived selection tint and its contrast-safe text. The status bar is the
+one full-accent chrome surface. Severity is conveyed by its existing glyph and text, not by colour: all
+status-bar glyphs and text use `StatusBarForeground`. This deliberately replaces the old per-severity colours,
+which did not meet contrast on a dark bar.
 
 ### 3.4 Fluent resource keys
 
@@ -145,9 +156,15 @@ These are the keys the palette is expected to override; adding a key is a contra
 | Tab item | `TabItemHeaderBackgroundUnselected`, `TabItemHeaderBackgroundUnselectedPointerOver`, `TabItemHeaderBackgroundUnselectedPressed`, `TabItemHeaderBackgroundSelected`, `TabItemHeaderBackgroundSelectedPointerOver`, `TabItemHeaderBackgroundSelectedPressed`, `TabItemHeaderBackgroundDisabled`, `TabItemHeaderForegroundUnselected`, `TabItemHeaderForegroundUnselectedPointerOver`, `TabItemHeaderForegroundUnselectedPressed`, `TabItemHeaderForegroundSelected`, `TabItemHeaderForegroundSelectedPointerOver`, `TabItemHeaderForegroundSelectedPressed`, `TabItemHeaderForegroundDisabled`, `TabItemHeaderSelectedPipeFill`, `TabItemMinHeight`, `TabItemHeaderMargin` |
 | Menu and flyout | `MenuFlyoutPresenterBackground`, `MenuFlyoutPresenterBorderBrush`, `MenuFlyoutItemBackgroundPointerOver`, `MenuFlyoutItemBackgroundPressed`, `MenuFlyoutItemForeground`, `MenuFlyoutItemForegroundPointerOver`, `MenuFlyoutItemForegroundPressed`, `MenuFlyoutItemForegroundDisabled`, `MenuFlyoutItemKeyboardAcceleratorTextForeground`, `MenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOver`, `MenuFlyoutItemKeyboardAcceleratorTextForegroundPressed`, `MenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled` |
 
+These keys are the palette baseline, including the default/`blue` accent. For an optional accent,
+`AvaloniaThemeApplier` additionally overlays the accent subset in §3.6 as direct application resources; the key
+names do not change and the palette remains the source for default restoration and high contrast. Adding a key to
+this table remains a contract change and a test update.
+
 Check boxes, radio buttons, sliders, toggles, progress bars, and tooltips keep their Fluent templates. Their
 text, accent, and selection keys resolve through the global entries above. A control that still shows a Fluent
-blue after the palette is applied is a defect in the key list, not a reason to add a template.
+blue after the palette and the §3.6 overlay are applied is a defect in the key list, not a reason to add a
+template.
 
 ### 3.5 High contrast
 
@@ -169,7 +186,107 @@ When high contrast is enabled, every token in §3.1–§3.3 and every key in §3
 
 High contrast keeps the dark/light selection underneath; it is a colour and border override, not a third layout.
 The existing `HighContrast` and `Density` dictionaries remain merged dictionaries applied by
-`AvaloniaThemeApplier`; their precedence over the palette is mandatory and tested.
+`AvaloniaThemeApplier`; their precedence over the palette is mandatory and tested. `HighContrast.axaml` also
+defines `Mocassin.FocusBrush` (`#FFD700`). When high contrast is enabled, the applier removes every direct
+accent-overlay resource in §3.6, so a selected accent cannot leak into the high-contrast values.
+
+### 3.6 Accent propagation
+
+The accent setting is a runtime overlay, not a second palette. The palette in §3.1–§3.5 is the default/`blue`
+baseline and the high-contrast source. For an optional accent, `AvaloniaThemeApplier` publishes the resources
+in this section as direct application resources; direct application resources outrank the palette. For `null`,
+the explicit `blue` key, and high contrast, the applier removes every one of them, so the palette or the
+high-contrast dictionary wins again. Density is unaffected.
+
+**Accent values.** `null` and `blue` are `#007ACC`. The five optional keys keep their values: `teal #008B8B`,
+`green #2E7D32`, `amber #B26A00`, `violet #6A4C93`, `rose #B0004F`. The hex values do not change. The
+contrast-safe values below are derived role values, not new accent-palette entries.
+
+**Derivation.** `C(a, b)` is the WCAG contrast ratio of colours `a` and `b`. `worstSurface(dark)` is `#2D2D30`
+(the brightest dark surface); `worstSurface(light)` is `#F3F3F3` (the darkest light surface).
+
+- `OnAccent(a)` is `#FFFFFF` when `C(#FFFFFF, a) >= 4.5`; otherwise `#000000`. The white-first rule preserves
+  the approved `#007ACC` white foreground and makes explicit `blue` identical to the default.
+- `AccentText(a, theme)` is `#4DA6FF` (dark) / `#005A9E` (light) for `null`/`blue`. For an optional accent it is
+  `a` when `C(a, worstSurface(theme)) >= 4.5`; otherwise it is the first 1% sRGB blend of `a` toward `#FFFFFF`
+  (dark) or `#000000` (light) that reaches 4.5.
+- `FocusAccent(a, theme)` is `a` when `C(a, worstSurface(theme)) >= 3.0`; otherwise it is the first 1% sRGB
+  blend toward `#FFFFFF` (dark) or `#000000` (light) that reaches 3.0. This is the contrast-safe variant for
+  focus rings, 2 px indicators, and Fluent accent controls. It is not the accent fill.
+- `SelectedFill(a, theme)` is `#094771` (dark) / `#CCE5FF` (light) for `null`/`blue`. For an optional accent it
+  is the channel-wise sRGB blend `round(0.30 * a + 0.70 * chrome(theme))`, with `chrome(dark) = #1E1E1E` and
+  `chrome(light) = #F3F3F3`.
+- `SelectedText(fill, theme)` is `ForegroundStrongBrush` for the theme when its contrast on `fill` is at least
+  4.5; otherwise `#FFFFFF`.
+
+The 1% blend rule is deterministic: for `t = 1, 2, …, 100`, `channel = round(a + (target - a) * t / 100)`, and
+the first `t` that meets the floor is used. Tests assert the resolved values in the table below, not the
+intermediate search.
+
+**Complete overlay set.** For an optional accent and the active light/dark values, the applier writes:
+
+| Resource | Type | Value | Consumed by |
+| --- | --- | --- | --- |
+| `SystemAccentColor` | `Color` | raw accent | Fluent accent derivation |
+| `Mocassin.AccentBrush` | brush | raw accent | `Button.accent`, accent fills, decorative splitter line |
+| `Mocassin.AccentTextBrush` | brush | `AccentText` | accent-coloured text and links |
+| `Mocassin.OnAccentBrush` | brush | `OnAccent(raw)` | text/glyphs on `AccentBrush` and accent buttons |
+| `Mocassin.FocusBrush` | brush | `FocusAccent` | explicit focus adorners, focus borders, selected-pipe indicator |
+| `Mocassin.StatusBarBackground` | brush | raw accent | status bar |
+| `Mocassin.StatusBarForeground` | brush | `OnAccent(raw)` | status text, glyphs, progress |
+| `Mocassin.SelectedBackground` | brush | `SelectedFill` | selected row/tree/combo role |
+| `Mocassin.SelectedForeground` | brush | `SelectedText` | text on `SelectedBackground` |
+| `SystemControlHighlightAccentBrush` | brush | `FocusAccent` | Fluent focus, slider/toggle/progress accent, selected highlight |
+| `SystemControlHighlightAltBaseHighBrush` | brush | `OnAccent(FocusAccent)` | text/glyphs on Fluent accent controls |
+| `SystemControlHighlightListAccentLowBrush` | brush | `SelectedFill` | Fluent list/tree selected fill |
+| `SystemControlHighlightListAccentMediumBrush` | brush | `SelectedFill` | Fluent list/tree selected fill |
+| `SystemControlHighlightListAccentHighBrush` | brush | `SelectedFill` | Fluent list/tree selected fill |
+| `AccentButtonBackground` | brush | raw accent | Fluent accent button |
+| `AccentButtonBackgroundPointerOver` | brush | raw accent | Fluent accent button |
+| `AccentButtonBackgroundPressed` | brush | raw accent | Fluent accent button |
+| `AccentButtonBorderBrush` | brush | raw accent | Fluent accent button |
+| `AccentButtonBorderBrushPointerOver` | brush | raw accent | Fluent accent button |
+| `AccentButtonBorderBrushPressed` | brush | raw accent | Fluent accent button |
+| `AccentButtonForeground` | brush | `OnAccent(raw)` | Fluent accent button |
+| `AccentButtonForegroundPointerOver` | brush | `OnAccent(raw)` | Fluent accent button |
+| `AccentButtonForegroundPressed` | brush | `OnAccent(raw)` | Fluent accent button |
+| `TextControlBorderBrushFocused` | brush | `FocusAccent` | text-input focus border |
+| `TextControlSelectionHighlightColor` | brush (the palette type) | raw accent | TextBox selection fallback |
+| `ComboBoxItemBackgroundSelected` | brush | `SelectedFill` | combo selected item |
+| `ComboBoxItemBackgroundSelectedPointerOver` | brush | `SelectedFill` | combo selected item |
+| `ComboBoxItemBackgroundSelectedPressed` | brush | `SelectedFill` | combo selected item |
+| `ComboBoxItemForegroundSelected` | brush | `SelectedText` | combo selected item |
+| `ComboBoxItemForegroundSelectedPointerOver` | brush | `SelectedText` | combo selected item |
+| `ComboBoxItemForegroundSelectedPressed` | brush | `SelectedText` | combo selected item |
+| `TabItemHeaderSelectedPipeFill` | brush | `FocusAccent` | document/console selected-tab pipe |
+
+`ShellStyles.axaml` sets `TextBox.SelectionBrush` to `Mocassin.AccentBrush` and
+`TextBox.SelectionForegroundBrush` to `Mocassin.OnAccentBrush`, so text selection always uses the matching
+pair. This is a property setter, not a control template.
+
+**Deliberately not overlaid.** Disabled keys (`AccentButtonBackgroundDisabled`,
+`AccentButtonForegroundDisabled`, `AccentButtonBorderBrushDisabled`,
+`ComboBoxItemBackgroundSelectedDisabled`), the neutral hover/pressed keys, and the non-pipe tab keys keep the
+theme values. Disabled states must remain visibly disabled.
+
+**Optional-accent values.** The table is the test oracle. `null`/`blue` use the palette values in §3.2/§3.3.
+The dark `SelectedText` is `#FFFFFF` for every row.
+
+| Accent | `OnAccent(raw)` | `AccentText` dark | `AccentText` light | `FocusAccent` dark | `FocusAccent` light | `SelectedFill` dark | `SelectedFill` light | `SelectedText` light |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `null` / `blue` | `#FFFFFF` | `#4DA6FF` | `#005A9E` | `#007ACC` | `#007ACC` | `#094771` | `#CCE5FF` | `#1F1F1F` |
+| `teal` | `#000000` | `#36A3A3` | `#007C7C` | `#008B8B` | `#008B8B` | `#096A6A` | `#49AAAA` | `#1F1F1F` |
+| `green` | `#FFFFFF` | `#69A16B` | `#2E7D32` | `#3B853E` | `#2E7D32` | `#29602C` | `#69A06C` | `#1F1F1F` |
+| `amber` | `#000000` | `#C28936` | `#A05F00` | `#B26A00` | `#B26A00` | `#865309` | `#C69349` | `#1F1F1F` |
+| `violet` | `#FFFFFF` | `#A08CBA` | `#6A4C93` | `#856CA6` | `#6A4C93` | `#533E70` | `#937EB0` | `#1F1F1F` |
+| `rose` | `#FFFFFF` | `#D578A2` | `#B0004F` | `#C64780` | `#B0004F` | `#840940` | `#C44980` | `#FFFFFF` |
+
+**Live reapply and restoration.** `StartupCoordinator` calls `Apply` for the initial settings and on every
+settings change. The applier removes the whole overlay before writing a new one. Switching between two optional
+accents replaces every row; switching to `null`, `blue`, or high contrast removes every row, and the resolved
+palette/high-contrast values are the same as a fresh start. A theme switch with the same optional accent
+recomputes the light/dark columns. `ThemeSelection.System` uses the `Default` dictionary, which mirrors `Light`
+(§2), so the light column applies.
 
 ## 4. Typography
 
@@ -228,15 +345,16 @@ The existing `HighContrast` and `Density` dictionaries remain merged dictionarie
 | Normal | `CardBackground` or `InputBackground`; `BorderBrush`; `ForegroundBrush`. |
 | Hover | `HoverBackground`; the border stays `BorderBrush`; text stays `ForegroundBrush`. |
 | Pressed | `PressedBackground`; no scale transform; text stays `ForegroundBrush`. |
-| Selected | `SelectedBackground` and `SelectedForeground` for list, tree, and combo rows. The active tab uses `TabActiveBackground`, `TabActiveForeground`, and a 2 px `AccentBrush` indicator. |
-| Focus | A visible 2 px `AccentBrush` ring, inside or outside the control, with at least 3:1 contrast against the adjacent surface. Focus is never removed for a keyboard-reachable control. |
+| Selected | `SelectedBackground` and `SelectedForeground` for list, tree, and combo rows; both follow the selected accent per §3.6. The active tab uses `TabActiveBackground`, `TabActiveForeground`, and a 2 px `FocusBrush` indicator. |
+| Focus | A visible 2 px `FocusBrush` ring, inside or outside the control, with at least 3:1 contrast against the adjacent surface. Focus is never removed for a keyboard-reachable control. |
 | Disabled | `DisabledBackground` and `DisabledForeground`; the control stays legible. Opacity alone is not a disabled treatment. |
 | Dirty/unsaved | The existing `*` marker plus its accessible name; no new colour-only signal. |
 
-Focus indicators for splitters keep the existing adorner but use `AccentBrush` and `FocusThickness`. Fluent's
-default focus adorner is acceptable where it already resolves to `SystemControlHighlightAccentBrush`; a
-control without a visible focus ring gets an explicit `FocusAdorner` from `ShellStyles.axaml`. Replacing a
-control template to obtain focus is not acceptable in this pass.
+Focus indicators for splitters keep the existing adorner but use `FocusBrush` and `FocusThickness`. Fluent's
+default focus adorner is acceptable where it resolves to `SystemControlHighlightAccentBrush`; the applier
+overlays that key to the contrast-safe `FocusAccent` value for an optional accent. A control without a visible
+focus ring gets an explicit `FocusAdorner` from `ShellStyles.axaml`. Replacing a control template to obtain
+focus is not acceptable in this pass.
 
 `Enter`, `Escape`, Tab order, and layer modality do not change. In particular, a `TabControl` selects with
 arrow keys or a click and ignores plain `Enter`, as specified in
@@ -264,7 +382,8 @@ arrow keys or a click and ignores plain `Enter`, as specified in
 - The workspace grid keeps star tracks, the existing minima, and the 6 px splitter tracks. Card margins are
   zero; the splitter gap is the visual gap. The workspace itself is inset by `RegionGap` from the window chrome
   so the outer card radius is visible; this inset is chrome and does not change the fraction model.
-- The splitter is transparent at rest. Hover shows a 1 px `AccentBrush` line; focus shows the 2 px focus ring.
+- The splitter is transparent at rest. Hover shows a 1 px `AccentBrush` line; focus shows the 2 px
+  `FocusBrush` ring.
 - The documents card contains the tab strip and the active document. The document surface uses
   `WorkspaceBackground`; the tab strip uses `ChromeBackground`.
 - The console card contains the console tab strip and the active channel. The former separate "Console" title
@@ -285,15 +404,19 @@ arrow keys or a click and ignores plain `Enter`, as specified in
 
 - Height `StatusBarHeight`; background `StatusBarBackground`; all text, glyphs, and progress use
   `StatusBarForeground`.
+- The default/`blue` background is `#007ACC` with a white foreground. Under an optional accent, the background
+  is the selected accent and the foreground is its contrast-safe `OnAccent` value: white for `green`, `violet`,
+  and `rose`; black for `teal` and `amber`. Text and progress stay at or above 4.5:1.
 - Text is caption size. The application name is `SemiBold`; the remaining items use normal weight.
-- The progress bar sits on the right, 140 px wide and 4 px high, with a white foreground on the accent bar.
+- The progress bar sits on the right, 140 px wide and 4 px high, with `StatusBarForeground` on the transparent
+  track. Its foreground/background pair meets 4.5:1.
 - The status bar has no border; the chrome backdrop and the card borders separate it from the workspace.
 
 ### 7.4 Document tab strip
 
 - Height `TabHeight`; background `TabStripBackground`; tabs use `RadiusTab` on the top corners only.
 - Inactive tab: `TabInactiveBackground`, `TabInactiveForeground`. Active tab: `TabActiveBackground`,
-  `TabActiveForeground`, plus a 2 px `AccentBrush` indicator along the top edge. The existing dirty
+  `TabActiveForeground`, plus a 2 px `FocusBrush` indicator along the top edge. The existing dirty
   `*` and close button remain.
 - Tabs keep their current order, close button, context menu, and keyboard shortcuts. Drag-reorder remains
   deferred.
@@ -433,11 +556,14 @@ The following minimum ratios are measured on the final composited colours. Norma
 | Body text on chrome, workspace, and card | `#D4D4D4` on `#1E1E1E` / `#252526` / `#2D2D30` | `#333333` on `#F3F3F3` / `#FFFFFF` / `#F3F3F3` | 4.5:1 |
 | Strong text on card | `#FFFFFF` on `#2D2D30` | `#1F1F1F` on `#F3F3F3` | 4.5:1 |
 | Muted text on chrome, workspace, and card | `#9D9D9D` on the three surfaces | `#6F6F6F` on the three surfaces | 4.5:1 |
-| Accent text on card and workspace | `#4DA6FF` | `#005A9E` | 4.5:1 |
-| On-accent text on accent | `#FFFFFF` on `#007ACC` | `#FFFFFF` on `#007ACC` | 4.5:1 |
-| Selected-row text on selected fill | `#FFFFFF` on `#094771` | `#1F1F1F` on `#CCE5FF` | 4.5:1 |
+| Accent text on chrome, workspace, and card | default `#4DA6FF`; optional `AccentText` per §3.6 | default `#005A9E`; optional `AccentText` per §3.6 | 4.5:1 |
+| On-accent text on accent fill (accent button, status bar) | `OnAccent(raw)`: white for blue/green/violet/rose, black for teal/amber | the same values | 4.5:1 |
+| On-accent text on a Fluent accent control | `OnAccent(FocusAccent)` per §3.6 | `OnAccent(FocusAccent)` per §3.6 | 4.5:1 |
+| Selected-row text on selected fill | default `#FFFFFF` on `#094771`; optional `SelectedText` on `SelectedFill` per §3.6 | default `#1F1F1F` on `#CCE5FF`; optional `SelectedText` on `SelectedFill` per §3.6 | 4.5:1 |
+| Status-bar text, glyphs, and progress on status bar | `OnAccent(raw)` on raw accent | `OnAccent(raw)` on raw accent | 4.5:1 |
+| Text selection pair (`SelectionBrush`/`SelectionForegroundBrush`) | `OnAccent(raw)` on raw accent | `OnAccent(raw)` on raw accent | 4.5:1 |
 | Error, warning, success, and info text on card | the dark semantic tokens | the light semantic tokens | 4.5:1 |
-| Focus ring against adjacent surfaces | `#007ACC` | `#007ACC` | 3:1 |
+| Focus ring and selected-pipe indicator against adjacent surfaces | default `#007ACC`; optional `FocusAccent` per §3.6 | default `#007ACC`; optional `FocusAccent` per §3.6 | 3:1 |
 
 High contrast pairs are `#FFFFFF` on `#000000` (21:1), `#000000` on `#FFD700` (about 15:1), and `#FFD700`
 against `#000000` (about 15:1). They are tested separately.
@@ -498,7 +624,8 @@ requirement; the record supplies the implementation and evidence plan. At minimu
 | Check | Tier |
 | --- | --- |
 | Palette role values, light/dark resolution, and high-contrast precedence | PR-fast headless |
-| WCAG contrast for the pairs in §11.1, both themes | PR-fast unit |
+| WCAG contrast for the pairs in §11.1, both themes and all six accent keys | PR-fast unit |
+| Accent propagation: full §3.6 overlay, status bar, accent text, focus, tab pipe, selection, default restoration, live switch, high-contrast precedence | PR-fast headless |
 | Region card radius/border/gap, tab labels/order, removed channel combo | PR-fast headless |
 | Console tab persistence, unknown-id fallback, `Enter` no-op, focus order | PR-fast headless |
 | Welcome button label centring at comfortable and compact density | PR-fast headless |
