@@ -40,7 +40,6 @@ public sealed class AppSettingsReaderTests
         var settings = new AppSettings
         {
             Theme = ThemeSelection.Dark,
-            Accent = "teal",
             Density = Density.Compact,
             FontScale = 1.25,
             HighContrast = true,
@@ -85,7 +84,6 @@ public sealed class AppSettingsReaderTests
         Assert.Contains("\"level\": \"warning\"", json, StringComparison.Ordinal);
         Assert.DoesNotContain("\"Format\"", json, StringComparison.Ordinal);
         Assert.Equal(settings.Theme, result.Settings.Theme);
-        Assert.Equal(settings.Accent, result.Settings.Accent);
         Assert.Equal(settings.FontScale, result.Settings.FontScale);
         Assert.Equal(settings.Logging.Level, result.Settings.Logging.Level);
         Assert.Equal(settings.Ui.ConfirmOnExternalChange, result.Settings.Ui.ConfirmOnExternalChange);
@@ -146,6 +144,43 @@ public sealed class AppSettingsReaderTests
         Assert.Equal(ThemeSelection.Dark, result.Settings.Theme);
     }
 
+    [Theory]
+    [InlineData("\"teal\"")]
+    [InlineData("\"orange\"")]
+    [InlineData("\"default\"")]
+    [InlineData("\"\"")]
+    public void ALegacyAccentStringIsAcceptedSilentlyAndOmittedOnWrite(string accent)
+    {
+        var result = AppSettingsJsonReader.Read(
+            $$"""{"format":"mocassin.settings","accent":{{accent}},"theme":"dark"}""");
+
+        Assert.False(result.IsFatal);
+        Assert.Empty(result.Warnings);
+        Assert.Equal(ThemeSelection.Dark, result.Settings.Theme);
+
+        var json = JsonSerializer.Serialize(result.Settings, AppSettingsJsonContext.Default.AppSettings);
+        Assert.DoesNotContain("\"accent\"", json, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("null")]
+    [InlineData("42")]
+    [InlineData("true")]
+    [InlineData("{\"value\":\"teal\"}")]
+    [InlineData("[1,2]")]
+    public void ANonStringAccentIsAcceptedSilentlyAndOmittedOnWrite(string accent)
+    {
+        var result = AppSettingsJsonReader.Read(
+            $$"""{"format":"mocassin.settings","accent":{{accent}},"theme":"light"}""");
+
+        Assert.False(result.IsFatal);
+        Assert.Empty(result.Warnings);
+        Assert.Equal(ThemeSelection.Light, result.Settings.Theme);
+
+        var json = JsonSerializer.Serialize(result.Settings, AppSettingsJsonContext.Default.AppSettings);
+        Assert.DoesNotContain("\"accent\"", json, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void BadValuesFallBackPerFieldWithWarnings()
     {
@@ -156,7 +191,6 @@ public sealed class AppSettingsReaderTests
               "theme": "purple",
               "density": "wide",
               "fontScale": 9,
-              "accent": "orange",
               "logging": { "level": "verbose" },
               "layout": {
                 "leftFraction": 0.9,
@@ -171,7 +205,6 @@ public sealed class AppSettingsReaderTests
         Assert.Equal(ThemeSelection.System, result.Settings.Theme);
         Assert.Equal(Density.Comfortable, result.Settings.Density);
         Assert.Equal(SettingsDefaults.DefaultFontScale, result.Settings.FontScale);
-        Assert.Null(result.Settings.Accent);
         Assert.Equal(SettingsLogLevel.Information, result.Settings.Logging.Level);
         Assert.Equal(SettingsDefaults.DefaultLeftFraction, result.Settings.Layout.LeftFraction);
         Assert.Equal(SettingsDefaults.DefaultRightFraction, result.Settings.Layout.RightFraction);
@@ -385,7 +418,6 @@ public sealed class AppSettingsReaderTests
         var settings = new AppSettings
         {
             FontScale = 4,
-            Accent = "orange",
             Culture = " ",
             Layout = new LayoutSettings
             {
@@ -409,7 +441,6 @@ public sealed class AppSettingsReaderTests
         var (normalized, warnings) = AppSettingsValidator.Normalize(settings);
 
         Assert.Equal(SettingsDefaults.DefaultFontScale, normalized.FontScale);
-        Assert.Null(normalized.Accent);
         Assert.Equal("en", normalized.Culture);
         Assert.Equal(SettingsDefaults.DefaultLeftFraction, normalized.Layout.LeftFraction);
         Assert.Equal(SettingsDefaults.DefaultRightFraction, normalized.Layout.RightFraction);

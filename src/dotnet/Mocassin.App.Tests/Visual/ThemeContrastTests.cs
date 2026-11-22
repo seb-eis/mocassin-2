@@ -37,6 +37,7 @@ public sealed class ThemeContrastTests
             ["Mocassin.AccentBrush"] = ("#007ACC", "#007ACC"),
             ["Mocassin.AccentTextBrush"] = ("#4DA6FF", "#005A9E"),
             ["Mocassin.OnAccentBrush"] = ("#FFFFFF", "#FFFFFF"),
+            ["Mocassin.FocusBrush"] = ("#248DD3", "#007ACC"),
             ["Mocassin.TabActiveForeground"] = ("#FFFFFF", "#1F1F1F"),
             ["Mocassin.TabInactiveForeground"] = ("#9D9D9D", "#6F6F6F"),
             ["Mocassin.HoverBackground"] = ("#37373D", "#E8E8E8"),
@@ -57,11 +58,21 @@ public sealed class ThemeContrastTests
             ["Mocassin.StatusBarForeground"] = ("#FFFFFF", "#FFFFFF"),
         };
 
-    private static readonly string[] optionalAccents = ["blue", "teal", "green", "amber", "violet", "rose"];
-    private static readonly ThemeSelection[] bothThemes = [ThemeSelection.Light, ThemeSelection.Dark];
     private static readonly string[] darkSurfaces = ["#1E1E1E", "#252526", "#2D2D30"];
     private static readonly string[] lightSurfaces = ["#F3F3F3", "#FFFFFF", "#F3F3F3"];
     private static readonly string[] focusSurfaces = ["#1E1E1E", "#252526", "#2D2D30", "#FFFFFF", "#F3F3F3"];
+    private static readonly string[] darkFocusSurfaces = ["#1E1E1E", "#252526", "#2D2D30", "#3C3C3C", "#37373D"];
+    private static readonly string[] lightFocusSurfaces = ["#F3F3F3", "#FFFFFF"];
+
+    private static readonly string[] derivedAccentKeys =
+    [
+        "SystemAccentColorLight1",
+        "SystemAccentColorLight2",
+        "SystemAccentColorLight3",
+        "SystemAccentColorDark1",
+        "SystemAccentColorDark2",
+        "SystemAccentColorDark3",
+    ];
 
     private static readonly string[] fluentKeys =
     [
@@ -84,6 +95,32 @@ public sealed class ThemeContrastTests
         "SystemControlHighlightListAccentLowBrush",
         "SystemControlHighlightListAccentMediumBrush",
         "SystemControlHighlightListAccentHighBrush",
+        "SystemControlForegroundAccentBrush",
+        "SystemControlHighlightAccent2RevealBackgroundBrush",
+        "SystemControlHighlightAccent3RevealBackgroundBrush",
+        "SystemControlHighlightAltChromeWhiteBrush",
+        "SystemControlHighlightChromeWhiteBrush",
+        "SystemControlFocusVisualPrimaryBrush",
+        "SystemControlFocusVisualSecondaryBrush",
+        "CheckBoxCheckBackgroundFillChecked",
+        "CheckBoxCheckBackgroundFillIndeterminate",
+        "CheckBoxCheckBackgroundStrokeIndeterminate",
+        "CheckBoxCheckGlyphForegroundChecked",
+        "CheckBoxCheckGlyphForegroundCheckedPointerOver",
+        "CheckBoxCheckGlyphForegroundCheckedPressed",
+        "CheckBoxCheckGlyphForegroundIndeterminate",
+        "CheckBoxCheckGlyphForegroundIndeterminatePointerOver",
+        "CheckBoxCheckGlyphForegroundIndeterminatePressed",
+        "CheckBoxForegroundUncheckedPressed",
+        "CheckBoxCheckBackgroundFillUncheckedPressed",
+        "CheckBoxCheckBackgroundFillCheckedDisabled",
+        "CheckBoxCheckBackgroundFillIndeterminateDisabled",
+        "CheckBoxCheckGlyphForegroundCheckedDisabled",
+        "CheckBoxCheckGlyphForegroundIndeterminateDisabled",
+        "SliderThumbBackground",
+        "SliderTrackValueFill",
+        "SliderTrackValueFillPointerOver",
+        "SliderTrackValueFillPressed",
         "ButtonBackground",
         "ButtonBackgroundPointerOver",
         "ButtonBackgroundPressed",
@@ -251,7 +288,6 @@ public sealed class ThemeContrastTests
                         Theme = ThemeSelection.Dark,
                         HighContrast = true,
                         Density = Density.Compact,
-                        Accent = "teal",
                     });
 
                 Assert.Equal(ThemeVariant.Dark, Application.Current!.RequestedThemeVariant);
@@ -259,6 +295,15 @@ public sealed class ThemeContrastTests
                 Assert.Equal("#FFD700", Hex(ResolveColor("Mocassin.BorderBrush", ThemeVariant.Dark)));
                 Assert.Equal("#FFFFFF", Hex(ResolveColor("Mocassin.ForegroundBrush", ThemeVariant.Dark)));
                 Assert.Equal("#000000", Hex(ResolveColor("Mocassin.OnAccentBrush", ThemeVariant.Dark)));
+                Assert.Equal("#FFD700", Hex(ResolveColor("Mocassin.FocusBrush", ThemeVariant.Dark)));
+                Assert.Equal("#FFD700", Hex(ResolveColor("SystemControlFocusVisualPrimaryBrush", ThemeVariant.Dark)));
+                Assert.Equal("#000000", Hex(ResolveColor("SystemControlFocusVisualSecondaryBrush", ThemeVariant.Dark)));
+                Assert.Equal("#000000", Hex(ResolveColor("SystemControlForegroundChromeWhiteBrush", ThemeVariant.Dark)));
+                Assert.Equal("#000000", Hex(ResolveColor("SystemControlHighlightAltChromeWhiteBrush", ThemeVariant.Dark)));
+                Assert.Equal("#000000", Hex(ResolveColor("SystemControlHighlightChromeWhiteBrush", ThemeVariant.Dark)));
+                Assert.Equal("#FFFFFF", Hex(ResolveColor("CheckBoxForegroundUncheckedPressed", ThemeVariant.Dark)));
+                Assert.Equal("#FFD700", Hex(ResolveColor("CheckBoxCheckBackgroundFillUncheckedPressed", ThemeVariant.Dark)));
+                Assert.Equal("#A0A0A0", Hex(ResolveColor("CheckBoxForegroundCheckedDisabled", ThemeVariant.Dark)));
                 Assert.Equal(new Thickness(2), Application.Current.Resources["Mocassin.BorderThickness"]);
                 Assert.Equal(new Thickness(4), Application.Current.Resources["Mocassin.ControlPadding"]);
                 Assert.Equal(26d, Application.Current.Resources["Mocassin.ControlMinHeight"]);
@@ -268,6 +313,13 @@ public sealed class ThemeContrastTests
                         Application.Current.Resources.TryGetResource(key, ThemeVariant.Dark, out var value),
                         $"{key} did not resolve in high contrast.");
                     Assert.NotNull(value);
+                }
+
+                foreach (var key in derivedAccentKeys)
+                {
+                    Assert.Equal(
+                        "#FFD700",
+                        Hex(Assert.IsType<Color>(ResolveResource(key, ThemeVariant.Dark))));
                 }
             });
 
@@ -283,27 +335,129 @@ public sealed class ThemeContrastTests
             });
 
     [Fact]
-    public Task EveryOptionalAccentPublishesAContrastSafeOnAccentBrush() =>
+    public Task TheSixDerivedAccentKeysAreColorsInEveryThemeAndHighContrast() =>
         HeadlessSession.DispatchAsync(
             () =>
             {
                 var applier = new AvaloniaThemeApplier();
-                foreach (var accent in optionalAccents)
+                foreach (var (selection, variant) in new[]
                 {
-                    foreach (var theme in bothThemes)
+                    (ThemeSelection.Light, ThemeVariant.Light),
+                    (ThemeSelection.Dark, ThemeVariant.Dark),
+                    (ThemeSelection.System, ThemeVariant.Default),
+                })
+                {
+                    applier.Apply(AppSettings.Default with { Theme = selection });
+                    foreach (var key in derivedAccentKeys)
                     {
-                        applier.Apply(AppSettings.Default with { Theme = theme, Accent = accent });
-                        var accentColor = ResolveColor("Mocassin.AccentBrush", ThemeVariant.Default);
-                        var onAccent = ResolveColor("Mocassin.OnAccentBrush", ThemeVariant.Default);
-                        Assert.True(
-                            Contrast(onAccent, accentColor) >= 4.5,
-                            $"{accent}/{theme} on-accent contrast was {Contrast(onAccent, accentColor):F2}.");
+                        Assert.IsType<Color>(ResolveResource(key, variant));
                     }
                 }
 
-                applier.Apply(AppSettings.Default with { Accent = "blue" });
-                Assert.Equal("#007ACC", Hex(ResolveColor("Mocassin.AccentBrush", ThemeVariant.Default)));
+                applier.Apply(AppSettings.Default with { Theme = ThemeSelection.Dark, HighContrast = true });
+                foreach (var key in derivedAccentKeys)
+                {
+                    Assert.Equal("#FFD700", Hex(Assert.IsType<Color>(ResolveResource(key, ThemeVariant.Dark))));
+                }
             });
+
+    [Fact]
+    public Task TheFixedFamilyUsesTheContractValuesInBothThemes() =>
+        HeadlessSession.DispatchAsync(
+            () =>
+            {
+                var applier = new AvaloniaThemeApplier();
+                applier.Apply(AppSettings.Default with { Theme = ThemeSelection.Dark });
+                Assert.Equal("#007ACC", Hex(ResolveColor("Mocassin.AccentBrush", ThemeVariant.Dark)));
+                Assert.Equal("#FFFFFF", Hex(ResolveColor("Mocassin.OnAccentBrush", ThemeVariant.Dark)));
+                Assert.Equal("#248DD3", Hex(ResolveColor("Mocassin.FocusBrush", ThemeVariant.Dark)));
+                Assert.Equal("#4DA6FF", Hex(ResolveColor("Mocassin.AccentTextBrush", ThemeVariant.Dark)));
+                Assert.Equal("#094771", Hex(ResolveColor("Mocassin.SelectedBackground", ThemeVariant.Dark)));
+                Assert.Equal("#FFFFFF", Hex(ResolveColor("Mocassin.SelectedForeground", ThemeVariant.Dark)));
+                Assert.Equal("#248DD3", Hex(ResolveColor("SystemControlHighlightAccentBrush", ThemeVariant.Dark)));
+                Assert.Equal("#248DD3", Hex(ResolveColor("TabItemHeaderSelectedPipeFill", ThemeVariant.Dark)));
+                Assert.Equal("#248DD3", Hex(ResolveColor("TextControlBorderBrushFocused", ThemeVariant.Dark)));
+                Assert.Equal("#3A9CDD", Hex(Assert.IsType<Color>(ResolveResource("SystemAccentColorLight1", ThemeVariant.Dark))));
+                Assert.Equal("#248CD1", Hex(Assert.IsType<Color>(ResolveResource("SystemAccentColorDark1", ThemeVariant.Dark))));
+
+                applier.Apply(AppSettings.Default with { Theme = ThemeSelection.Light });
+                Assert.Equal("#007ACC", Hex(ResolveColor("Mocassin.AccentBrush", ThemeVariant.Light)));
+                Assert.Equal("#007ACC", Hex(ResolveColor("Mocassin.FocusBrush", ThemeVariant.Light)));
+                Assert.Equal("#005A9E", Hex(ResolveColor("Mocassin.AccentTextBrush", ThemeVariant.Light)));
+                Assert.Equal("#CCE5FF", Hex(ResolveColor("Mocassin.SelectedBackground", ThemeVariant.Light)));
+                Assert.Equal("#1F1F1F", Hex(ResolveColor("Mocassin.SelectedForeground", ThemeVariant.Light)));
+                Assert.Equal("#007ACC", Hex(ResolveColor("SystemControlHighlightAccentBrush", ThemeVariant.Light)));
+                Assert.Equal("#0090F0", Hex(Assert.IsType<Color>(ResolveResource("SystemAccentColorLight1", ThemeVariant.Light))));
+                Assert.Equal("#005994", Hex(Assert.IsType<Color>(ResolveResource("SystemAccentColorDark1", ThemeVariant.Light))));
+            });
+
+    [Fact]
+    public void FixedFamilyPairsMeetTheContrastFloor()
+    {
+        // Text roles on the surfaces they are used on.
+        foreach (var surface in darkSurfaces)
+        {
+            AssertAtLeast("#4DA6FF", surface, 4.5);
+        }
+
+        foreach (var surface in lightSurfaces)
+        {
+            AssertAtLeast("#005A9E", surface, 4.5);
+        }
+
+        AssertAtLeast("#FFFFFF", "#007ACC", 4.5);
+        AssertAtLeast("#FFFFFF", "#094771", 4.5);
+        AssertAtLeast("#1F1F1F", "#CCE5FF", 4.5);
+        AssertAtLeast("#FFFFFF", "#007ACC", 3.0);
+
+        // Paired focus/derived values on the surfaces they are rendered against.
+        foreach (var surface in darkFocusSurfaces)
+        {
+            AssertAtLeast("#248DD3", surface, 3.0);
+            AssertAtLeast("#3A9CDD", surface, 3.0);
+            AssertAtLeast("#248CD1", surface, 3.0);
+        }
+
+        foreach (var surface in lightFocusSurfaces)
+        {
+            AssertAtLeast("#007ACC", surface, 3.0);
+            AssertAtLeast("#0090F0", surface, 3.0);
+            AssertAtLeast("#005994", surface, 3.0);
+        }
+
+        // Text selection pair.
+        AssertAtLeast("#FFFFFF", "#007ACC", 4.5);
+        AssertAtLeast("#000000", "#FFD700", 4.5);
+
+        // High contrast.
+        AssertAtLeast("#FFFFFF", "#000000", 21.0);
+        AssertAtLeast("#000000", "#FFD700", 4.5);
+        AssertAtLeast("#FFD700", "#000000", 3.0);
+    }
+
+    [Fact]
+    public void TheNeutralFocusPairMeetsTheLayeredFloor()
+    {
+        // Light: primary black against the light surfaces, inner secondary white against the primary.
+        foreach (var surface in lightFocusSurfaces)
+        {
+            AssertAtLeast("#000000", surface, 3.0);
+        }
+
+        AssertAtLeast("#FFFFFF", "#000000", 3.0);
+
+        // Dark: primary white against the dark surfaces, inner secondary black against the primary.
+        foreach (var surface in darkFocusSurfaces)
+        {
+            AssertAtLeast("#FFFFFF", surface, 3.0);
+        }
+
+        AssertAtLeast("#000000", "#FFFFFF", 3.0);
+
+        // High contrast: gold primary on black, black secondary on gold.
+        AssertAtLeast("#FFD700", "#000000", 3.0);
+        AssertAtLeast("#000000", "#FFD700", 3.0);
+    }
 
     [Fact]
     public void TextPairsMeetTheContractFloor()
@@ -348,10 +502,16 @@ public sealed class ThemeContrastTests
 
     private static Color ResolveColor(string key, ThemeVariant variant)
     {
+        return Assert.IsAssignableFrom<ISolidColorBrush>(ResolveResource(key, variant)).Color;
+    }
+
+    private static object ResolveResource(string key, ThemeVariant variant)
+    {
         Assert.True(
             Application.Current!.Resources.TryGetResource(key, variant, out var value),
             $"{key} did not resolve under {variant}.");
-        return Assert.IsAssignableFrom<ISolidColorBrush>(value).Color;
+        Assert.NotNull(value);
+        return value;
     }
 
     private static string Hex(Color color) => $"#{color.R:X2}{color.G:X2}{color.B:X2}";
