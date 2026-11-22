@@ -12,7 +12,7 @@
 | --- | --- |
 | Review ID | `MAINT-2026-11-22-GUI-ACCENT` |
 | Type | Out-of-step maintenance design review (not a roadmap step) |
-| Target commit | `c0628c247e1bdb188c94fcff44689896f3de1293` |
+| Target commit | `6ed4858f562ec9f29e1042b6ae4294bd3cac6fef` |
 | Docs branch | `fix/gui-accent-propagation` |
 | Request owner | Planner |
 | Orchestrator | — |
