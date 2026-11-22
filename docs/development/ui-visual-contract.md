@@ -55,7 +55,7 @@ Rules:
   a `region-card`/`overlay-card` class. Do not keep a universal `Border` selector that adds a border to every
   nested `Border`, banner, or separator.
 - Effective precedence, highest first:
-  1. direct application resources written by `AvaloniaThemeApplier` (font scale, the accent overlay, runtime
+  1. direct application resources written by `AvaloniaThemeApplier` (font scale, `SystemAccentColor`, runtime
      density, border thickness, motion);
   2. the high-contrast merged dictionary;
   3. the compact-density merged dictionary;
