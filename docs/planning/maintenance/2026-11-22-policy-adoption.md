@@ -1,6 +1,7 @@
 # Policy adoption — 2026-11-22
 
-**Status:** Adopted by the owner; binding and tooling follow-up assigned to the implementor.
+**Status:** Merged into `main` as `9bb92e1ec2ec6825a688c4f6e201684ed8815acd` (`--no-ff`), confirmation CI
+`45033099422` green, branch deleted locally and remotely, no tag.
 **Source:** private `seb-eis/opencode-workflow` repository at commit
 `74e3c6dc2fb9228665fa0f785f4565b5b138527f`, read-only clone at `/home/node/tmp/opencode-workflow`.
 **Branch:** `docs/policy-adoption` from `main` at `214b09ac0457e8f2203a80086ed9656e1c46f7cf`.
@@ -314,3 +315,34 @@ it by default.
 **Deviations.** None from §5. The binding test in `tools/tests/test_opencode_binding.py` was updated because it is
 the process-check test for this binding, not an unrelated test. `./tools/verify.sh policy --require` also runs the
 API and contract checks by design; the process-consistency result is the row that covers §5.9.
+
+## Merge closeout (2026-11-22)
+
+- **Merge commit:** `9bb92e1ec2ec6825a688c4f6e201684ed8815acd` — `docs: adopt standard-profile policy and role
+  bindings [skip ci]`. It is a `--no-ff` merge with parents `214b09ac0457e8f2203a80086ed9656e1c46f7cf`
+  (`docs: record tabs and scroll gutter merge closeout [skip ci]`, the `main` base) and
+  `2d2cf2df272e7b9488b1c163ad0d4f358d988d53` (`docs: record policy-adoption binding evidence [skip ci]`, the tip
+  of `docs/policy-adoption`). No commit was added, amended, rebased, or squashed.
+- **`[skip ci]` deviation and the owner decision.** The merge commit carried `[skip ci]`, so no automatic `main`
+  CI run followed the merge. Rather than accept an untested merge on the strength of the branch-local gates, the
+  owner approved one confirmation `workflow_dispatch` run instead of accepting the skip, and it was dispatched
+  with `platforms=ubuntu` and `force_all=true`:
+  - Run: [`45033099422`](https://github.com/seb-eis/mocassin-2/actions/runs/45033099422), `head_sha`
+    `9bb92e1ec2ec6825a688c4f6e201684ed8815acd`, conclusion `success`.
+  - Jobs that ran, all green: **Detect changes**; **Rust** (format, clippy, test, release build);
+    **.NET (ubuntu-latest)** (restore, build, test with coverage, format); **Contracts and policy** (contract
+    drift, space-group catalog drift, SPDX licence headers, secret scan, cargo-deny); **Python (3.13)** (tests
+    with coverage, wheel and sdist build); and **Public API compatibility** (restore, build, NuGet licence
+    policy, NuGet vulnerability audit, ApiCompat baseline).
+  - Skipped by design for an Ubuntu dispatch: the conditional `Platform tests - *` and `Upload test results and
+    distributions` steps. Windows and macOS were not run, per the CI cost policy.
+- **Model-economics fallback.** This closeout was assigned to `dev-free` first. That binding reported its free
+  usage limit before doing any work, so the lead re-spawned the same bounded assignment on the paid `dev`
+  binding, as [`docs/development/model-economics.md`](../../development/model-economics.md) requires. The fallback
+  is recorded here rather than left implicit.
+- **Branch and tag.** `docs/policy-adoption` was deleted locally and on `origin` after the green confirmation run.
+  No tag was created: this was a process and tooling change on `main`, not a step or milestone closeout, and
+  `step-NN`/`milestone-mN` tags remain reserved for those.
+- **Restart note.** The running service still holds the pre-rename agent list (see §8). New sessions select
+  `lead` by default through `opencode.json`; existing sessions keep their loaded binding until they restart. This
+  run did not restart the service.
