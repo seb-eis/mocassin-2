@@ -47,7 +47,7 @@ pub struct ContextLimits {
     /// Maximum path nodes of one jump direction (default 10, the state-code bound).
     ///
     /// This may be lowered but not raised above the fixed 10-node jump-status scratch
-    /// ([`super::jumps::MAX_PATH_NODES`]); a larger value is rejected as invalid input before any allocation.
+    /// (`jumps::MAX_PATH_NODES`); a larger value is rejected as invalid input before any allocation.
     pub max_path_nodes: u8,
     /// Byte cap for the site table plus the site+pair vectors (default 512 MiB).
     pub max_energy_vector_bytes: u64,
