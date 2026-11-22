@@ -164,7 +164,8 @@ The normative rules and values are in visual contract §3.6. The implementation 
 - `SelectedFill(a, theme)` keeps the approved `#094771`/`#CCE5FF` for `null`/`blue`. For an optional accent it
   is the 30% accent / 70% chrome blend, so the selected row reads as the chosen accent instead of blue.
 - `SelectedText(fill, theme)` is the theme's `ForegroundStrongBrush` when it passes 4.5:1 on the fill;
-  otherwise white. Dark is white for every accent; light is `#1F1F1F` except rose, which needs white.
+  otherwise its opposite (`#000000` in dark, `#FFFFFF` in light). Dark is white for every accent; light is
+  `#1F1F1F` except rose, which needs white.
 
 The exact optional-accent values are in visual contract §3.6 and are the test oracle. They are derived values,
 not new palette entries.

@@ -217,7 +217,7 @@ contrast-safe values below are derived role values, not new accent-palette entri
   is the channel-wise sRGB blend `round(0.30 * a + 0.70 * chrome(theme))`, with `chrome(dark) = #1E1E1E` and
   `chrome(light) = #F3F3F3`.
 - `SelectedText(fill, theme)` is `ForegroundStrongBrush` for the theme when its contrast on `fill` is at least
-  4.5; otherwise `#FFFFFF`.
+  4.5; otherwise its opposite (`#000000` in dark, `#FFFFFF` in light).
 
 The 1% blend rule is deterministic: for `t = 1, 2, …, 100`, `channel = round(a + (target - a) * t / 100)`, and
 the first `t` that meets the floor is used. Tests assert the resolved values in the table below, not the
