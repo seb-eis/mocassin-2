@@ -11,6 +11,14 @@ original behaviour to preserve, the target design, concrete tasks, acceptance cr
 
 > **Planning checkpoint:** the accepted planning state is tagged `planning-complete`. The development
 > readiness checkpoint is tagged `development-ready`.
+>
+> **Adoption profile: `standard`.** The repository uses the `standard` profile for a solo developer or small
+> team: branches, local gates, a design review per step (`Full` or `Light` depth; `None` pre-authorized for
+> documentation, typos, test-only, mechanical refactors, and generated refreshes), a fresh-context completion
+> audit, one closeout CI run, one automatic `main` run, and a cumulative approval report before a merge or tag.
+> The gate matrix is in [`AGENTS.md` §3.15](../../AGENTS.md), the design classes in
+> [`../development/design-proportionality.md`](../development/design-proportionality.md), and the model tiers in
+> [`../development/model-economics.md`](../development/model-economics.md).
 
 ## Reading order
 
@@ -109,6 +117,9 @@ items are tracked in [`05-open-decisions.md`](05-open-decisions.md).
 - Step pages record a complexity class and split decision per
   [`04-roadmap.md` §3.1](04-roadmap.md#31-step-sizing-and-split-triggers) at design time; person-week figures
   are non-gating forecasts.
+- Step pages from Step 15 onward record a **design class** (`Full`, `Light`, or `None`) and its one-line
+  justification per [`../development/design-proportionality.md`](../development/design-proportionality.md).
+  Completed step pages and historical records are not rewritten.
 - Contracts in [`02-data-contracts.md`](02-data-contracts.md) change only through an ADR and a schema
   version bump.
 - Independent reviewers write their evidence, findings, and verdict directly into the durable review or audit

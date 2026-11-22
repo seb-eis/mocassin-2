@@ -7,6 +7,7 @@
 | Amendment ID | `step-NN-amend-M` |
 | Parent step | NN — Step title |
 | Status | Proposed |
+| Design class | Full / Light / None (with one-line record) |
 | Branch | — |
 | Design review | `docs/planning/reviews/step-NN-amend-M.md` |
 | Parent audit | `docs/planning/audits/step-NN.md` |

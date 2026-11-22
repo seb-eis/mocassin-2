@@ -1,7 +1,7 @@
 # Step NN Design Review
 
-> Reviewer: write the evidence, findings, and verdict directly into
-> `docs/planning/reviews/step-NN.md`. You may edit only your own metadata (`Reviewer`, `Review date`, `Record state`), the checklist completion marks and inline verification notes (not item text), the
+> Review agent: write the evidence, findings, and verdict directly into
+> `docs/planning/reviews/step-NN.md`. You may edit only your own metadata (`Review agent`, `Review date`, `Record state`), the checklist completion marks and inline verification notes (not item text), the
 > `Evidence`, `Findings`, and `Verdict` sections, and commit only that file with a documentation-only message
 > and `[skip ci]`. Do not edit the request scope, checklist item text, resolutions, code, tests, configuration,
 > status dashboard, step page, or any other file.
@@ -11,23 +11,27 @@
 | Field | Value |
 | --- | --- |
 | Step | NN — Step title |
-| Request owner | Step agent (implementor) |
-| Orchestrator | — |
-| Step agent (implementor) | — |
-| Review initiated by | Orchestrator, on request of the planner or step agent |
+| Request owner | Dev |
+| Lead | — |
+| Dev | — |
+| Review initiated by | Lead, on request of the design agent or dev |
+| Design class | Full / Light |
 | Reviewed commit | — |
 | Docs branch | — |
 | Review date | — |
-| Reviewer | — |
+| Review agent | — |
 
 Step page: [`Step NN — Step title`](../steps/step-NN-short-title.md)
 
-> Orchestration: the orchestrator spawns a fresh planning auditor after the step agent has frozen the design and
-> completed the review request, and relays the verdict and owner decisions. The planner and step agent update the
-> design docs, apply fixes on the design docs or a maintenance branch, add resolutions without altering reviewer
-> text, and ask the orchestrator for re-review until the auditor no longer identifies issues. The orchestrator
-> does not edit the design or the review record. The human owner approves the final verdict and the start of
-> implementation.
+> Coordination: the lead spawns a fresh review agent after the dev has frozen the design and completed the
+> review request, and relays the verdict and owner decisions. The design agent and dev update the design docs,
+> apply fixes on the design docs or a maintenance branch, add resolutions without altering review text, and ask
+> the lead for re-review until the review agent no longer identifies issues. The lead does not edit the design or
+> the review record. The human owner approves the final verdict and the start of implementation.
+>
+> Design depth: a `Light` review answers the five design questions only and is one pass. A `Full` review uses the
+> full checklist and stops when no Blocker or Major remains. Minor and Note findings are accepted or deferred and
+> do not trigger another round. A third Full round needs an owner decision.
 
 ## Step summary
 
@@ -57,6 +61,9 @@ Step page: [`Step NN — Step title`](../steps/step-NN-short-title.md)
 
 ## Standard design-review checklist
 
+Use this full checklist for a `Full` step. A `Light` step answers the five design questions only.
+
+- [ ] Design class (`Full` or `Light`) is recorded and matches the triggers
 - [ ] Scope, non-goals, and acceptance criteria are explicit and testable
 - [ ] Complexity class and split decision are recorded and justified per
       [`04-roadmap.md` §3.1](../04-roadmap.md#31-step-sizing-and-split-triggers)
@@ -76,13 +83,14 @@ Commands run:
 
 ## Findings
 
-| Severity | Finding | Evidence |
-| --- | --- | --- |
-| — | — | — |
+| Severity | Origin | Finding | Evidence |
+| --- | --- | --- | --- |
+| — | — | — | — |
 
-Severity values: **Blocker**, **Major**, **Minor**, **Note**. The planning auditor writes the findings and
-verdict directly. The step agent adds resolutions in the separate `Resolution status` section without altering
-the auditor's findings, evidence, or verdict.
+Severity values: **Blocker**, **Major**, **Minor**, **Note**. Origin: **design**, **implementation**,
+**evidence**, or **documentation**. The review agent writes the findings and verdict directly. The dev adds
+resolutions in the separate `Resolution status` section without altering the review agent's findings, evidence,
+or verdict.
 
 ## Record state
 
@@ -93,7 +101,7 @@ the auditor's findings, evidence, or verdict.
 ## Reviewer independence
 
 > I am a fresh context. I did not author or implement the reviewed work and have no shared conversation with the
-> planner, implementor, or orchestrator.
+> design agent, dev, or lead.
 
 ## Verdict
 
@@ -107,11 +115,11 @@ Follow-up step:
 
 ## Approval summary
 
-The request owner (step agent or planner) completes this section before the orchestrator presents the approval
+The request owner (dev or design agent) completes this section before the lead presents the approval
 request. It must cover the full history, not only the latest round.
 
 - [ ] Requested decision and frozen commit recorded
-- [ ] Every review/audit round recorded (round, date, commit, reviewer, verdict)
+- [ ] Every review/audit round recorded (round, date, commit, review agent, verdict)
 - [ ] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
 - [ ] Accepted notes and waivers recorded with rationale
 - [ ] Residual risks, deferred items, and follow-up owners recorded
@@ -120,7 +128,7 @@ request. It must cover the full history, not only the latest round.
 
 Round history:
 
-| Round | Date | Commit | Reviewer | Verdict |
+| Round | Date | Commit | Review agent | Verdict |
 | --- | --- | --- | --- | --- |
 | — | — | — | — | — |
 
@@ -146,7 +154,7 @@ Date:
 | --- | --- | --- | --- |
 | — | — | — | — |
 
-The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
+The dev fills this section after the verdict. Do not alter the review agent-authored findings, evidence, or
 verdict.
 
 ## Review rounds

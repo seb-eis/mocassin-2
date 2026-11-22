@@ -48,31 +48,31 @@ The checkpoints record:
 
 | Role | Responsibility |
 | --- | --- |
-| Orchestrator | Coordinates the review, freezes nothing itself, spawns the reviewer, relays findings and decisions |
-| Planner / implementor | Prepares the request, scope, and checklist; remediates findings and adds resolutions |
-| Reviewer | Fresh independent context; writes evidence, findings, and verdict only |
+| Lead | Coordinates the review, freezes nothing itself, spawns the review agent, relays findings and decisions |
+| Design agent / dev | Prepares the request, scope, and checklist; remediates findings and adds resolutions |
+| Review agent | Fresh independent context; writes evidence, findings, and verdict only |
 | Human owner | Approves the checklists, final verdicts, and phase gate |
 
-The orchestrator must not be the reviewer, must not fix findings, and must not edit reviewer text. It may
+The lead must not be the review agent, must not fix findings, and must not edit review agent text. It may
 coordinate the combined review; when the owner asks for three separate reviews, each gets a fresh context.
 
-## 3. Orchestration
+## 3. Coordination
 
 Each review uses the same round-based process as design reviews and implementation:
 
-1. The planner or implementor prepares the request, scope, checklist, and target commit, and asks the
-   orchestrator for a reviewer.
-2. The orchestrator spawns a fresh reviewer. It provides the frozen commit, record, repository links, and
+1. The design agent or dev prepares the request, scope, checklist, and target commit, and asks the
+   lead for a review agent.
+2. The lead spawns a fresh review agent. It provides the frozen commit, record, repository links, and
    required commands/scope. It must not provide a desired verdict, pass on its conversation history, or a
    summary that substitutes for reading the repository.
-3. The reviewer writes evidence, findings, verdict, and checklist marks into its record and commits only that
+3. The review agent writes evidence, findings, verdict, and checklist marks into its record and commits only that
    file with `[skip ci]`.
-4. If the reviewer reports findings, the planner or implementor fixes the repository state on a maintenance
+4. If the review agent reports findings, the design agent or dev fixes the repository state on a maintenance
    branch, updates the appropriate design/process/docs artifact, adds resolutions to the record without
-   altering reviewer text, sets the record state to `Re-review required`, and records the new commit.
-5. The orchestrator spawns a fresh reviewer for the new commit. The same reviewer may continue only if it stayed
+   altering review agent text, sets the record state to `Re-review required`, and records the new commit.
+5. The lead spawns a fresh review agent for the new commit. The same review agent may continue only if it stayed
    read-only and did not participate in the remediation; otherwise use a fresh context. Append a new round.
-6. Repeat until the reviewer no longer identifies Blocker/Major issues. The human owner approves the final
+6. Repeat until the review agent no longer identifies Blocker/Major issues. The human owner approves the final
    verdict and the phase gate.
 
 ## 4. Original-design fidelity (architecture review)
@@ -98,25 +98,25 @@ Examples of original strengths to look for include the per-environment energy ca
 deltas, the selection pool and selection optimizers, pre-run normalization, static `S2` corrections, CSR
 neighbor links, and incremental lattice-energy updates.
 
-## 5. Reviewer rules
+## 5. Review agent rules
 
-- The reviewer is a fresh context with no shared conversation with the orchestrator or implementors.
-- The reviewer reads the repository at the frozen commit. A summary from the orchestrator is not evidence.
-- The reviewer may check checklist boxes and add short inline verification notes. It may not change item text.
-- The reviewer writes only its assigned record, may set the `Record state` field, and commits only that file
+- The review agent is a fresh context with no shared conversation with the lead or devs.
+- The review agent reads the repository at the frozen commit. A summary from the lead is not evidence.
+- The review agent may check checklist boxes and add short inline verification notes. It may not change item text.
+- The review agent writes only its assigned record, may set the `Record state` field, and commits only that file
   with `[skip ci]`.
-- The reviewer must not fix findings, merge, tag, push `main`, or delete branches.
-- The reviewer must not be asked for a particular verdict and is not re-spawned until a preferred verdict
+- The review agent must not fix findings, merge, tag, push `main`, or delete branches.
+- The review agent must not be asked for a particular verdict and is not re-spawned until a preferred verdict
   appears.
-- The reviewer records exact commands, results, and file references behind the verdict.
+- The review agent records exact commands, results, and file references behind the verdict.
 
 ## 6. Status values
 
 | Status | Meaning |
 | --- | --- |
 | **Planned** | Scope approved; waiting for the phase's last step to complete and the checkpoint to freeze. |
-| **Ready for review** | Scope frozen at a commit; reviewer may start. |
-| **In review** | A fresh reviewer is working. |
+| **Ready for review** | Scope frozen at a commit; review agent may start. |
+| **In review** | A fresh review agent is working. |
 | **Fixes required** | Blocker/Major findings remain. |
 | **Re-review required** | Remediation applied; fresh review needed. |
 | **Passed** | No Blocker/Major remains. |
@@ -140,7 +140,7 @@ neighbor links, and incremental lattice-energy updates.
 - Do not create a step branch, step tag, or release tag for a cross-cutting review.
 - Remediate findings through maintenance branches, ADRs, amendments, or step-page updates. Never move an
   existing tag.
-- A record commit that touches any other file is invalid; re-run the review with a fresh reviewer.
+- A record commit that touches any other file is invalid; re-run the review with a fresh review agent.
 
 ## 8. Record template
 

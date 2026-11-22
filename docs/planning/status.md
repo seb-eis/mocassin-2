@@ -3,6 +3,11 @@
 This is the at-a-glance status dashboard for the 32-step plan. The detailed task and acceptance checkboxes
 remain in each step page; each step page also has a feature log.
 
+> **Effective from Step 15 (2026-11-22).** The `lead`/`design`/`dev-free`/`dev`/`review` role names, the
+> `standard` adoption profile, `Full`/`Light`/`None` design classes, the review stop rule, and the pre-audit gate
+> apply from Step 15 and to amendments started after adoption. Steps 00–14 and their records, audits, closeouts,
+> and tags are historical; they keep the role names in force when they were written and are not rewritten.
+
 ## Status values
 
 | Status | Meaning |
@@ -28,12 +33,13 @@ remain in each step page; each step page also has a feature log.
   `docs/planning/closeout/step-NN.json`, and set the audit status to `Ready for audit`. After a passed audit and
   merge, set the step to `Done`, record the main merge reference, and create and push the annotated `step-NN`
   tag as part of the same approval.
-- **Audit:** a fresh out-of-context audit agent reviews the frozen step branch and writes its evidence,
+- **Audit:** a fresh out-of-context review agent reviews the frozen step branch and writes its evidence,
   findings, and verdict directly into `docs/planning/audits/step-NN.md`. See
   [`audits/README.md`](audits/README.md).
-- **Design review:** before implementation, a fresh planning auditor reviews the frozen design docs and writes
+- **Design review:** before implementation, a fresh review agent reviews the frozen design docs and writes
   its evidence, findings, and verdict directly into `docs/planning/reviews/step-NN.md`. See
-  [`reviews/README.md`](reviews/README.md).
+  [`reviews/README.md`](reviews/README.md) and
+  [`../development/design-proportionality.md`](../development/design-proportionality.md).
 - **Milestones:** when a roadmap milestone is reached, create the matching `milestone-mN` tag on the
   milestone commit.
 - **Parity:** keep [`appendix-b-parity-matrix.md`](appendix-b-parity-matrix.md) as the feature-level
