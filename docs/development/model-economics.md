@@ -114,9 +114,13 @@ bindings of one dev role:
 
 | Tier | Binding | Model |
 | --- | --- | --- |
-| strong | `lead`, `design`, `review` | `opencode-go/glm-5.3` |
+| strong | `lead`, `design`, `review` | `opencode-go/deepseek-v4.1-flash` |
 | workhorse, free | `dev-free` | `opencode/deepseek-v4.1-flash-free` |
 | workhorse, paid | `dev` | `opencode-go/deepseek-v4.1-flash` |
+
+**Re-pinned 2026-11-23.** By owner decision the strong-tier binding moved from `opencode-go/glm-5.3` to
+`opencode-go/deepseek-v4.1-flash` for cost. The agent files (`.opencode/agents/{lead,design,review}.md`) carry the
+binding and `tools/tests/test_opencode_binding.py` enforces this table, so a tier change updates both with it.
 
 The dev role has two bindings so the lead can execute the free-first rule: it spawns `dev-free`, and when the
 spawn fails or that binding reports a rate limit, a degraded model, or unavailability, it re-spawns the same
