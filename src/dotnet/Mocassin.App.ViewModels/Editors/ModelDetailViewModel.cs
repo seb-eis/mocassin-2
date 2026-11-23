@@ -169,6 +169,11 @@ internal abstract partial class ModelDetailViewModel : ObservableValidator
     public event EventHandler<string>? FocusRequested;
 
     /// <summary>
+    /// Raised when a dependents/usage action asks the shell to navigate to a model path.
+    /// </summary>
+    public event EventHandler<Mocassin.Core.Diagnostics.ModelPath>? NavigationRequested;
+
+    /// <summary>
     /// Attaches the coordinator that owns the write path.
     /// </summary>
     /// <param name="value">The session coordinator.</param>
@@ -219,7 +224,16 @@ internal abstract partial class ModelDetailViewModel : ObservableValidator
                 break;
         }
 
+        OnCommitted(result);
         return result;
+    }
+
+    /// <summary>
+    /// Called after a commit completes, so a domain form can react to an add/remove.
+    /// </summary>
+    /// <param name="result">The app-level result.</param>
+    protected virtual void OnCommitted(EditApplyResult result)
+    {
     }
 
     /// <summary>
@@ -269,6 +283,18 @@ internal abstract partial class ModelDetailViewModel : ObservableValidator
         WarningMessage = null;
         ConflictMessage = null;
         HasUncommittedChanges = false;
+    }
+
+    /// <summary>
+    /// Requests shell navigation to one model path.
+    /// </summary>
+    /// <param name="path">The target path.</param>
+    public void RequestNavigation(Mocassin.Core.Diagnostics.ModelPath path)
+    {
+        if (path is not null)
+        {
+            NavigationRequested?.Invoke(this, path);
+        }
     }
 
     /// <summary>

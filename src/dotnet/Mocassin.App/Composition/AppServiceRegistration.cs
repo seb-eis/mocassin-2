@@ -14,6 +14,7 @@ using Mocassin.App.ViewModels.Diagnostics;
 using Mocassin.App.ViewModels.Editors.Navigation;
 using Mocassin.App.ViewModels.Editors.Particles;
 using Mocassin.App.ViewModels.Editors.Sets;
+using Mocassin.App.ViewModels.Editors.Sites;
 using Mocassin.App.ViewModels.Editors.Structure;
 using Mocassin.App.ViewModels.Documents;
 using Mocassin.App.ViewModels.Navigation;
@@ -107,6 +108,7 @@ internal static class AppServiceRegistration
         services.AddSingleton<IModelEditorFactory, ParticlesEditorViewModelFactory>();
         services.AddSingleton<IModelEditorFactory, ParticleSetsEditorViewModelFactory>();
         services.AddSingleton<IModelEditorFactory, StructureEditorViewModelFactory>();
+        services.AddSingleton<IModelEditorFactory, SitesEditorViewModelFactory>();
         services.AddSingleton<INavigationTargetProvider, ModelEditorNavigationTargetProvider>();
         services.AddSingleton<IExplorerNodeProvider, ModelEditorExplorerNodeProvider>();
         services.AddSingleton<ModelEditorCommandRegistrar>();

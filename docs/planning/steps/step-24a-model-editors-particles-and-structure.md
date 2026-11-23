@@ -697,9 +697,12 @@ cross-step interfaces — more overhead without a smaller audit surface.
   energy-reference-only cascade is offered. Evidence:
   `ModelUsageIndexTests.AFilterlessUnstableEnvironmentIsADependentThroughItsSiteId` (the ceria sample's environment
   has no filters).
-- **m-14 — site-overlap gate.** Deferred to feature 4 as the accepted resolution requires: the site form validates
-  the candidate with `IStructureValidator`, refuses Apply on an error, and lists the `STR007` diagnostics; the
-  candidate has no preview to mark. No 24A-wide change is made here.
+- **m-14 — site-overlap gate (resolved in feature 4).** `CellSiteDetailViewModel` validates the candidate
+  `StructureModel` with `IStructureValidator` before Apply. A candidate whose symmetry expansion overlaps
+  (`STR007`) has no preview because `TryCreatePreview` returns `null`; the form therefore shows the `STR007`
+  diagnostics inline, shows no non-existent orbit rows, and **refuses Apply**. Other candidate errors (`STR003`,
+  `STR005`, `STR006`, `STR004`) are shown the same way. Evidence: `CellSiteEditorTests.AnOverlappingCandidateIsShownAndRefused`
+  and the preview-index test `TheTableAndP1PreviewMatchTheEngineData`.
 
 **Owner input needed at the 24A start gate**
 

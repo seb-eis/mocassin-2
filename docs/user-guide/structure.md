@@ -86,6 +86,50 @@ The cell form validates against the committed space group. Changing the space gr
 cell diagnostics is the safe order; the candidate preview already reports a candidate cell violation before it is
 applied.
 
+## Editing sites and the P1 preview in the GUI
+
+Open **Sites** from the **Model** menu or the project explorer's **Model** node. The sites document is the shared
+master-detail surface: the table selects, the detail edits, and the P1 preview sits below the fields behind a
+toggle.
+
+### Site table and form
+
+- Columns: name, fractional A/B/C, stability, particle set, orbit size, multiplicity, and the representative
+  Cartesian position. The fractional fields accept the numeric expression grammar; the particle set uses the
+  searchable reference picker.
+- **Add** opens a new-site form (`Site 1`, `Site 2`, …) and never inserts a half-valid site. Apply requires a
+  name, a particle set, and three finite fractional coordinates.
+- The candidate is validated with `IStructureValidator` before Apply. An overlapping candidate (`STR007`), a
+  cell violation (`STR003`), or any other error is shown inline and **Apply is disabled**. In particular, a
+  candidate whose symmetry expansion overlaps another site has no preview; the editor surfaces the `STR007`
+  diagnostics rather than marking non-existent preview rows (m-14).
+- Applying an add or edit is one undo entry; Revert restores the committed values. Read-only sessions disable
+  the fields, Add, Apply, and the deletion actions.
+
+### P1 preview
+
+- The preview shows **this site's orbit** with the fractional position, the Cartesian position, the canonical
+  `P` index, and the orbit-member index. The indices are the engine's own `StructurePreview` orbit/position
+  data; the app does not re-derive them.
+- **Whole structure** lists every canonical P1 position in ascending `P` order with its owning reference site
+  and stability.
+- The plane selector projects the whole list onto the a–b, a–c, or b–c plane. The projection is deterministic
+  for a fixed structure and plane and is virtualized as a list.
+- There is **no generating-operation label**. No preview API exposes which symmetry operation maps a reference
+  position onto an orbit member, and the editor does not duplicate Step 02's exact symmetry to guess it (M-1).
+
+### Deletion and stability
+
+- **Delete site** is blocked whenever the usage index reports a dependent. The detail lists the dependents
+  (MMC transitions, resolved KMC path points, occupation exchanges and dopings, and energy references) and each
+  row has a **Go** action. There is no cascade for transitions, exchanges, or dopings.
+- **Delete site and energy references** is offered only when every dependent is an energy reference (stable or
+  unstable environment/filter, cluster centre, or site-energy set). It asks for confirmation, lists the energy
+  objects that will be removed, and records one undo entry.
+- Changing stability shows a warning when an MMC transition or a resolved KMC path point uses the site, because
+  the structural validator does not block that edit. Apply is still allowed; the Problems channel reports the
+  resulting `TRN012`/`TRN020` diagnostics after the edit.
+
 ## Reference sites
 
 A site stores a stable `CellSiteId`, a name, a fractional position, a particle-set reference, and a stability

@@ -24,7 +24,13 @@ internal class ModelEditorDocumentViewModel : DocumentViewModel, IInspectorContr
     {
         Descriptor = descriptor ?? throw new ArgumentNullException(nameof(descriptor));
         Editor = editor ?? throw new ArgumentNullException(nameof(editor));
+        Editor.NavigationRequested += OnEditorNavigationRequested;
     }
+
+    /// <summary>
+    /// Raised when the editor's dependents/usage action asks the shell to navigate.
+    /// </summary>
+    public event EventHandler<ModelPath>? NavigationRequested;
 
     /// <summary>
     /// Gets the domain descriptor.
@@ -80,6 +86,9 @@ internal class ModelEditorDocumentViewModel : DocumentViewModel, IInspectorContr
     /// <inheritdoc />
     public object? CreateInspector(InspectorSelection selection) => Editor.CreateInspector();
 
+    private void OnEditorNavigationRequested(object? sender, ModelPath path) =>
+        NavigationRequested?.Invoke(this, path);
+
     /// <inheritdoc />
     public override Task OnClosingAsync(CancellationToken cancellationToken = default)
     {
@@ -96,6 +105,7 @@ internal class ModelEditorDocumentViewModel : DocumentViewModel, IInspectorContr
         }
 
         disposed = true;
+        Editor.NavigationRequested -= OnEditorNavigationRequested;
         Editor.Dispose();
         GC.SuppressFinalize(this);
     }

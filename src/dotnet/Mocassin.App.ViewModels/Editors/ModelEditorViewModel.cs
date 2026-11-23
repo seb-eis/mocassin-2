@@ -68,6 +68,9 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
             () => DuplicateSelected(),
             () => CanMutateSelection);
         ShowUsagesCommand = new RelayCommand(ShowUsages, () => Table.SelectedRow is not null);
+        OpenUsageCommand = new RelayCommand<ModelUsageEntry>(
+            entry => RequestNavigation(entry!.Reference.ToPath()),
+            entry => entry is not null);
 
         Table.PropertyChanged += OnTablePropertyChanged;
         Coordinator.ProjectChanged += OnProjectChanged;
@@ -226,9 +229,19 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
     public IRelayCommand ShowUsagesCommand { get; }
 
     /// <summary>
+    /// Gets the command that navigates to one usage entry.
+    /// </summary>
+    public IRelayCommand<ModelUsageEntry> OpenUsageCommand { get; }
+
+    /// <summary>
     /// Raised when a navigation request asks a view to focus a field.
     /// </summary>
     public event EventHandler<string>? FocusRequested;
+
+    /// <summary>
+    /// Raised when a usage/dependent action asks the shell to navigate to a model path.
+    /// </summary>
+    public event EventHandler<ModelPath>? NavigationRequested;
 
     /// <summary>
     /// Gets the model-path domains whose diagnostics belong to this editor.
@@ -359,6 +372,12 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
     }
 
     /// <summary>
+    /// Requests shell navigation to one model path.
+    /// </summary>
+    /// <param name="path">The target path.</param>
+    public void RequestNavigation(ModelPath path) => NavigationRequested?.Invoke(this, path);
+
+    /// <summary>
     /// Consumes the pending focus request when a view attaches.
     /// </summary>
     /// <returns>The property name, or <see langword="null"/>.</returns>
@@ -367,6 +386,28 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
         var pending = pendingFocus;
         pendingFocus = null;
         return pending;
+    }
+
+    /// <summary>
+    /// Shows a domain-created detail that is not tied to a selected row (for example an add form).
+    /// </summary>
+    /// <param name="detail">The detail, or <see langword="null"/> to clear it.</param>
+    protected void ShowDetail(ModelDetailViewModel? detail)
+    {
+        if (Detail is not null)
+        {
+            Detail.NavigationRequested -= OnDetailNavigationRequested;
+        }
+
+        if (detail is not null)
+        {
+            detail.Attach(Coordinator);
+            detail.NavigationRequested += OnDetailNavigationRequested;
+        }
+
+        Detail = detail;
+        DetailMessage = null;
+        OnPropertyChanged(nameof(IsSelectedObjectReadOnly));
     }
 
     /// <summary>
@@ -457,9 +498,15 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
         Coordinator.EditRejected -= OnEditRejected;
         session.ValidationCoordinator.Changed -= OnValidationChanged;
         layout.PropertyChanged -= OnLayoutPropertyChanged;
+        if (Detail is not null)
+        {
+            Detail.NavigationRequested -= OnDetailNavigationRequested;
+        }
+
         usageIndex = null;
         usageSnapshot = null;
         FocusRequested = null;
+        NavigationRequested = null;
         OnDisposed();
     }
 
@@ -532,6 +579,11 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
 
         if (args.Kind == ProjectChangeKind.Replaced)
         {
+            if (Detail is not null)
+            {
+                Detail.NavigationRequested -= OnDetailNavigationRequested;
+            }
+
             Detail = null;
         }
 
@@ -589,11 +641,18 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
 
     private bool RowExists(Guid objectId) => Table.ContainsObject(objectId);
 
+    private void OnDetailNavigationRequested(object? sender, ModelPath path) => RequestNavigation(path);
+
     private void RefreshDetail()
     {
         var selected = Table.SelectedRow;
         if (selected is null)
         {
+            if (Detail is not null)
+            {
+                Detail.NavigationRequested -= OnDetailNavigationRequested;
+            }
+
             Detail = null;
             DetailMessage = null;
             OnPropertyChanged(nameof(IsSelectedObjectReadOnly));
@@ -607,10 +666,16 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
             return;
         }
 
+        if (Detail is not null)
+        {
+            Detail.NavigationRequested -= OnDetailNavigationRequested;
+        }
+
         var created = CreateDetail(session.Project, selected.ObjectId);
         if (created is not null)
         {
             created.Attach(Coordinator);
+            created.NavigationRequested += OnDetailNavigationRequested;
             if (pendingFocus is { } focus)
             {
                 created.FocusField(focus);
