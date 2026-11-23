@@ -29,16 +29,20 @@ adds one public Core API. No format change and no new dependency. Justification 
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** **Ready for review** — frozen 2026-11-23 at `b98a56f824002bc3cdbb4ace9e0b5cf9dd464ba9`; record
-  [`reviews/step-24a.md`](../reviews/step-24a.md); the lead requests a fresh review agent
+- **Design review:** **Re-review required** — round 1 (`Changes required`, one Major and twelve Minor findings)
+  resolved on this commit; the round-1 freeze was
+  `b98a56f824002bc3cdbb4ace9e0b5cf9dd464ba9`, record [`reviews/step-24a.md`](../reviews/step-24a.md)
+- **Layout gate:** **Closed** — ADR 0003
+  [records the composition](../adr/0003-avalonia-mvvm-stack.md#editor-layout-decision-2026-11-22) (option 1
+  `ListBox` table + detail composed with option 4's `GridSplitter`); the POC report
+  `docs/planning/maintenance/2026-11-22-step-24-layout-poc.md` is the evidence and the spike code is discarded.
+  **The 24A start gate is conditional on that report and its PNGs reaching `main`**: the `fix/step-24-layout-poc`
+  branch is now documentation-and-assets only (the spike code was removed at `fbdae6c`) and lands through the
+  owner-approved `--no-ff` merge recorded in ADR 0003.
 - **Feature list:** Proposed (six features, §18) — owner approval at the start gate
 - **Design class:** **Full** (§16)
 - **Complexity class:** **High** — cross-step interfaces and test-matrix breadth; **owner acceptance as one High
   unit is required at the start gate**, and no further split is proposed (§16)
-- **Layout gate:** **Closed** — ADR 0003
-  [records the composition](../adr/0003-avalonia-mvvm-stack.md#editor-layout-decision-2026-11-22) (option 1
-  `ListBox` table + detail composed with option 4's `GridSplitter`); the POC report
-  `docs/planning/maintenance/2026-11-22-step-24-layout-poc.md` is the evidence and the spike code is discarded
 - **Last updated:** 2026-11-23
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
@@ -80,9 +84,11 @@ unlearn.
   transitions only to count references.
 - **No energy, lattice, simulation, parameterization, job-template, build, 3D, run-monitoring, results, or
   analysis UI** (Steps 25–28 and 20–22).
-- **No cascade deletion.** A referenced object's deletion is blocked with a dependents list and navigation; the
-  user deletes dependents in the domain that owns them. `ProjectEditor` has no site-cascade path, and 24A cannot
-  show what a cascade would remove because the transition/environment editors do not exist yet. See §17 D-2.
+- **No broad cascade deletion.** A referenced object's deletion is blocked with a dependents list and navigation;
+  the user deletes dependents in the domain that owns them. The single exception is a site whose **only**
+  dependents are energy references: the editor offers "delete site and energy references" through the existing
+  `ProjectEditor.RemoveCellSiteAndEnergyReferences` (§6). There is no cascade for MMC transitions, KMC resolved
+  paths, occupation exchanges, or dopings. See §17 D-2.
 - **No new data-grid control, no dependency, no `Avalonia.Controls.DataGrid`/`TreeDataGrid`/third-party grid.**
   ADR 0003 stands; a new control dependency would need its own ADR.
 - **No shell, workspace, settings, theming, or lifecycle redesign.** 24A fills the documented 23A/23B seams; a
@@ -131,11 +137,21 @@ key shape, no lifecycle, and no settings schema beyond the additive field in §9
 | `ProjectEditCoordinator`, `ProjectSession` | the only write path; `ProjectChanged`/`EditRejected` drive refresh and inline errors |
 | `ValidationCoordinator` | the domain's diagnostics are filtered out of the existing validation state; 24A never runs the pipeline itself |
 | `LayoutSettings` | the additive `editorFraction` (§9) |
-| `AppServiceRegistration` | a new `AddMocassinModelEditors` call from `AppHost` after `AddMocassinViewModels` |
+| `AppServiceRegistration` | a new `AddMocassinModelEditors` call from `AppHost` after `AddMocassinViewModels`, registering the Symmetry preview/validator services for the editors (§11) |
 
 The editor view models live in `Mocassin.App.ViewModels/Editors/**` and the views in
 `Mocassin.App.Views/Editors/**`, so the existing `ViewLocator` convention (`…ViewModels.…ViewModel` →
 `…Views.…View`) resolves the detail templates without a registry.
+
+**Library reference and service registration (n-1).** `Mocassin.Symmetry` is today reachable only transitively
+(`App.ViewModels → Packages → Compilation → Symmetry`). 24A adds an **explicit `Mocassin.Symmetry` project
+reference** to `Mocassin.App.ViewModels` — an in-repo project reference to a merged step, not a package or
+external dependency — and updates [`01-target-architecture.md`](../01-target-architecture.md) §3.2 accordingly.
+`AddMocassinModelEditors` registers `IStructurePreviewService` (`StructurePreviewService`) and
+`IStructureValidator` (`StructureValidator`) as singletons for the editor view models; their constructors'
+optional catalog/version parameters resolve to the embedded-catalog defaults, so no extra service registration
+is needed. The view models consume these services and the `TransitionPathResolver` (§2); they never re-derive
+exact symmetry or resolved paths.
 
 ### 2. Editor framework
 
@@ -207,14 +223,38 @@ internal sealed class StructureEditorDocumentViewModel : DocumentViewModel
   `ProjectEditCoordinator.Apply(description, operation)` overload (§10), which records one undo entry and raises
   `EditRejected` with the operation's diagnostics when the operation fails. The view model never mutates a
   `Project` or a domain object and never builds a `ProjectChange`.
-- **Local state refresh.** On `ProjectChanged` the editor rebuilds rows from the new snapshot and preserves
-  selection by object id. A detail form with uncommitted changes is not overwritten: it shows "The project
-  changed" with Revert/Apply, and Apply is disabled if the selected object no longer exists. On `EditRejected`
-  the detail shows the rejection diagnostics inline and the object is unchanged.
+- **Local state refresh (`ProjectChanged` kinds, D-14).** `ProjectChanged` carries a `ProjectChangeKind`. The
+  editor reacts by kind:
+  - `Saved` — values are unchanged: update only the dirty/save-point state and the tab title; do **not** rebuild
+    rows or invalidate an open form.
+  - `Edited`, `Undo`, `Redo` — rebuild rows and preserve selection by object id. An open form with uncommitted
+    changes compares its object by id in `Previous` and `Current`:
+    - value-equal → keep the form and refresh only the reference-picker options;
+    - value-changed → keep the fields, refresh options, and show "The project changed elsewhere"; Apply stays
+      enabled (last writer wins, explicitly) and Revert restores the current committed value;
+    - removed → Apply is disabled and the form offers to close; it never silently rebases.
+  - `Replaced` (reload/recovery) — discard uncommitted forms, rebuild all rows and options from the new snapshot.
+  - A change in another domain never invalidates a form; it only refreshes reference-picker options.
 - **Read-only sessions** disable Add/Remove/Duplicate/Apply, show the 23B read-only banner, and never call the
   coordinator (a reached `Apply` would return `ReadOnly`; the editor also guards locally).
 - **Empty states** name the next action ("No particles yet — Add a particle or open a sample project") and keep
   the Add command reachable by keyboard.
+
+**Usage index (`ModelUsageIndex`, D-12).** The index is built lazily per immutable `Project` reference and answers
+two questions: "how many objects reference this one" for the usage column, and "which objects are these" for the
+blocked-delete list and the inspector. It walks the project value and attributes:
+
+- particles → particle sets, state changes (donor/acceptor), transitions by chain → group → state change;
+- particle sets → cell sites;
+- cell sites → MMC transitions (`SiteAId`/`SiteBId`), KMC transitions **through their resolved reference path**
+  (each point resolved with `Mocassin.Symmetry.Transitions.TransitionPathResolver`, which yields the owning
+  `CellSiteId`), occupation exchanges (and the dopings that reference them), and the energy references (stable
+  and unstable environment filters, cluster center sites, site-energy sets).
+
+The index is an **affordance and a pre-check**, not a validator: it uses the same Step 02/04/05/06 services the
+compiler uses and never re-implements their rules. The KMC path resolution is required because the Core structural
+validator deliberately does not check resolved paths (`TRN020`/`TRN012` belong to the Symmetry path validator, which
+runs only in the full pipeline), so the index is the only place a site edit can see that dependency before applying.
 
 ### 3. Table surface, column policy, and focus
 
@@ -244,7 +284,14 @@ Step 24 requirement needs it).
   ([`ui-interaction-contract.md` §8](../../development/ui-interaction-contract.md#8-rules-for-steps-2428-editors)
   rule 4). Arrow keys keep list selection; `Ctrl`/`Shift` extend it where multi-select is enabled.
 - **Multi-select** is enabled for particles, sets, and sites, where bulk deletion is safe under the same
-  blocked-delete checks. Bulk delete asks for confirmation and reports each refusal.
+  blocked-delete checks.
+- **Bulk operations are one undo entry, all-or-nothing (D-13).** The framework composes a bulk action as **one**
+  `Func<ProjectEditor, Project, ProjectEditResult>` (§10): it folds the typed single-object operation over a
+  candidate `Project`, accumulating diagnostics, and returns one result whose `ProjectChange` spans the original
+  and the final value. A mid-batch rejection discards the whole candidate — the project, undo stack, redo stack,
+  save point, and dirty state are untouched — and the inline summary names the failing object and reason. Bulk
+  delete of `n` objects is one entry; if any selected object is referenced, the batch is refused and the
+  dependents of every selected object are listed.
 - **Accessibility.** Every control has an automation name and role; the table exposes a list role and the row's
   severity as text; status is never colour-only; the splitter is named and keyboard-resizable
   ([`ui-visual-contract.md`](../../development/ui-visual-contract.md)).
@@ -264,6 +311,11 @@ arithmetic expression: `+ - * / ^`, parentheses, unary minus, the constants `pi`
 bounded input length (128) and depth (16), and it rejects non-finite results (`NaN`, `±Infinity`) as an inline
 error.
 
+- **Lexing rule (m-6).** A token is a number, an identifier, an operator, or a parenthesis. A number is
+  `digits [ "." digits ] [ ("e"|"E") [ "+"|"-" ] digits ]`: exponent notation belongs to the number and requires
+  at least one exponent digit, so `1e5` and `2e-3` are numbers while `1e` and `2e` are malformed numbers (an
+  error), not `1 * e` or `2 * e`. The identifier `e` is the constant only when it is not preceded by a digit
+  sequence; there is no implicit multiplication (`2 pi` is an error, not `2 * pi`), and no variable names exist.
 - **No trigonometric functions in v1.** The fields that would use them are angles in degrees while an expression
   is unitless, so `sin(30)` has two defensible meanings. The step does not guess: trigonometric input is out
   until a design decides the unit convention, and that limitation is documented and tested.
@@ -281,11 +333,11 @@ error.
   `0`, as one undo entry.
 - Charge/symbol edits commit as one undo entry per field and refresh dependents immediately.
 - The vacancy toggle warns when the default occupation is charged (Step 03 `PAR004`).
-- Duplicate copies the fields with a new id and a unique name; bulk "set charge" applies one undo entry per
-  confirmed batch.
+- Duplicate copies the fields with a new id and a unique name; bulk "set charge" is one composed operation and
+  one undo entry (D-13).
 - Delete is **blocked** when the particle is referenced: the editor lists dependents from the usage index and
-  offers "Show usages" (navigates to the dependent domain). The authority is the Core rejection; the index is
-  the affordance, and a test asserts they agree.
+  offers "Show usages" (navigates to the dependent domain). The Core structural validator also rejects a dangling
+  particle reference, so the pre-check and the rejection must agree; a test asserts both.
 
 **Particle-sets document** (`model.particleSets`)
 
@@ -320,22 +372,58 @@ document, keyboard included. The particles document remains the place to edit pa
   are explicit commands with confirmation. Field locks are an affordance only: `CellGeometry` remains the
   validity authority, and a test cross-checks the lock table against the geometry diagnostics for every crystal
   system so the two cannot drift.
-- **Structure summary.** P1 position count, stable/unstable site counts, cell volume, particle-number density
-  (`count / volume`, with units), the orbit table, and the large-P1 performance warning (`STR009`).
+- **Structure summary (m-1: named sources only).** Every value comes from the preview the editor already builds
+  or from the structure value — 24A does **not** call `ModelStatistics` (23B keeps statistics an explicit
+  on-demand action):
+  - reference-site count ← `StructureModel.Sites.Length` (equal to `StructurePreview.Orbits.Length`);
+  - P1 position count ← `StructurePreview.PositionList.Length`;
+  - **stable/unstable P1 position** counts ← counted from `StructurePreview.PositionList` by the owning reference
+    site's `Stability` (`ExpandedSite.ReferenceSiteIndex` indexes the input reference sites in
+    `StructureModel.Sites` order), labelled "positions", never "sites";
+  - cell volume ← `StructurePreview.CellVolumeAngstrom3`;
+  - orbit table ← `StructurePreview.Orbits` (representative, multiplicity, position indices);
+  - **reference-site density** `= ReferenceSiteCount / CellVolumeAngstrom3` in Å⁻³, labelled as such.
+    Particle-number density is a lattice/simulation quantity (it needs a compiled lattice) and is **not** shown in
+    24A;
+  - large-P1 performance warning ← `STR009` from `IStructureValidator`.
 
 **Sites document** (`model.sites`) — the master-detail surface.
 
 - Columns: name, A/B/C, stability, particle set, orbit size, multiplicity, and Cartesian position.
 - Detail: name, three fractional fields (expression-capable), stability, particle set (reference picker), orbit
   size and multiplicity (read-only, from the preview), and the Cartesian position (read-only).
-- **P1 preview panel** below the fields, as a toggle, not a tab: "This site's orbit" (positions with fractional
-  and Cartesian coordinates and the generating operation) or "Whole structure" (every canonical P1 position in
-  `P` order, plus a deterministic 2D projection on the selected a–b, a–c, or b–c plane). Overlap positions are
-  marked with a glyph and text.
+- **P1 preview panel** below the fields, as a toggle, not a tab (D-5). "This site's orbit" rows show the
+  fractional position, the Cartesian position, the **canonical `P` index**, and the **orbit-member index**;
+  "Whole structure" lists every canonical P1 position in `P` order plus a deterministic 2D projection on the
+  selected a–b, a–c, or b–c plane. Overlap positions are marked with a glyph and text.
+- **No generating-operation label (M-1/D-11).** No Symmetry preview API exposes the operation that maps a
+  reference position onto an orbit member: `StructurePreview` carries positions, Cartesian positions, volume,
+  orbits, and the encoder; `SiteOrbitInfo` carries the representative, positions, and position indices; and
+  `ExpandedSite` carries `P`, encoding, fractional values, the reference index, and `OrbitMemberIndex`. 24A
+  therefore shows positions and indices only. It does not re-derive the operation in the app — that would
+  duplicate Step 02's exact symmetry in a view model, contrary to §1, `01-target-architecture.md` §3.2, and
+  `AGENTS.md` §5 — and it adds no Symmetry API. A labelled operation is deferred to a later step that opens its
+  own preview API with an owner-approved design change.
 - Add site: the form requires stability, a particle set, and three coordinates; the site is refused with
   `STR005` (empty/duplicate name) or `STR006` (missing set) and is never added in a half-valid state.
-- **Deletion** shows the dependents (transitions, environments, clusters, dopings) and blocks; it offers
-  navigation, not a cascade (D-2). Stability changes warn if a KMC/MMC transition uses the site.
+- **Deletion (D-2, corrected in round 2).** The dependents come from the usage index (§2) and are exactly:
+  MMC transitions that select the site (`SiteAId`/`SiteBId`); KMC transitions whose **resolved reference path**
+  lands on the site (each point resolved through `TransitionPathResolver`, giving the owning `CellSiteId`);
+  occupation exchanges at the site (and the dopings that reference them); and the energy references (stable and
+  unstable environment filters, cluster centre sites, site-energy sets). Two actions:
+  1. **Delete site** (default) — blocked when any dependent exists, with the dependents list and navigation.
+  2. **Delete site and energy references** — enabled **only** when the only dependents are energy references;
+     one undo entry through `ProjectEditor.RemoveCellSiteAndEnergyReferences`; the confirmation lists the energy
+     objects that will be removed. It is never offered while an MMC/KMC/exchange/doping dependent exists.
+  The editor's index is the blocking authority because the Core structural validator does not check every case:
+  `ProjectValidator` validates a dangling `OccupationExchange.SiteId` and the Core-owned energy references, but
+  MMC site ids and KMC resolved paths are Symmetry rules (`TRN016`/`TRN020`, `TRN012`) that run only in the full
+  validation pipeline. A test asserts the index and the Core rejection agree wherever the Core checks apply, and
+  that the energy-reference action is refused when a non-energy dependent exists.
+- **Stability changes** warn when an MMC transition selects the site or a resolved KMC path point lands on it,
+  because the change can invalidate `TRN012`/`TRN020` rules without the structural validator blocking the edit;
+  the Problems channel reports the resulting diagnostics after the edit. 24A warns, it does not block a stability
+  change.
 
 **Dummy-positions document** (`model.dummyPositions`) — a small master-detail with name and three fractional
 fields, a distinct marker glyph in every list and preview, and no physics. A "dummy positions tab" inside the
@@ -377,43 +465,86 @@ structure editor would add a nested tab level, which the layout POC rejected; it
 
 `LayoutSettings.EditorFraction` (app-local, additive): the selection pane's share of the editor width, default
 `0.42`, clamped `0.25–0.70`, one value for every editor document. `AppSettingsValidator` clamps it like the shell
-fractions, "View → Reset Layout" resets it, and an absent value reads as the default — no migration and no
-`defaultsRevision` bump. Per-domain fractions are deliberately not stored: they multiply the settings surface for
-a cosmetic preference.
+fractions and an absent value reads as the default — no migration and no `defaultsRevision` bump. Per-domain
+fractions are deliberately not stored: they multiply the settings surface for a cosmetic preference.
+
+**Ownership and the reset path (m-9/D-9).** The value is **shell-owned layout state**, not per-document state, so
+there is exactly one writer (`ShellViewModel`'s serialized layout-persist path) and every open editor observes the
+same value:
+
+1. The shell's layout state gains `EditorFraction` (a property on the existing `ShellRegionsViewModel` layout
+   state, or a one-property `IEditorPaneLayout` that the shell layout state implements; the interface is internal
+   to `Mocassin.App.ViewModels` and has two real consumer groups — the shell and every editor document).
+2. `ShellViewModel.CaptureLayout()` includes `EditorFraction`, `ApplySettings` sets it, and the existing
+   region-property-changed hook persists it on a drag or a reset — so a shell region change can never drop the
+   editor fraction.
+3. `ShellViewModel.ResetLayout()` sets `EditorFraction` to `SettingsDefaults.DefaultEditorFraction` alongside the
+   three region fractions; the property change reaches every open editor document, which applies it to its
+   splitter immediately (no document restart, no per-document write).
+4. Editor documents read the value on open and write it back on splitter release through the same shared state;
+   they never call `ISettingsService.UpdateAsync` themselves.
 
 ### 10. Library change owned by this step
 
 One additive Core API, needed because the GUI must run the **same typed `ProjectEditor` operations as the CLI**
-inside the **one** coordinator write path:
+inside the **one** coordinator write path (m-7/D-8):
 
 ```csharp
 // Mocassin.Core.Editing.ProjectDocument (additive overload)
-public ProjectEditResult Apply(string description, Func<ProjectModel, ProjectEditResult> operation);
+public ProjectEditResult Apply(
+    string description,
+    Func<ProjectEditor, ProjectModel, ProjectEditResult> operation);
 ```
 
-Semantics: run `operation(Project)`; if the result has an error, return it and change nothing (undo/redo, save
-point, and dirty state untouched); if it succeeded without a change, return it; otherwise record **one**
-`ProjectChange(description, before, result.Project)` and set `Project`. The existing
-`Apply(string, Func<ProjectModel, ProjectModel>)` overload is unchanged, so 23B's metadata editor is unaffected.
+**The delegate receives the document's own `ProjectEditor`.** That makes the precondition structural: the
+operation is a typed `ProjectEditor` operation over the document's current project, not a hand-built mutation.
+`ProjectDocument` bypasses its own validator for this overload, so the documented caller contract is *"pass the
+provided editor's typed operation"*; the dev adds the guard below and a test for the failure path.
 
-- `ProjectEditCoordinator` gains the matching internal overload `Apply(string, Func<Project, ProjectEditResult>)`
-  that performs the read-only check, raises `EditRejected` with the operation's diagnostics, and announces
-  `ProjectChanged` on success. It remains the **only** write path.
+- **Semantics.** The overload is an instance method on `ProjectDocument`, so it invokes `operation(editor, Project)`
+  with the document's own `ProjectEditor` (the field the constructor already stores; no new accessor is added).
+  If the result has an error diagnostic, return it and change nothing (undo stack, redo stack, save point, and
+  dirty state untouched). If it succeeded with
+  `Change == null` (the typed operation's own no-op case), return it with no stack change. Otherwise verify
+  `ReferenceEquals(result.Change.After, result.Project)` and `ReferenceEquals(result.Change.Before, Project)`
+  (a malformed result is an `InvalidOperationException`, i.e. a programmer error), then record **one**
+  `ProjectChange(description, Project, result.Project)` — the caller's description, not the typed operation's —
+  append it to the undo stack, **`TrimUndoStack()` (`MaxUndoDepth`)** and **clear the redo stack**, set
+  `Project`, and return the result. This mirrors the existing overload exactly, so save-point and dirty behaviour
+  are unchanged.
+- **API gate.** The overload is a new public Core member: `Mocassin.Core/PublicAPI.Unshipped.txt` gains its line
+  and `./tools/verify.sh api` must pass (ApiCompat is additive-only, so the baseline is unchanged). This is a
+  feature-1 gate, alongside `verify.sh dotnet`.
+- `ProjectEditCoordinator` gains the matching internal overload
+  `Apply(string, Func<ProjectEditor, Project, ProjectEditResult>)`: it performs the read-only check, raises
+  `EditRejected` with the operation's diagnostics, and announces `ProjectChanged` on success. It remains the
+  **only** write path. A bulk action composes several typed operations into **one** delegate of this shape
+  (§3/D-13).
 - Rejected alternative: running the typed operation and then calling the existing `Apply(_ => result.Project)`
   validates every successful edit twice and loses the operation's precise rejection diagnostics. Rejected:
-  building mutations in the view models duplicates the Core operations and would drift from the CLI.
-- No other library change. No new package, no format, no diagnostic code, no Compilation reference.
+  building mutations in the view models duplicates the Core operations and would drift from the CLI. Rejected:
+  re-validating inside the overload for the same double-validation cost; the structural delegate plus the
+  identity guards cover the trust gap.
+- No other library change. No new package, no format, no diagnostic code, no `Mocassin.Compilation` reference.
+  `Mocassin.Symmetry` is a new **project** reference (§1/n-1), not a package.
 
 ### 11. Dependency and interface checks
 
 - **Dependencies** 23B and 02–06 are `Done`, merged, and tagged; their model, preview, and edit APIs are stable.
-  24A uses no Step 08–22 API. No package is added.
+  24A uses no Step 08–22 API. No package is added. The only new reference is an **in-repo
+  `Mocassin.Symmetry` project reference** on `Mocassin.App.ViewModels` (n-1), recorded in
+  [`01-target-architecture.md`](../01-target-architecture.md) §3.2; it is not a package dependency and it does not
+  change the design class.
+- **Services registered by `AddMocassinModelEditors`** — `IStructurePreviewService` and `IStructureValidator` as
+  singletons (their optional constructor parameters default to the embedded catalog and versions). The usage index
+  uses `TransitionPathResolver.TryCreate` per structure snapshot; no other service is added.
 - **Inputs/outputs** are `Project` snapshots in and `ProjectEditResult` values with their diagnostics out; no
   persisted type, schema, or file is introduced.
 - **Versioning and migration** are not applicable: the only persisted surface is the additive app-local setting,
   which reads a default when absent and needs no migration.
-- **No unresolved cross-step interface question remains for 24A.** 24B's compile-preview API question is recorded
-  on the 24B page and is not a 24A dependency.
+- **No unresolved cross-step interface question remains for 24A.** Round 1's M-1 is resolved *inside* the existing
+  boundary: the P1 preview shows positions and indices only, so no Symmetry API is needed and no interface question
+  is open (§6/D-11). 24B's compile-preview API question is recorded on the 24B page and is not a 24A dependency.
 
 ### 12. Documentation plan
 
@@ -431,22 +562,25 @@ point, and dirty state untouched); if it succeeded without a change, return it; 
 
 | Test | Assertion | Tier |
 | --- | --- | --- |
-| `ModelEditorAcceptanceTests` | On the real `samples/ceria/ceria.mocprj` through `ProjectStore`, create the ceria particles, sets, structure, and sites without the CLI; undo every edit back to the loaded value | PR-fast |
+| `ModelEditorAcceptanceTests` | **From an empty project** (`samples/blank/blank.mocprj`, whose `model` is `{}`) through `ProjectStore`, author the ceria particles, sets, structure, and sites without the CLI, then compare the authored values by name/value to `samples/ceria/ceria.mocprj` (ids legitimately differ); undo every edit back to the loaded blank value. A second case opens ceria and edits one existing field, proving the edit path on a populated project (m-3) | PR-fast |
 | `ModelTableSurfaceTests` | Header and rows share the column list; columns stay aligned at 1280 and 720 px with the scroll gutter; 1,000 sites realize a bounded container count and the last row is selectable | PR-fast |
 | `ModelTableKeyboardTests` | Arrows/Home/End/Tab/Enter/Escape; `Home` → `Tab` and `End` → `Tab` both focus the detail pane's first field; row containers are not tab stops | PR-fast |
 | `ParticleEditorTests` | Add/rename/charge/symbol/duplicate/bulk; the void row is pinned and read-only; `PAR001`, `PAR004`, `PAR008` surface inline; a referenced delete is refused and the project is unchanged | PR-fast |
 | `ParticleSetEditorTests` | Ordered membership, default badge, void refused (`PAR005`), empty set refused, duplicate gets a new id, drag and keyboard produce the same order, use by a site blocks deletion (`STR006`) | PR-fast |
-| `NumericExpressionTests` (property-based) | Precedence, associativity, unary minus, constants, functions, `1/3`; malformed input, over-long input, deep nesting, `NaN`/`Inf` are rejected with a message; culture-invariant parsing; the same input parses identically under `de-DE` and `en-US` | PR-fast |
+| `NumericExpressionTests` (property-based) | Precedence, associativity, unary minus, constants, functions, `1/3`; the lexing cases `1e5`, `2e-3`, `1e`, `e`, `2e`, `2 pi` (numbers vs identifiers vs malformed, no implicit multiplication, §4); malformed input, over-long input, deep nesting, `NaN`/`Inf` are rejected with a message; culture-invariant parsing; the same input parses identically under `de-DE` and `en-US` (m-6) | PR-fast |
 | `SpaceGroupPreviewTests` | A candidate setting previews orbit sizes and overlap before apply; cancelling changes nothing; applying is one undo entry; `STR003`/`STR007` are shown for an incompatible candidate | PR-fast |
 | `CellParameterTests` | Locks match `CellGeometry` for every crystal system (cross-check table test); invalid angle combinations show the geometry diagnostic; reset commands are undoable; live vectors/volume match `CellGeometry` | PR-fast |
-| `CellSiteEditorTests` | Coordinate expressions, stability and particle-set rules (`STR005`, `STR006`), overlap inline (`STR007`), orbit size/multiplicity match `StructurePreview`, deletion dependents listed and blocked | PR-fast |
-| `P1PreviewTests` | The position list equals `StructurePreview.PositionList` (canonical `P` order); the 2D projection is deterministic for a fixed structure and plane; a >1,000-position preview is virtualized and cancellable | PR-fast |
-| `DummyPositionTests`, `StructureSummaryTests` | Dummy positions round-trip and render with the distinct glyph; summary counts, volume, and density agree with `ModelStatistics` | PR-fast |
+| `CellSiteEditorTests` | Coordinate expressions, stability and particle-set rules (`STR005`, `STR006`), overlap inline (`STR007`), orbit size/multiplicity match `StructurePreview`; **deletion**: the dependents list contains the MMC transitions, the KMC transitions whose resolved path lands on the site, the occupation exchanges/dopings, and the energy references; the default delete is blocked; the energy-reference action is offered only when the remaining dependents are energy references and is one undo entry; the index agrees with the Core rejection wherever the Core validator checks; a stability change warns when a KMC/MMC transition uses the site (m-2) | PR-fast |
+| `P1PreviewTests` | The whole-structure list equals `StructurePreview.PositionList` (canonical `P` order); each per-site orbit row's canonical `P` index and orbit-member index equal the values in `StructurePreview.Orbits[i].PositionIndices` and `PositionList[...].OrbitMemberIndex`; the row projection has **no operation field**, and the view renders no operation label (M-1); the 2D projection is deterministic for a fixed structure and plane; a >1,000-position preview is virtualized and cancellable | PR-fast |
+| `DummyPositionTests`, `StructureSummaryTests` | Dummy positions round-trip and render with the distinct glyph; the summary's reference-site count, P1 position count, stable/unstable **position** counts, volume, orbit table, and reference-site density equal the values recomputed from `StructureModel.Sites` and `StructurePreview` (§6); the summary calls no `ModelStatistics` service (m-1) | PR-fast |
 | `EditorNavigationTests` | `particle/<id>`, `particleSet/<id>`, `structure`, `cellSite/<id>`, `cellDummyPosition/<id>` open/select/focus; a stale id returns `null` without throwing; every domain diagnostic in a ceria fixture navigates to its field | PR-fast |
-| `EditorUndoTests` | Undo/redo across every editor operation, save point intact, dirty marker follows the coordinator | PR-fast |
+| `EditorUndoTests` | Undo/redo across every editor operation, save point intact, dirty marker follows the coordinator; **bulk delete of n objects and bulk set-charge are each one entry**; a mid-batch failure changes nothing (project, undo, redo, save point, dirty state) (m-8) | PR-fast |
+| `EditorReadOnlyTests` | In a read-only session Add/Remove/Duplicate/Apply and `Enter` are disabled, the 23B banner is shown, the coordinator is never called, no undo entry and no dirty change appear, and no `EditRejected` diagnostic is raised; a forced coordinator `Apply` returns `ReadOnly` and changes nothing (m-4) | PR-fast |
+| `EditorRefreshTests` | On `ProjectChanged`: `Saved` does not rebuild rows or invalidate an open form; an edit in another domain refreshes reference options only; an edit to the open form's object shows the conflict with Apply/Revert as specified; removal disables Apply; `Replaced` rebuilds and discards forms (m-10) | PR-fast |
 | `EditorAccessibilityTests` | Every interactive control has a name and role; the table exposes a list role; severity is text not colour; the splitter is named and keyboard-resizable | PR-fast headless |
 | `EditorScreenshotTests` | Light, dark, and high-contrast captures of the particles, sets, structure, sites, and P1-preview states, plus a narrow-window capture | PR-medium (Ubuntu) |
-| `EditorPerformanceTests` | 1,000 sites: build+select bounded (record the measured budget in the step page); a 250 ms debounced preview coalesces rapid edits and a superseded preview is discarded | PR-fast |
+| `EditorPerformanceTests` | **Functional only, no absolute duration (m-5)**: the realized row-container count is bounded and does not grow with row count (compare 100 vs 1,000 sites); all 1,000 rows are present and the last row is selectable; with a fake clock, rapid edits coalesce into one preview and a superseded preview result is discarded; no row is dropped after a rebuild | PR-fast |
+| `EditorPerformanceEvidence` (not a test) | The measured 1,000-row build/select time and preview latency are recorded in the step page as **non-gating evidence** (benchmark/manual run), never asserted (`03-quality-strategy.md` §11.1) | non-gating evidence |
 
 **The 1,000-row limit (POC finding 2).** `StructureModel.MaxReferenceSites` is 1,000 and `STR012` rejects more, so
 no valid project can hold "more than 1,000 reference sites". The virtualization acceptance uses a **1,000-site**
@@ -463,6 +597,9 @@ rather than silently accepted, so the limit is documented where a test can prove
 - Usage index: one lazy build per project snapshot; a 1,000-site, 64-particle project stays well under a frame.
 - No validation or compile work on keystrokes; only on commit and on the debounced validation the shell already
   owns.
+- **No PR-fast test asserts an absolute duration.** The functional properties are tested (bounded realized
+  containers, coalescing, superseded-result discard, no dropped rows); measured build/select and preview times are
+  recorded as non-gating evidence (`03-quality-strategy.md` §11.1, m-5).
 
 ### 15. Risks and mitigations
 
@@ -472,10 +609,11 @@ rather than silently accepted, so the limit is documented where a test can prove
 | Expression parser scope creep or locale bugs | Fixed grammar, bounded input, no trig in v1, property tests plus a two-culture test |
 | Symmetry preview performance on large cells | Debounce, cancel, off-thread, cache by immutable structure reference, progress above 100 ms |
 | Drag-and-drop excludes keyboard users | Every drag has a button equivalent and a test; the interaction contract's keyboard rules apply |
-| Blocked deletes frustrate users | Dependents list, "Show usages", and precise inline text; no silent cascade |
+| Blocked deletes frustrate users | Dependents list, "Show usages", precise inline text, and the energy-reference action when it is the only dependency; no silent cascade |
+| A site edit silently invalidates a KMC path or MMC site reference that the Core validator does not check | The usage index resolves paths through `TransitionPathResolver` and blocks the delete; stability changes warn; the full pipeline reports the residual diagnostics (§6/D-12) |
 | The layout choice is re-litigated in implementation | ADR 0003 and §3 fix the surface; a change re-opens the ADR, not the step |
-| Divergence from the CLI edit path | Editors call the same `ProjectEditor` operations; the acceptance test compares behaviour on a real project |
-| Settings churn for a cosmetic split | One global `editorFraction`, clamped, reset by Reset Layout |
+| Divergence from the CLI edit path | Editors call the same `ProjectEditor` operations through the structural overload; the acceptance test compares behaviour on a real project |
+| Settings churn or a lost editor fraction | One global `editorFraction` owned by the shell layout state with one serialized writer; Reset Layout and Apply both reach open editors (D-9) |
 
 ### 16. Complexity class and split decision
 
@@ -491,8 +629,10 @@ freeze without an owner decision.
    once the model domains are built on them; the POC exists precisely because that cost is real.
 3. **Public API.** The additive `ProjectDocument.Apply` overload (§10) is a public Core surface.
 
-No format, dependency, migration, or security/concurrency trigger applies. Review depth: the full checklist,
-stopping when no Blocker or Major remains.
+No format, dependency, migration, or security/concurrency trigger applies. The round-2 corrections do not
+change the class: M-1 is resolved by dropping an element the existing API cannot supply (no new Symmetry API), and
+the `Mocassin.Symmetry` reference is an in-repo project reference to a merged step, not a package or external
+dependency. Review depth: the full checklist, stopping when no Blocker or Major remains.
 
 **Complexity class: High.** Measured against [`04-roadmap.md` §3.1](../04-roadmap.md#31-step-sizing-and-split-triggers):
 
@@ -522,22 +662,28 @@ cross-step interfaces — more overhead without a smaller audit surface.
 | ID | Decision | Rationale |
 | --- | --- | --- |
 | D-1 | Layout: option 1 table + detail composed with option 4's splitter; matrix control inside the detail pane | Owner decision 2026-11-22 on the POC evidence; recorded in ADR 0003 |
-| D-2 | A referenced object's deletion is blocked with a dependents list and navigation; **no cascade** in 24A | `ProjectEditor` has no site-cascade path, and 24A cannot show what a cascade removes because the owning editors are 24B/25. A cascade can be added later behind an additive Core API |
+| D-2 | Site deletion is **blocked** by the usage-index dependents list with navigation; the only offered cascade is **"delete site and energy references"**, enabled solely when the remaining dependents are energy references | **Corrected in round 2 (m-2):** `RemoveCellSiteAndEnergyReferences` *does* exist for energy references, but there is no cascade for MMC site ids, KMC resolved paths, or occupation exchanges. A full cascade would need new Core APIs and could remove rules the user cannot see yet. The block is the index's, because the structural validator does not check MMC site ids or KMC paths |
 | D-3 | The set detail carries its own "Project particles" drag source | Cross-document drag is fragile; the workflow and its keyboard equivalent stay in one document |
 | D-4 | `ModelEditorViewModel` is `ObservableObject`; `ModelDetailViewModel` is `ObservableValidator` | Field values are what validate; a validator on the list base would validate nothing |
 | D-5 | Dummy positions are their own document; the P1 preview is a panel toggle, not a tab | Nested tabs were rejected by the layout POC; the shell already has document tabs |
-| D-6 | The numeric expression has no trigonometric functions in v1 | The degrees/radians convention would be a guess; document and test the limitation |
+| D-6 | The numeric expression has no trigonometric functions in v1, and exponent notation is part of a number (`1e5`) while the bare identifier `e` is the constant; there is no implicit multiplication | The degrees/radians convention would be a guess; the lexing rule (m-6) removes the `e` ambiguity and is tested |
 | D-7 | Editor gestures are document-local; the global catalog holds only open/navigation commands | Two editors must not claim the same global key |
-| D-8 | One additive Core `ProjectDocument.Apply` overload; the typed `ProjectEditor` operations remain the edit API | Single validation, the CLI's exact operations, one write path |
-| D-9 | One global `editorFraction`, not a per-domain fraction | Bounded settings surface for a cosmetic preference |
+| D-8 | One additive Core `ProjectDocument.Apply` overload whose delegate receives the document's `ProjectEditor`; the typed `ProjectEditor` operations remain the edit API | Single validation, the CLI's exact operations, one write path; the structural delegate and identity guards close the trust gap (m-7), and `PublicAPI.Unshipped.txt` + `verify.sh api` are the API gate |
+| D-9 | One global `editorFraction`, owned by the shell layout state with one serialized writer; editors observe it and never write settings directly | Bounded settings surface, and Reset Layout/Apply reach open editors without a second writer (m-9) |
 | D-10 | The site-table virtualization acceptance uses exactly 1,000 sites; the >1,000 case uses P1 positions | `MaxReferenceSites` = 1,000 and `STR012` rejects more (POC finding 2) |
+| D-11 | The P1 preview shows positions and indices only — no generating-operation label | No Symmetry preview API exposes the operation; re-deriving it in a view model would duplicate exact symmetry (M-1). A labelled operation needs a later Symmetry preview API and an owner-approved design change |
+| D-12 | The usage index resolves KMC reference paths through `TransitionPathResolver` and attributes each point to its owning site; it also counts MMC site ids, occupation exchanges/dopings, and energy references | The structural validator deliberately leaves resolved-path and MMC site rules to the Symmetry validator, so the index is the only pre-apply view of those dependencies (m-2/n-1) |
+| D-13 | A bulk action is one composed `Func<ProjectEditor, Project, ProjectEditResult>` with all-or-nothing semantics and one undo entry | `ProjectEditor` has no bulk operation; a partial batch would be a half-applied edit (m-8) |
+| D-14 | `ProjectChanged` is handled by kind: `Saved` never invalidates a form; other-domain edits refresh options only; the open object's edit shows a conflict; `Replaced` rebuilds | A save or a foreign edit must not warn about an unchanged form (m-10) |
 
 **Owner input needed at the 24A start gate**
 
 1. Accept **class High** as one unit with no further split (§16).
 2. Approve the six-feature list below.
-3. Confirm D-2 (no cascade deletion in 24A) as the approved scope. D-2, D-3, D-5, and D-6 reshape or narrow the
-   indicative sketch; the other decisions are internal choices with no scope effect.
+3. Confirm D-2 as revised in round 2: a blocked delete with a dependents list, plus the **energy-reference-only**
+   cascade. The earlier "no cascade at all" premise was wrong (`RemoveCellSiteAndEnergyReferences` exists); the
+   approved scope now includes that one bounded cascade and nothing wider. D-2, D-3, D-5, D-6, and D-11 reshape or
+   narrow the indicative sketch; the other decisions are internal choices with no scope effect.
 4. Approve the feature-branch list and the step-branch name.
 
 ### 18. Closeout and audit plan
@@ -547,16 +693,17 @@ cross-step interfaces — more overhead without a smaller audit surface.
 
 | # | Feature | Slug | Scope | Done when |
 | --- | --- | --- | --- | --- |
-| 1 | Shared editor framework | `shared-editor-framework` | ADR 0003 surface: `ModelTableSurface`, `ModelColumn` policy, scroll gutter, tab-order fix, multi-select; `ModelEditorDocumentViewModel`/`ModelEditorViewModel`/`ModelDetailViewModel`; `ReferencePickerViewModel`; `NumericExpression`; `ModelUsageIndex`; inline validation summary; empty states; keyboard map; `AddMocassinModelEditors`; the additive Core overload and coordinator overload; the `editorFraction` setting; document kinds and navigation/explorer/inspector/command registration for the 24A domains | CRUD and undo work headlessly on a real ceria project through the framework; `Home`/`End` → `Tab` reaches the detail pane; a diagnostic navigates into an editor and focuses the offending field; the usage index agrees with a blocked-delete rejection |
+| 1 | Shared editor framework | `shared-editor-framework` | ADR 0003 surface: `ModelTableSurface`, `ModelColumn` policy, scroll gutter, tab-order fix, multi-select; `ModelEditorDocumentViewModel`/`ModelEditorViewModel`/`ModelDetailViewModel`; `ReferencePickerViewModel`; `NumericExpression`; `ModelUsageIndex` (path resolution included); inline validation summary; empty states; keyboard map; `AddMocassinModelEditors` with the direct Symmetry reference and preview/validator registration; the additive Core overload and coordinator overload (with `PublicAPI.Unshipped.txt` and `verify.sh api`); the shell-owned `editorFraction`; document kinds and navigation/explorer/inspector/command registration for the 24A domains | CRUD and undo work headlessly on a real project through the framework; `Home`/`End` → `Tab` reaches the detail pane; a diagnostic navigates into an editor and focuses the offending field; the usage index agrees with a blocked-delete rejection; `verify.sh api` passes with the new unshipped member |
 | 2 | Particle and set editors | `particle-and-set-editors` | Particles table (pinned read-only void, usage counts, charge/symbol/vacancy warnings, blocked delete with dependents, duplicate, bulk charge); sets with drag and keyboard membership, default-occupation badge, empty-set error, occupation chips | The particle/set acceptance rows pass; drag and keyboard-only flows produce the same result |
 | 3 | Space group and cell parameters | `space-group-and-cell-parameters` | Searchable space-group picker (number/HM/Hall/crystal system), settings, operation details, compatibility and orbit-size preview before apply; cell parameters with expressions, crystal-system locks, live vectors/volume, geometry diagnostics, resets | A space-group change previews the new orbits and overlaps before applying; locks match `CellGeometry` for every crystal system |
-| 4 | Site table and P1 preview | `site-table-and-p1-preview` | Cell-site table; add/edit with expressions and reference pickers; P1 preview (orbit list, whole-structure list, 2D projection) with overlap warnings; deletion dependents with navigation; stability warnings | Overlaps are shown inline and the candidate is refused; the preview list equals the engine's orbit list |
-| 5 | Dummy positions and structure summary | `dummy-positions-and-structure-summary` | Dummy-positions document with distinct glyph; structure summary (P1 count, stable/unstable, volume, density, orbit table, large-P1 warning) | Summary values agree with `ModelStatistics`; dummies render distinctly and round-trip |
-| 6 | 24A tests, documentation, and closeout | `tests-docs-and-closeout` | The §13 suite, the §12 documentation, parity/status updates, `docs/planning/closeout/step-24a.json` (`"step": "step-24a"`), the pre-audit gate, and the audit request | `./tools/verify.sh all --require` passes; the strict docs build passes; `check_closeout_evidence.py` validates; the audit request is complete |
+| 4 | Site table and P1 preview | `site-table-and-p1-preview` | Cell-site table; add/edit with expressions and reference pickers; P1 preview (orbit rows with position, Cartesian, `P` index and orbit-member index; whole-structure list; 2D projection) with overlap warnings; dependency-aware deletion (blocked list plus the energy-reference-only action); stability warnings | Overlaps are shown inline and the candidate is refused; the preview's indices equal the engine's orbit/position data and no operation label is rendered |
+| 5 | Dummy positions and structure summary | `dummy-positions-and-structure-summary` | Dummy-positions document with distinct glyph; structure summary (reference-site count, P1 position count, stable/unstable **position** counts, cell volume, reference-site density from `Sites/volume`, orbit table, large-P1 warning), all from `StructureModel` and `StructurePreview` | Summary values equal the values recomputed from `StructureModel.Sites` and `StructurePreview`; no `ModelStatistics` call; dummies render distinctly and round-trip |
+| 6 | 24A tests, documentation, and closeout | `tests-docs-and-closeout` | The §13 suite, the §12 documentation, **the parity-matrix rows for the 24A/24B split mapped to the delivering half** (n-2), status updates, `docs/planning/closeout/step-24a.json` (`"step": "step-24a"`), the pre-audit gate, and the audit request | `./tools/verify.sh all --require` passes; the strict docs build passes; `check_closeout_evidence.py` validates; the parity rows name 24A/24B; the audit request is complete |
 
 - **Pre-audit gate.** The dev maps every ticked acceptance criterion to its evidence, confirms that the step page,
-  dashboard, feature log, and closeout evidence agree, runs the structure/link/secret/licence checks, and records
-  the design class and any waiver in the step page
+  dashboard, feature log, and closeout evidence agree, **maps the parity-matrix rows to 24A/24B** (n-2),
+  **confirms the POC report and PNGs are on `main`** before the start gate (m-11), runs the
+  structure/link/secret/licence checks, and records the design class and any waiver in the step page
   ([`design-proportionality.md` §3](../../development/design-proportionality.md#3-pre-audit-gate)).
 - **Platform gates.** Windows and macOS are required because the step touches GUI keyboard, focus, drag-and-drop,
   and screenshot behaviour; the platform gate is recorded in the audit request. Ubuntu is the closeout run.
@@ -567,18 +714,21 @@ cross-step interfaces — more overhead without a smaller audit surface.
 
 - [ ] The layout is used as recorded in ADR 0003: the table selects, the splitter resizes the detail pane, and the
       detail pane edits. No new grid/control dependency is added.
-- [ ] A user can create the ceria particles, sets, structure, and sites without the CLI. (The oxygen migration is
+- [ ] A user can author the ceria particles, sets, structure, and sites **from an empty project**
+      (`samples/blank`) without the CLI, and the authored values match the ceria sample. (The oxygen migration is
       24B's criterion; 24A does not claim it.)
 - [ ] Drag-and-drop and keyboard-only flows both work for particle-set membership and produce the same order.
 - [ ] Changing the space group previews the new orbit sizes and overlaps **before** applying, and cancelling
       changes nothing.
 - [ ] Overlapping sites are shown inline and cannot be applied; the rejection changes nothing.
+- [ ] The P1 preview shows positions with their canonical `P` index and orbit-member index, matches the engine's
+      orbit/position data, and renders no generating-operation label (M-1).
 - [ ] Every particle/structure diagnostic navigates to the offending field by keyboard and by click.
 - [ ] Undo/redo works across every 24A edit, and the save point stays correct.
 - [ ] `Tab` reaches the detail pane from the selection surface after `Home`/`End`; the surface is one tab stop.
 - [ ] The site table stays aligned and virtualizes exactly 1,000 sites; a preview of more than 1,000 P1 positions
       is bounded and cancellable.
-- [ ] Read-only sessions disable every edit path and show the 23B banner.
+- [ ] Read-only sessions disable every edit path and show the 23B banner, proved by `EditorReadOnlyTests`.
 - [ ] Documentation written (the §12 pages).
 
 ## Documentation

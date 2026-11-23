@@ -34,6 +34,15 @@ feature-work edit.
 100) and this note. It changes no 24A design text, so the reviewed commit remains the freeze SHA above; the 24B
 page is out of this review's scope beyond the split-boundary check.
 
+**Round-2 resolution note.** Round 1 returned `Changes required` for **M-1** (Major) with m-1…m-12 and n-1/n-2.
+The design was corrected and re-frozen at the commit recorded in `Resolution status` below. Changed files: the 24A
+step page, ADR 0003, `01-target-architecture.md` §3.2 and `05-open-decisions.md` (design), plus `status.md` (the
+dashboard row and the phase narrative — status-only, no design text). The reviewer's round-1 text (findings,
+evidence, verdict, checklists) is unchanged. M-1 is resolved **inside** the existing boundary — the preview no
+longer promises an element the API cannot supply — so there is no scope, dependency, or design-class change and no
+new public API. Per the Full stop rule the Minor and Note findings do not by themselves justify a new round; they
+are resolved or accepted in `Resolution status` because the commit was required for M-1 anyway.
+
 **Split note.** The human owner split Step 24 into **24A** (this step) and **24B** (transition editors) on
 2026-11-22 under the complexity rule (class High, more than one independent acceptance story, an audit surface too
 large for one sitting), at the same gate that recorded the editor layout. 24A contains no 24B task; 24B depends on
@@ -302,7 +311,7 @@ or verdict.
 
 ## Record state
 
-**State:** Changes required
+**State:** Re-review required
 
 `Re-review required` is a record state, not a verdict.
 
@@ -360,12 +369,28 @@ Date:
 
 ## Resolution status
 
-| Finding | Status | Owner | Commit |
-| --- | --- | --- | --- |
-| — | — | — | — |
+The request owner fills this section after the verdict. Do not alter the review agent-authored findings, evidence,
+or verdict.
 
-The dev fills this section after the verdict. Do not alter the review agent-authored findings, evidence, or
-verdict.
+**Round-2 resolution commit:** `ROUND2_SHA` (the design re-freeze; recorded by the follow-up status commit).
+
+| Finding | Severity | Resolution | Status | Owner |
+| --- | --- | --- | --- | --- |
+| **M-1** | **Major** | The P1 preview now promises **positions and indices only**: each orbit row shows the fractional and Cartesian position, the canonical `P` index and the orbit-member index. No Symmetry API is added; the design explicitly forbids re-deriving the operation in the app (it would duplicate Step 02 exact symmetry, contrary to §1, `01-target-architecture.md` §3.2 and `AGENTS.md` §5). A labelled operation is deferred to a later step that opens a preview API. `P1PreviewTests` asserts the row indices equal `StructurePreview.Orbits[i].PositionIndices` / `ExpandedSite.OrbitMemberIndex` and that the row projection has no operation field; a new acceptance criterion states it. §11 now records that no interface question remains. **No scope or class change, no new public API — the hard stop was not triggered.** | Fixed | Design agent |
+| **m-1** | Minor | The structure summary names real sources and defines the statistic: reference-site count from `StructureModel.Sites`; P1 count and stable/unstable **position** counts from `StructurePreview.PositionList` (labelled positions, never sites); volume from `StructurePreview.CellVolumeAngstrom3`; orbit table from `StructurePreview.Orbits`; **reference-site density** `= sites / volume` (Å⁻³). Particle-number density is a lattice/simulation quantity and is not shown; `ModelStatistics` is not called (23B keeps statistics on demand). `StructureSummaryTests` compares against the recomputed preview values. | Fixed | Design agent |
+| **m-2** | Minor | **D-2 re-resolved.** The false premise is corrected: `RemoveCellSiteAndEnergyReferences` exists, but only for energy references. The dependents are now exactly MMC transitions (`SiteAId`/`SiteBId`), KMC transitions through their resolved reference path (`TransitionPathResolver` → owning `CellSiteId`), occupation exchanges and their dopings, and the energy references. The default delete is blocked; the **only** cascade offered is "delete site and energy references", enabled solely when the remaining dependents are energy references. The usage index is the blocking authority because the structural validator does not check MMC site ids or KMC paths (`TRN016`/`TRN020`/`TRN012` are Symmetry rules that run only in the full pipeline); the Core rejection remains the backstop where it checks (occupation exchanges, Core-owned energy references) and a test asserts they agree. The KMC/MMC stability warning is retained with its resolution path named. **D-2 outcome for the owner: a blocked delete plus one bounded energy-reference cascade; no broader cascade; the owner confirms this at the start gate.** | Fixed | Design agent |
+| **m-3** | Minor | The acceptance test starts from an **empty project** (`samples/blank`) and authors the ceria model from scratch, comparing the authored values to `samples/ceria` by name/value (ids differ); a second case edits one field on the populated ceria sample. Acceptance criterion 2 now says "from an empty project". | Fixed | Design agent |
+| **m-4** | Minor | Added `EditorReadOnlyTests`: Add/Remove/Duplicate/Apply/`Enter` disabled, banner shown, no coordinator call, no undo/dirty change, no `EditRejected`, and a forced `Apply` returns `ReadOnly`. The read-only acceptance criterion names the test. | Fixed | Design agent |
+| **m-5** | Minor | `EditorPerformanceTests` is **functional only** (bounded realized containers independent of row count, all rows present, coalescing and superseded-result discard with a fake clock, no dropped rows). Timing is moved to `EditorPerformanceEvidence` as non-gating recorded evidence per `03-quality-strategy.md` §11.1; §14 states no PR-fast test asserts a duration. | Fixed | Design agent |
+| **m-6** | Minor | The lexing rule is stated: exponent notation belongs to a number and requires exponent digits (`1e5`, `2e-3` are numbers; `1e`, `2e` are malformed, not `2 * e`); the identifier `e` is the constant only when not preceded by a digit sequence; there is no implicit multiplication (`2 pi` is an error). Test cases `1e5`, `2e-3`, `1e`, `e`, `2e`, `2 pi` are added. | Fixed | Design agent |
+| **m-7** | Minor | §10 now requires `Mocassin.Core/PublicAPI.Unshipped.txt` and `./tools/verify.sh api`; it states the redo-clear and `TrimUndoStack()` (`MaxUndoDepth`) semantics, the change identity (`Before` = the document value, `After` = the result project, the caller's description wins), and a structural precondition: the delegate now receives the document's **own `ProjectEditor`** (`Func<ProjectEditor, Project, ProjectEditResult>`), with identity guards and a test for the rejected-operation path. Feature 1's done-when includes `verify.sh api`. | Fixed | Design agent |
+| **m-8** | Minor | A bulk action is **one composed delegate** that folds the typed single-object operations over a candidate project, returns one `ProjectChange`, and is all-or-nothing: a mid-batch rejection changes nothing and names the failing object. Bulk delete (n objects), bulk set-charge and multi-select delete are each one undo entry; `EditorUndoTests` asserts both the one-entry behaviour and the mid-batch rollback. | Fixed | Design agent |
+| **m-9** | Minor | `editorFraction` is **shell-owned layout state** with one serialized writer: it is captured by `CaptureLayout()`, applied by `ApplySettings`, reset by `ResetLayout()` and persisted by the existing region-property hook; editor documents observe the shared value and never write settings themselves. §9 states the ownership, the reset path and the observation path; a shell region change cannot drop the field. | Fixed | Design agent |
+| **m-10** | Minor | `ProjectChanged` is handled by kind (D-14): `Saved` never rebuilds or invalidates a form; `Edited`/`Undo`/`Redo` rebuild rows, refresh options, and compare the open object by id to decide between "keep", "conflict" and "removed"; `Replaced` discards forms and rebuilds. `EditorRefreshTests` covers each case. | Fixed | Design agent |
+| **m-11** | Minor | Recorded as merge sequencing: the POC report and PNGs are branch-only today; the `fix/step-24-layout-poc` branch is now documentation-and-assets only (spike code removed at `fbdae6c`) and lands on `main` through its owner-approved `--no-ff` merge. **ADR 0003 and the 24A page now state that the 24A start gate is conditional on that merge**, and the pre-audit gate re-checks it. No merge was performed by the design agent. | Fixed by sequencing | Lead/owner (merge), dev (pre-audit check) |
+| **m-12** | Minor | ADR 0003 no longer claims "second-fastest": it states the measured 84 ms as within the 29–84 ms non-tree band and about 18× faster than the 1,521 ms tree. The decision reasons are unchanged. The POC record's own phrasing is branch-only evidence and was not edited. | Fixed | Design agent |
+| **n-1** | Note | `Mocassin.App.ViewModels` gains an **explicit `Mocassin.Symmetry` project reference** (in-repo, not a package), `01-target-architecture.md` §3.2 is updated, and `AddMocassinModelEditors` registers `IStructurePreviewService`/`IStructureValidator` as singletons; the usage index uses `TransitionPathResolver`. The page §1 and §11 state the reference, registration and the "consume, never own an algorithm" rule. | Fixed | Design agent |
+| **n-2** | Note | Accepted as pre-audit bookkeeping: feature 6 now includes mapping the parity-matrix rows to the delivering half, and the pre-audit gate checks it. The mapping is recorded for the dev: 24A — drag-and-drop set membership, space-group selection/operations, cell locks, P1 preview, dummy positions, numeric expression, particle/set editor, structure editor, and the particle/structure domain providers; 24B — state changes, groups, chains, reference paths, transition rule-count preview, transition editor, and the transition domain providers. | Accepted (deferred) | Dev (pre-audit) |
 
 ## Review rounds
 

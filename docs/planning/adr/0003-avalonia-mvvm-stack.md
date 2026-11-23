@@ -68,9 +68,10 @@ separate window shape.
 
 **Why this composition.**
 
-- Option 1 was the only candidate that met every §0.2 requirement of the Step 24 spike at the lowest marginal
-  size (59 option lines on top of the shared surface) and the second-fastest 1,024-row build (84 ms), with
-  exact header/row alignment through the shared width policy plus the scroll gutter.
+- Option 1 met every §0.2 requirement of the Step 24 spike at the lowest marginal size (59 option lines on top
+  of the shared surface), with a 1,024-row build of 84 ms — within the 29–84 ms band of the four non-tree
+  options and about 18× faster than the 1,521 ms tree — and exact header/row alignment through the shared width
+  policy plus the scroll gutter.
 - Option 4 adds the one thing option 1 lacks that the Step 24 detail panes need: width for the occupation and
   exchange matrices. It changes only the container around the same table surface, so the two compose without a
   second table implementation.
@@ -85,8 +86,10 @@ separate window shape.
 
 **Evidence.** The out-of-step POC report and its bounded PNG subset are the durable decision input:
 `docs/planning/maintenance/2026-11-22-step-24-layout-poc.md` with
-`docs/planning/maintenance/assets/step-24-layout-poc/`. They land on `main` through the spike branch's
-owner-approved `--no-ff` merge under [`AGENTS.md` §3.5](../../../AGENTS.md); the report is decision-input
+`docs/planning/maintenance/assets/step-24-layout-poc/`. They live on `fix/step-24-layout-poc` until that branch's
+**documentation-and-assets-only** owner-approved `--no-ff` merge under [`AGENTS.md` §3.5](../../../AGENTS.md) lands
+them on `main`; the spike code was already removed there (`fbdae6c`). **The Step 24A start gate is conditional on
+that merge**: a fresh auditor must be able to read the decision input from `main`. The report is decision-input
 evidence, not a normative design. The spike code is **discarded** by owner decision (2026-11-22) and does not
 seed the implementation: Step 24 re-derives the surfaces from its frozen step page and this ADR.
 
@@ -94,7 +97,8 @@ seed the implementation: Step 24 re-derives the surfaces from its frozen step pa
 
 - The editor detail pane is a resizable region, so it needs a persisted **fraction** rather than a fixed width
   ([`ui-interaction-contract.md` §6](../../development/ui-interaction-contract.md#6-shell-layout)). The fraction
-  is app-local settings state (`layout.editorFraction`), additive with no schema bump.
+  is app-local settings state (`layout.editorFraction`), additive with no schema bump and owned by the shell's
+  serialized layout state so that Reset Layout and settings changes reach every open editor.
 - Reference pickers are composed from a search box plus a filtered combo box; Avalonia has no searchable combo.
   Keep that one small reusable control instead of repeating two controls per reference field.
 - Focus and `Enter`/`Escape` behaviour stays under
