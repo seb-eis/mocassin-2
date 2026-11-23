@@ -30,7 +30,7 @@ adds one public Core API. No format change and no new dependency. Justification 
 - **Step tag:** —
 - **Audit:** Not requested
 - **Design review:** **Re-review required** — round 1 (`Changes required`, one Major and twelve Minor findings)
-  resolved on this commit; the round-1 freeze was
+  resolved at `b75efea4997eab9e89ebe62297efeca1f0c2f26e`; the round-1 freeze was
   `b98a56f824002bc3cdbb4ace9e0b5cf9dd464ba9`, record [`reviews/step-24a.md`](../reviews/step-24a.md)
 - **Layout gate:** **Closed** — ADR 0003
   [records the composition](../adr/0003-avalonia-mvvm-stack.md#editor-layout-decision-2026-11-22) (option 1

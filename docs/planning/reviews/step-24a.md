@@ -372,7 +372,7 @@ Date:
 The request owner fills this section after the verdict. Do not alter the review agent-authored findings, evidence,
 or verdict.
 
-**Round-2 resolution commit:** `ROUND2_SHA` (the design re-freeze; recorded by the follow-up status commit).
+**Round-2 resolution commit:** `b75efea4997eab9e89ebe62297efeca1f0c2f26e` (the design re-freeze; recorded by the follow-up status commit).
 
 | Finding | Severity | Resolution | Status | Owner |
 | --- | --- | --- | --- | --- |
