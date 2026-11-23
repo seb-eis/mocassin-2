@@ -678,6 +678,27 @@ cross-step interfaces — more overhead without a smaller audit surface.
 | D-13 | A bulk action is one composed `Func<ProjectEditor, Project, ProjectEditResult>` with all-or-nothing semantics and one undo entry | `ProjectEditor` has no bulk operation; a partial batch would be a half-applied edit (m-8) |
 | D-14 | `ProjectChanged` is handled by kind: `Saved` never invalidates a form; other-domain edits refresh options only; the open object's edit shows a conflict; `Replaced` rebuilds | A save or a foreign edit must not warn about an unchanged form (m-10) |
 
+**Implementation-time resolutions (accepted by the owner 2026-11-23; audit-verified).**
+
+- **m-13 — bulk composition.** The one `ProjectChange` is constructed in the **Core
+  `ProjectDocument.Apply(string, Func<ProjectEditor, Project, ProjectEditResult>)` overload** (the permitted
+  construction place), not in a view model. The app-side fold (`BulkEditComposer`) runs the typed operations over
+  a candidate and returns the last successful typed result; it never constructs a `ProjectChange`. A mid-batch
+  rejection returns the **document project** with `Change == null` and the accumulated diagnostics, so project,
+  undo, redo, save point, and dirty state are untouched. The overload's identity guard requires
+  `ReferenceEquals(result.Change.After, result.Project)` (a malformed result is an `InvalidOperationException`) and
+  always records `ProjectChange(description, documentProject, result.Project)` with the caller's description.
+  Evidence: `ProjectDocumentApplyOverloadTests.ComposedOperationRecordsOneCanonicalChange...` and
+  `ModelEditorFrameworkTests.BulkEditIsOneUndoEntryAndAPartialRejectionChangesNothing`.
+- **m-15 — unstable-environment dependents.** `ModelUsageIndex` adds the `UnstableEnvironment` itself through its
+  own `SiteId` before walking its filters, so a filterless environment is still a dependent and the
+  energy-reference-only cascade is offered. Evidence:
+  `ModelUsageIndexTests.AFilterlessUnstableEnvironmentIsADependentThroughItsSiteId` (the ceria sample's environment
+  has no filters).
+- **m-14 — site-overlap gate.** Deferred to feature 4 as the accepted resolution requires: the site form validates
+  the candidate with `IStructureValidator`, refuses Apply on an error, and lists the `STR007` diagnostics; the
+  candidate has no preview to mark. No 24A-wide change is made here.
+
 **Owner input needed at the 24A start gate**
 
 1. Accept **class High** as one unit with no further split (§16).

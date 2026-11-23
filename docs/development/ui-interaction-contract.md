@@ -344,6 +344,12 @@ An editor added in a later step must satisfy all of the following before its ste
    `Height` next to a star track.
 7. Add headless tests for initial focus, `Escape`, the `Enter` mapping, and focus restoration. Screenshot
    baselines are not a substitute.
+8. **The selection surface is exactly one tab stop**, whatever the selection state. Row containers are not tab
+   stops (`ListBoxItem.IsTabStop="False"`) and the list uses one-shot tab navigation; `Tab` from the list moves
+   to the detail pane's first actionable field, including immediately after `Home` or `End`. A deterministic
+   tunnel `KeyDown` handler is the fallback if one-shot navigation does not produce that. `Enter` on a focused
+   row opens or focuses the detail, double-click is the same action, `Escape` reverts an uncommitted form,
+   `Delete` removes after confirmation, and `Ctrl+D` duplicates (24A framework).
 
 ## 9. Verification
 
@@ -354,6 +360,7 @@ An editor added in a later step must satisfy all of the following before its ste
 | Palette/cheat sheet/settings initial focus, `Escape`, restore | PR-fast headless |
 | Dialog initial focus, `Escape`, `Enter`, progress opt-out | PR-fast headless |
 | List/tree `Enter` activation, single-line commit, multiline opt-out when the first multiline editor lands | PR-fast headless |
+| Editor selection surface is one tab stop; `Home`/`End` + `Tab` reaches the detail; row activation | PR-fast headless |
 | Splitter names, roles, and focus indicator | PR-fast headless |
 | Shell appearance after the layout change | PR-medium screenshot baselines |
 

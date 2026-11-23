@@ -1,0 +1,65 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Mocassin.App.ViewModels.Editors"
+             xmlns:editors="using:Mocassin.App.Views.Editors"
+             xmlns:automation="using:Avalonia.Automation"
+             x:Class="Mocassin.App.Views.Editors.ModelEditorDocumentView"
+             x:DataType="vm:ModelEditorDocumentViewModel">
+  <Grid RowDefinitions="Auto,Auto,*" Background="{DynamicResource Mocassin.WorkspaceBackground}">
+    <Border Grid.Row="0"
+            Background="{DynamicResource Mocassin.CardBackground}"
+            BorderBrush="{DynamicResource Mocassin.BorderBrush}"
+            BorderThickness="0,0,0,1"
+            Padding="10,4">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <TextBlock Text="{Binding Editor.Table.MatchCountText}"
+                   VerticalAlignment="Center"
+                   Foreground="{DynamicResource Mocassin.ForegroundMutedBrush}" />
+        <TextBlock Grid.Column="1"
+                   Text="{Binding Editor.DiagnosticSummary.SummaryText}"
+                   VerticalAlignment="Center"
+                   Margin="12,0"
+                   automation:AutomationProperties.Name="Editor validation summary" />
+        <Button Grid.Column="2"
+                Content="Open Problems"
+                Command="{Binding Editor.DiagnosticSummary.OpenProblemsCommand}"
+                IsVisible="{Binding Editor.DiagnosticSummary.HasDiagnostics}" />
+      </Grid>
+    </Border>
+
+    <Border Grid.Row="1"
+            IsVisible="{Binding Editor.HasBlockedDelete}"
+            Background="{DynamicResource Mocassin.WarningBackground}"
+            BorderBrush="{DynamicResource Mocassin.WarningBorderBrush}"
+            BorderThickness="0,0,0,1"
+            Padding="10,4">
+      <TextBlock Text="{Binding Editor.BlockedDeleteMessage}" TextWrapping="Wrap" />
+    </Border>
+
+    <Border Grid.Row="1"
+            IsVisible="{Binding Editor.IsReadOnly}"
+            Background="{DynamicResource Mocassin.WarningBackground}"
+            BorderBrush="{DynamicResource Mocassin.WarningBorderBrush}"
+            BorderThickness="0,0,0,1"
+            Padding="10,4">
+      <TextBlock Text="This project is open read-only; editor commands are disabled." TextWrapping="Wrap" />
+    </Border>
+
+    <Grid Grid.Row="2" x:Name="MasterDetailGrid" ColumnDefinitions="0.42*,4,0.58*">
+      <editors:ModelTableSurface Grid.Column="0"
+                                 x:Name="TableSurface"
+                                 DataContext="{Binding Editor}"
+                                 MinWidth="280" />
+      <GridSplitter Grid.Column="1"
+                    x:Name="EditorSplitter"
+                    ResizeDirection="Columns"
+                    Background="Transparent"
+                    Focusable="True"
+                    automation:AutomationProperties.Name="Resize editor panes"
+                    automation:AutomationProperties.HelpText="Use the arrow keys to resize the detail pane" />
+      <Border Grid.Column="2" MinWidth="240">
+        <ContentControl x:Name="DetailHost" Content="{Binding Editor.Detail}" />
+      </Border>
+    </Grid>
+  </Grid>
+</UserControl>

@@ -24,6 +24,11 @@ internal sealed record LayoutSettings
     public double ConsoleFraction { get; init; } = SettingsDefaults.DefaultConsoleFraction;
 
     /// <summary>
+    /// Gets the editor selection-pane share of the editor width. An absent value reads as the default.
+    /// </summary>
+    public double EditorFraction { get; init; } = SettingsDefaults.DefaultEditorFraction;
+
+    /// <summary>
     /// Gets a value indicating whether the projects region is visible.
     /// </summary>
     public bool LeftVisible { get; init; } = true;

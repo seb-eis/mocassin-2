@@ -29,7 +29,8 @@ internal sealed partial class ShellViewModel
             or nameof(ShellRegionsViewModel.IsConsoleVisible)
             or nameof(ShellRegionsViewModel.LeftFraction)
             or nameof(ShellRegionsViewModel.RightFraction)
-            or nameof(ShellRegionsViewModel.ConsoleFraction))
+            or nameof(ShellRegionsViewModel.ConsoleFraction)
+            or nameof(ShellRegionsViewModel.EditorFraction))
         {
             ScheduleLayoutPersist();
         }
@@ -64,6 +65,7 @@ internal sealed partial class ShellViewModel
             Regions.LeftFraction = SettingsDefaults.DefaultLeftFraction;
             Regions.RightFraction = SettingsDefaults.DefaultRightFraction;
             Regions.ConsoleFraction = SettingsDefaults.DefaultConsoleFraction;
+            Regions.EditorFraction = SettingsDefaults.DefaultEditorFraction;
         }
         finally
         {
@@ -87,6 +89,7 @@ internal sealed partial class ShellViewModel
         LeftFraction = Regions.LeftFraction,
         RightFraction = Regions.RightFraction,
         ConsoleFraction = Regions.ConsoleFraction,
+        EditorFraction = Regions.EditorFraction,
         ActiveConsoleChannel = Console.ActiveChannel?.Id ?? SettingsDefaults.DefaultConsoleChannel,
     };
 
@@ -120,6 +123,7 @@ internal sealed partial class ShellViewModel
         Regions.LeftFraction = value.Layout.LeftFraction;
         Regions.RightFraction = value.Layout.RightFraction;
         Regions.ConsoleFraction = value.Layout.ConsoleFraction;
+        Regions.EditorFraction = value.Layout.EditorFraction;
         Console.ActiveChannel =
             Console.Channels.FirstOrDefault(channel => channel.Id == value.Layout.ActiveConsoleChannel)
             ?? Console.Channels.FirstOrDefault();

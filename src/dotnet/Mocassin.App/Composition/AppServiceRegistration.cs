@@ -11,6 +11,7 @@ using Mocassin.App.ViewModels.Commands;
 using Mocassin.App.ViewModels.Consoles;
 using Mocassin.App.ViewModels.Dialogs;
 using Mocassin.App.ViewModels.Diagnostics;
+using Mocassin.App.ViewModels.Editors.Navigation;
 using Mocassin.App.ViewModels.Documents;
 using Mocassin.App.ViewModels.Navigation;
 using Mocassin.App.ViewModels.Notifications;
@@ -26,6 +27,7 @@ using Mocassin.App.Views.Dialogs;
 using Mocassin.App.Views.Platform;
 using Mocassin.App.Views.Shell;
 using Mocassin.App.Views.Theming;
+using Mocassin.Symmetry.Structure;
 
 namespace Mocassin.App.Composition;
 
@@ -91,6 +93,21 @@ internal static class AppServiceRegistration
     }
 
     /// <summary>
+    /// Registers the shared model-editor framework and the 24A editor seams.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <returns>The service collection.</returns>
+    public static IServiceCollection AddMocassinModelEditors(this IServiceCollection services)
+    {
+        services.AddSingleton<IStructurePreviewService, StructurePreviewService>();
+        services.AddSingleton<IStructureValidator, StructureValidator>();
+        services.AddSingleton<INavigationTargetProvider, ModelEditorNavigationTargetProvider>();
+        services.AddSingleton<IExplorerNodeProvider, ModelEditorExplorerNodeProvider>();
+        services.AddSingleton<ModelEditorCommandRegistrar>();
+        return services;
+    }
+
+    /// <summary>
     /// Registers the view-layer services.
     /// </summary>
     /// <param name="services">The service collection.</param>
@@ -117,10 +134,12 @@ internal static class AppServiceRegistration
     /// <returns>The service collection.</returns>
     public static IServiceCollection AddMocassinShell(this IServiceCollection services)
     {
+        services.AddSingleton<ShellRegionsViewModel>();
+        services.AddSingleton<IEditorPaneLayout>(provider => provider.GetRequiredService<ShellRegionsViewModel>());
         services.AddSingleton(provider => new ShellViewModel(
             provider.GetRequiredService<IConsoleService>(),
             provider.GetServices<IConsoleChannelProvider>(),
-            new ShellRegionsViewModel(),
+            provider.GetRequiredService<ShellRegionsViewModel>(),
             new StatusBarViewModel(GetVersion(), provider.GetServices<IStatusBarItemProvider>()),
             provider.GetRequiredService<ProgressService>(),
             provider.GetRequiredService<IShellLifetime>(),

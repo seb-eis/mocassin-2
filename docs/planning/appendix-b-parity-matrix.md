@@ -230,7 +230,8 @@ Status legend:
 | Application settings and logging | N | Implemented | 23A/23B | Versioned `mocassin.settings` v1 with migration and retention in 23A; `autosave`/`session` additive fields in 23B; structured rolling logs replace the original XML settings file |
 | Crash recovery dialog | N | Improvement | 23A/23B | Global exception boundary, log entry, and "open log folder" in 23A; captured dirty-session snapshots, the 2 s bounded async recovery writer, per-session status, and the recovery action in 23B; the dead-UI path writes no snapshots, and the autosave fallback is failure-injected in a PR-fast test |
 | Application diagnostics | N | Deferred | 23A/23B | App-side environment report (distinct from CLI `doctor`) |
-| Particle/set editor | Y | Planned | 24 | |
+| Shared model-editor framework | Y | Implemented | 24A | ADR 0003 table + detail surface, one column/header policy, one-tab-stop focus with `Home`/`End` + `Tab`, typed sort, multi-select, reusable reference picker, in-house numeric expression, lazy usage index with resolved KMC paths, and the additive typed `ProjectDocument.Apply` overload; shell-owned `layout.editorFraction`. The particle and structure UX is delivered in the same step's later features |
+| Particle/set editor | Y | Planned | 24A | |
 | Structure editor | Y | Planned | 24 | |
 | Transition editor | Y | Planned | 24 | |
 | Energy editor | Y | Planned | 25 | |

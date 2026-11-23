@@ -14,7 +14,7 @@ namespace Mocassin.App.ViewModels.Editing;
 /// </summary>
 /// <remarks>
 /// A coordinator is owned by a project session and lives on the UI thread. It never mutates a project itself: every
-/// edit goes through <see cref="ProjectDocument.Apply"/> and therefore <see cref="ProjectEditor"/>, which validates
+/// edit goes through <c>ProjectDocument.Apply</c> and therefore <see cref="ProjectEditor"/>, which validates
 /// the candidate with the structural <see cref="ProjectValidator"/>. It is not the full validation pipeline; a
 /// structurally valid but cross-domain-invalid edit is accepted and reported by the validation surface later.
 /// </remarks>
@@ -100,6 +100,48 @@ internal sealed partial class ProjectEditCoordinator : ObservableObject
 
         var previous = document.Project;
         var edit = document.Apply(description, mutation);
+        if (!edit.IsSuccess)
+        {
+            var message = edit.Diagnostics
+                .FirstOrDefault(static diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)
+                ?.Message;
+            EditRejected?.Invoke(this, new EditRejectedEventArgs(description, edit.Diagnostics));
+            return new EditApplyResult(EditApplyOutcome.Rejected, edit, message);
+        }
+
+        if (edit.Change is null)
+        {
+            return new EditApplyResult(EditApplyOutcome.Applied, edit, null);
+        }
+
+        RefreshState();
+        OnProjectChanged(ProjectChangeKind.Edited, previous, document.Project, description);
+        return new EditApplyResult(EditApplyOutcome.Applied, edit, null);
+    }
+
+    /// <summary>
+    /// Applies one typed <see cref="ProjectEditor"/> operation through the single write path.
+    /// </summary>
+    /// <param name="description">The user-visible change description.</param>
+    /// <param name="operation">The typed operation, invoked with the document's own editor.</param>
+    /// <returns>
+    /// A read-only refusal, a rejection with diagnostics, or an acceptance. A same-hash no-op is accepted with
+    /// <see cref="EditApplyResult.HasChange"/> false and raises no event.
+    /// </returns>
+    public EditApplyResult Apply(
+        string description,
+        Func<ProjectEditor, ProjectModel, ProjectEditResult> operation)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(description);
+        ArgumentNullException.ThrowIfNull(operation);
+
+        if (!canEdit)
+        {
+            return new EditApplyResult(EditApplyOutcome.ReadOnly, null, ReadOnlyMessage);
+        }
+
+        var previous = document.Project;
+        var edit = document.Apply(description, operation);
         if (!edit.IsSuccess)
         {
             var message = edit.Diagnostics

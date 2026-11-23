@@ -2305,3 +2305,4 @@ static Mocassin.Core.Diagnostics.JobDiagnosticCodes.HelpFor(string! code) -> str
 Mocassin.Core.Model.Jobs.JobSettingsValidator
 static Mocassin.Core.Model.Jobs.JobSettingsValidator.Validate(Mocassin.Core.Model.Jobs.JobSettings? settings, Mocassin.Core.Model.Simulations.SimulationKind? kind, Mocassin.Core.Diagnostics.ModelPath! path, bool validateKindApplicability = true) -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
 Mocassin.Core.Model.Jobs.JobExtension.ToCanonicalJson() -> string!
+Mocassin.Core.Editing.ProjectDocument.Apply(string! description, System.Func<Mocassin.Core.Editing.ProjectEditor!, Mocassin.Core.Project.Project!, Mocassin.Core.Editing.ProjectEditResult!>! operation) -> Mocassin.Core.Editing.ProjectEditResult!

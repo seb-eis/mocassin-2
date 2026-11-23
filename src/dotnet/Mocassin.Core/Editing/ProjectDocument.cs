@@ -124,6 +124,65 @@ public sealed class ProjectDocument
     }
 
     /// <summary>
+    /// Applies one typed editor operation, records one undoable change, and clears the redo stack on success.
+    /// </summary>
+    /// <param name="description">The user-visible change description; the document uses it, not the operation's.</param>
+    /// <param name="operation">
+    /// The typed operation, invoked with the document's own <see cref="ProjectEditor"/> and current project.
+    /// </param>
+    /// <returns>
+    /// The edit result. A rejected or no-op operation leaves the project, undo stack, redo stack, save point, and
+    /// dirty state untouched.
+    /// </returns>
+    /// <remarks>
+    /// <para>
+    /// The delegate receives the document's editor, so the "typed <see cref="ProjectEditor"/> operation" precondition
+    /// is structural rather than a convention. A composed bulk operation folds several typed operations and returns
+    /// its final result; that result's change begins at an intermediate candidate, so this overload is the permitted
+    /// place that records the canonical <see cref="ProjectChange"/> from the document value to the final project.
+    /// </para>
+    /// <para>
+    /// A malformed result whose change does not end at the result project is a programmer error and throws
+    /// <see cref="InvalidOperationException"/>. The operation's own description is ignored.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="ArgumentNullException"><paramref name="operation"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException"><paramref name="description"/> is empty.</exception>
+    /// <exception cref="InvalidOperationException">The operation returned <see langword="null"/> or a malformed result.</exception>
+    public ProjectEditResult Apply(
+        string description,
+        Func<ProjectEditor, ProjectModel, ProjectEditResult> operation)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(description);
+        ArgumentNullException.ThrowIfNull(operation);
+
+        var result = operation(editor, Project)
+            ?? throw new InvalidOperationException("A project edit operation returned null.");
+
+        if (!result.IsSuccess || result.Change is null)
+        {
+            return result;
+        }
+
+        if (!ReferenceEquals(result.Change.After, result.Project))
+        {
+            throw new InvalidOperationException(
+                "A project edit result must end its change at the result project.");
+        }
+
+        if (ReferenceEquals(result.Project, Project))
+        {
+            return result;
+        }
+
+        undoStack.Add(new ProjectChange(description, Project, result.Project));
+        TrimUndoStack();
+        redoStack.Clear();
+        Project = result.Project;
+        return result;
+    }
+
+    /// <summary>
     /// Undoes the most recent change.
     /// </summary>
     /// <returns><see langword="true"/> when a change was undone.</returns>
