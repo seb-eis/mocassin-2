@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+using Mocassin.App.ViewModels.Editors.Structure;
 
 namespace Mocassin.App.ViewModels.Editors;
 
@@ -17,4 +18,9 @@ internal sealed class StructureEditorDocumentViewModel : ModelEditorDocumentView
         : base(descriptor, editor)
     {
     }
+
+    /// <summary>
+    /// Gets the typed structure form editor.
+    /// </summary>
+    public StructureEditorViewModel Structure => (StructureEditorViewModel)Editor;
 }

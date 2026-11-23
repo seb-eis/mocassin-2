@@ -46,6 +46,46 @@ diagnostic hint lists the allowed settings for the space-group number when the c
 Inconsistent values are rejected with `STR003`; the API never silently overwrites user input. A user interface
 may lock dependent fields as a convenience, but the model validation is authoritative.
 
+## Editing the space group and cell in the GUI
+
+Open **Structure** from the **Model** menu or the project explorer's **Model** node. The structure document is a
+form: a space-group section and a cell-parameter section, both on the shared editor validation, undo, and
+read-only plumbing.
+
+### Space group
+
+- The search box matches the International Tables number, the Hermann–Mauguin symbol, the Hall symbol, the crystal
+  system, the axis setting, and the origin choice.
+- The **Settings** selector lists every catalog setting for the selected group number, so the origin choice and
+  the unique-axis/rhombohedral setting are explicit.
+- The details panel shows the operation count, the general multiplicity, the crystal system, and every operation
+  in matrix/translation and human-readable form (for example `x, y, z` for the identity).
+- Selecting a setting never edits the project. It builds a *candidate* structure and shows the current versus
+  candidate orbit size for every reference site. Overlapping candidates report `STR007`; cell violations report
+  `STR003`; an incompatible candidate disables **Apply**.
+- **Apply** records one undo entry. **Cancel** discards the candidate and changes nothing.
+
+### Cell parameters
+
+- The six fields (`a`, `b`, `c` in Å; `α`, `β`, `γ` in degrees) accept the same numeric expressions as the other
+  model editors: `+ - * / ^`, parentheses, `pi`/`e`, and `sqrt`/`ln`/`exp`/`abs`.
+- Fields that the resolved crystal system fixes are locked and show the reason: right angles for
+  orthorhombic/tetragonal/cubic, `a = b` for tetragonal/hexagonal, `a = b = c` for cubic/rhombohedral,
+  `α = β = γ` for rhombohedral, the unique-axis right angles for monoclinic, and `γ = 120°` for hexagonal. The
+  locks are an affordance; `CellGeometry` remains the validity authority.
+- The live cell vectors and volume update as you type. An invalid length, angle, Gram determinant, condition
+  number, or crystal-system constraint is shown with the violated inequality (for example “The cell angle α must
+  be 90°, but was 80°”) and disables **Apply**.
+- **Apply** records one undo entry; **Revert** reloads the committed cell.
+- **Reset to cubic** (cubic structures only) and **Reset to defaults** ask for confirmation and are undoable. The
+  defaults reset uses the current crystal-system locks, so it is valid for every system.
+
+### Interaction with the space group
+
+The cell form validates against the committed space group. Changing the space group first and then checking the
+cell diagnostics is the safe order; the candidate preview already reports a candidate cell violation before it is
+applied.
+
 ## Reference sites
 
 A site stores a stable `CellSiteId`, a name, a fractional position, a particle-set reference, and a stability

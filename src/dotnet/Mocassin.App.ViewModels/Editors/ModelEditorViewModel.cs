@@ -460,6 +460,14 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
         usageIndex = null;
         usageSnapshot = null;
         FocusRequested = null;
+        OnDisposed();
+    }
+
+    /// <summary>
+    /// Called after the editor unsubscribes; a parent editor disposes its child forms here.
+    /// </summary>
+    protected virtual void OnDisposed()
+    {
     }
 
     private ModelUsageIndex EnsureUsages()

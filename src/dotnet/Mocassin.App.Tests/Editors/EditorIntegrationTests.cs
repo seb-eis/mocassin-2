@@ -8,10 +8,12 @@ using Mocassin.App.Tests.TestSupport;
 using Mocassin.App.ViewModels.Editors;
 using Mocassin.App.ViewModels.Editors.Particles;
 using Mocassin.App.ViewModels.Editors.Sets;
+using Mocassin.App.ViewModels.Editors.Structure;
 using Mocassin.App.ViewModels.Navigation;
 using Mocassin.App.ViewModels.Shell;
 using Mocassin.App.Views.Editors.Particles;
 using Mocassin.App.Views.Editors.Sets;
+using Mocassin.App.Views.Editors.Structure;
 using Mocassin.Core.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -44,10 +46,13 @@ public sealed class EditorIntegrationTests
 
                     var particleCommand = shell.Commands.Find("model.open.particle");
                     var setCommand = shell.Commands.Find("model.open.particleSet");
+                    var structureCommand = shell.Commands.Find("model.open.structure");
                     Assert.NotNull(particleCommand);
                     Assert.NotNull(setCommand);
+                    Assert.NotNull(structureCommand);
                     Assert.True(particleCommand!.Command.CanExecute(null));
                     Assert.True(setCommand!.Command.CanExecute(null));
+                    Assert.True(structureCommand!.Command.CanExecute(null));
 
                     Assert.True(await shell.Navigation.NavigateToAsync(
                         new ModelPath(ModelEditorDomains.Particle, Guid.Empty),
@@ -64,6 +69,15 @@ public sealed class EditorIntegrationTests
                     var setDocument = Assert.IsType<ModelEditorDocumentViewModel>(shell.Documents.ActiveDocument);
                     Assert.IsType<ParticleSetsEditorViewModel>(setDocument.Editor);
                     HeadlessSession.Pump(window);
+
+                    Assert.True(await shell.Navigation.NavigateToAsync(
+                        new ModelPath(ModelEditorDomains.Structure, Guid.Empty),
+                        NavigationIntent.Activate));
+                    var structureDocument = Assert.IsType<StructureEditorDocumentViewModel>(shell.Documents.ActiveDocument);
+                    Assert.IsType<StructureEditorViewModel>(structureDocument.Editor);
+                    HeadlessSession.Pump(window);
+                    Assert.NotNull(window.GetVisualDescendants().OfType<SpaceGroupEditorView>().FirstOrDefault());
+                    Assert.NotNull(window.GetVisualDescendants().OfType<CellParametersView>().FirstOrDefault());
                 }
                 finally
                 {

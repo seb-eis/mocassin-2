@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Mocassin.App.ViewModels.Editors"
              xmlns:automation="using:Avalonia.Automation"
+             xmlns:editors="using:Mocassin.App.Views.Editors.Structure"
              x:Class="Mocassin.App.Views.Editors.StructureEditorDocumentView"
              x:DataType="vm:StructureEditorDocumentViewModel">
   <Grid RowDefinitions="Auto,*" Background="{DynamicResource Mocassin.WorkspaceBackground}">
@@ -31,7 +32,11 @@
     </Border>
 
     <ScrollViewer Grid.Row="1" Classes="scroll-gutter-right">
-      <ContentControl x:Name="FormHost" Content="{Binding Editor.Detail}" Margin="12" />
+      <StackPanel Spacing="16">
+        <editors:SpaceGroupEditorView DataContext="{Binding Structure.SpaceGroupEditor}" />
+        <Border Height="1" Background="{DynamicResource Mocassin.BorderBrush}" Margin="14,0" />
+        <editors:CellParametersView DataContext="{Binding Structure.CellParameters}" />
+      </StackPanel>
     </ScrollViewer>
   </Grid>
 </UserControl>
