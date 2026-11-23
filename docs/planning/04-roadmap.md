@@ -17,10 +17,10 @@ E Results                                                                       
 22 ◄── 21 ◄── 20 ◄────────────────────────────────────────────────────────────────────────────────────── 19
 
 F GUI
-23A ──► 23B ──► 24 ──► 25 ──► 26 ──► 27 ──► 28
-                │           │
-                └───────────┴────────────► (23A can start after 01/03–07/12; later steps consume
-                                           08/09/10/11/20 as they land)
+23A ──► 23B ──► 24A ──► 24B ──► 25 ──► 26 ──► 27 ──► 28
+                │             │
+                └─────────────┴────────────► (23A can start after 01/03–07/12; later steps consume
+                                             08/09/10/11/20 as they land)
 
 G Release and documentation
 29 ──► 30 ──► 31
@@ -89,10 +89,11 @@ comparability and planning, not as a sizing gate.
 | 22 | Python `.mcs` reader, basic evaluations, pytest, mkdocstrings | 18, 20 | 2–3 pw |
 | 23A | Avalonia workspace and project lifecycle | 01, 03–07, 12 | 2–3 pw forecast (non-gating). Complexity class **High**; owner acceptance at the 23A start gate — see the [23A page](steps/step-23a-workspace-and-project-lifecycle.md) §18 |
 | 23B | Editing, diagnostics, and recovery | 23A | 1.5–2.5 pw forecast (non-gating). Complexity class **High**; owner acceptance at the 23B start gate — see the [23B page](steps/step-23b-editing-diagnostics-and-recovery.md) §16 |
-| 24 | Particle, structure, transition editors | 23B, 03, 04 | 4–6 pw |
-| 25 | Energy, lattice, simulation editors | 24, 05, 06 | 3–5 pw |
+| 24A | Shared editor framework, particles, structure | 23B, 02, 03, 04 (05/06 read-only) | 2.5–3.5 pw forecast (non-gating). Complexity class **High**; owner acceptance at the 24A start gate — see the [24A page](steps/step-24a-model-editors-particles-and-structure.md) §16 |
+| 24B | Transition editors | 24A, 02, 04, 05/06/08 (read-only) | 1.5–2.5 pw forecast (non-gating). Complexity class **High**; owner acceptance at the 24B start gate — see the [24B page](steps/step-24b-model-editors-transitions.md) §14 |
+| 25 | Energy, lattice, simulation editors | 24B, 05, 06 | 3–5 pw |
 | 26 | Parameterization, job templates, build/deploy UI | 25, 09–12 | 4–6 pw |
-| 27 | 3D viewer and visualization | 24, 03–05 | 4–6 pw |
+| 27 | 3D viewer and visualization | 24B, 03–05 | 4–6 pw |
 | 28 | Run monitoring, charts, MMCFE UI | 26, 19–21 | 3–5 pw |
 | 29 | Statistical parity, performance, fuzzing, hardening | 16–22 | 3–5 pw |
 | 30 | Documentation completion: coverage, cross-cutting pages, APIs, tutorials, publish | 19, 21, 22, 28 | 3–5 pw |
@@ -196,6 +197,32 @@ audit surface without stranding either half.
   autosave without a dirty state or validation without an editing surface.
 - The same change updated the step index, §3 forecasts, the dependency graph (§2/§3), and **Step 24's dependency
   to 23B**; Steps 25–28 keep their existing chains, and milestone M10 (after 26) is unaffected.
+
+#### Recorded split — Step 24 (2026-11-22)
+
+The owner split **Step 24** into **24A** (shared editor framework, particles, structure) and **24B** (transition
+editors) under the complexity rule, at the same gate that recorded the editor layout in ADR 0003. The unsplit step
+was class **High** on cross-step interfaces, test-matrix breadth, three independent acceptance stories
+(particles/sets, structure/sites, transitions), and an evidence set too large for one audit sitting; it also
+carried the irreversible ADR-recorded layout pick. The boundary follows the Phase B library split (Step 03 =
+particles + structure; Step 04 = transitions), so it is dependency-clean: 24A ships the framework and the first
+half of the model, and 24B consumes the framework and adds the transition half.
+
+- **24A** is class **High** on cross-step interfaces and test-matrix breadth; its contracts (one additive Core
+  overload and one additive app-local setting), dependencies, irreversibility, acceptance-story count, and
+  evidence size are Medium. It defines the editor surface and interaction rules that Steps 25–28 consume.
+- **24B** is class **High** on cross-step interfaces and test-matrix breadth; its contracts (one additive Packages
+  compile-preview API) and remaining dimensions are Medium. Its design freeze follows 24A feature 1, because it
+  consumes the framework as built.
+- **Neither half is Low or Medium**: the split reduced the acceptance-story count and the evidence size, not the
+  interface or test-matrix breadth. Each half therefore needs **explicit owner acceptance as a High unit at its
+  own start gate** (24A §16, 24B §14).
+- **A further split is not proposed for either half.** Splitting 24A would leave the framework's acceptance proven
+  only by its simplest domain and duplicate the harness/baselines; splitting 24B would separate the chain contract
+  from the matrices and paths it produces. Both half-splits would remain High on test-matrix breadth.
+- The same change updated the step index, §3 forecasts, the dependency graph (§2/§3), the dashboard rows, the
+  closed layout gate in ADR 0003, and **Step 25's dependency to 24B**; Step 27 keeps its existing dependency on the
+  Step 24 line, and milestone M10 (after 26) is unaffected.
 
 #### Recorded class — Step 14 (design freeze 2026-11-20)
 
@@ -311,8 +338,10 @@ Starts after steps 01, 03–07, and 12 with the workspace and project lifecycle 
 diagnostics, and recovery half (**23B**); the owner started this track in parallel with the solver track
 (Step 13) on 2026-11-20 and split Step 23 into 23A/23B on the same date (see §3.1). 23A consumes only the merged
 library surfaces of 01/03–07/12 and defines the registration seams; 23B fills them and adds the edit/validation
-surface; neither assumes Steps 13–22 exist. Steps 24–25 consume the model APIs as they land, then 09–12 for 26,
-then 20–21 for 28. Step 27 (3D) starts after 24 and runs in parallel.
+surface; neither assumes Steps 13–22 exist. Step 24 is split into **24A** (shared editor framework, particles,
+structure) and **24B** (transition editors) as of 2026-11-22; 24A starts after 23B, and 24B starts after 24A
+because it consumes the framework. Steps 24A/24B–25 consume the model APIs as they land, then 09–12 for 26,
+then 20–21 for 28. Step 27 (3D) starts after the 24 line and runs in parallel.
 
 ### Track D — Documentation
 

@@ -167,15 +167,16 @@ Rules:
 | `Mocassin.App*` | Presentation, commands, navigation, dialogs | Scientific algorithms |
 | `Mocassin.Rendering` | GPU abstraction, scene graph, picking, camera, overlays | Model validation |
 
-### 3.2 UI composition and state ownership (Steps 23A/23B)
+### 3.2 UI composition and state ownership (Steps 23A/23B, extended by 24A)
 
 The Avalonia track is a consumer of the same public library APIs as the CLI. **Step 23A** fixes its
 composition, dependency direction, workspace, settings, and project lifecycle; **Step 23B** adds the edit
-pipeline, validation surface, and recovery; Steps 24–28 add editors, build UI, 3D, and run monitoring through
-registration seams without changing the shell.
+pipeline, validation surface, and recovery; **Step 24A** adds the model-editor framework and the first direct
+`Mocassin.Symmetry` reference (structure preview/validation and transition-path resolution); Steps 24B–28 add the
+remaining editors, build UI, 3D, and run monitoring through registration seams without changing the shell.
 
 ```text
-Mocassin.App  ──►  Mocassin.App.Views  ──►  Mocassin.App.ViewModels  ──►  Packages / Results / Contracts / Core
+Mocassin.App  ──►  Mocassin.App.Views  ──►  Mocassin.App.ViewModels  ──►  Packages / Results / Contracts / Core / Symmetry
       │                                                                  (public library APIs only)
       ├──► Avalonia, Microsoft.Extensions.*, Serilog
       └──► Mocassin.Rendering (unused until Step 27)
@@ -184,7 +185,7 @@ Mocassin.App  ──►  Mocassin.App.Views  ──►  Mocassin.App.ViewModels 
 | Project | Owns | Must not own |
 | --- | --- | --- |
 | `Mocassin.App` | `Program`, `App`, `ViewLocator`, the composition root (`AppHost`, registration, startup options, app paths, logging setup, crash boundary), startup coordination, and the app-local I/O implementations: the settings store and project file probe (23A), the recovery store (23B), and log retention | View models, views, or scientific logic |
-| `Mocassin.App.ViewModels` | (23A) shell and region view models, document model, navigation service and target registry, project session, settings model and pure validator/migrations, theme contracts, command catalog and palette, dialog/picker/dispatcher contracts; (23B) edit coordinator, validation coordinator, recovery contracts; all virtualization of library values for binding | Any Avalonia or control type, views, `System.IO`/`Environment`/`Application`/resource dictionaries, scientific algorithms, a second store/validator/hash/catalog |
+| `Mocassin.App.ViewModels` | (23A) shell and region view models, document model, navigation service and target registry, project session, settings model and pure validator/migrations, theme contracts, command catalog and palette, dialog/picker/dispatcher contracts; (23B) edit coordinator, validation coordinator, recovery contracts; (24A) model-editor framework, table/column policy, reference picker, numeric expression, and the usage index; all virtualization of library values for binding | Any Avalonia or control type, views, `System.IO`/`Environment`/`Application`/resource dictionaries, scientific algorithms, a second store/validator/hash/catalog |
 | `Mocassin.App.Views` | Shell window and views, region hosts, dialog overlay host, console/problems views, settings and palette views, theme/density/high-contrast resource dictionaries, the theme applier, the storage-picker and dispatcher implementations | Library calls, scientific logic, persistence decisions |
 
 Rules:
@@ -203,6 +204,12 @@ Rules:
 - The GUI never references `Mocassin.Cli`. Behaviour the GUI needs must live in a library; the CLI and the GUI
   share `ProjectStore`, `ProjectTemplateFactory`, `ProjectPathRules`, `ProjectDocument`, and the validation
   pipeline.
+- **24A library references and services.** `Mocassin.App.ViewModels` gains a direct `Mocassin.Symmetry` project
+  reference (an in-repo reference to a merged step, not a package or external dependency) for
+  `IStructurePreviewService`, `IStructureValidator`, and `TransitionPathResolver`. The Symmetry preview and
+  validator services are registered as singletons in `AddMocassinModelEditors`; the app consumes them and never
+  re-derives exact symmetry, resolved paths, or cell geometry. The "scientific algorithms" prohibition means the
+  view models do not own an algorithm, not that they cannot call a Step 02 service.
 - One writer per project: Step 23B's `ProjectEditCoordinator` over the Step 01 `ProjectDocument`. View models
   never mutate a `Project` or a domain object, never compute a project hash, and never build a `ProjectChange`.
   23A has no writer because nothing is editable. A read-only session refuses edits with the app-level
