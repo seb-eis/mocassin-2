@@ -262,6 +262,12 @@ early-warning signal for the next cross-cutting review.
   `msl-v1`/`amend-1-net10` canonical summaries are unchanged. The `step-08` tag and merge are unchanged.
   Step 13's `step-13-centered` fixture consumes the fixed compiler; the later `4973d02` smoke bound is a
   separate shared-runner test-budget change.
+- The model-binding policy was reconciled with the owner's `ea53c47` agent-definition change on 2026-11-23 (owner
+  decision, Option B): the strong tier (`lead`, `design`, `review`) is `opencode-go/deepseek-v4.1-flash` for cost,
+  with `docs/development/model-economics.md` §6 and `tools/tests/test_opencode_binding.py` updated to match. Merged
+  as `8899569` (`--no-ff`) from `docs/model-binding-reconciliation` (`cf6be8e`); main CI
+  [45263507253](https://github.com/seb-eis/mocassin-2/actions/runs/45263507253) is green with every code job
+  path-filtered out (the change is docs/tools-only); the branch was deleted.
 - Milestones M0–M3 were backfilled on 2026-11-12 with annotated tags on the existing step merge commits:
   `milestone-m0` → `47a9a90`, `milestone-m1` → `7b4a994`, `milestone-m2` → `dbf5691`, `milestone-m3` →
   `3ed558a`. Tags were pushed to `origin`; no step tag was moved.
