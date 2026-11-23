@@ -22,7 +22,7 @@ adds one public Core API. No format change and no new dependency. Justification 
 
 ## Implementation status
 
-- **Status:** In progress — started 2026-11-23 from `main` at `3e904ed`; features 1–4 squashed (`c24d1cf`, `0c749c2`, `82cd326`, `034981d`), features 5–6 pending
+- **Status:** In progress — started 2026-11-23 from `main` at `3e904ed`; features 1–5 squashed (`c24d1cf`, `0c749c2`, `82cd326`, `034981d`, `5128f9f`), feature 6 pending
 - **Step branch:** `step/24a-model-editors-particles-and-structure`
 - **Step CI:** — (the single closeout dispatch runs at the end of the step)
 - **Main merge:** —
@@ -44,7 +44,7 @@ adds one public Core API. No format change and no new dependency. Justification 
 - **Design class:** **Full** (§16)
 - **Complexity class:** **High** — cross-step interfaces and test-matrix breadth; **owner acceptance as one High
   unit is required at the start gate**, and no further split is proposed (§16)
-- **Last updated:** 2026-11-23 (feature 4)
+- **Last updated:** 2026-11-23 (feature 5)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
@@ -52,6 +52,7 @@ adds one public Core API. No format change and no new dependency. Justification 
 | 2. Particle and set editors | `feature/step-24a-model-editors-particles-and-structure/particle-and-set-editors` | **Squashed** | `./tools/verify.sh dotnet` (412 App + all suites), `structure`, `docs` green 2026-11-23; `ParticleEditorTests`, `ParticleSetEditorTests`, `ModelEditorAcceptanceTests`, `EditorIntegrationTests` | — (no per-feature run) | `0c749c2` |
 | 3. Space group and cell parameters | `feature/step-24a-model-editors-particles-and-structure/space-group-and-cell-parameters` | **Squashed** | `./tools/verify.sh dotnet` (426 App + all suites), `structure`, `docs` green 2026-11-23; `SpaceGroupPreviewTests`, `CellParameterTests`, `EditorIntegrationTests` | — (no per-feature run) | `82cd326` |
 | 4. Site table and P1 preview | `feature/step-24a-model-editors-particles-and-structure/site-table-and-p1-preview` | **Squashed** | `./tools/verify.sh dotnet` (435 App + all suites), `structure`, `docs` green 2026-11-23; `CellSiteEditorTests` (m-14 overlap refusal, preview-index equality, D-2 energy-only delete, stability warning, read-only) | — (no per-feature run) | `034981d` |
+| 5. Dummy positions and structure summary | `feature/step-24a-model-editors-particles-and-structure/dummy-positions-and-structure-summary` | **Squashed** | `./tools/verify.sh dotnet` (440 App + all suites), `structure`, `docs` green 2026-11-23; `DummyPositionTests` (distinct glyph, undo, save/load round-trip, read-only), `StructureSummaryTests` (recomputed equality, no statistics dependency) | — (no per-feature run) | `5128f9f` |
 
 ## Goal
 
