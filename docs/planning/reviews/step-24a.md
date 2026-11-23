@@ -337,7 +337,8 @@ or verdict.
 
 ## Record state
 
-**State:** Ready with notes — round-2 verdict (see `Re-review round 2`); the human owner's acceptance is pending.
+**State:** Ready with notes — round-2 verdict (see `Re-review round 2`); **accepted by the human owner on
+2026-11-23** (see `Human approval`).
 Round 1's `Changes required` verdict is preserved in `Review round 1`.
 
 `Ready with notes` is the round-2 design verdict; it is not an implementation-start record and creates no step
@@ -387,13 +388,30 @@ Findings and resolutions:
 
 ## Human approval
 
+**Owner decisions recorded 2026-11-23.** The owner accepted the round-2 `Ready with notes` verdict on 2026-11-23
+(record `f4cc809`; frozen design `b75efea`) and approved the 24A start gate. m-13, m-14, and m-15 are accepted
+for implementation-time resolution and are audit-verified; n-3, n-4, and n-5 are documentation-only corrections
+applied before the start gate. These are scope/class and verdict-acceptance approvals; the `Accepted:` checkbox
+below records the design verdict, not an implementation-start claim.
+
+| Decision | Status |
+| --- | --- |
+| Class **High** as one unit, no further split (§16) | **Approved** |
+| Six-feature list and order (§18) | **Approved** |
+| Revised **D-2**: blocked site delete with a dependents list, plus the energy-reference-only cascade | **Approved** |
+| Feature-branch list and step branch `step/24a-model-editors-particles-and-structure` | **Approved** |
+| **m-13**, **m-14**, **m-15** resolved at implementation time and verified at the audit | **Accepted** |
+| **n-3**, **n-4**, **n-5** as documentation-only corrections before the start gate | **Accepted** |
+| Merge order: `docs/step-24-design` then `fix/step-24-layout-poc`, both `--no-ff`, one push | **Approved** |
+| Accept the round-2 verdict and start implementation | **Accepted / Instructed** |
+
 - [ ] Accepted: Ready for implementation
-- [ ] Accepted: Ready with notes
+- [x] Accepted: Ready with notes
 - [ ] Changes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Human owner
+Date: 2026-11-23
 
 ## Resolution status
 
