@@ -284,6 +284,27 @@ reviewed commit remains `b98a56f` (README §8.1: recorded as a note, no re-revie
 The docs build does **not** catch m-11: the ADR and step page cite the POC report as plain code spans, not
 markdown links, so a missing evidence artefact leaves the link gate green.
 
+**Round-2 evidence (re-review, 2026-11-23).** Frozen design `b75efea4997eab9e89ebe62297efeca1f0c2f26e` on
+`docs/step-24-design`; branch and record tip at review time `1eaf720`. The worktree was clean before and after the
+gates (`git status --short` empty; the docs build writes only ignored `site/`, `artifacts/`, and `target/`).
+
+| Command (worktree `/home/node/.local/share/opencode/worktree/c2378f/step-24-design`) | Result |
+| --- | --- |
+| `./tools/verify.sh docs` | **exit 0** — math conventions OK (210 files), links OK (213 files), Zensical strict "No issues found", DocFX 0 warnings / 0 errors, rustdoc built |
+| `./tools/verify.sh policy` | **exit 0** — "Public API is compatible with the checked-in baseline"; contract artifacts current (26 files); model/parameterization/lattice projections OK; space-group catalog current (274 settings, sha256 `1f3bf67d…`); process consistency OK (62 tests); SPDX headers in 1114 source files; no secret patterns in 1645 tracked text files; cargo-deny advisories/bans/licenses/sources OK |
+| `git diff --stat b98a56f..b75efea` | 7 files, +519/−133, all under `docs/planning/` — no code, test, configuration, contract, generated, or dependency file |
+| `git show --name-only b75efea` | 6 files: the 24A page, ADR 0003, `01-target-architecture.md`, `05-open-decisions.md`, `status.md`, this record |
+| `git diff b75efea..1eaf720` | 2 files, 2 changed lines: the record's `ROUND2_SHA` placeholder and the step page's freeze SHA — documentation-only, recorded as a note per README §8.1 |
+| `git diff 90ac8ab..b75efea -- docs/planning/reviews/step-24a.md` | additions only (request round-2 note, `Record state`, resolution table). No round-1 findings/evidence/verdict/checklist line is modified; the only non-additive changes are the `Record state` value (README §4.6 lets the request owner mark `Re-review required`) and the pre-round-1 `Resolution status` placeholder rows |
+| `git diff --stat $(git merge-base main fix/step-24-layout-poc)..fix/step-24-layout-poc` | 16 files: the POC report + 15 PNGs, +354 lines; no code (spike removed at `fbdae6c`); the report is absent from `main` |
+
+Files read at the frozen commit: the 24A page (all sections), ADR 0003, `01-target-architecture.md` §3.2,
+`05-open-decisions.md`, `status.md`, the draft 24B page (split boundary only), `reviews/README.md`,
+`design-proportionality.md`, `02-data-contracts.md` (no change expected), `03-quality-strategy.md` §11.1,
+`audits/README.md`, `code-structure.md`, `ui-interaction-contract.md` §8, `ui-visual-contract.md`,
+`appendix-b-parity-matrix.md`, `Directory.Packages.props`, and the POC report from `fix/step-24-layout-poc`.
+Read-only code checks are listed per finding in `Re-review round 2` and the closure table there.
+
 ## Findings
 
 | Severity | Origin | Finding | Evidence |
@@ -311,9 +332,11 @@ or verdict.
 
 ## Record state
 
-**State:** Re-review required
+**State:** Ready with notes — round-2 verdict (see `Re-review round 2`); the human owner's acceptance is pending.
+Round 1's `Changes required` verdict is preserved in `Review round 1`.
 
-`Re-review required` is a record state, not a verdict.
+`Ready with notes` is the round-2 design verdict; it is not an implementation-start record and creates no step
+branch.
 
 ## Reviewer independence
 
@@ -468,3 +491,104 @@ complete. It cannot start as written because M-1 leaves a promised structure-pre
 source while the design forbids the library change that would supply it, and §11 claims no interface question
 remains. Fix M-1 on a new commit (and, while doing so, address or explicitly accept m-1…m-12/n-1/n-2); a fresh
 review agent then appends round 2. The human owner approves the final verdict and the start gate.
+
+### Re-review round 2
+
+#### Independence and frozen state
+
+I am a fresh review context. I did not author or implement the reviewed work and have no shared conversation with
+the design agent, the dev, the lead, or the round-1 review agent. I was spawned by the lead with the frozen commit,
+this record, and the repository; no desired verdict, summary, or finding list was supplied. My model is DeepSeek
+V4.1 Flash 1017 (`opencode-go/deepseek-v4.1-flash`).
+
+I reviewed the design at `b75efea4997eab9e89ebe62297efeca1f0c2f26e` on `docs/step-24-design` (the round-2
+re-freeze: the 24A page corrections plus ADR 0003, `01-target-architecture.md` §3.2, `05-open-decisions.md`, and
+`status.md`). Branch and record tip at review time is `1eaf720`; `git diff b75efea..1eaf720` is two changed lines
+in two documentation files — the record's `ROUND2_SHA` placeholder and the step page's freeze SHA — so the design
+text under review is `b75efea`, and the tip delta is recorded as a note (README §8.1).
+
+Round 1's text is unchanged. `git diff 90ac8ab..b75efea -- docs/planning/reviews/step-24a.md` contains only
+additions to the request-side notes, the `Record state` value (README §4.6 lets the request owner mark
+`Re-review required`), and the dev-owned `Resolution status` table; no round-1 finding, evidence line, verdict
+sentence, or checklist note was edited or removed. Round 1's verdict is preserved verbatim in `Review round 1`.
+
+The round-2 delta is documentation-only: the seven files in `b98a56f..b75efea` are all under `docs/planning/`, and
+`git diff b75efea..1eaf720` is documentation-only. `contracts/manifest.json`, `Directory.Packages.props`, the
+solution, and every test project are untouched, so the "no format, dependency, or contract change" claim in the
+request still holds. The re-freeze does not move the design class: M-1 is resolved by dropping an element, the
+`Mocassin.Symmetry` reference is an in-repo project reference to a merged step, and the only public surface added
+is still the one additive Core overload.
+
+#### Round-1 findings: closure verification
+
+| Finding | Round-2 status | Verification |
+| --- | --- | --- |
+| **M-1** (Major, design) | **Closed** | §6 lines 399–406 and D-11 (line 674) drop the generating-operation label; acceptance criterion 6 (lines 724–726) and `P1PreviewTests` (line 574) assert the `P` and orbit-member indices and the absence of an operation field; §11 lines 545–549 record that no interface question remains. I re-verified that the API genuinely cannot supply it: `StructurePreview` carries positions, Cartesian positions, volume, orbits, and the encoder (`StructurePreview.cs:24–32`); `SiteOrbitInfo` carries the representative, positions, and position indices (`SiteOrbitInfo.cs:15–25`); `ExpandedSite` carries `P`, encoding, fractional values, reference index, and `OrbitMemberIndex` (`ExpandedSite.cs:15–20`). `SpaceGroupSetting.Operations` lists the group operations only, and mapping a member to its generating operation in the app would re-derive exact symmetry, which §1, `01-target-architecture.md` §3.2, and `AGENTS.md` §5 forbid. Dropping the element is the sound resolution; no new API, scope, or class change. |
+| **m-1** (Minor, design) | **Closed** | The named sources exist and the statistic is defined. `StructureModel.Sites` is `ImmutableArray<CellSite>` (`StructureModel.cs:27`); the preview builds its references from `Sites` in order, so `ExpandedSite.ReferenceSiteIndex` indexes `Sites`; `ExpandedSite` carries no stability, and the summary therefore reads `Sites[ReferenceSiteIndex].Stability` (`CellSite.cs:20–25`, `SiteStability`); volume comes from `StructurePreview.CellVolumeAngstrom3`; `Orbits` groups the expanded sites by `ReferenceSiteIndex` (`UnitCellVectorEncoder.cs:242–254`), so `Orbits.Length` does equal `Sites.Length`; reference-site density is defined as sites/volume. `ModelStatistics` is not used. |
+| **m-2** (Minor, design) | **Closed except for m-15** | `RemoveCellSiteAndEnergyReferences` exists and removes the site plus stable filters, unstable environments and their filters, clusters, and site energies (`ProjectEditor.Energy.cs:284`, `:338–365`). `MetropolisTransition` carries `SiteAId`/`SiteBId` (`:22–27`); `KineticTransition` carries only `ReferencePath`/`ChainId` (`:20–26`); no Core transition validator reads either site id (`grep` over `Mocassin.Core/Model/Transitions` finds only the record declarations). `TransitionPathResolver.TryCreate`/`TryResolve` resolve path points to the owning `CellSite` (`TransitionPathResolver.cs:50–88`, `:170–230`), and `ResolvedPathPosition` exposes `SiteId`. `OccupationExchange` carries `SiteId` (`:20–27`), validated by `LatticeModelValidator` (`:85–110`); `EnergyModelValidator` validates the unstable-environment `SiteId` (`:111`) and the filters (`:175`). The "index is the blocking authority, Core is the backstop" claim holds. The one residual is the enumeration gap in m-15. |
+| **m-3** (Minor, evidence) | **Closed** | `samples/blank/blank.mocprj` has `model: {}`; `samples/ceria/ceria.mocprj` already contains 3 particles, 3 sets, 3 sites, 1 dummy, and SG 225. Criterion 2 now says "from an empty project", and §13 keeps the populated-project edit as a second case. |
+| **m-4** (Minor, evidence) | **Closed** | `EditorReadOnlyTests` (§13) covers Add/Remove/Duplicate/Apply/`Enter` disabled, the banner, no coordinator call, no undo/dirty change, no `EditRejected`, and a forced `Apply` returning `ReadOnly`; criterion 11 names the test. `ProjectEditCoordinator.Apply` returns `EditApplyOutcome.ReadOnly` before any write (`ProjectEditCoordinator.cs:91–99`). |
+| **m-5** (Minor, design) | **Closed** | `EditorPerformanceTests` is functional only, timing moved to the non-gating `EditorPerformanceEvidence` row, and §14 states that no PR-fast test asserts a duration. Consistent with `03-quality-strategy.md` §11.1. |
+| **m-6** (Minor, design) | **Closed** | §4 states the number grammar, the malformed `1e`/`2e` rule, the standalone `e` constant, and the absence of implicit multiplication; `NumericExpressionTests` lists `1e5`, `2e-3`, `1e`, `e`, `2e`, `2 pi`. |
+| **m-7** (Minor, design) | **Closed** | §10 adds the `PublicAPI.Unshipped.txt` + `verify.sh api` gate, the redo-clear and `TrimUndoStack()`/`MaxUndoDepth` semantics, the returned-change identity, and the structural precondition. Verified: `ProjectDocument` stores `editor` privately (`ProjectDocument.cs:24`), the existing `Apply` records one `ProjectChange(description, Project, result.Project)` and trims/clears (`:111–140`), `TrimUndoStack` honours `MaxUndoDepth` (`:163–175`), `MaxUndoDepth` is init-only (`:73–93`), and `PublicAPI.Unshipped.txt:51` lists the existing overload. |
+| **m-8** (Minor, design) | **Closed in substance** | D-13 states one composed delegate, one undo entry, all-or-nothing, and names the mid-batch rollback and the failing object. The composed result's interface is the residual m-13. |
+| **m-9** (Minor, design) | **Closed** | §9 states shell ownership, `CaptureLayout`/`ApplySettings`/`ResetLayout`, and the region-property hook. Verified in `ShellViewModel.Layout.cs:20–45` (hook), `:56–72` (reset), `:82–104` (capture), `:110–127` (apply) over `ShellRegionsViewModel`; `AppSettingsValidator` normalises the fractions (`:36–77`, `:156–170`). |
+| **m-10** (Minor, design) | **Closed** | D-14 matches `ProjectChangeKind` exactly (`ProjectChangeKind.cs:8–34`); `NotifySaved` raises `Saved` with equal previous/current values (`ProjectEditCoordinator.cs:175–180`); `ReplaceDocument` raises `Replaced` (`:188–197`). |
+| **m-11** (Minor, evidence) | **Closed by recorded sequencing** | The `fix/step-24-layout-poc` delta from its merge base is the POC report plus 15 PNGs (+354 lines) with no code (spike removed at `fbdae6c`); the report is absent from `main`. ADR 0003 and the step page now make the 24A start gate conditional on that documentation-and-assets merge, and §18's pre-audit gate re-checks it. |
+| **m-12** (Minor, evidence) | **Closed** | POC §7 records 84 ms (option 1), 1,521 ms (tree), and 58/29/73 ms (options 3/4/5); the ADR now states the 29–84 ms band and ~18× (1521/84 ≈ 18.1) and no longer claims "second-fastest". |
+| **n-1** (Note, design) | **Closed** | `01-target-architecture.md` §3.2 now records the direct `Mocassin.Symmetry` reference and the service registrations; `StructurePreviewService` and `StructureValidator` default their optional catalog/version parameters (`StructurePreviewService.cs:36–48`, `StructureValidator.cs:26–29`); `TransitionPathResolver` is a public Symmetry type; `AppBoundaryTests` forbids only Avalonia, `App.Views`, and `App` (`:13–20`), so the project reference does not break the boundary gate. |
+| **n-2** (Note, documentation) | **Accepted (deferred)** | `appendix-b-parity-matrix.md` still maps seven rows to "24" and is untouched by the delta; feature 6 and the pre-audit gate own the 24A/24B mapping. Correctly deferred. |
+
+#### Full-checklist re-verification
+
+Round 1's checklist marks apply to the design as a whole and remain satisfied; I re-checked each item against the
+round-2 frozen state rather than re-marking round-1 text.
+
+| Checklist item | Round-2 result |
+| --- | --- |
+| Design-class triggers | **Satisfied** — still `Full` (framework architecture boundary, ADR 0003 irreversibility, public Core overload); §16 records that the round-2 corrections change neither the class nor the scope. |
+| Scope, non-goals, testable criteria | **Satisfied** — twelve criteria, each mapped in §13; the added energy-reference cascade is an explicit non-goal exception in the scope and an explicit owner input (§17.3). |
+| Complexity class and split | **Satisfied** — `High`, one unit, no further split; owner acceptance still required at the start gate. |
+| Design decisions complete and consistent | **Mostly satisfied** — D-11…D-14 added and D-2 corrected; m-13, m-14, and m-15 are residual inconsistencies. |
+| Tests, property tests, fixtures, performance | **Satisfied with notes** — every criterion has a named test and tier; m-14 affects the site-overlap test wording; n-5 asks for an explicit Core-overload test row. |
+| Documentation, status, parity, audit planning | **Satisfied** — §12 pages exist and are named, the dashboard and step page are updated, parity is deferred to feature 6, §18 plans the audit and platform gate; n-3 is request-text bookkeeping. |
+| Licensing, provenance, dependencies | **Satisfied** — no package or dependency change, an in-repo project reference only, no GPL content; `Directory.Packages.props` untouched. |
+| Risks and mitigations | **Satisfied** — §15 now covers the resolved-path invalidation risk and the shell-owned fraction; no unmitigated risk is left unowned. |
+| Code layout and namespaces | **Satisfied** — `Editors/**` under the existing conventions; no structure-policy change. |
+| No hidden scope, placeholders, unowned decisions | **Satisfied** — no 24B task, no format or diagnostic change, the cascade scope is explicit, the 24B compile-preview question stays deferred. |
+| Dependencies `Done` and stable | **Satisfied** — 02–06 and 23A/23B verified again on the named APIs; no Step 08–22 use. |
+| Inputs, outputs, types, formats | **Satisfied with notes** — the composed-result shape is m-13 and the type spelling is n-4; otherwise complete. |
+| Versioning and migration | **Satisfied** — no persisted change; the additive app-local setting reads a default. |
+| No unresolved cross-step interface question | **Satisfied** — M-1 is closed and §11 says so; the 24B question is out of scope. |
+
+#### Findings
+
+No Blocker. No Major. Three Minor and three Note findings were introduced by the round-2 delta or left open by it;
+each is localized and none is start-blocking.
+
+| ID | Severity | Origin | Finding | Evidence |
+| --- | --- | --- | --- | --- |
+| **m-13** | **Minor** | **design** | **Bulk composition has no permitted place to build the one `ProjectChange`, and the §10 identity guard rejects a folded result.** §3/D-13 requires the framework to "fold the typed single-object operation over a candidate `Project` … and return one result whose `ProjectChange` spans the original and the final value", while §2, `01-target-architecture.md` §3.2, the 23B page §2, and the `05-open-decisions.md` edit-path row all say no view model builds a `ProjectChange` — the same row states both rules. Mechanically, a fold of typed operations returns a change whose `Before` is the intermediate candidate (`ProjectEditor.Apply` constructs `ProjectChange(description, project, candidate)`), so §10's `ReferenceEquals(result.Change.Before, Project)` check throws `InvalidOperationException` for a legitimately composed bulk result. The only ways out are to construct `ProjectChange(description, Project, final)` in the App framework (needing an explicit exception to the rule) or to let the Core overload synthesise the change and drop the identity checks for composed results. Also unstated: which `Project` a mid-batch rejection returns — the fold's natural error result carries the intermediate candidate, not the document value. Fix one sentence in §10 and align §2/§3.2/05. | 24A page lines 225, 288–291, 504–515; `docs/planning/01-target-architecture.md:214`; `step-23b-editing-diagnostics-and-recovery.md` §2 ("never build a `ProjectChange`"); `05-open-decisions.md:124`; `Mocassin.Core/Editing/ProjectEditor.cs:37–66`; `ProjectDocument.cs:111–140` |
+| **m-14** | **Minor** | **design** | **The site-overlap display and apply gate are not implementable as written.** §6 says "Overlap positions are marked with a glyph and text" in the P1 preview panel, but `IStructurePreviewService.TryCreatePreview` returns `null` for any candidate whose encoder reports an overlap, and the encoder fails on the first `STR007` (`bag.HasErrors` → `return false`), so an overlapping candidate has no preview and no rows to mark. Core does not refuse it either: `ProjectEditor.AddCellSite`/`UpdateCellSite` validate with `ProjectValidator`, which runs the Core model validators but not the Symmetry encoder (`ProjectValidator.cs:55–64`), so an overlapping site is accepted. The design names `IStructureValidator` only for the space-group candidate. State that the site form validates the candidate with `IStructureValidator`, refuses Apply on error, and lists the `STR007` diagnostics (the diagnostic carries the `cellSite` path and the related site), and reword the "marked in the preview" sentence. Acceptance criterion 5 stays achievable that way. | 24A page lines 391–398, 407–408; `Mocassin.Symmetry/Structure/StructurePreviewService.cs:143–155`; `Mocassin.Symmetry/Geometry/UnitCellVectorEncoder.cs:180–214`; `Mocassin.Core/Project/ProjectValidator.cs:55–64`; `Mocassin.Symmetry/Structure/StructureValidator.cs:31–56` |
+| **m-15** | **Minor** | **design** | **D-2's dependents enumeration omits the unstable-environment object.** §6 lists the energy references as "stable and unstable environment filters, cluster centre sites, site-energy sets". An `UnstableEnvironment` is itself a dependent through its own `SiteId`, and `RemoveCellSiteAndEnergyReferences` removes the whole environment whose `SiteId` matches. Empty filter lists are valid, so a filterless unstable environment at the site is missed by a filter-only scan: the usage index reports no dependents, enables the default delete, and Core then rejects it (the environment `SiteId` is a Core-owned energy reference), while the energy-reference-only cascade that would have been the correct action is never offered. Add the environment objects (stable environment has no site id; unstable environments do) to the enumeration and to `CellSiteEditorTests`. | 24A page lines 409–425; `Mocassin.Core/Model/Energy/UnstableEnvironment.cs:15–18`; `ProjectEditor.Energy.cs:337–349`; `Mocassin.Core/Model/Energy/EnergyModelValidator.cs:88–118`, `:165–176` |
+| **n-3** | Note | documentation | **The request's own summary still denies the cascade the design now offers.** The "Reconciliation of the indicative design" bullet and the "Known limitations" section say "D-2 (no cascade delete in 24A)" and "24A blocks the delete with a dependents list and navigation instead", which contradicts the revised D-2, §6, and owner input §17.3 that asks the owner to approve the energy-reference-only cascade. Update the request text (dev-owned) before the start gate so the owner is not asked to approve the cascade against a summary that denies it. | This record lines 116, 120, 128 vs. 24A page lines 87–91, 409–425, 682–686 |
+| **n-4** | Note | documentation | **The new overload is spelled with two type names.** §10 writes `Func<ProjectEditor, ProjectModel, ProjectEditResult>` while §3/D-13 and `05-open-decisions.md` write `Func<ProjectEditor, Project, ProjectEditResult>`; `ProjectModel` exists only as a source alias (`using ProjectModel = Mocassin.Core.Project.Project` in `ProjectChange.cs`/`ProjectDocument.cs`), so the `PublicAPI.Unshipped.txt` line will read `Mocassin.Core.Project.Project`. Cosmetic; use the public type name in the sketch. | 24A page lines 289, 496; `05-open-decisions.md:124`; `Mocassin.Core/Editing/ProjectChange.cs:3` |
+| **n-5** | Note | evidence | **§10 requires a guard test but §13 has no row for the new Core overload.** §10 says "the dev adds the guard below and a test for the failure path", and the overload has four behaviours worth pinning (accepted edit records the caller's description; operation rejection leaves every stack untouched; no-op returns without a change; a malformed `Before`/`After` identity throws). Add a Core test row (for example `ProjectDocumentApplyOverloadTests`) to §13 so feature 1's evidence is explicit rather than prose-only. | 24A page lines 504–518; §13 table lines 563–583 |
+
+#### Verdict
+
+- No Blocker and no Major remains. Round 1's M-1 and all twelve Minor and two Note findings are closed, verified
+  closed, or explicitly accepted with a recorded deferral (n-2). The round-2 delta is documentation-only, the
+  design class and scope are unchanged, and the two required gates pass.
+- **Ready with notes.** The three Minor findings (m-13, m-14, m-15) and the three Notes (n-3, n-4, n-5) are
+  localized; they need an explicit owner acceptance, or a small documentation fix by the design agent/dev before
+  the start gate. Per the Full stop rule they do not justify another review round, and none of them blocks
+  implementation once accepted.
+- The start gate still has the conditions the design records: the human owner accepts class High as one unit, the
+  six-feature list, the revised D-2 (blocked site delete plus the energy-reference-only cascade), and the
+  feature-branch list (§17.1–§17.4), and the `fix/step-24-layout-poc` documentation-and-assets merge lands the
+  POC report on `main` before the step starts (m-11, §18 pre-audit re-check).
+- This verdict does not authorize implementation. After the owner's start-gate approval the dev creates the step
+  branch from the reviewed `main` commit, not from this docs branch, per `AGENTS.md` §3.9.7. Resolutions for
+  m-13…m-15 and n-3…n-5 belong in the dev-owned `Resolution status` table; the review agent's text is unchanged.
+- The human owner approves the final verdict and the start gate.
