@@ -22,16 +22,17 @@ adds one public Core API. No format change and no new dependency. Justification 
 
 ## Implementation status
 
-- **Status:** Not started — design frozen for review; the start gate is open
-- **Step branch:** — (created only after the owner approves the verdict and the feature list; planned
-  `step/24a-model-editors-particles-and-structure`)
-- **Step CI:** —
+- **Status:** In progress — started 2026-11-23 from `main` at `3e904ed`; feature 1 in progress
+- **Step branch:** `step/24a-model-editors-particles-and-structure`
+- **Step CI:** — (the single closeout dispatch runs at the end of the step)
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** **Re-review required** — round 1 (`Changes required`, one Major and twelve Minor findings)
-  resolved at `b75efea4997eab9e89ebe62297efeca1f0c2f26e`; the round-1 freeze was
-  `b98a56f824002bc3cdbb4ace9e0b5cf9dd464ba9`, record [`reviews/step-24a.md`](../reviews/step-24a.md)
+- **Design review:** **Ready with notes — accepted by the human owner 2026-11-23** at
+  `b75efea4997eab9e89ebe62297efeca1f0c2f26e` ([record](../reviews/step-24a.md), round 2 `f4cc809`); class High
+  accepted as one unit, the six-feature list approved, and revised D-2 confirmed. m-13, m-14, and m-15 are
+  accepted for implementation-time resolution and audit verification; n-3, n-4, and n-5 were corrected before
+  the start gate.
 - **Layout gate:** **Closed** — ADR 0003
   [records the composition](../adr/0003-avalonia-mvvm-stack.md#editor-layout-decision-2026-11-22) (option 1
   `ListBox` table + detail composed with option 4's `GridSplitter`); the POC report
@@ -39,7 +40,7 @@ adds one public Core API. No format change and no new dependency. Justification 
   **The 24A start gate is conditional on that report and its PNGs reaching `main`**: the `fix/step-24-layout-poc`
   branch is now documentation-and-assets only (the spike code was removed at `fbdae6c`) and lands through the
   owner-approved `--no-ff` merge recorded in ADR 0003.
-- **Feature list:** Proposed (six features, §18) — owner approval at the start gate
+- **Feature list:** **Approved** (six features, §18) — owner 2026-11-23
 - **Design class:** **Full** (§16)
 - **Complexity class:** **High** — cross-step interfaces and test-matrix breadth; **owner acceptance as one High
   unit is required at the start gate**, and no further split is proposed (§16)
@@ -47,7 +48,7 @@ adds one public Core API. No format change and no new dependency. Justification 
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| 1. Shared editor framework | `feature/step-24a-model-editors-particles-and-structure/shared-editor-framework` | In progress | — | — | — |
 
 ## Goal
 
