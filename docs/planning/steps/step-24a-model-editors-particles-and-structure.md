@@ -48,7 +48,7 @@ adds one public Core API. No format change and no new dependency. Justification 
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| 1. Shared editor framework | `feature/step-24a-model-editors-particles-and-structure/shared-editor-framework` | **Squashed** | `./tools/verify.sh dotnet` (394 App + all suites), `api`, `structure`, `docs` green 2026-11-23 | — (no per-feature run) | `c24d1cf` |
+| 1. Shared editor framework | `feature/step-24a-model-editors-particles-and-structure/shared-editor-framework` | **Squashed** | `./tools/verify.sh dotnet` (394 App + all suites), `api`, `structure`, `docs` green 2026-11-23 | — (no per-feature run) | `c24d1cf`; m-13 doc alignment `f77bfd3` |
 
 ## Goal
 
