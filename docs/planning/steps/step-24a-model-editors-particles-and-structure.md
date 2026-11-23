@@ -22,7 +22,7 @@ adds one public Core API. No format change and no new dependency. Justification 
 
 ## Implementation status
 
-- **Status:** In progress — started 2026-11-23 from `main` at `3e904ed`; feature 1 in progress
+- **Status:** In progress — started 2026-11-23 from `main` at `3e904ed`; feature 1 squashed at `c24d1cf`, features 2–6 pending
 - **Step branch:** `step/24a-model-editors-particles-and-structure`
 - **Step CI:** — (the single closeout dispatch runs at the end of the step)
 - **Main merge:** —
@@ -44,11 +44,11 @@ adds one public Core API. No format change and no new dependency. Justification 
 - **Design class:** **Full** (§16)
 - **Complexity class:** **High** — cross-step interfaces and test-matrix breadth; **owner acceptance as one High
   unit is required at the start gate**, and no further split is proposed (§16)
-- **Last updated:** 2026-11-23
+- **Last updated:** 2026-11-23 (feature 1)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| 1. Shared editor framework | `feature/step-24a-model-editors-particles-and-structure/shared-editor-framework` | In progress | — | — | — |
+| 1. Shared editor framework | `feature/step-24a-model-editors-particles-and-structure/shared-editor-framework` | **Squashed** | `./tools/verify.sh dotnet` (394 App + all suites), `api`, `structure`, `docs` green 2026-11-23 | — (no per-feature run) | `c24d1cf` |
 
 ## Goal
 
