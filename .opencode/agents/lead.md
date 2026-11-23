@@ -2,7 +2,7 @@
 description: Owner's only interface. Routes step work, spawns the role agents, and relays decisions. Never designs, implements, reviews, approves, merges, or tags.
 mode: primary
 # Reference tier: strong. See docs/development/model-economics.md.
-model: opencode-go/glm-5.3
+model: opencode-go/deepseek-v4.1-flash
 permissions:
   - { action: edit, resource: "*", effect: deny }
   - { action: subagent, resource: "*", effect: deny }

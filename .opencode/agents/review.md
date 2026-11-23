@@ -2,7 +2,7 @@
 description: Fresh, read-only review agent. Writes only its assigned record; never fixes findings, implements, merges, or tags.
 mode: subagent
 # Reference tier: strong, and different from the dev. See docs/development/model-economics.md.
-model: opencode-go/glm-5.3
+model: opencode-go/deepseek-v4.1-flash
 permissions:
   - { action: edit, resource: "*", effect: deny }
   - { action: edit, resource: "docs/planning/reviews/step-*.md", effect: allow }
