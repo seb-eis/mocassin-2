@@ -12,7 +12,7 @@ belongs in ADR 0003.
 | Base | `main` at `536c8b3` |
 | Specification | Step 24 §0, frozen at `b3258ac` on `docs/step-24-design` |
 | Binding | paid `dev` binding (owner decision 2026-11-22; the `dev-free` allowance was exhausted) |
-| Status | Spike complete — owner layout pick and split decision pending (§0.7 step 2) |
+| Status | Gate complete (§0.7 step 2) — layout pick: **option 1** (`ListBox` table + detail editor) composed with **option 4** (`GridSplitter` master-detail), recorded in [ADR 0003](../adr/0003-avalonia-mvvm-stack.md) at `cbf9f2d`; the 24A/24B split is approved; spike code removed in `fbdae6c`; this record and the 15 PNGs are the durable artefacts |
 | Design class | Not a step feature; no design review. Evidence only, no normative design. |
 | Dependencies | **None added.** No `Avalonia.Controls.DataGrid`, no `TreeDataGrid`, no third-party grid, no package change. |
 | Durable artefacts | this record and the 15 PNGs under [`assets/step-24-layout-poc/`](assets/step-24-layout-poc/) |
