@@ -29,7 +29,7 @@ adds one public Core API. No format change and no new dependency. Justification 
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** **Ready for review** — frozen 2026-11-23; record
+- **Design review:** **Ready for review** — frozen 2026-11-23 at `b98a56f824002bc3cdbb4ace9e0b5cf9dd464ba9`; record
   [`reviews/step-24a.md`](../reviews/step-24a.md); the lead requests a fresh review agent
 - **Feature list:** Proposed (six features, §18) — owner approval at the start gate
 - **Design class:** **Full** (§16)

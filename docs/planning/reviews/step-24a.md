@@ -16,7 +16,7 @@
 | Dev | Not assigned — created from the reviewed `main` commit after the start-gate approval |
 | Review initiated by | Lead, on request of the design agent |
 | Design class | Full |
-| Reviewed commit | — (this freeze commit; filled by the follow-up request commit) |
+| Reviewed commit | `b98a56f824002bc3cdbb4ace9e0b5cf9dd464ba9` |
 | Docs branch | `docs/step-24-design` |
 | Review date | — |
 | Review agent | — |
@@ -24,9 +24,9 @@
 Step page: [`Step 24A — Shared Editor Framework, Particles, and Structure`](../steps/step-24a-model-editors-particles-and-structure.md)
 
 **Freeze note.** The freeze is the commit that introduces this request — the Step 24A/24B split, the 24A design,
-the closed layout gate in ADR 0003, and this record. The record is part of that commit so the branch has no
-dangling links; a documentation-only follow-up fills the `Reviewed commit` cell with the freeze SHA before the
-lead requests the review. The freeze contains no code, test, configuration, contract, generated file, or
+the closed layout gate in ADR 0003, and this record. The record was part of that commit so the branch has no
+dangling links; a documentation-only follow-up then filled the `Reviewed commit` cell with the freeze SHA before
+the lead requests the review. The freeze contains no code, test, configuration, contract, generated file, or
 feature-work edit.
 
 **Split note.** The human owner split Step 24 into **24A** (this step) and **24B** (transition editors) on
