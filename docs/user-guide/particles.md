@@ -119,6 +119,44 @@ because it is semantic. See the [project format](../reference/project-format.md)
 `PAR003` is not used in v1. An out-of-range charge is rejected by the typed value or JSON reader as
 `PROJ002`.
 
+## Editing particles and sets in the GUI
+
+Open **Particles** or **Particle sets** from the **Model** menu or the project explorer's **Model** node. Both
+editors use the shared model-table surface: search, a severity filter, typed column sorting, and multi-select.
+
+### Particles
+
+- The table shows name, symbol, charge, vacancy, authored index, usage count, and a status column. The implicit
+  **Void** particle is pinned first, marked read-only, and explained in the detail pane; it is never persisted and
+  is not counted as an authored particle.
+- **Add** creates `Particle 1`, `Particle 2`, … (case-insensitive unique) with charge `0`.
+- Name, symbol, charge, and the vacancy toggle each commit on `Enter` or focus loss as one undo entry. **Apply**
+  commits the whole form as one entry; **Revert** restores the last committed values.
+- **Duplicate** copies every field under a new id and a unique name.
+- Select several authored particles and use the bulk **Set charge** action to change them all in **one** undo
+  entry; a mid-batch rejection changes nothing.
+- Inline messages: `PAR001` for an empty or duplicate name, `PAR008` when the symbol does not match the
+  recommended pattern, and `PAR004` when a charged vacancy could pair with a charged default occupation.
+- **Delete** is blocked while the particle is referenced (by a set, a state change, or a transition). The
+  editor lists the dependents and **Show usages**; delete the dependents in their own domain first. The Core
+  structural validator rejects the same dangling reference, so the pre-check and the rejection agree.
+
+### Particle sets
+
+- The table shows name, ordered member count, usage count, and status. The detail carries its own
+  **Project particles** list as the drag source, so membership works inside one document.
+- Drag a particle onto the member list, or select it and use **Add**. **Remove**, **Move up**, and **Move down**
+  are the keyboard equivalents of every drag action; both paths produce the same order.
+- The first member carries the **default occupation** badge and appears first in the occupation-chip preview.
+- The void cannot be a member (`PAR005`), a repeated member is refused (`PAR012`), and an empty set is invalid
+  (`PAR005`): the error is inline and **Apply** is disabled.
+- **Duplicate** copies the ordered members under a new set id and a unique name.
+- Deleting a set used by a reference site is blocked with the dependent site list; the Core reference check also
+  rejects the dangling site reference.
+
+Read-only sessions disable Add, Remove, Duplicate, Apply, bulk charge, and the set membership controls, and show
+the shell's read-only banner.
+
 ## Queries and editing
 
 The immutable `Project` snapshot implements `IParticleQuery`: `Particles`, `VoidParticle`,

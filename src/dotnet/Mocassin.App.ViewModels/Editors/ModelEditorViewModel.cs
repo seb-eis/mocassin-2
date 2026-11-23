@@ -34,8 +34,10 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
     private ImmutableArray<ModelUsageEntry> selectedUsages = [];
     private string? blockedDeleteMessage;
     private string? pendingFocus;
+    private string? detailMessage;
     private ModelEditorState state;
     private ModelDetailViewModel? detail;
+    private ModelEditorActionBarViewModel? actionBar;
     private bool disposed;
 
     /// <summary>
@@ -59,10 +61,12 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
         DiagnosticSummary = new ModelDiagnosticSummaryViewModel(openProblems);
 
         AddCommand = new RelayCommand(Add, () => CanEdit);
-        RemoveCommand = new RelayCommand(() => TryRemoveSelected(), () => CanEdit && Table.SelectedRow is not null);
+        RemoveCommand = new RelayCommand(
+            () => TryRemoveSelected(),
+            () => CanMutateSelection);
         DuplicateCommand = new RelayCommand(
             () => DuplicateSelected(),
-            () => CanEdit && Table.SelectedRow is not null);
+            () => CanMutateSelection);
         ShowUsagesCommand = new RelayCommand(ShowUsages, () => Table.SelectedRow is not null);
 
         Table.PropertyChanged += OnTablePropertyChanged;
@@ -124,6 +128,12 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
     public IEditorPaneLayout PaneLayout => layout;
 
     /// <summary>
+    /// Gets a value indicating whether the selected row can be mutated.
+    /// </summary>
+    public bool CanMutateSelection =>
+        CanEdit && Table.SelectedRow is not null && !IsSelectedObjectReadOnly;
+
+    /// <summary>
     /// Gets the selection pane's share of the editor width.
     /// </summary>
     public double EditorFraction => layout.EditorFraction;
@@ -136,6 +146,30 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
         get => detail;
         private set => SetProperty(ref detail, value);
     }
+
+    /// <summary>
+    /// Gets the optional document-level action bar (for example the particle editor's bulk charge).
+    /// </summary>
+    public ModelEditorActionBarViewModel? ActionBar
+    {
+        get => actionBar;
+        protected set => SetProperty(ref actionBar, value);
+    }
+
+    /// <summary>
+    /// Gets the read-only explanation shown when a selected row has no editable detail (for example the void
+    /// particle).
+    /// </summary>
+    public string? DetailMessage
+    {
+        get => detailMessage;
+        private set => SetProperty(ref detailMessage, value);
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether the selected row is read-only (frameworks can pin a synthetic row).
+    /// </summary>
+    public bool IsSelectedObjectReadOnly => Table.SelectedRow is { } row && IsReadOnlyObject(row.ObjectId);
 
     /// <summary>
     /// Gets the usages of the latest show-usages request or blocked delete.
@@ -205,6 +239,28 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
     /// Rebuilds the rows after a domain editor has configured its column policy.
     /// </summary>
     protected void RebuildRows() => Reload(Table.SelectedRow?.ObjectId);
+
+    /// <summary>
+    /// Determines whether one projected row is read-only (the default is editable).
+    /// </summary>
+    /// <param name="objectId">The row's object id.</param>
+    /// <returns><see langword="true"/> when the row is a pinned, read-only row.</returns>
+    protected virtual bool IsReadOnlyObject(Guid objectId) => false;
+
+    /// <summary>
+    /// Gets the explanation for a selected row that has no detail.
+    /// </summary>
+    /// <param name="objectId">The row's object id.</param>
+    /// <returns>The explanation, or <see langword="null"/>.</returns>
+    protected virtual string? GetDetailMessage(Guid objectId) => null;
+
+    /// <summary>
+    /// Removes several objects after the framework's per-object blocked-delete check.
+    /// </summary>
+    /// <param name="objectIds">The selected object ids.</param>
+    /// <returns><see langword="true"/> when the removal was attempted.</returns>
+    protected virtual bool RemoveManyCore(IReadOnlyList<Guid> objectIds) =>
+        objectIds.All(RemoveCore);
 
     /// <summary>
     /// Gets the current project snapshot.
@@ -319,24 +375,35 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
     /// <returns><see langword="true"/> when the removal was attempted.</returns>
     public bool TryRemoveSelected()
     {
-        if (Table.SelectedRow is not { } row)
+        var rows = Table.SelectedRows.Count > 0
+            ? Table.SelectedRows.ToArray()
+            : Table.SelectedRow is { } single
+                ? new[] { single }
+                : Array.Empty<ModelTableRow>();
+        var removable = rows.Where(row => !IsReadOnlyObject(row.ObjectId)).ToArray();
+        if (removable.Length == 0)
         {
             return false;
         }
 
-        var target = new ModelObjectRef(Descriptor.Domain, row.ObjectId);
-        var dependents = EnsureUsages().GetDependents(target);
-        if (!dependents.IsDefaultOrEmpty)
+        var usages = EnsureUsages();
+        var allDependents = new List<ModelUsageEntry>();
+        foreach (var row in removable)
         {
-            SelectedUsages = dependents;
+            allDependents.AddRange(usages.GetDependents(new ModelObjectRef(Descriptor.Domain, row.ObjectId)));
+        }
+
+        if (allDependents.Count > 0)
+        {
+            SelectedUsages = [.. allDependents.Distinct()];
             BlockedDeleteMessage = string.Create(
                 System.Globalization.CultureInfo.InvariantCulture,
-                $"The {Descriptor.ObjectNoun} is used by {dependents.Length} object(s): {string.Join(", ", dependents.Select(static entry => entry.DisplayName))}.");
+                $"The {Descriptor.ObjectNoun} is used by {allDependents.Distinct().Count()} object(s): {string.Join(", ", allDependents.Distinct().Select(static entry => entry.DisplayName))}.");
             return false;
         }
 
         BlockedDeleteMessage = null;
-        return RemoveCore(row.ObjectId);
+        return RemoveManyCore(removable.Select(static row => row.ObjectId).ToArray());
     }
 
     /// <summary>
@@ -520,11 +587,15 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
         if (selected is null)
         {
             Detail = null;
+            DetailMessage = null;
+            OnPropertyChanged(nameof(IsSelectedObjectReadOnly));
             return;
         }
 
         if (Detail is not null && Detail.ObjectId == selected.ObjectId)
         {
+            DetailMessage = null;
+            OnPropertyChanged(nameof(IsSelectedObjectReadOnly));
             return;
         }
 
@@ -539,6 +610,8 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
         }
 
         Detail = created;
+        DetailMessage = created is null ? GetDetailMessage(selected.ObjectId) : null;
+        OnPropertyChanged(nameof(IsSelectedObjectReadOnly));
     }
 
     private void RefreshCommands()
@@ -549,6 +622,8 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
         ShowUsagesCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(CanEdit));
         OnPropertyChanged(nameof(IsReadOnly));
+        OnPropertyChanged(nameof(CanMutateSelection));
+        OnPropertyChanged(nameof(IsSelectedObjectReadOnly));
         OnPropertyChanged(nameof(State));
     }
 

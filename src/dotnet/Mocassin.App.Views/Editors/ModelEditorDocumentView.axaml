@@ -5,7 +5,7 @@
              xmlns:automation="using:Avalonia.Automation"
              x:Class="Mocassin.App.Views.Editors.ModelEditorDocumentView"
              x:DataType="vm:ModelEditorDocumentViewModel">
-  <Grid RowDefinitions="Auto,Auto,*" Background="{DynamicResource Mocassin.WorkspaceBackground}">
+  <Grid RowDefinitions="Auto,Auto,Auto,*" Background="{DynamicResource Mocassin.WorkspaceBackground}">
     <Border Grid.Row="0"
             Background="{DynamicResource Mocassin.CardBackground}"
             BorderBrush="{DynamicResource Mocassin.BorderBrush}"
@@ -45,7 +45,30 @@
       <TextBlock Text="This project is open read-only; editor commands are disabled." TextWrapping="Wrap" />
     </Border>
 
-    <Grid Grid.Row="2" x:Name="MasterDetailGrid" ColumnDefinitions="0.42*,4,0.58*">
+    <Border Grid.Row="2"
+            IsVisible="{Binding Editor.ActionBar, Converter={x:Static ObjectConverters.IsNotNull}}"
+            Background="{DynamicResource Mocassin.CardBackground}"
+            BorderBrush="{DynamicResource Mocassin.BorderBrush}"
+            BorderThickness="0,0,0,1"
+            Padding="10,4">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <TextBlock Text="{Binding Editor.ActionBar.Label}" VerticalAlignment="Center" />
+        <TextBox Text="{Binding Editor.ActionBar.ValueText, Mode=TwoWay}"
+                 PlaceholderText="{Binding Editor.ActionBar.Placeholder}"
+                 Width="130"
+                 automation:AutomationProperties.Name="Bulk action value" />
+        <Button Content="Apply"
+                Command="{Binding Editor.ActionBar.ApplyCommand}"
+                automation:AutomationProperties.Name="Apply bulk action" />
+        <TextBlock Text="{Binding Editor.ActionBar.ErrorText}"
+                   IsVisible="{Binding Editor.ActionBar.HasError}"
+                   Foreground="{DynamicResource Mocassin.ErrorForeground}"
+                   VerticalAlignment="Center"
+                   TextWrapping="Wrap" />
+      </StackPanel>
+    </Border>
+
+    <Grid Grid.Row="3" x:Name="MasterDetailGrid" ColumnDefinitions="0.42*,4,0.58*">
       <editors:ModelTableSurface Grid.Column="0"
                                  x:Name="TableSurface"
                                  DataContext="{Binding Editor}"
@@ -58,7 +81,16 @@
                     automation:AutomationProperties.Name="Resize editor panes"
                     automation:AutomationProperties.HelpText="Use the arrow keys to resize the detail pane" />
       <Border Grid.Column="2" MinWidth="240">
-        <ContentControl x:Name="DetailHost" Content="{Binding Editor.Detail}" />
+        <Grid RowDefinitions="*,Auto">
+          <ContentControl x:Name="DetailHost" Content="{Binding Editor.Detail}" />
+          <TextBlock Grid.Row="1"
+                     Text="{Binding Editor.DetailMessage}"
+                     IsVisible="{Binding Editor.DetailMessage, Converter={x:Static ObjectConverters.IsNotNull}}"
+                     Margin="12"
+                     TextWrapping="Wrap"
+                     Foreground="{DynamicResource Mocassin.ForegroundMutedBrush}"
+                     automation:AutomationProperties.Name="Editor selection explanation" />
+        </Grid>
       </Border>
     </Grid>
   </Grid>

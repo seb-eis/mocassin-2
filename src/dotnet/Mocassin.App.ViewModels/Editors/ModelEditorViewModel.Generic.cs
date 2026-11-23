@@ -58,7 +58,7 @@ internal abstract class ModelEditorViewModel<TModel> : ModelEditorViewModel
     /// </summary>
     /// <param name="model">The model.</param>
     /// <returns>The detail.</returns>
-    protected abstract ModelDetailViewModel CreateDetailFor(TModel model);
+    protected abstract ModelDetailViewModel? CreateDetailFor(TModel model);
 
     /// <inheritdoc />
     protected sealed override ImmutableArray<ModelTableRow> BuildRows(ProjectModel project) =>

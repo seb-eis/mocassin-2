@@ -87,7 +87,7 @@ internal sealed class TestParticleEditor : ModelEditorViewModel<Particle>
     }
 
     /// <inheritdoc />
-    protected override ModelDetailViewModel CreateDetailFor(Particle model) => new TestParticleDetail(model);
+    protected override ModelDetailViewModel? CreateDetailFor(Particle model) => new TestParticleDetail(model);
 
     /// <inheritdoc />
     protected override void AddCore() => AddParticle($"Particle {Project.Particles.Length + 1}");

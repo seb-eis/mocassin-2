@@ -21,6 +21,7 @@ internal abstract partial class ModelDetailViewModel : ObservableValidator
 {
     private ProjectEditCoordinator? coordinator;
     private string? errorMessage;
+    private string? warningMessage;
     private string? conflictMessage;
     private bool hasUncommittedChanges;
     private bool isRemoved;
@@ -82,6 +83,26 @@ internal abstract partial class ModelDetailViewModel : ObservableValidator
     }
 
     /// <summary>
+    /// Gets the inline warning from the last accepted (or rejected) commit, for example <c>PAR004</c>/<c>PAR008</c>.
+    /// </summary>
+    public string? WarningMessage
+    {
+        get => warningMessage;
+        private set
+        {
+            if (SetProperty(ref warningMessage, value))
+            {
+                OnPropertyChanged(nameof(HasWarning));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether an inline warning is present.
+    /// </summary>
+    public bool HasWarning => !string.IsNullOrWhiteSpace(WarningMessage);
+
+    /// <summary>
     /// Gets a value indicating whether the object changed elsewhere while this form was open.
     /// </summary>
     public string? ConflictMessage
@@ -125,7 +146,7 @@ internal abstract partial class ModelDetailViewModel : ObservableValidator
     /// <summary>
     /// Gets a value indicating whether Apply is enabled.
     /// </summary>
-    public bool CanApply => coordinator?.CanEdit == true && !IsRemoved;
+    public virtual bool CanApply => coordinator?.CanEdit == true && !IsRemoved;
 
     /// <summary>
     /// Gets a value indicating whether Revert is enabled.
@@ -154,38 +175,89 @@ internal abstract partial class ModelDetailViewModel : ObservableValidator
     internal void Attach(ProjectEditCoordinator value)
     {
         coordinator = value;
-        ApplyCommand.NotifyCanExecuteChanged();
+        NotifyCanApplyChanged();
+        OnAttached();
     }
 
     /// <summary>
     /// Commits the detail's typed operation through the coordinator.
     /// </summary>
     /// <returns>The app-level result.</returns>
-    public EditApplyResult Commit()
+    public EditApplyResult Commit() => CommitOperation(Description, ApplyCore);
+
+    /// <summary>
+    /// Commits one typed operation and routes its diagnostics into the inline error/warning state.
+    /// </summary>
+    /// <param name="description">The user-visible change description.</param>
+    /// <param name="operation">The typed operation.</param>
+    /// <returns>The app-level result.</returns>
+    protected EditApplyResult CommitOperation(
+        string description,
+        Func<ProjectEditor, ProjectModel, ProjectEditResult> operation)
     {
         if (coordinator is null)
         {
             throw new InvalidOperationException("The detail is not attached to an editor coordinator.");
         }
 
-        var result = coordinator.Apply(Description, ApplyCore);
+        var result = coordinator.Apply(description, operation);
         switch (result.Outcome)
         {
             case EditApplyOutcome.Applied:
                 ErrorMessage = null;
                 ConflictMessage = null;
                 HasUncommittedChanges = false;
+                WarningMessage = WarningText(result.Edit?.Diagnostics);
                 break;
             case EditApplyOutcome.Rejected:
                 ErrorMessage = result.Message ?? "The edit was rejected.";
+                WarningMessage = null;
                 break;
             case EditApplyOutcome.ReadOnly:
                 ErrorMessage = result.Message;
+                WarningMessage = null;
                 break;
         }
 
         return result;
     }
+
+    /// <summary>
+    /// Raises the Apply/Revert command can-execute state after a form-level validity change.
+    /// </summary>
+    protected void NotifyCanApplyChanged()
+    {
+        ApplyCommand.NotifyCanExecuteChanged();
+        RevertCommand.NotifyCanExecuteChanged();
+        OnPropertyChanged(nameof(CanApply));
+        OnCanApplyChanged();
+    }
+
+    /// <summary>
+    /// Called when the detail attaches or its form-level validity changes, so derived commands can refresh.
+    /// </summary>
+    protected virtual void OnCanApplyChanged()
+    {
+    }
+
+    /// <summary>
+    /// Called once after the coordinator is attached.
+    /// </summary>
+    protected virtual void OnAttached()
+    {
+    }
+
+    /// <summary>
+    /// Sets an inline warning message from a domain-specific pre-check.
+    /// </summary>
+    /// <param name="message">The warning, or <see langword="null"/> to clear it.</param>
+    protected void SetWarning(string? message) => WarningMessage = message;
+
+    /// <summary>
+    /// Sets an inline error message from a domain-specific pre-check.
+    /// </summary>
+    /// <param name="message">The error, or <see langword="null"/> to clear it.</param>
+    protected void SetError(string? message) => ErrorMessage = message;
 
     /// <summary>
     /// Restores the committed values.
@@ -194,6 +266,7 @@ internal abstract partial class ModelDetailViewModel : ObservableValidator
     {
         RevertCore();
         ErrorMessage = null;
+        WarningMessage = null;
         ConflictMessage = null;
         HasUncommittedChanges = false;
     }
@@ -251,6 +324,20 @@ internal abstract partial class ModelDetailViewModel : ObservableValidator
     /// <param name="project">The current project snapshot.</param>
     protected virtual void RefreshOptionsCore(ProjectModel project)
     {
+    }
+
+    private static string? WarningText(System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic>? diagnostics)
+    {
+        if (diagnostics is not { } value || value.IsDefault)
+        {
+            return null;
+        }
+
+        var warnings = value
+            .Where(static diagnostic => diagnostic.Severity == Mocassin.Core.Diagnostics.DiagnosticSeverity.Warning)
+            .Select(static diagnostic => $"{diagnostic.Code}: {diagnostic.Message}")
+            .ToArray();
+        return warnings.Length == 0 ? null : string.Join(" ", warnings);
     }
 
     private void Apply() => Commit();
