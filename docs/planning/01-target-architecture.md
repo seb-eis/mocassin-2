@@ -212,7 +212,10 @@ Rules:
   view models do not own an algorithm, not that they cannot call a Step 02 service.
 - One writer per project: Step 23B's `ProjectEditCoordinator` over the Step 01 `ProjectDocument`. View models
   never mutate a `Project` or a domain object, never compute a project hash, and never build a `ProjectChange`.
-  23A has no writer because nothing is editable. A read-only session refuses edits with the app-level
+  The 24A additive `ProjectDocument.Apply(string, Func<ProjectEditor, Project, ProjectEditResult>)` overload is the
+  permitted place that records the canonical change for a typed or composed bulk operation; a mid-batch rejection
+  returns the document value with a null change and the accumulated diagnostics. 23A has no writer because nothing
+  is editable. A read-only session refuses edits with the app-level
   `EditApplyOutcome.ReadOnly` message; this is not a Core diagnostic code. The recovery comparison uses
   `ProjectDocument.CreateRecovered(...).IsDirty` after normalizing `ModifiedUtc`; the hash stays in Core.
 - Validation handoff: 23A performs one internal load-validation pass and retains `ProjectSession.Validation`;
