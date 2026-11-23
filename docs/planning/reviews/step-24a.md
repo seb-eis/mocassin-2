@@ -113,21 +113,26 @@ Review these design artifacts at the frozen commit:
 - **Editing path (D-8).** The typed `ProjectEditor` operations the CLI uses, committed through the one
   `ProjectEditCoordinator` write path; one additive Core `ProjectDocument.Apply` overload so an edit is validated
   once and records one undo entry.
-- **Reconciliation of the indicative design.** D-2 (no cascade delete in 24A), D-3 (set detail owns its drag
+- **Reconciliation of the indicative design.** D-2 (site deletion is blocked with a dependents list, and the only
+  cascade is the energy-reference-only "delete site and energy references"), D-3 (set detail owns its drag
   source), D-4 (validator on the detail, not the list base), D-5 (dummy positions as their own document; P1
   preview as a panel toggle, not a tab), D-6 (no trigonometric functions in the expression in v1), D-7
   (document-local gestures), D-9 (one global `editorFraction`), D-10 (1,000-site virtualization acceptance).
-- **Scope control.** No transition editor, no cascade delete, no energy/lattice/simulation/3D UI, no format or
-  diagnostic-code change, no new dependency. One additive Core API and one additive app-local setting only.
+- **Scope control.** No transition editor, no broad cascade delete (only the energy-reference-only site action),
+  no energy/lattice/simulation/3D UI, no format or diagnostic-code change, no new dependency. One additive Core
+  API and one additive app-local setting only.
 - **Evidence plan.** §13 names the tests and tiers for every acceptance criterion, including the 1,000-site and
   >1,000-P1-position virtualization cases, the two-culture expression tests, the lock-table-versus-`CellGeometry`
   cross-check, and the real ceria acceptance test.
 
 ## Known limitations and deliberate omissions
 
-- **No cascade deletion in 24A (D-2).** The indicative design offered cascade removal for a referenced site;
-  24A blocks the delete with a dependents list and navigation instead. This is a deliberate scope narrowing for
-  the owner to confirm at the start gate, not an oversight.
+- **Site deletion is blocked except for the energy-reference-only action (D-2).** The indicative design offered
+  general cascade removal for a referenced site; 24A instead blocks the delete with a dependents list and
+  navigation. The single exception is a site whose only dependents are energy references, where the editor offers
+  "delete site and energy references" through the existing `ProjectEditor.RemoveCellSiteAndEnergyReferences`. There
+  is no cascade for MMC transitions, KMC resolved paths, occupation exchanges, or dopings. This narrowing plus the
+  one bounded cascade is the revised D-2 the owner confirms at the start gate, not an oversight.
 - **No trigonometric functions in the numeric expression (D-6).** The degrees/radians convention is not decided,
   so the step ships `+ - * / ^`, parentheses, `pi`, `e`, `sqrt`, `ln`, `exp`, `abs` and documents the limit.
 - **No column resize/reorder.** ADR 0003 defers option 5 (the custom `TableView`) until a step needs

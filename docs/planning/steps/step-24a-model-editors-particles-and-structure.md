@@ -493,7 +493,7 @@ inside the **one** coordinator write path (m-7/D-8):
 // Mocassin.Core.Editing.ProjectDocument (additive overload)
 public ProjectEditResult Apply(
     string description,
-    Func<ProjectEditor, ProjectModel, ProjectEditResult> operation);
+    Func<ProjectEditor, Project, ProjectEditResult> operation);
 ```
 
 **The delegate receives the document's own `ProjectEditor`.** That makes the precondition structural: the
@@ -575,6 +575,7 @@ provided editor's typed operation"*; the dev adds the guard below and a test for
 | `DummyPositionTests`, `StructureSummaryTests` | Dummy positions round-trip and render with the distinct glyph; the summary's reference-site count, P1 position count, stable/unstable **position** counts, volume, orbit table, and reference-site density equal the values recomputed from `StructureModel.Sites` and `StructurePreview` (§6); the summary calls no `ModelStatistics` service (m-1) | PR-fast |
 | `EditorNavigationTests` | `particle/<id>`, `particleSet/<id>`, `structure`, `cellSite/<id>`, `cellDummyPosition/<id>` open/select/focus; a stale id returns `null` without throwing; every domain diagnostic in a ceria fixture navigates to its field | PR-fast |
 | `EditorUndoTests` | Undo/redo across every editor operation, save point intact, dirty marker follows the coordinator; **bulk delete of n objects and bulk set-charge are each one entry**; a mid-batch failure changes nothing (project, undo, redo, save point, dirty state) (m-8) | PR-fast |
+| `ProjectDocumentApplyOverloadTests` (Core, n-5) | The additive `ProjectDocument.Apply` overload (§10): an accepted edit records **one** `ProjectChange` with the caller's description, `Before` the document value and `After` the result project, and clears the redo stack; a rejected operation returns its error result and leaves the project, undo stack, redo stack, save point, and dirty state untouched; a successful no-op (`Change == null`) returns without a stack change; a malformed result whose `Change.Before`/`Change.After` is not reference-equal to the document/result project throws `InvalidOperationException` | PR-fast |
 | `EditorReadOnlyTests` | In a read-only session Add/Remove/Duplicate/Apply and `Enter` are disabled, the 23B banner is shown, the coordinator is never called, no undo entry and no dirty change appear, and no `EditRejected` diagnostic is raised; a forced coordinator `Apply` returns `ReadOnly` and changes nothing (m-4) | PR-fast |
 | `EditorRefreshTests` | On `ProjectChanged`: `Saved` does not rebuild rows or invalidate an open form; an edit in another domain refreshes reference options only; an edit to the open form's object shows the conflict with Apply/Revert as specified; removal disables Apply; `Replaced` rebuilds and discards forms (m-10) | PR-fast |
 | `EditorAccessibilityTests` | Every interactive control has a name and role; the table exposes a list role; severity is text not colour; the splitter is named and keyboard-resizable | PR-fast headless |
