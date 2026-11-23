@@ -36,6 +36,8 @@
         <editors:SpaceGroupEditorView DataContext="{Binding Structure.SpaceGroupEditor}" />
         <Border Height="1" Background="{DynamicResource Mocassin.BorderBrush}" Margin="14,0" />
         <editors:CellParametersView DataContext="{Binding Structure.CellParameters}" />
+        <Border Height="1" Background="{DynamicResource Mocassin.BorderBrush}" Margin="14,0" />
+        <editors:StructureSummaryView DataContext="{Binding Structure.Summary}" />
       </StackPanel>
     </ScrollViewer>
   </Grid>

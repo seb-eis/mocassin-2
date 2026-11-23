@@ -6,6 +6,7 @@ using Avalonia.VisualTree;
 using Mocassin.App.Composition;
 using Mocassin.App.Tests.TestSupport;
 using Mocassin.App.ViewModels.Editors;
+using Mocassin.App.ViewModels.Editors.Dummies;
 using Mocassin.App.ViewModels.Editors.Particles;
 using Mocassin.App.ViewModels.Editors.Sets;
 using Mocassin.App.ViewModels.Editors.Sites;
@@ -15,6 +16,7 @@ using Mocassin.App.ViewModels.Shell;
 using Mocassin.App.Views.Editors.Particles;
 using Mocassin.App.Views.Editors.Sets;
 using Mocassin.App.Views.Editors.Sites;
+using Mocassin.App.Views.Editors.Dummies;
 using Mocassin.App.Views.Editors.Structure;
 using Mocassin.Core.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
@@ -50,14 +52,17 @@ public sealed class EditorIntegrationTests
                     var setCommand = shell.Commands.Find("model.open.particleSet");
                     var structureCommand = shell.Commands.Find("model.open.structure");
                     var siteCommand = shell.Commands.Find("model.open.cellSite");
+                    var dummyCommand = shell.Commands.Find("model.open.cellDummyPosition");
                     Assert.NotNull(particleCommand);
                     Assert.NotNull(setCommand);
                     Assert.NotNull(structureCommand);
                     Assert.NotNull(siteCommand);
+                    Assert.NotNull(dummyCommand);
                     Assert.True(particleCommand!.Command.CanExecute(null));
                     Assert.True(setCommand!.Command.CanExecute(null));
                     Assert.True(structureCommand!.Command.CanExecute(null));
                     Assert.True(siteCommand!.Command.CanExecute(null));
+                    Assert.True(dummyCommand!.Command.CanExecute(null));
 
                     Assert.True(await shell.Navigation.NavigateToAsync(
                         new ModelPath(ModelEditorDomains.Particle, Guid.Empty),
@@ -83,6 +88,7 @@ public sealed class EditorIntegrationTests
                     HeadlessSession.Pump(window);
                     Assert.NotNull(window.GetVisualDescendants().OfType<SpaceGroupEditorView>().FirstOrDefault());
                     Assert.NotNull(window.GetVisualDescendants().OfType<CellParametersView>().FirstOrDefault());
+                    Assert.NotNull(window.GetVisualDescendants().OfType<StructureSummaryView>().FirstOrDefault());
 
                     Assert.True(await shell.Navigation.NavigateToAsync(
                         new ModelPath(ModelEditorDomains.CellSite, Guid.Empty),
@@ -93,6 +99,17 @@ public sealed class EditorIntegrationTests
                     Assert.True(sitesEditor.RequestSelection(entry.Project.Structure.Sites[0].Id.Value));
                     HeadlessSession.Pump(window);
                     Assert.NotNull(window.GetVisualDescendants().OfType<CellSiteDetailView>().FirstOrDefault());
+
+                    Assert.True(await shell.Navigation.NavigateToAsync(
+                        new ModelPath(ModelEditorDomains.CellDummyPosition, Guid.Empty),
+                        NavigationIntent.Activate));
+                    var dummyDocument = Assert.IsType<ModelEditorDocumentViewModel>(shell.Documents.ActiveDocument);
+                    var dummiesEditor = Assert.IsType<DummiesEditorViewModel>(dummyDocument.Editor);
+                    HeadlessSession.Pump(window);
+                    Assert.True(dummiesEditor.RequestSelection(
+                        entry.Project.Structure.DummyPositions[0].Id.Value));
+                    HeadlessSession.Pump(window);
+                    Assert.NotNull(window.GetVisualDescendants().OfType<DummyPositionDetailView>().FirstOrDefault());
                 }
                 finally
                 {

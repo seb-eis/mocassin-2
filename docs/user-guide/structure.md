@@ -130,6 +130,37 @@ toggle.
   the structural validator does not block that edit. Apply is still allowed; the Problems channel reports the
   resulting `TRN012`/`TRN020` diagnostics after the edit.
 
+## Dummy positions in the GUI
+
+Open **Dummy positions** from the **Model** menu or the project explorer's **Model** node. Dummies are their own
+document (they are not nested tabs inside the structure form) and are marked with the distinct **◇** glyph and
+the **visual-only** status in the table and detail.
+
+- Each dummy has a name and three expression-capable fractional fields. It has no particle set, stability,
+  energy, or transition meaning, and may coincide with a reference site.
+- **Add**, edit (one undo entry per Apply), and **Delete** use the same coordinator and undo rules as the other
+  model editors. Read-only sessions disable the actions.
+- Dummies are persisted under `structure.dummyPositions` and round-trip through save/load unchanged. They are
+  excluded from all simulation compilation.
+
+## Structure summary in the GUI
+
+The structure document ends with a summary derived only from the structure value and the structure preview; it
+does **not** call the on-demand statistics service.
+
+| Value | Source |
+| --- | --- |
+| Reference sites | `StructureModel.Sites.Length` |
+| P1 positions | `StructurePreview.PositionList.Length` |
+| Stable/unstable **positions** | counted from `PositionList` by the owning reference site's stability; labelled positions, never sites |
+| Cell volume | `StructurePreview.CellVolumeAngstrom3` |
+| Reference-site density | `ReferenceSiteCount / CellVolumeAngstrom3` in Å⁻³ |
+| Orbit table | `StructurePreview.Orbits`: representative, multiplicity, P1 position count |
+| Large-P1 warning | the structure validator's `STR009` |
+
+If the structure cannot produce a preview (for example an invalid cell or an orbit overlap), the summary keeps
+the reference-site count and reports why the preview is unavailable.
+
 ## Reference sites
 
 A site stores a stable `CellSiteId`, a name, a fractional position, a particle-set reference, and a stability

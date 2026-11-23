@@ -31,6 +31,7 @@ internal sealed class StructureEditorViewModel : ModelEditorViewModel
     {
         SpaceGroupEditor = new SpaceGroupEditorViewModel(session, previewService, validator);
         CellParameters = new CellParameterEditorViewModel(session, previewService);
+        Summary = new StructureSummaryViewModel(session, previewService, validator);
     }
 
     /// <summary>
@@ -42,6 +43,11 @@ internal sealed class StructureEditorViewModel : ModelEditorViewModel
     /// Gets the cell-parameter form.
     /// </summary>
     public CellParameterEditorViewModel CellParameters { get; }
+
+    /// <summary>
+    /// Gets the structure summary.
+    /// </summary>
+    public StructureSummaryViewModel Summary { get; }
 
     /// <inheritdoc />
     protected override ImmutableArray<ModelTableRow> BuildRows(ProjectModel project) => [];
@@ -57,6 +63,7 @@ internal sealed class StructureEditorViewModel : ModelEditorViewModel
     {
         SpaceGroupEditor.Dispose();
         CellParameters.Dispose();
+        Summary.Dispose();
         base.OnDisposed();
     }
 }
