@@ -70,9 +70,9 @@ class BindingTests(unittest.TestCase):
                 self.assertEqual(mode.group(1), expected)
 
     def test_agents_use_the_assigned_model_tiers(self) -> None:
-        self.assertEqual(model(AGENTS / "lead.md"), "opencode-go/glm-5.3")
-        self.assertEqual(model(AGENTS / "design.md"), "opencode-go/glm-5.3")
-        self.assertEqual(model(AGENTS / "review.md"), "opencode-go/glm-5.3")
+        self.assertEqual(model(AGENTS / "lead.md"), "opencode-go/deepseek-v4.1-flash")
+        self.assertEqual(model(AGENTS / "design.md"), "opencode-go/deepseek-v4.1-flash")
+        self.assertEqual(model(AGENTS / "review.md"), "opencode-go/deepseek-v4.1-flash")
         self.assertEqual(model(AGENTS / "dev-free.md"), "opencode/deepseek-v4.1-flash-free")
         self.assertEqual(model(AGENTS / "dev.md"), "opencode-go/deepseek-v4.1-flash")
 
