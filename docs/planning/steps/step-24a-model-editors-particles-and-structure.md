@@ -22,7 +22,7 @@ adds one public Core API. No format change and no new dependency. Justification 
 
 ## Implementation status
 
-- **Status:** In progress — started 2026-11-23 from `main` at `3e904ed`; features 1–2 squashed (`c24d1cf`, `0c749c2`), features 3–6 pending
+- **Status:** In progress — started 2026-11-23 from `main` at `3e904ed`; features 1–3 squashed (`c24d1cf`, `0c749c2`, `82cd326`), features 4–6 pending
 - **Step branch:** `step/24a-model-editors-particles-and-structure`
 - **Step CI:** — (the single closeout dispatch runs at the end of the step)
 - **Main merge:** —
@@ -44,12 +44,13 @@ adds one public Core API. No format change and no new dependency. Justification 
 - **Design class:** **Full** (§16)
 - **Complexity class:** **High** — cross-step interfaces and test-matrix breadth; **owner acceptance as one High
   unit is required at the start gate**, and no further split is proposed (§16)
-- **Last updated:** 2026-11-23 (feature 2)
+- **Last updated:** 2026-11-23 (feature 3)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
 | 1. Shared editor framework | `feature/step-24a-model-editors-particles-and-structure/shared-editor-framework` | **Squashed** | `./tools/verify.sh dotnet` (394 App + all suites), `api`, `structure`, `docs` green 2026-11-23 | — (no per-feature run) | `c24d1cf`; m-13 doc alignment `f77bfd3` |
 | 2. Particle and set editors | `feature/step-24a-model-editors-particles-and-structure/particle-and-set-editors` | **Squashed** | `./tools/verify.sh dotnet` (412 App + all suites), `structure`, `docs` green 2026-11-23; `ParticleEditorTests`, `ParticleSetEditorTests`, `ModelEditorAcceptanceTests`, `EditorIntegrationTests` | — (no per-feature run) | `0c749c2` |
+| 3. Space group and cell parameters | `feature/step-24a-model-editors-particles-and-structure/space-group-and-cell-parameters` | **Squashed** | `./tools/verify.sh dotnet` (426 App + all suites), `structure`, `docs` green 2026-11-23; `SpaceGroupPreviewTests`, `CellParameterTests`, `EditorIntegrationTests` | — (no per-feature run) | `82cd326` |
 
 ## Goal
 
