@@ -78,7 +78,8 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 22 | [Python Analysis API](steps/step-22-python-analysis-api.md) | E. Results | Not started | — | — | — | — | — | Not requested | Not requested |
 | 23a | [Workspace and Project Lifecycle](steps/step-23a-workspace-and-project-lifecycle.md) | F. GUI | Done | `step/23a-workspace-and-project-lifecycle` (merged and deleted) | — | [Ubuntu 44889193801](https://github.com/seb-eis/mocassin-2/actions/runs/44889193801), Windows 44889462922, macOS 44889646766 green at `30dcf3e`; [main green](https://github.com/seb-eis/mocassin-2/actions/runs/44892961809) at `9f4d186` | `9f4d186` | `step-23a` | [Passed with notes](audits/step-23a.md) at `30dcf3e` — accepted by the human owner 2026-11-21; R3-1…R3-3 fixed, R3-4/R3-5 accepted | Ready with notes — **accepted by the human owner 2026-11-20** at `b9c56fe` ([record](reviews/step-23a.md), round 3 `b6a472c`); class High accepted; five features approved |
 | 23b | [Editing, Diagnostics, and Recovery](steps/step-23b-editing-diagnostics-and-recovery.md) | F. GUI | Done | `step/23b-editing-diagnostics-and-recovery` | F1 (`bb048ad`); F2 (`77c1b9c`); F3 (`97c42ec`); F4 (`a14ef1f`; fixes `833f135`, `eb120e1`); audit round 1 fixes F1–F7 (`ca64c9a`); notes/owner acceptance `172df45` | Ubuntu [44932597523](https://github.com/seb-eis/mocassin-2/actions/runs/44932597523), Windows [44932918537](https://github.com/seb-eis/mocassin-2/actions/runs/44932918537), macOS [44932432910](https://github.com/seb-eis/mocassin-2/actions/runs/44932432910) green at `fe79552`; main CI [44935708199](https://github.com/seb-eis/mocassin-2/actions/runs/44935708199) green at the merge | `a48da3b` | `step-23b` | [Passed with notes](audits/step-23b.md) — **owner accepted 2026-11-21** | Ready with notes — **accepted by the human owner 2026-11-21** at `a33711d` ([record](reviews/step-23b.md), round 4 `c4ded0e`); class High accepted; four features approved |
-| 24 | [Particle, Structure, and Transition Editors](steps/step-24-model-editors-particle-structure-transitions.md) | F. GUI | Not started | — | — | — | — | — | Not requested | Not requested |
+| 24a | [Shared Editor Framework, Particles, and Structure](steps/step-24a-model-editors-particles-and-structure.md) | F. GUI | Not started | — | — | — | — | — | Not requested | Ready for review — [record](reviews/step-24a.md) |
+| 24b | [Transition Editors](steps/step-24b-model-editors-transitions.md) | F. GUI | Not started | — | — | — | — | — | Not requested | Not requested — freeze after 24A feature 1 |
 | 25 | [Energy, Lattice, and Simulation Editors](steps/step-25-model-editors-energy-lattice-simulations.md) | F. GUI | Not started | — | — | — | — | — | Not requested | Not requested |
 | 26 | [Parameterization, Job Templates, and Build UI](steps/step-26-parameterization-job-templates-and-build-ui.md) | F. GUI | Not started | — | — | — | — | — | Not requested | Not requested |
 | 27 | [3D Viewer and Visualization](steps/step-27-3d-viewer-and-visualization.md) | F. GUI | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -88,6 +89,15 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 31 | [Packaging and Release](steps/step-31-packaging-and-release.md) | G. Release and documentation | Not started | — | — | — | — | — | Not requested | Not requested |
 
 ## Active work
+
+The GUI track (Phase F) is at Step 24. Steps 23A and 23B are **Done**, merged, and tagged (`step-23a`,
+`step-23b`). The editor-layout gate is **closed**: the owner reviewed the five-option POC on 2026-11-22, picked
+option 1 (`ListBox` table + detail) composed with option 4's `GridSplitter` master-detail, and the decision is
+recorded in [ADR 0003](adr/0003-avalonia-mvvm-stack.md#editor-layout-decision-2026-11-22); the spike code is
+discarded and the POC report is the durable evidence. At the same gate the owner split Step 24 into **24A**
+(shared editor framework, particles, structure) and **24B** (transition editors). The **24A design is frozen and
+`Ready for review`** ([record](reviews/step-24a.md)); 24B is drafted and freezes after 24A feature 1, because it
+consumes that framework. Neither half has a step branch or a start-gate approval; the start gates are pending.
 
 Phase C — Compilation and build (Steps 08–12) is complete and tagged: `step-08` through `step-12`, with Step 08
 merged as `f91fc63` and Step 12 as `ec2e04a` (both `--no-ff`). The Phase C cross-cutting checkpoint `XC-04`

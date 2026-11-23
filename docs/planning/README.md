@@ -99,7 +99,8 @@ items are tracked in [`05-open-decisions.md`](05-open-decisions.md).
 | E. Results | [22](steps/step-22-python-analysis-api.md) | Python `.mcs`/`.msr` reader, basic evaluations, pytest, mkdocstrings |
 | F. GUI | [23A](steps/step-23a-workspace-and-project-lifecycle.md) | Avalonia workspace, navigation, settings, project lifecycle |
 | F. GUI | [23B](steps/step-23b-editing-diagnostics-and-recovery.md) | Editing/undo, validation surface, dirty state, autosave, recovery |
-| F. GUI | [24](steps/step-24-model-editors-particle-structure-transitions.md) | Particle, structure, and transition editors |
+| F. GUI | [24A](steps/step-24a-model-editors-particles-and-structure.md) | Shared editor framework, particles and sets, structure and sites |
+| F. GUI | [24B](steps/step-24b-model-editors-transitions.md) | State changes, chains, KMC/MMC transition editors, compile preview |
 | F. GUI | [25](steps/step-25-model-editors-energy-lattice-simulations.md) | Energy, lattice, and simulation editors |
 | F. GUI | [26](steps/step-26-parameterization-job-templates-and-build-ui.md) | Parameterization, job templates, build/deploy UI |
 | F. GUI | [27](steps/step-27-3d-viewer-and-visualization.md) | Cross-platform 3D viewer and overlays |
