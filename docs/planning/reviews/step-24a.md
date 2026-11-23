@@ -29,6 +29,11 @@ dangling links; a documentation-only follow-up then filled the `Reviewed commit`
 the lead requests the review. The freeze contains no code, test, configuration, contract, generated file, or
 feature-work edit.
 
+**Post-freeze delta (documentation only).** One later commit on this branch adds a test-planning paragraph to the
+**24B draft** page (the 1,000-reference-site limit does not bound the 24B tables, and `TRN019` caps transitions at
+100) and this note. It changes no 24A design text, so the reviewed commit remains the freeze SHA above; the 24B
+page is out of this review's scope beyond the split-boundary check.
+
 **Split note.** The human owner split Step 24 into **24A** (this step) and **24B** (transition editors) on
 2026-11-22 under the complexity rule (class High, more than one independent acceptance story, an audit surface too
 large for one sitting), at the same gate that recorded the editor layout. 24A contains no 24B task; 24B depends on

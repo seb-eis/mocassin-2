@@ -300,6 +300,13 @@ public sealed record TransitionRulePreview(
 | `TransitionScreenshotTests` | Light, dark, and high-contrast captures of the chain builder, the matrix, the KMC path, and the compile preview | PR-medium (Ubuntu) |
 | `TransitionPerformanceTests` | A 7-position chain with many groups previews within the recorded budget; path preview is debounced and superseded results are discarded; a compile preview reports progress and is cancellable | PR-fast |
 
+**The 1,000-reference-site limit (POC finding 2) does not apply to the 24B tables.** They hold state changes,
+groups, chains, and transitions — not reference sites. Kinetic and Metropolis transitions are capped at 100 in
+total (`TRN019`), so no valid project puts 1,000 rows in a transition table. The 24B surfaces must still
+virtualize and scroll correctly, but their breadth evidence is a generated *display-only* state-change/group list
+for the scroll test, and the 1,000-row virtualization acceptance stays in 24A where the legal maximum is
+reachable. A test asserts the 101st transition is refused with `TRN019` rather than silently accepted.
+
 ### 13. Risks and mitigations
 
 | Risk | Mitigation |
