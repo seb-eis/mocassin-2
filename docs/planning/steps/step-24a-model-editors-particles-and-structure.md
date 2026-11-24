@@ -22,12 +22,12 @@ adds one public Core API. No format change and no new dependency. Justification 
 
 ## Implementation status
 
-- **Status:** In progress — features 1–6 squashed (`c24d1cf`, `0c749c2`, `82cd326`, `034981d`, `5128f9f`, `9d0cfd7`); closeout CI/platform dispatch is the remaining owner step, so the audit is not requested
+- **Status:** In audit — features 1–6 squashed (`c24d1cf`, `0c749c2`, `82cd326`, `034981d`, `5128f9f`, `9d0cfd7`); closeout and platform CI green at the frozen step commit; [audit requested](../audits/step-24a.md)
 - **Step branch:** `step/24a-model-editors-particles-and-structure`
-- **Step CI:** **Not dispatched** — `gh` absent and no token; owner must dispatch `ci.yml` (`platforms=ubuntu`, then `windows`, then `macos`) at the frozen step commit
+- **Step CI:** [Ubuntu 45477848106](https://github.com/seb-eis/mocassin-2/actions/runs/45477848106), [Windows 45478516289](https://github.com/seb-eis/mocassin-2/actions/runs/45478516289), [macOS 45479315065](https://github.com/seb-eis/mocassin-2/actions/runs/45479315065) green at `5dd70e6`
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Not requested
+- **Audit:** [Ready for audit](../audits/step-24a.md) — frozen audited commit `5dd70e6`; closeout evidence [`step-24a.json`](../closeout/step-24a.json)
 - **Design review:** **Ready with notes — accepted by the human owner 2026-11-23** at
   `b75efea4997eab9e89ebe62297efeca1f0c2f26e` ([record](../reviews/step-24a.md), round 2 `f4cc809`); class High
   accepted as one unit, the six-feature list approved, and revised D-2 confirmed. m-13, m-14, and m-15 are
@@ -44,7 +44,7 @@ adds one public Core API. No format change and no new dependency. Justification 
 - **Design class:** **Full** (§16)
 - **Complexity class:** **High** — cross-step interfaces and test-matrix breadth; **owner acceptance as one High
   unit is required at the start gate**, and no further split is proposed (§16)
-- **Last updated:** 2026-11-24 (feature 6; closeout blocked on CI dispatch)
+- **Last updated:** 2026-11-24 (closeout CI green; audit requested)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
@@ -53,7 +53,7 @@ adds one public Core API. No format change and no new dependency. Justification 
 | 3. Space group and cell parameters | `feature/step-24a-model-editors-particles-and-structure/space-group-and-cell-parameters` | **Squashed** | `./tools/verify.sh dotnet` (426 App + all suites), `structure`, `docs` green 2026-11-23; `SpaceGroupPreviewTests`, `CellParameterTests`, `EditorIntegrationTests` | — (no per-feature run) | `82cd326` |
 | 4. Site table and P1 preview | `feature/step-24a-model-editors-particles-and-structure/site-table-and-p1-preview` | **Squashed** | `./tools/verify.sh dotnet` (435 App + all suites), `structure`, `docs` green 2026-11-23; `CellSiteEditorTests` (m-14 overlap refusal, preview-index equality, D-2 energy-only delete, stability warning, read-only) | — (no per-feature run) | `034981d` |
 | 5. Dummy positions and structure summary | `feature/step-24a-model-editors-particles-and-structure/dummy-positions-and-structure-summary` | **Squashed** | `./tools/verify.sh dotnet` (440 App + all suites), `structure`, `docs` green 2026-11-23; `DummyPositionTests` (distinct glyph, undo, save/load round-trip, read-only), `StructureSummaryTests` (recomputed equality, no statistics dependency) | — (no per-feature run) | `5128f9f` |
-| 6. 24A tests, documentation, and closeout | `feature/step-24a-model-editors-particles-and-structure/tests-docs-and-closeout` | **Squashed** | `./tools/verify.sh all --require` green at `9d0cfd7`; App 451 tests; `docs`, `structure`, `policy` green; parity/24A-24B mapped | **Blocked** — closeout/platform dispatch needs owner (no token) | `9d0cfd7` |
+| 6. 24A tests, documentation, and closeout | `feature/step-24a-model-editors-particles-and-structure/tests-docs-and-closeout` | **Squashed** | `./tools/verify.sh all --require` green at `9d0cfd7`; App 451 tests; `docs`, `structure`, `policy` green; parity/24A-24B mapped | Ubuntu 45477848106, Windows 45478516289, macOS 45479315065 green at `5dd70e6` | `9d0cfd7` |
 
 ## Goal
 
@@ -790,7 +790,7 @@ Recorded 2026-11-24 by the dev (`dev`; `dev-free` free-limit fallback). Design c
 | Design class / waiver recorded | **Full**, no waiver |
 | POC report and PNGs on `main` (m-11) | Present on `main` at `3e904ed` (POC merge `3e904ed`) |
 | Parity rows mapped to 24A/24B (n-2) | 24A rows name the particle/set/structure/dummy/P1/summary/framework work; transition/editor rows name 24B |
-| `python tools/check_closeout_evidence.py docs/planning/closeout/step-24a.json` | **Blocked** — no GitHub token and `gh` is absent; closeout CI/platform runs cannot be dispatched from this environment. The evidence is explicitly incomplete (`closeout_ci.run_id` empty); the checker rejects it with `closeout_ci.run_id is required` until the owner dispatches the runs and updates `audit_commit`/`head_sha`/`merge_candidate` to that frozen commit. |
+| `python tools/check_closeout_evidence.py docs/planning/closeout/step-24a.json` | **Pass** — `Closeout evidence: OK` at the frozen audited commit. |
 
 **Evidence map**
 
@@ -810,15 +810,13 @@ Recorded 2026-11-24 by the dev (`dev`; `dev-free` free-limit fallback). Design c
 | Documentation | `particles.md`, `structure.md`, `ui-architecture.md`, `ui-interaction-contract.md`, `errors.md`, `tutorials/ceria-model.md`; strict docs build |
 
 **Closeout status.** `./tools/verify.sh all --require` is **green at `9d0cfd7`** (App 451 tests; docs, structure,
-policy, contracts, secret/licence checks, AOT evidence). CI dispatch is **blocked** in this environment: `gh` is
-absent, no `GH_TOKEN`/`GITHUB_TOKEN` is available, and an unauthenticated dispatch returns HTTP 401. The owner
-must dispatch:
-
-1. `CI` (`ci.yml`) on `step/24a-model-editors-particles-and-structure`, `platforms=ubuntu` (the single closeout run).
-2. `CI` with `platforms=windows` and `platforms=macos` (required for the GUI keyboard/focus/drag/screenshot surface).
-
-The audit request is deliberately **not created** and the step is not marked `In audit` until those runs exist and
-the evidence check passes. This is the recorded stop-and-relay point.
+policy, contracts, secret/licence checks, AOT evidence). The single closeout CI run
+[45477848106](https://github.com/seb-eis/mocassin-2/actions/runs/45477848106) and the Windows/macOS platform gates
+[45478516289](https://github.com/seb-eis/mocassin-2/actions/runs/45478516289) /
+[45479315065](https://github.com/seb-eis/mocassin-2/actions/runs/45479315065) are green at
+`5dd70e652c2885d2b439b4b495c0cd3f7e79b742`. `python tools/check_closeout_evidence.py
+docs/planning/closeout/step-24a.json` reports `Closeout evidence: OK`. The audit request
+[`../audits/step-24a.md`](../audits/step-24a.md) is `Ready for audit`; the branch is frozen for the review agent.
 
 ## Documentation
 
