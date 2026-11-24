@@ -264,35 +264,73 @@ docs/planning/closeout/step-24a.json` → `Closeout evidence: OK`.
 The dev completes this section before a merge, tag, or Blocker/Major waiver request. It must cover the
 full history, not only the latest round.
 
-- [ ] Requested decision and frozen commit recorded
-- [ ] Every review/audit round recorded (round, date, commit, review agent, verdict)
-- [ ] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
-- [ ] Accepted notes and waivers recorded with rationale
-- [ ] Residual risks, deferred items, and follow-up owners recorded
-- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
-- [ ] Final CI and documentation-build results recorded
+- [x] Requested decision and frozen commit recorded
+- [x] Every review/audit round recorded (round, date, commit, review agent, verdict)
+- [x] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
+- [x] Accepted notes and waivers recorded with rationale
+- [x] Residual risks, deferred items, and follow-up owners recorded
+- [x] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
+- [x] Final CI and documentation-build results recorded
+
+Requested decision: merge `step/24a-model-editors-particles-and-structure` into `main` with `--no-ff` and create
+the annotated `step-24a` tag after a green automatic main CI. Audited commit `10c7206`; frozen branch tip
+`1ea7ec4` (docs-only after the audited tree, plus this acceptance record).
 
 Round history:
 
 | Round | Date | Commit | Review agent | Verdict |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| 1 | 2026-11-24 | `5dd70e6` | DeepSeek V4.1 Flash 1017 (fresh context) | **Fixes required** |
+| 2 | 2026-11-24 | `10c7206` | DeepSeek V4.1 Flash 1017 | **Passed with notes** |
 
 Findings and resolutions:
 
 | Finding | Severity | Issue | Resolution | Commit | Status |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| F-1 | Major | Site form could commit an overlapping candidate during the debounce window | Synchronous candidate re-validation and validated gate; production regression test | `10c7206` | Fixed |
+| F-2 | Minor | Site table multi-select missing | Enabled; bulk-delete test | `10c7206` | Fixed |
+| F-3 | Minor | Particle/set blocked-delete navigation missing | Dependents list and Go/Show usages wiring; tests | `10c7206` | Fixed for blocked-delete path |
+| F-4 | Minor | Delete/Enter/initial-focus contract gaps | Confirmation bar, Enter apply, structure initial focus; tests | `10c7206` | Fixed |
+| F-5 | Minor | Named read-only/accessibility/performance tests and baselines missing | Named tests, baselines, timing evidence | `10c7206` | Fixed |
+| F-6 | Minor | Stale status narrative | Dashboard corrected | `10c7206` | Fixed |
+| F-7 | Note | Tutorial vacancy symbol mismatch | `Vc` corrected | `10c7206` | Fixed |
+| F-8 | Minor | Scheduler not disposed | `OnDisposed`; disposal test | `10c7206` | Fixed |
+| F-9 | Minor | Standalone `Show usages` leaves the list hidden | Owner-accepted; `fix/step-24a-notes` or 24B/Step 25 follow-up | — | Accepted for follow-up |
+| F-10 | Note | Open `ComboBox` can run the form `Enter` action | Owner-accepted; follow-up to add the `IsDropDownOpen` guard/test | — | Accepted for follow-up |
+| F-11 | Note | Two residual test-plan claims lack direct tests | Owner-accepted; follow-up row-drop and initial-focus tests | — | Accepted for follow-up |
+
+Gate statement: no Blocker or Major remains. F-9 (Minor), F-10 (Note), and F-11 (Note) are explicitly owner-accepted
+for a post-merge follow-up, not waived as fixed.
+
+Final state: round-2 Ubuntu closeout `45491888826`, Windows `45492513811`, and macOS `45493153286` are green at
+`10c7206`; strict docs build green; local `./tools/verify.sh all --require` exit 0 at `10c7206`;
+`python tools/check_closeout_evidence.py docs/planning/closeout/step-24a.json` returns `Closeout evidence: OK`.
+
+Residual risk: F-9/F-10/F-11 are user-facing or evidence gaps that remain after this merge; the follow-up owner is
+the `fix/step-24a-notes` maintenance branch or 24B/Step 25.
 
 ## Human approval
 
 - [ ] Accepted: Passed
-- [ ] Accepted: Passed with notes
+- [x] Accepted: Passed with notes
 - [ ] Fixes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Human owner
+Date: 2026-11-24
+
+## Owner acceptance (2026-11-24)
+
+The human owner accepted the round-2 **Passed with notes** verdict (audited commit `10c7206`; round-2 record
+`1ea7ec4`) on 2026-11-24, including the open findings **F-9 (Minor)**, **F-10 (Note)**, and **F-11 (Note)**.
+
+- **Follow-up owner:** a post-merge `fix/step-24a-notes` maintenance branch — F-9 standalone `Show usages`
+  visibility, F-10 open-`ComboBox` `Enter` contract, F-11 row-drop and initial-focus evidence — or alternatively
+  folded into 24B/Step 25. Merging that follow-up branch needs its own owner approval.
+- **Merge approval:** the owner approved the step-to-main `--no-ff` merge and the `step-24a` tag, the tag only
+  after a green automatic main CI run.
+- This section is dev-recorded owner input; the review agent's round-1/round-2 findings, evidence, and verdict
+  text above are unchanged.
 
 ## Audit rounds
 

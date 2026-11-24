@@ -27,7 +27,7 @@ adds one public Core API. No format change and no new dependency. Justification 
 - **Step CI:** Round 2 at `10c7206`: [Ubuntu 45491888826](https://github.com/seb-eis/mocassin-2/actions/runs/45491888826), [Windows 45492513811](https://github.com/seb-eis/mocassin-2/actions/runs/45492513811), [macOS 45493153286](https://github.com/seb-eis/mocassin-2/actions/runs/45493153286) green. Round 1 at `5dd70e6`: [Ubuntu 45477848106](https://github.com/seb-eis/mocassin-2/actions/runs/45477848106), [Windows 45478516289](https://github.com/seb-eis/mocassin-2/actions/runs/45478516289), [macOS 45479315065](https://github.com/seb-eis/mocassin-2/actions/runs/45479315065) green
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** [Fixes required — round 1; re-audit required](../audits/step-24a.md); round-2 frozen audited commit `10c7206`; closeout evidence [`step-24a.json`](../closeout/step-24a.json)
+- **Audit:** [Passed with notes — owner-accepted 2026-11-24](../audits/step-24a.md); round-2 verdict at `10c7206`; F-9/F-10/F-11 follow-up owner `fix/step-24a-notes` or 24B/Step 25; closeout evidence [`step-24a.json`](../closeout/step-24a.json)
 - **Design review:** **Ready with notes — accepted by the human owner 2026-11-23** at
   `b75efea4997eab9e89ebe62297efeca1f0c2f26e` ([record](../reviews/step-24a.md), round 2 `f4cc809`); class High
   accepted as one unit, the six-feature list approved, and revised D-2 confirmed. m-13, m-14, and m-15 are
