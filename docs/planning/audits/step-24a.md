@@ -211,10 +211,10 @@ Severity values: **Blocker**, **Major**, **Minor**, **Note**. Origin: **design**
 
 ## Record state
 
-**State:** Re-audit required — audit round 1 returned `Fixes required`; the dev applied F-1…F-8 on
-`feature/step-24a-model-editors-particles-and-structure/fix-audit-round-1` (squashed into the step branch as
-`10c7206`), reran the local closeout gate and the Ubuntu/Windows/macOS CI gates at `10c7206`, and completed the
-closeout evidence. No finding is deferred. A fresh/continuing review agent appends round 2.
+**State:** Passed with notes
+
+> Round 2 supersedes the round-1 `Fixes required` verdict; the round-1 text and verdict below remain historical.
+> The round-2 evidence and its Minor/Note findings are in `### Audit round 2`.
 
 ## Reviewer independence
 
@@ -375,3 +375,76 @@ documentation and gates are green, and the closeout/platform CI evidence is reco
 open because the production path can write an overlapping structure, which the step explicitly forbids. F-2…F-7 are
 minor/notable and should be fixed or owner-accepted in the resolution commit. A new commit with the F-1 fix and a
 new closeout CI run is required before round 2.
+
+### Audit round 2
+
+#### Independence and frozen state
+
+I am the same fresh-context reviewer as round 1; I remained read-only and outside the remediation and did not
+author or implement any part of it. I re-audited
+`10c72066bd71e121c9deef7fb92a6b6efe14be3a` on `step/24a-model-editors-particles-and-structure`. The frozen branch
+tip is `8ba3a583997723439a7143fca4486b4db292129a`; `git diff --name-status 10c7206..8ba3a58` is exactly the four
+documentation files (audit resolutions, closeout evidence, step page, dashboard), so the code/test/configuration
+tree under audit is `10c7206`. `main` is still `3e904ed21a5004dcf41cfd9060adaaf33a1967b7` and is an ancestor of the
+audited commit; it did not move, so no merge-tree CI applies. The closeout evidence at the frozen tip binds
+`audit_commit`, `closeout_ci.head_sha`, and `merge_candidate` to `10c7206` and `main_sha_at_freeze` to `3e904ed`.
+Round 1's findings, evidence, and verdict are unchanged; the round-1 `Fixes required` verdict remains historical.
+
+#### Commands and results
+
+Run in this worktree at the frozen tip `8ba3a58` (code/test tree `10c7206`):
+
+- `./tools/verify.sh all --require` → **exit 0** (log `EXIT:0`). App **467** tests (138 in the editor namespace),
+  Core 696, all other solution suites green, 0 failed; .NET build 0 warnings/0 errors and `dotnet format` clean;
+  Rust fmt/clippy/tests green; Python tests/build green; strict docs build “No issues found” with DocFX and
+  rustdoc; contracts/policy green (26 artifacts, 274-setting catalog, SPDX 1,210 source files, 1,755 tracked files
+  secret-scanned, cargo-deny); AOT gate passed with the documented 62 IL diagnostics as evidence; `Closeout gate
+  completed with required checks enabled.`
+- `./tools/verify.sh structure` → **exit 0**, 9/9 Architecture tests (also included in `all`).
+- `python tools/check_closeout_evidence.py docs/planning/closeout/step-24a.json` → `Closeout evidence: OK`.
+- Targeted `dotnet test` filters: editor namespace **138 passed**; the F-1/F-2/F-8 regression set
+  (`TheProductionDebouncedFormRefusesAnOverlapBeforeThePreviewRuns`,
+  `TheSiteTableEnablesMultiSelectAndBulkDeleteIsOneUndoEntry`, `DisposingTheSitesEditorCancelsThePendingPreview`,
+  `DeleteAsksForConfirmationBeforeRemoving`, `EnterAppliesTheFocusedSiteForm`,
+  `EnterAppliesTheCellParameterForm`) **6 passed**; the named read-only/accessibility/performance/integration set
+  **12 passed**.
+- `git diff --check 10c7206..8ba3a58` clean; `git merge-base --is-ancestor 3e904ed 10c7206` true.
+- Read-only GitHub API `GET`s (token from the git credential helper, never printed or persisted) for runs
+  `45491888826`, `45492513811`, and `45493153286`: all `status=completed`, `conclusion=success`,
+  `event=workflow_dispatch`, `head_sha=10c7206…`.
+- F-1 production-path probe re-run against the fixed code (same scratch project, not committed): after editing the
+  ceria `O transition` site to `0.25,0.25,0.25` **before** the clock advance,
+  `HasOverlap=false`, `CanApply=false`, `ApplyCommand.CanExecute=false`; a forced `ApplyCommand.Execute` left the
+  site at `(0.5,0.25,0.25)`, the site count at 3, and the undo stack at 0; after the 250 ms advance
+  `HasOverlap=true` and the committed project remains valid. This matches the new regression test and closes the
+  round-1 race.
+
+#### Closure of round-1 findings
+
+| Finding | Round-2 verification | Status |
+| --- | --- | --- |
+| **F-1** (Major) | `CellSiteDetailViewModel.ApplyCore` re-runs `ComputeCandidatePreview` and returns an error result before `AddCellSite`/`UpdateCellSite` when any diagnostic is an error (`CellSiteDetailViewModel.cs:407–426`); `CanApply` requires `candidateValidated` (`:381`), which `SchedulePreview` clears (`:619–638`) and `ApplyPreview` restores (`:709–711`). The production regression test uses the real `SitesEditorViewModel` + `ManualTimeProvider` + `InlineUiDispatcher` and forces `Commit()` before the debounce; it asserts `STR007`, no site/undo change, and the committed value unchanged. The probe above independently reproduces the fixed behaviour. The only other `CommitOperation` path in the class is the energy-reference delete (`:508`), which removes a site and is not an add/update candidate; no other add/update path exists. | **Fixed** |
+| **F-2** (Minor) | `SitesEditorViewModel` sets `Table.IsMultiSelectEnabled = true` (`:73`); `RemoveManyCore` is exercised by `CellSiteEditorTests.TheSiteTableEnablesMultiSelectAndBulkDeleteIsOneUndoEntry` (two-site bulk delete, one undo entry). | **Fixed** |
+| **F-3** (Minor) | `ModelEditorDocumentView` binds `SelectedUsages` with per-row **Go** and the `Show usages` button; `ParticleEditorTests`/`ParticleSetEditorTests` now assert blocked-delete navigation, and `EditorIntegrationTests.TheBlockedDeleteDependentsAndShowUsagesAreBoundInTheDocumentView` renders the dependents and verifies navigation. The blocked-delete path is fixed; see F-9 for the standalone `Show usages` residual. | **Fixed for the blocked-delete path** |
+| **F-4** (Minor) | `Delete` goes through `ModelEditorViewModel.RequestRemove`/`PendingRemovalViewModel` (confirmation bar); `EditorKeyboardTests.DeleteAsksForConfirmationBeforeRemoving` proves cancel/confirm. `EditorKeyGestures.ApplyOnEnter` applies the site/cell/space-group/dummy forms; `EditorKeyboardTests.EnterAppliesTheFocusedSiteForm`/`EnterAppliesTheCellParameterForm` pass. `StructureEditorDocumentView` declares and focuses the space-group search field. Residual interaction/test notes are F-10/F-11. | **Fixed** |
+| **F-5** (Minor) | `EditorReadOnlyTests` renders and asserts the banner in both document shapes; `EditorAccessibilityTests` covers names, list role, splitter keyboard/focus/persist and textual severity; `EditorPerformanceTests` covers 100-vs-1,000 realized containers, all rows, last row, and coalescing; dark/high-contrast baselines for sets/structure/dummies are added; the non-gating timing numbers are in step page §13. Residual no-dropped-row/initial-focus evidence is F-11. | **Fixed** |
+| **F-6** (Minor) | `status.md:90–105` now records the accepted design, the step branch, the six features, audit round 1 `Fixes required`, the fix squash `10c7206`, the round-2 runs, and `In audit`; it agrees with the 24A table row and the closeout evidence. | **Fixed** |
+| **F-7** (Note) | `docs/tutorials/ceria-model.md` uses the sample symbol `Vc`. | **Fixed** |
+| **F-8** (Minor) | `SitesEditorViewModel.OnDisposed` disposes the `StructurePreviewScheduler` (`:78–82`); `CellSiteEditorTests.DisposingTheSitesEditorCancelsThePendingPreview` advances the manual clock after `Dispose` and asserts no dispatcher post. | **Fixed** |
+
+#### Findings
+
+| Severity | Origin | Finding | Evidence |
+| --- | --- | --- | --- |
+| **Minor** | **implementation** | **F-9 — The standalone `Show usages` button does not make the usage list visible.** `ShowUsages()` sets `SelectedUsages`, but the banner that renders the list is visible only when `HasBlockedDelete` is true (driven by `BlockedDeleteMessage`). Clicking `Show usages` on a referenced object without first attempting a delete therefore populates a hidden list; the new integration test triggers `RemoveCommand` first, so it never covers the standalone button. Set a `HasSelectedUsages`/message on `ShowUsages`, or make the banner visible for either state. | `ModelEditorViewModel.ShowUsages` (`ModelEditorViewModel.cs:512–519`); `ModelEditorDocumentView.axaml:24–28` (button), `:38` (`HasBlockedDelete` visibility), `:45` (`SelectedUsages` list); `EditorIntegrationTests.TheBlockedDeleteDependentsAndShowUsagesAreBoundInTheDocumentView` (calls `RemoveCommand` first) |
+| **Note** | **implementation** | **F-10 — The shared `Enter` handler can apply a form from an open `ComboBox`, contrary to `ui-interaction-contract` §5.4.** `EditorKeyGestures.ApplyOnEnter` intercepts `ComboBox` as well as single-line `TextBox` and does not check `IsDropDownOpen`; the contract says an open `ComboBox` commits the list item and must not run the default action. The current tests use only a `TextBox`. Add an `IsDropDownOpen` guard and a headless test, or document the deliberate exception. | `EditorKeyGestures.cs:40–47`; `docs/development/ui-interaction-contract.md:208–212`; `EditorKeyboardTests.EnterAppliesTheFocusedSiteForm`/`EnterAppliesTheCellParameterForm` (TextBox only) |
+| **Note** | **evidence** | **F-11 — Two residual test-plan claims have no direct test.** `EditorPerformanceTests`'s class comment promises “no row is dropped after a rebuild”, but neither test rebuilds and asserts the row count/identities; `ModelTableViewModelTests` covers selection preservation only. `StructureEditorDocumentView.FocusInitial` is implemented, but no test asserts that the space-group search field receives initial focus. The code paths exist; add the two assertions or narrow the claims. | `EditorPerformanceTests.cs:20–22,27–74,76–101`; `ModelTableViewModelTests.cs:24–36`; `StructureEditorDocumentView.axaml.cs:23–38`; no `FocusInitial`/row-drop assertion in `EditorAccessibilityTests`/`EditorIntegrationTests` |
+
+#### Verdict
+
+**Passed with notes.** F-1 is fixed and independently reproduced; F-2–F-8 are closed by code and named tests. No
+Blocker or Major remains. F-9 is one Minor UI defect in the standalone `Show usages` path; F-10 and F-11 are Notes
+(an open-ComboBox `Enter` contract edge and two missing test assertions). The human owner must explicitly accept
+these notes for `Passed with notes` to close; otherwise a small docs/code follow-up should address F-9 and the
+F-10/F-11 assertions. The round-1 `Fixes required` verdict and text above remain historical; `Record state` is
+`Passed with notes` for this round.
