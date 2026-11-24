@@ -22,11 +22,11 @@ adds one public Core API. No format change and no new dependency. Justification 
 
 ## Implementation status
 
-- **Status:** In audit — features 1–6 squashed (`c24d1cf`, `0c749c2`, `82cd326`, `034981d`, `5128f9f`, `9d0cfd7`); audit round 1 returned **Fixes required** (F-1…F-8) and the fixes are squashed as `10c7206`; round 2 is requested [audit record](../audits/step-24a.md)
-- **Step branch:** `step/24a-model-editors-particles-and-structure`
+- **Status:** **Done** — merged into `main` with `--no-ff` as `95e24e648af2aa27ab949c786c4d0cb2649bc569`; main CI [45498967177](https://github.com/seb-eis/mocassin-2/actions/runs/45498967177) green; annotated tag `step-24a`; audit round 2 [Passed with notes](../audits/step-24a.md), owner-accepted 2026-11-24
+- **Step branch:** `step/24a-model-editors-particles-and-structure` (merged and deleted)
 - **Step CI:** Round 2 at `10c7206`: [Ubuntu 45491888826](https://github.com/seb-eis/mocassin-2/actions/runs/45491888826), [Windows 45492513811](https://github.com/seb-eis/mocassin-2/actions/runs/45492513811), [macOS 45493153286](https://github.com/seb-eis/mocassin-2/actions/runs/45493153286) green. Round 1 at `5dd70e6`: [Ubuntu 45477848106](https://github.com/seb-eis/mocassin-2/actions/runs/45477848106), [Windows 45478516289](https://github.com/seb-eis/mocassin-2/actions/runs/45478516289), [macOS 45479315065](https://github.com/seb-eis/mocassin-2/actions/runs/45479315065) green
-- **Main merge:** —
-- **Step tag:** —
+- **Main merge:** `95e24e648af2aa27ab949c786c4d0cb2649bc569` (`--no-ff`); main CI [45498967177](https://github.com/seb-eis/mocassin-2/actions/runs/45498967177) green
+- **Step tag:** `step-24a` (tag object `83cb78c742d7a6b2c26766317f22ce2f86a4a908`, pointing at merge `95e24e6`)
 - **Audit:** [Passed with notes — owner-accepted 2026-11-24](../audits/step-24a.md); round-2 verdict at `10c7206`; F-9/F-10/F-11 follow-up owner `fix/step-24a-notes` or 24B/Step 25; closeout evidence [`step-24a.json`](../closeout/step-24a.json)
 - **Design review:** **Ready with notes — accepted by the human owner 2026-11-23** at
   `b75efea4997eab9e89ebe62297efeca1f0c2f26e` ([record](../reviews/step-24a.md), round 2 `f4cc809`); class High
@@ -44,7 +44,7 @@ adds one public Core API. No format change and no new dependency. Justification 
 - **Design class:** **Full** (§16)
 - **Complexity class:** **High** — cross-step interfaces and test-matrix breadth; **owner acceptance as one High
   unit is required at the start gate**, and no further split is proposed (§16)
-- **Last updated:** 2026-11-24 (audit round 1 fixes applied; re-audit pending)
+- **Last updated:** 2026-11-24 (merged and tagged)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
@@ -828,8 +828,9 @@ policy, contracts, secret/licence checks, AOT evidence). The round-2 closeout CI
 [45493153286](https://github.com/seb-eis/mocassin-2/actions/runs/45493153286) are green at
 `10c72066bd71e121c9deef7fb92a6b6efe14be3a`. `python tools/check_closeout_evidence.py
 docs/planning/closeout/step-24a.json` reports `Closeout evidence: OK`. The audit record
-[`../audits/step-24a.md`](../audits/step-24a.md) is `Re-audit required`; the branch is frozen at the round-2
-audited commit for the review agent.
+[`../audits/step-24a.md`](../audits/step-24a.md) is `Passed with notes — owner-accepted 2026-11-24`; the step
+merged with `--no-ff` as `95e24e6`, the automatic main CI `45498967177` is green, and the annotated tag `step-24a`
+points at the merge. The F-9/F-10/F-11 follow-up is owned by `fix/step-24a-notes` or 24B/Step 25.
 
 ## Documentation
 

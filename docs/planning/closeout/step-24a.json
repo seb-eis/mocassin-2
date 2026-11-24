@@ -6,13 +6,13 @@
     "head_sha": "10c72066bd71e121c9deef7fb92a6b6efe14be3a"
   },
   "main_sha_at_freeze": "3e904ed21a5004dcf41cfd9060adaaf33a1967b7",
-  "merge_candidate": "10c72066bd71e121c9deef7fb92a6b6efe14be3a",
+  "merge_candidate": "95e24e648af2aa27ab949c786c4d0cb2649bc569",
   "merge_tree_ci": {
-    "run_id": "",
-    "head_sha": ""
+    "run_id": "45498967177",
+    "head_sha": "95e24e648af2aa27ab949c786c4d0cb2649bc569"
   },
   "platform_ci": "windows run 45492513811 at 10c72066bd71e121c9deef7fb92a6b6efe14be3a (green, https://github.com/seb-eis/mocassin-2/actions/runs/45492513811); macos run 45493153286 at 10c72066bd71e121c9deef7fb92a6b6efe14be3a (green, https://github.com/seb-eis/mocassin-2/actions/runs/45493153286)",
-  "tag": "",
+  "tag": "step-24a",
   "notes": [
     "Ubuntu closeout CI run 45491888826 is the workflow_dispatch at audited commit 10c72066bd71e121c9deef7fb92a6b6efe14be3a (platforms=ubuntu, force_all=false). It is green: Detect changes, .NET (ubuntu-latest), Contracts and policy, and Public API compatibility succeeded; Rust and Python were skipped by path filters.",
     "Windows platform gate run 45492513811 and macOS platform gate run 45493153286 were dispatched sequentially at the same commit and are green. Each ran Detect changes and the focused .NET platform job; the Ubuntu-only jobs were skipped.",
@@ -20,6 +20,9 @@
     "main 3e904ed21a5004dcf41cfd9060adaaf33a1967b7 (the step start base) is an ancestor of the audited commit and did not move; no merge-tree CI applies, and the audit-to-merge candidate delta is empty.",
     "Local closeout gate: ./tools/verify.sh all --require exited 0 at 10c72066bd71e121c9deef7fb92a6b6efe14be3a (App 467 tests; strict docs build; contracts/policy; structure; Rust; Python; AOT evidence recorded). It is the same tree that passed the feature-branch gate at a8d90d5; the step squash 10c7206 has a byte-identical tree.",
     "This evidence and the audit-record resolutions are documentation-only commits after the audited commit; no code, tests, contracts, or configuration changed after 10c7206. The audit record is ready for round 2 of a fresh/continuing review agent.",
-    "tag is empty because the step has not been merged into main and no tag is permitted before owner approval."
+    "At the pre-merge freeze the tag field was empty because no tag is permitted before owner approval and a green main CI. The owner approved the merge and tag on 2026-11-24; the annotated tag step-24a was created only after the automatic main CI run 45498967177 passed.",
+    "Merged into main with --no-ff as 95e24e648af2aa27ab949c786c4d0cb2649bc569 on 2026-11-24; the automatic main CI run 45498967177 is green at that merge commit (https://github.com/seb-eis/mocassin-2/actions/runs/45498967177). The main run is the merge-tree validation for the final merge candidate and is recorded in merge_tree_ci.",
+    "Annotated tag step-24a has tag object 83cb78c742d7a6b2c26766317f22ce2f86a4a908 and points at the merge commit 95e24e648af2aa27ab949c786c4d0cb2649bc569.",
+    "The Done/closure records on main are documentation-only [skip ci] commits after the tag; the audited solution remains 10c7206 and the merged solution is 95e24e6."
   ]
 }
