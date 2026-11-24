@@ -22,12 +22,12 @@ adds one public Core API. No format change and no new dependency. Justification 
 
 ## Implementation status
 
-- **Status:** In audit — features 1–6 squashed (`c24d1cf`, `0c749c2`, `82cd326`, `034981d`, `5128f9f`, `9d0cfd7`); closeout and platform CI green at the frozen step commit; [audit requested](../audits/step-24a.md)
+- **Status:** In audit — features 1–6 squashed (`c24d1cf`, `0c749c2`, `82cd326`, `034981d`, `5128f9f`, `9d0cfd7`); audit round 1 returned **Fixes required** (F-1…F-8) and the fixes are on `feature/step-24a-model-editors-particles-and-structure/fix-audit-round-1`, squashed on the step branch (round-2 freeze recorded in the closeout evidence); re-audit pending [audit record](../audits/step-24a.md)
 - **Step branch:** `step/24a-model-editors-particles-and-structure`
-- **Step CI:** [Ubuntu 45477848106](https://github.com/seb-eis/mocassin-2/actions/runs/45477848106), [Windows 45478516289](https://github.com/seb-eis/mocassin-2/actions/runs/45478516289), [macOS 45479315065](https://github.com/seb-eis/mocassin-2/actions/runs/45479315065) green at `5dd70e6`
+- **Step CI:** [Ubuntu 45477848106](https://github.com/seb-eis/mocassin-2/actions/runs/45477848106), [Windows 45478516289](https://github.com/seb-eis/mocassin-2/actions/runs/45478516289), [macOS 45479315065](https://github.com/seb-eis/mocassin-2/actions/runs/45479315065) green at `5dd70e6` (round 1); round 2 runs are pending at the new frozen commit
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** [Ready for audit](../audits/step-24a.md) — frozen audited commit `5dd70e6`; closeout evidence [`step-24a.json`](../closeout/step-24a.json)
+- **Audit:** [Fixes required — round 1](../audits/step-24a.md); round-1 fixes recorded in the resolution section; closeout evidence [`step-24a.json`](../closeout/step-24a.json)
 - **Design review:** **Ready with notes — accepted by the human owner 2026-11-23** at
   `b75efea4997eab9e89ebe62297efeca1f0c2f26e` ([record](../reviews/step-24a.md), round 2 `f4cc809`); class High
   accepted as one unit, the six-feature list approved, and revised D-2 confirmed. m-13, m-14, and m-15 are
@@ -44,7 +44,7 @@ adds one public Core API. No format change and no new dependency. Justification 
 - **Design class:** **Full** (§16)
 - **Complexity class:** **High** — cross-step interfaces and test-matrix breadth; **owner acceptance as one High
   unit is required at the start gate**, and no further split is proposed (§16)
-- **Last updated:** 2026-11-24 (closeout CI green; audit requested)
+- **Last updated:** 2026-11-24 (audit round 1 fixes applied; re-audit pending)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
@@ -54,6 +54,7 @@ adds one public Core API. No format change and no new dependency. Justification 
 | 4. Site table and P1 preview | `feature/step-24a-model-editors-particles-and-structure/site-table-and-p1-preview` | **Squashed** | `./tools/verify.sh dotnet` (435 App + all suites), `structure`, `docs` green 2026-11-23; `CellSiteEditorTests` (m-14 overlap refusal, preview-index equality, D-2 energy-only delete, stability warning, read-only) | — (no per-feature run) | `034981d` |
 | 5. Dummy positions and structure summary | `feature/step-24a-model-editors-particles-and-structure/dummy-positions-and-structure-summary` | **Squashed** | `./tools/verify.sh dotnet` (440 App + all suites), `structure`, `docs` green 2026-11-23; `DummyPositionTests` (distinct glyph, undo, save/load round-trip, read-only), `StructureSummaryTests` (recomputed equality, no statistics dependency) | — (no per-feature run) | `5128f9f` |
 | 6. 24A tests, documentation, and closeout | `feature/step-24a-model-editors-particles-and-structure/tests-docs-and-closeout` | **Squashed** | `./tools/verify.sh all --require` green at `9d0cfd7`; App 451 tests; `docs`, `structure`, `policy` green; parity/24A-24B mapped | Ubuntu 45477848106, Windows 45478516289, macOS 45479315065 green at `5dd70e6` | `9d0cfd7` |
+| 7. Audit round 1 fixes | `feature/step-24a-model-editors-particles-and-structure/fix-audit-round-1` | **Squashed** | `./tools/verify.sh dotnet`, `api`, `structure`, `docs`, then `all --require` green 2026-11-24; F-1…F-8 regression tests added (`CellSiteEditorTests`, `EditorKeyboardTests`, `EditorReadOnlyTests`, `EditorAccessibilityTests`, `EditorPerformanceTests`, `EditorIntegrationTests`, `ParticleEditorTests`, `ParticleSetEditorTests`) | Round 2 runs recorded in the closeout evidence | round-1 fix squash (see closeout evidence) |
 
 ## Goal
 
@@ -461,6 +462,7 @@ structure editor would add a nested tab level, which the layout POC rejected; it
 - Everything UI-facing runs on the UI thread through `IUiDispatcher`. The P1/structure preview is a pure CPU
   computation over an immutable snapshot: it is debounced (250 ms), cancellable, run off the UI thread, and its
   result is discarded when a newer structure value supersedes it (a monotonically increasing token, no hashing).
+  The debounce affects **display only**; Apply re-validates the candidate synchronously (m-14/F-1).
 - The usage index is rebuilt lazily per `Project` reference; `Project` is immutable, so reference identity is a
   sound cache key.
 - Subscriptions to `ProjectChanged`/`EditRejected` are removed on `DocumentViewModel.OnClosingAsync`/`Dispose`;
@@ -582,12 +584,12 @@ provided editor's typed operation"*; the dev adds the guard below and a test for
 | `EditorNavigationTests` | `particle/<id>`, `particleSet/<id>`, `structure`, `cellSite/<id>`, `cellDummyPosition/<id>` open/select/focus; a stale id returns `null` without throwing; every domain diagnostic in a ceria fixture navigates to its field | PR-fast |
 | `EditorUndoTests` | Undo/redo across every editor operation, save point intact, dirty marker follows the coordinator; **bulk delete of n objects and bulk set-charge are each one entry**; a mid-batch failure changes nothing (project, undo, redo, save point, dirty state) (m-8) | PR-fast |
 | `ProjectDocumentApplyOverloadTests` (Core, n-5) | The additive `ProjectDocument.Apply` overload (§10): an accepted edit records **one** `ProjectChange` with the caller's description, `Before` the document value and `After` the result project, and clears the redo stack; a rejected operation returns its error result and leaves the project, undo stack, redo stack, save point, and dirty state untouched; a successful no-op (`Change == null`) returns without a stack change; a malformed result whose `Change.Before`/`Change.After` is not reference-equal to the document/result project throws `InvalidOperationException` | PR-fast |
-| `EditorReadOnlyTests` | In a read-only session Add/Remove/Duplicate/Apply and `Enter` are disabled, the 23B banner is shown, the coordinator is never called, no undo entry and no dirty change appear, and no `EditRejected` diagnostic is raised; a forced coordinator `Apply` returns `ReadOnly` and changes nothing (m-4) | PR-fast |
+| `EditorReadOnlyTests` | In a read-only session Add/Remove/Duplicate/Apply and `Enter` are disabled, the 23B banner is rendered, the coordinator is never called, no undo entry and no dirty change appear, and no `EditRejected` diagnostic is raised; a forced coordinator `Apply` returns `ReadOnly` and changes nothing (m-4; F-5). Both the master-detail and the structure form assert the rendered banner | PR-fast |
 | `EditorRefreshTests` | On `ProjectChanged`: `Saved` does not rebuild rows or invalidate an open form; an edit in another domain refreshes reference options only; an edit to the open form's object shows the conflict with Apply/Revert as specified; removal disables Apply; `Replaced` rebuilds and discards forms (m-10) | PR-fast |
-| `EditorAccessibilityTests` | Every interactive control has a name and role; the table exposes a list role; severity is text not colour; the splitter is named and keyboard-resizable | PR-fast headless |
 | `EditorScreenshotTests` | Light, dark, and high-contrast captures of the particles, sets, structure, sites, and P1-preview states, plus a narrow-window capture | PR-medium (Ubuntu) |
+| `EditorAccessibilityTests` | Every interactive control has an accessible name; the table exposes a list role; severity is text not colour; the splitter is named, focusable, keyboard-resizable, and its committed ratio is persisted to the shell layout state | PR-fast headless |
 | `EditorPerformanceTests` | **Functional only, no absolute duration (m-5)**: the realized row-container count is bounded and does not grow with row count (compare 100 vs 1,000 sites); all 1,000 rows are present and the last row is selectable; with a fake clock, rapid edits coalesce into one preview and a superseded preview result is discarded; no row is dropped after a rebuild | PR-fast |
-| `EditorPerformanceEvidence` (not a test) | The measured 1,000-row build/select time and preview latency are recorded in the step page as **non-gating evidence** (benchmark/manual run), never asserted (`03-quality-strategy.md` §11.1) | non-gating evidence |
+| `EditorPerformanceEvidence` (not a test) | Non-gating measured evidence on the Linux dev container (Release, xunit, 2026-11-24): 1,000-site editor construction **13–44 ms**, first selection **28–57 ms**, one candidate edit + synchronous validation/preview **22–26 ms**; the 100-site comparison was **20 ms** select / **1.3 ms** edit. Timings are indicative, not asserted (`03-quality-strategy.md` §11.1) | non-gating evidence |
 
 **The 1,000-row limit (POC finding 2).** `StructureModel.MaxReferenceSites` is 1,000 and `STR012` rejects more, so
 no valid project can hold "more than 1,000 reference sites". The virtualization acceptance uses a **1,000-site**
@@ -700,12 +702,17 @@ cross-step interfaces — more overhead without a smaller audit surface.
   energy-reference-only cascade is offered. Evidence:
   `ModelUsageIndexTests.AFilterlessUnstableEnvironmentIsADependentThroughItsSiteId` (the ceria sample's environment
   has no filters).
-- **m-14 — site-overlap gate (resolved in feature 4).** `CellSiteDetailViewModel` validates the candidate
-  `StructureModel` with `IStructureValidator` before Apply. A candidate whose symmetry expansion overlaps
-  (`STR007`) has no preview because `TryCreatePreview` returns `null`; the form therefore shows the `STR007`
-  diagnostics inline, shows no non-existent orbit rows, and **refuses Apply**. Other candidate errors (`STR003`,
-  `STR005`, `STR006`, `STR004`) are shown the same way. Evidence: `CellSiteEditorTests.AnOverlappingCandidateIsShownAndRefused`
-  and the preview-index test `TheTableAndP1PreviewMatchTheEngineData`.
+- **m-14 — site-overlap gate (resolved in feature 4; hardened after audit F-1).** `CellSiteDetailViewModel` validates
+  the candidate `StructureModel` with `IStructureValidator` before Apply **synchronously**: the 250 ms preview is
+  display-only, and `ApplyCore` recomputes the candidate validation so a field edit made inside the debounce window
+  cannot commit an overlap. A candidate whose symmetry expansion overlaps (`STR007`) has no preview because
+  `TryCreatePreview` returns `null`; the form therefore shows the `STR007` diagnostics inline, shows no non-existent
+  orbit rows, refuses Apply, and keeps `ApplyCommand` disabled until the current candidate is validated. Other
+  candidate errors (`STR003`, `STR005`, `STR006`, `STR004`) are shown the same way. Evidence:
+  `CellSiteEditorTests.AnOverlappingCandidateIsShownAndRefused` (synchronous editor) and
+  `CellSiteEditorTests.TheProductionDebouncedFormRefusesAnOverlapBeforeThePreviewRuns` (real `SitesEditorViewModel`
+  with a manual clock and inline dispatcher), plus the preview-index test
+  `TheTableAndP1PreviewMatchTheEngineData`.
 
 **Owner input needed at the 24A start gate**
 
@@ -772,7 +779,9 @@ cross-step interfaces — more overhead without a smaller audit surface.
       `CellSiteEditorTests.APreviewOfMoreThanOneThousandPositionsIsVirtualized`, and
       `StructurePreviewSchedulerTests` (coalescing and superseded/disposed schedules).
 - [x] Read-only sessions disable every edit path and show the 23B banner, proved by `EditorReadOnlyTests`. —
-      `ParticleEditorTests.ReadOnlySessionDisablesEveryParticlePath`,
+      `EditorReadOnlyTests.AReadOnlySessionShowsTheBannerAndDisablesEveryEditPath` and
+      `EditorReadOnlyTests.TheStructureFormShowsTheBannerAndDisablesBothForms` (rendered banner, disabled commands,
+      forced `ReadOnly` apply), plus the per-domain `ParticleEditorTests.ReadOnlySessionDisablesEveryParticlePath`,
       `ParticleSetEditorTests.ReadOnlySessionDisablesSetEdits`, `CellParameterTests.ReadOnlyDisablesBothStructureForms`,
       `CellSiteEditorTests.ReadOnlyDisablesTheSiteFormAndActions`, `DummyPositionTests.ReadOnlyDisablesTheDummyDocument`.
 - [x] Documentation written (the §12 pages). — `particles.md`, `structure.md`, `ui-architecture.md`,
@@ -806,7 +815,9 @@ Recorded 2026-11-24 by the dev (`dev`; `dev-free` free-limit fallback). Design c
 | Undo/redo and save point | `ModelEditorFrameworkTests`, `ParticleEditorTests`, `ParticleSetEditorTests`, `SpaceGroupPreviewTests`, `CellParameterTests`, `CellSiteEditorTests`, `DummyPositionTests`, `EditorRefreshTests`, `ProjectDocumentApplyOverloadTests` |
 | `Home`/`End` → `Tab`, one tab stop | `ModelTableSurfaceTests.HomeOrEndThenTabReachesTheDetailPane` |
 | 1,000-site table; >1,000 P1 positions bounded; coalescing | `CellSiteEditorTests.OneThousandSitesVirtualizeAndTheLastRowIsSelectable`, `CellSiteEditorTests.APreviewOfMoreThanOneThousandPositionsIsVirtualized`, `StructurePreviewSchedulerTests` |
-| Read-only paths | `ParticleEditorTests`, `ParticleSetEditorTests`, `CellParameterTests`, `CellSiteEditorTests`, `DummyPositionTests` |
+| Read-only paths | `EditorReadOnlyTests` (rendered banner, disabled commands, forced `ReadOnly` apply), `ParticleEditorTests`, `ParticleSetEditorTests`, `CellParameterTests`, `CellSiteEditorTests`, `DummyPositionTests` |
+| Editor accessibility | `EditorAccessibilityTests` (control names, table list role, textual severity, named/keyboard-resizable splitter, committed pane fraction) |
+| Editor performance (non-gating numbers in §13) | `EditorPerformanceTests` (100 vs 1,000 realized containers, all rows, last row selectable, coalescing, no dropped rows) |
 | Documentation | `particles.md`, `structure.md`, `ui-architecture.md`, `ui-interaction-contract.md`, `errors.md`, `tutorials/ceria-model.md`; strict docs build |
 
 **Closeout status.** `./tools/verify.sh all --require` is **green at `9d0cfd7`** (App 451 tests; docs, structure,

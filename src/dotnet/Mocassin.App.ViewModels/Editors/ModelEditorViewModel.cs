@@ -34,6 +34,7 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
     private ImmutableArray<ModelUsageEntry> selectedUsages = [];
     private string? blockedDeleteMessage;
     private string? pendingFocus;
+    private readonly Removal.PendingRemovalViewModel pendingRemoval;
     private string? detailMessage;
     private ModelEditorState state;
     private ModelDetailViewModel? detail;
@@ -71,6 +72,9 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
         OpenUsageCommand = new RelayCommand<ModelUsageEntry>(
             entry => RequestNavigation(entry!.Reference.ToPath()),
             entry => entry is not null);
+        pendingRemoval = new Removal.PendingRemovalViewModel(
+            objectIds => RemoveManyCore(objectIds));
+        pendingRemoval.PropertyChanged += OnPendingRemovalChanged;
 
         Table.PropertyChanged += OnTablePropertyChanged;
         Coordinator.ProjectChanged += OnProjectChanged;
@@ -203,6 +207,12 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
     /// </summary>
     public bool HasBlockedDelete => !string.IsNullOrWhiteSpace(BlockedDeleteMessage);
 
+    /// <summary>Gets a value indicating whether a removal awaits confirmation.</summary>
+    public bool HasPendingRemove => pendingRemoval.IsPending;
+
+    /// <summary>Gets the confirmation prompt for the pending removal.</summary>
+    public string? PendingRemoveText => pendingRemoval.Text;
+
     /// <summary>
     /// Gets the pending focus request for a view that attaches after navigation.
     /// </summary>
@@ -232,6 +242,16 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
     /// Gets the command that navigates to one usage entry.
     /// </summary>
     public IRelayCommand<ModelUsageEntry> OpenUsageCommand { get; }
+
+    /// <summary>
+    /// Gets the command that confirms a pending removal.
+    /// </summary>
+    public IRelayCommand ConfirmRemoveCommand => pendingRemoval.ConfirmCommand;
+
+    /// <summary>
+    /// Gets the command that cancels a pending removal.
+    /// </summary>
+    public IRelayCommand CancelRemoveCommand => pendingRemoval.CancelCommand;
 
     /// <summary>
     /// Raised when a navigation request asks a view to focus a field.
@@ -411,41 +431,80 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
     }
 
     /// <summary>
-    /// Removes the selected object unless the usage index reports a dependent.
+    /// Removes the selected object unless the usage index reports a dependent. This is the direct, unconfirmed
+    /// action; the <c>Delete</c> gesture goes through <see cref="RequestRemove"/>.
     /// </summary>
     /// <returns><see langword="true"/> when the removal was attempted.</returns>
     public bool TryRemoveSelected()
+    {
+        if (!TryGetRemovableSelection(out var removable) || BlockOnDependents(removable))
+        {
+            return false;
+        }
+
+        BlockedDeleteMessage = null;
+        return RemoveManyCore(removable);
+    }
+
+    /// <summary>
+    /// Requests removal of the selection after the blocked-delete check and asks for confirmation first.
+    /// </summary>
+    public void RequestRemove()
+    {
+        if (!TryGetRemovableSelection(out var removable) || BlockOnDependents(removable))
+        {
+            return;
+        }
+
+        BlockedDeleteMessage = null;
+        pendingRemoval.Request(
+            removable.Length == 1
+                ? string.Create(
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    $"Remove the selected {Descriptor.ObjectNoun}?")
+                : string.Create(
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    $"Remove {removable.Length} selected {Descriptor.ObjectNoun}s?"),
+            removable);
+    }
+
+    private bool TryGetRemovableSelection(out Guid[] removable)
     {
         var rows = Table.SelectedRows.Count > 0
             ? Table.SelectedRows.ToArray()
             : Table.SelectedRow is { } single
                 ? new[] { single }
                 : Array.Empty<ModelTableRow>();
-        var removable = rows.Where(row => !IsReadOnlyObject(row.ObjectId)).ToArray();
-        if (removable.Length == 0)
-        {
-            return false;
-        }
+        removable = rows
+            .Where(row => !IsReadOnlyObject(row.ObjectId))
+            .Select(static row => row.ObjectId)
+            .ToArray();
+        return removable.Length > 0;
+    }
 
+    private bool BlockOnDependents(IReadOnlyList<Guid> removable)
+    {
         var usages = EnsureUsages();
         var allDependents = new List<ModelUsageEntry>();
-        foreach (var row in removable)
+        foreach (var objectId in removable)
         {
-            allDependents.AddRange(usages.GetDependents(new ModelObjectRef(Descriptor.Domain, row.ObjectId)));
+            allDependents.AddRange(usages.GetDependents(new ModelObjectRef(Descriptor.Domain, objectId)));
         }
 
-        if (allDependents.Count > 0)
+        if (allDependents.Count == 0)
         {
-            SelectedUsages = [.. allDependents.Distinct()];
-            BlockedDeleteMessage = string.Create(
-                System.Globalization.CultureInfo.InvariantCulture,
-                $"The {Descriptor.ObjectNoun} is used by {allDependents.Distinct().Count()} object(s): {string.Join(", ", allDependents.Distinct().Select(static entry => entry.DisplayName))}.");
             return false;
         }
 
-        BlockedDeleteMessage = null;
-        return RemoveManyCore(removable.Select(static row => row.ObjectId).ToArray());
+        var distinct = allDependents.Distinct().ToArray();
+        SelectedUsages = [.. distinct];
+        BlockedDeleteMessage = string.Create(
+            System.Globalization.CultureInfo.InvariantCulture,
+            $"The {Descriptor.ObjectNoun} is used by {distinct.Length} object(s): {string.Join(", ", distinct.Select(static entry => entry.DisplayName))}.");
+        return true;
     }
+
+    private void ClearPendingRemove() => pendingRemoval.Clear();
 
     /// <summary>
     /// Shows the selected object's usages.
@@ -498,6 +557,7 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
         Coordinator.EditRejected -= OnEditRejected;
         session.ValidationCoordinator.Changed -= OnValidationChanged;
         layout.PropertyChanged -= OnLayoutPropertyChanged;
+        pendingRemoval.PropertyChanged -= OnPendingRemovalChanged;
         if (Detail is not null)
         {
             Detail.NavigationRequested -= OnDetailNavigationRequested;
@@ -566,6 +626,7 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
     private void OnProjectChanged(object? sender, ProjectChangedEventArgs args)
     {
         rejectedDiagnostics = [];
+        ClearPendingRemove();
         var previous = args.Previous;
         var current = args.Current;
         var selectedId = Table.SelectedRow?.ObjectId;
@@ -645,6 +706,19 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
         {
             RefreshDetail();
             RefreshCommands();
+        }
+    }
+
+    private void OnPendingRemovalChanged(object? sender, PropertyChangedEventArgs args)
+    {
+        switch (args.PropertyName)
+        {
+            case nameof(Removal.PendingRemovalViewModel.IsPending):
+                OnPropertyChanged(nameof(HasPendingRemove));
+                break;
+            case nameof(Removal.PendingRemovalViewModel.Text):
+                OnPropertyChanged(nameof(PendingRemoveText));
+                break;
         }
     }
 

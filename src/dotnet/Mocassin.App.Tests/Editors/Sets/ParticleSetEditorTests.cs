@@ -127,6 +127,12 @@ public sealed class ParticleSetEditorTests
         editor.RemoveCommand.Execute(null);
         Assert.True(editor.HasBlockedDelete);
         Assert.Contains(site.Name, editor.BlockedDeleteMessage, StringComparison.Ordinal);
+        Assert.NotEmpty(editor.SelectedUsages);
+        ModelPath? requested = null;
+        editor.NavigationRequested += (_, path) => requested = path;
+        editor.OpenUsageCommand.Execute(editor.SelectedUsages[0]);
+        Assert.NotNull(requested);
+        Assert.Equal(editor.SelectedUsages[0].Reference.ObjectId, requested!.ObjectId);
         Assert.Contains(entry.Session.Project.Model.ParticleSets, candidate => candidate.Id == set.Id);
 
         var direct = entry.Session.EditCoordinator.Apply(

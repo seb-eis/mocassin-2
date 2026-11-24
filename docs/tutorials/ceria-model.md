@@ -11,7 +11,7 @@ Open **Model → Particles**.
 
 1. Add `Ce4+` with symbol `Ce`, charge `+4`, not a vacancy.
 2. Add `O2-` with symbol `O`, charge `-2`, not a vacancy.
-3. Add `Vacancy` with symbol `V`, charge `0`, vacancy enabled.
+3. Add `Vacancy` with symbol `Vc`, charge `0`, vacancy enabled.
 4. Add the sets in **Model → Particle sets**:
    - `Cerium site`: `Ce4+`.
    - `Oxygen site`: `O2-`, `Vacancy` (first member is the default occupation).

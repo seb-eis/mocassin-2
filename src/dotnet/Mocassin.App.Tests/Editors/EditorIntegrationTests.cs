@@ -17,6 +17,7 @@ using Mocassin.App.ViewModels.Shell;
 using Mocassin.App.Views.Editors.Particles;
 using Mocassin.App.Views.Editors.Sets;
 using Mocassin.App.Views.Editors.Sites;
+using Mocassin.App.Views.Editors;
 using Mocassin.App.Views.Editors.Dummies;
 using Mocassin.App.Views.Editors.Structure;
 using Mocassin.Core.Diagnostics;
@@ -135,6 +136,53 @@ public sealed class EditorIntegrationTests
                     window.Close();
                 }
             });
+
+    [Fact]
+    public async Task TheBlockedDeleteDependentsAndShowUsagesAreBoundInTheDocumentView()
+    {
+        var entry = await ProjectFixtures.LoadCeriaAsync();
+        await HeadlessSession.DispatchAsync(
+            () =>
+            {
+                var layout = new ShellRegionsViewModel();
+                using var editor = new ParticlesEditorViewModel(entry.Session, layout);
+                var document = new ModelEditorDocumentViewModel(ModelEditorDomains.Particles, editor);
+                var view = new ModelEditorDocumentView { DataContext = document };
+                var window = new Window { Width = 1000, Height = 700, Content = view };
+                window.Show();
+                HeadlessSession.Pump(window);
+                try
+                {
+                    var set = entry.Project.Model.ParticleSets.First(candidate => candidate.ParticleIds.Length > 0);
+                    Assert.True(editor.RequestSelection(set.ParticleIds[0].Value));
+                    editor.RemoveCommand.Execute(null);
+                    HeadlessSession.Pump(window);
+
+                    Assert.True(editor.HasBlockedDelete);
+                    Assert.NotEmpty(editor.SelectedUsages);
+                    Assert.NotNull(view.GetVisualDescendants().OfType<Button>()
+                        .SingleOrDefault(button => AutomationProperties.GetName(button)
+                            == "Show the selected object's usages"));
+                    var dependents = view.GetVisualDescendants().OfType<ItemsControl>()
+                        .SingleOrDefault(control => AutomationProperties.GetName(control)
+                            == "Blocked-delete dependents");
+                    Assert.NotNull(dependents);
+                    var go = dependents!.GetVisualDescendants().OfType<Button>()
+                        .FirstOrDefault(button => AutomationProperties.GetName(button) == "Navigate to dependent");
+                    Assert.NotNull(go);
+
+                    ModelPath? requested = null;
+                    document.NavigationRequested += (_, path) => requested = path;
+                    go!.Command?.Execute(go.CommandParameter);
+                    Assert.NotNull(requested);
+                    Assert.Equal(editor.SelectedUsages[0].Reference.ObjectId, requested!.ObjectId);
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+    }
 
     [Fact]
     public async Task TheParticleAndSetDetailViewsRealizeTheirControls()

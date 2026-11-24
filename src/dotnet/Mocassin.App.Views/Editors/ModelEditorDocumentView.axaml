@@ -4,14 +4,15 @@
              xmlns:editors="using:Mocassin.App.Views.Editors"
              xmlns:automation="using:Avalonia.Automation"
              x:Class="Mocassin.App.Views.Editors.ModelEditorDocumentView"
+             x:CompileBindings="False"
              x:DataType="vm:ModelEditorDocumentViewModel">
-  <Grid RowDefinitions="Auto,Auto,Auto,*" Background="{DynamicResource Mocassin.WorkspaceBackground}">
+  <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*" Background="{DynamicResource Mocassin.WorkspaceBackground}">
     <Border Grid.Row="0"
             Background="{DynamicResource Mocassin.CardBackground}"
             BorderBrush="{DynamicResource Mocassin.BorderBrush}"
             BorderThickness="0,0,0,1"
             Padding="10,4">
-      <Grid ColumnDefinitions="Auto,*,Auto">
+      <Grid ColumnDefinitions="Auto,*,Auto,Auto">
         <TextBlock Text="{Binding Editor.Table.MatchCountText}"
                    VerticalAlignment="Center"
                    Foreground="{DynamicResource Mocassin.ForegroundMutedBrush}" />
@@ -21,9 +22,15 @@
                    Margin="12,0"
                    automation:AutomationProperties.Name="Editor validation summary" />
         <Button Grid.Column="2"
+                Content="Show usages"
+                Command="{Binding Editor.ShowUsagesCommand}"
+                Margin="0,0,8,0"
+                automation:AutomationProperties.Name="Show the selected object's usages" />
+        <Button Grid.Column="3"
                 Content="Open Problems"
                 Command="{Binding Editor.DiagnosticSummary.OpenProblemsCommand}"
-                IsVisible="{Binding Editor.DiagnosticSummary.HasDiagnostics}" />
+                IsVisible="{Binding Editor.DiagnosticSummary.HasDiagnostics}"
+                automation:AutomationProperties.Name="Open the Problems channel" />
       </Grid>
     </Border>
 
@@ -33,19 +40,58 @@
             BorderBrush="{DynamicResource Mocassin.WarningBorderBrush}"
             BorderThickness="0,0,0,1"
             Padding="10,4">
-      <TextBlock Text="{Binding Editor.BlockedDeleteMessage}" TextWrapping="Wrap" />
+      <StackPanel Spacing="4">
+        <TextBlock Text="{Binding Editor.BlockedDeleteMessage}" TextWrapping="Wrap" />
+        <ItemsControl ItemsSource="{Binding Editor.SelectedUsages}"
+                      automation:AutomationProperties.Name="Blocked-delete dependents">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <Grid ColumnDefinitions="*,Auto" Margin="0,1">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <TextBlock Text="{Binding DisplayName}" />
+                  <TextBlock Text="{Binding Description}" Classes="caption" />
+                </StackPanel>
+                <Button Grid.Column="1"
+                        Content="Go"
+                        Command="{Binding DataContext.Editor.OpenUsageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        CommandParameter="{Binding}"
+                        automation:AutomationProperties.Name="Navigate to dependent" />
+              </Grid>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
     </Border>
 
-    <Border Grid.Row="1"
+    <Border Grid.Row="2"
             IsVisible="{Binding Editor.IsReadOnly}"
             Background="{DynamicResource Mocassin.WarningBackground}"
             BorderBrush="{DynamicResource Mocassin.WarningBorderBrush}"
             BorderThickness="0,0,0,1"
             Padding="10,4">
-      <TextBlock Text="This project is open read-only; editor commands are disabled." TextWrapping="Wrap" />
+      <TextBlock Text="This project is open read-only; editor commands are disabled."
+                 TextWrapping="Wrap"
+                 automation:AutomationProperties.Name="Read-only project banner" />
     </Border>
 
-    <Border Grid.Row="2"
+    <Border Grid.Row="3"
+            IsVisible="{Binding Editor.HasPendingRemove}"
+            Background="{DynamicResource Mocassin.WarningBackground}"
+            BorderBrush="{DynamicResource Mocassin.WarningBorderBrush}"
+            BorderThickness="0,0,0,1"
+            Padding="10,4">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <TextBlock Text="{Binding Editor.PendingRemoveText}" VerticalAlignment="Center" TextWrapping="Wrap" />
+        <Button Content="Remove"
+                Command="{Binding Editor.ConfirmRemoveCommand}"
+                automation:AutomationProperties.Name="Confirm removal" />
+        <Button Content="Cancel"
+                Command="{Binding Editor.CancelRemoveCommand}"
+                automation:AutomationProperties.Name="Cancel removal" />
+      </StackPanel>
+    </Border>
+
+    <Border Grid.Row="4"
             IsVisible="{Binding Editor.ActionBar, Converter={x:Static ObjectConverters.IsNotNull}}"
             Background="{DynamicResource Mocassin.CardBackground}"
             BorderBrush="{DynamicResource Mocassin.BorderBrush}"
@@ -68,7 +114,7 @@
       </StackPanel>
     </Border>
 
-    <Grid Grid.Row="3" x:Name="MasterDetailGrid" ColumnDefinitions="0.42*,4,0.58*">
+    <Grid Grid.Row="5" x:Name="MasterDetailGrid" ColumnDefinitions="0.42*,4,0.58*">
       <editors:ModelTableSurface Grid.Column="0"
                                  x:Name="TableSurface"
                                  DataContext="{Binding Editor}"

@@ -139,7 +139,8 @@ the **visual-only** status in the table and detail.
 - Each dummy has a name and three expression-capable fractional fields. It has no particle set, stability,
   energy, or transition meaning, and may coincide with a reference site.
 - **Add**, edit (one undo entry per Apply), and **Delete** use the same coordinator and undo rules as the other
-  model editors. Read-only sessions disable the actions.
+  model editors. The multi-field forms apply on **Enter** in a focused single-line field or on the Apply button,
+  and **Delete** asks for confirmation before it records one undo entry. Read-only sessions disable the actions.
 - Dummies are persisted under `structure.dummyPositions` and round-trip through save/load unchanged. They are
   excluded from all simulation compilation.
 

@@ -18,7 +18,8 @@
         <Button Grid.Column="1"
                 Content="Open Problems"
                 Command="{Binding Editor.DiagnosticSummary.OpenProblemsCommand}"
-                IsVisible="{Binding Editor.DiagnosticSummary.HasDiagnostics}" />
+                IsVisible="{Binding Editor.DiagnosticSummary.HasDiagnostics}"
+                automation:AutomationProperties.Name="Open the Problems channel" />
       </Grid>
     </Border>
 
@@ -28,7 +29,9 @@
             BorderBrush="{DynamicResource Mocassin.WarningBorderBrush}"
             BorderThickness="0,0,0,1"
             Padding="10,4">
-      <TextBlock Text="This project is open read-only; editor commands are disabled." TextWrapping="Wrap" />
+      <TextBlock Text="This project is open read-only; editor commands are disabled."
+                 TextWrapping="Wrap"
+                 automation:AutomationProperties.Name="Read-only project banner" />
     </Border>
 
     <ScrollViewer Grid.Row="1" Classes="scroll-gutter-right">

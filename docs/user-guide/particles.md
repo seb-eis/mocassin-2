@@ -138,8 +138,10 @@ editors use the shared model-table surface: search, a severity filter, typed col
 - Inline messages: `PAR001` for an empty or duplicate name, `PAR008` when the symbol does not match the
   recommended pattern, and `PAR004` when a charged vacancy could pair with a charged default occupation.
 - **Delete** is blocked while the particle is referenced (by a set, a state change, or a transition). The
-  editor lists the dependents and **Show usages**; delete the dependents in their own domain first. The Core
-  structural validator rejects the same dangling reference, so the pre-check and the rejection agree.
+  editor lists the dependents with **Go** navigation and **Show usages**; delete the dependents in their own
+  domain first. An unreferenced **Delete** asks for confirmation in a Remove/Cancel bar before it records one undo
+  entry. The Core structural validator rejects the same dangling reference, so the pre-check and the rejection
+  agree.
 
 ### Particle sets
 

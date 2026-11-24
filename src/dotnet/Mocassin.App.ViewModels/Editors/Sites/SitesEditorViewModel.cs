@@ -70,7 +70,15 @@ internal sealed class SitesEditorViewModel : ModelEditorViewModel<CellSite>
             ? new StructurePreviewScheduler(timeProvider, uiDispatcher)
             : null;
         Table.SetColumns(Columns);
+        Table.IsMultiSelectEnabled = true;
         RebuildRows();
+    }
+
+    /// <inheritdoc />
+    protected override void OnDisposed()
+    {
+        previewScheduler?.Dispose();
+        base.OnDisposed();
     }
 
     /// <inheritdoc />

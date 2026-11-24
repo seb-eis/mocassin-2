@@ -11,7 +11,8 @@ namespace Mocassin.App.Views.Editors;
 
 /// <summary>
 /// The master-detail model-editor document view: the table selects, the splitter resizes, and the detail pane
-/// edits.
+/// edits. <c>Enter</c> applies the focused field/form, <c>Escape</c> reverts it, <c>Delete</c> asks for confirmation
+/// before removing, and <c>Ctrl+D</c> duplicates.
 /// </summary>
 internal sealed partial class ModelEditorDocumentView : UserControl
 {
@@ -39,6 +40,7 @@ internal sealed partial class ModelEditorDocumentView : UserControl
         };
         EditorSplitter.AddHandler(PointerReleasedEvent, OnSplitterReleased, RoutingStrategies.Bubble);
         AddHandler(KeyDownEvent, OnEditorKeyDown, RoutingStrategies.Tunnel, handledEventsToo: true);
+        EditorKeyGestures.ApplyOnEnter(DetailHost, () => viewModel?.Editor.Detail?.ApplyCommand);
         AttachedToVisualTree += (_, _) => Dispatcher.UIThread.Post(FocusInitial);
     }
 
@@ -51,6 +53,36 @@ internal sealed partial class ModelEditorDocumentView : UserControl
     /// Gets the detail host, used by the headless tests.
     /// </summary>
     internal ContentControl Detail => DetailHost;
+
+    /// <summary>
+    /// Gets the resizable master-detail grid, used by the headless splitter test.
+    /// </summary>
+    internal Grid MasterDetail => MasterDetailGrid;
+
+    /// <summary>
+    /// Gets the editor splitter, used by the headless accessibility test.
+    /// </summary>
+    internal GridSplitter Splitter => EditorSplitter;
+
+    /// <summary>
+    /// Commits the current splitter ratio to the shell-owned layout state. The pointer-release handler calls it; the
+    /// headless test calls it after realizing a layout so the drag commit path is exercised without a real pointer.
+    /// </summary>
+    internal void CommitSplitterFraction()
+    {
+        if (viewModel is null)
+        {
+            return;
+        }
+
+        var tableWidth = MasterDetailGrid.ColumnDefinitions[0].ActualWidth;
+        var detailWidth = MasterDetailGrid.ColumnDefinitions[2].ActualWidth;
+        var total = tableWidth + detailWidth;
+        if (total > 0d && double.IsFinite(total))
+        {
+            viewModel.Editor.PaneLayout.EditorFraction = tableWidth / total;
+        }
+    }
 
     private void AttachModel()
     {
@@ -106,7 +138,7 @@ internal sealed partial class ModelEditorDocumentView : UserControl
         if (args.Key == Key.Delete && viewModel.Editor.RemoveCommand.CanExecute(null))
         {
             args.Handled = true;
-            viewModel.Editor.RemoveCommand.Execute(null);
+            viewModel.Editor.RequestRemove();
             return;
         }
 
@@ -119,21 +151,7 @@ internal sealed partial class ModelEditorDocumentView : UserControl
         }
     }
 
-    private void OnSplitterReleased(object? sender, PointerReleasedEventArgs args)
-    {
-        if (viewModel is null)
-        {
-            return;
-        }
-
-        var tableWidth = MasterDetailGrid.ColumnDefinitions[0].ActualWidth;
-        var detailWidth = MasterDetailGrid.ColumnDefinitions[2].ActualWidth;
-        var total = tableWidth + detailWidth;
-        if (total > 0d && double.IsFinite(total))
-        {
-            viewModel.Editor.PaneLayout.EditorFraction = tableWidth / total;
-        }
-    }
+    private void OnSplitterReleased(object? sender, PointerReleasedEventArgs args) => CommitSplitterFraction();
 
     private void ApplyEditorFraction()
     {
@@ -153,16 +171,10 @@ internal sealed partial class ModelEditorDocumentView : UserControl
         Dispatcher.UIThread.Post(
             () =>
             {
-                if (!string.IsNullOrWhiteSpace(pending))
+                if (!string.IsNullOrWhiteSpace(pending) && TableSurface.FocusDetailField(pending))
                 {
-                    if (TableSurface.FocusDetailField(pending))
-                    {
-                        viewModel.Editor.ConsumePendingFocus();
-                    }
-
-                    return;
+                    viewModel.Editor.ConsumePendingFocus();
                 }
-
             });
     }
 

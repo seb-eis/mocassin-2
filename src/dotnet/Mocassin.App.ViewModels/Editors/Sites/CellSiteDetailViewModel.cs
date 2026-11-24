@@ -46,6 +46,7 @@ internal sealed partial class CellSiteDetailViewModel : ModelDetailViewModel
     private StructurePreview? currentPreview;
     private ImmutableArray<CellSite> previewSites;
     private bool fieldsValid;
+    private bool candidateValidated = true;
     private bool showP1Preview = true;
     private string selectedPlane = "a–b";
     private bool refreshingOptions;
@@ -369,8 +370,15 @@ internal sealed partial class CellSiteDetailViewModel : ModelDetailViewModel
     /// </summary>
     public bool CanEditForm => Coordinator?.CanEdit == true && !IsRemoved;
 
-    /// <inheritdoc />
-    public override bool CanApply => base.CanApply && fieldsValid && !HasCandidateErrors;
+    /// <summary>
+    /// Gets a value indicating whether Apply is enabled.
+    /// </summary>
+    /// <remarks>
+    /// A field change marks the candidate unvalidated until the current debounced preview is applied, so a stale
+    /// preview can never leave Apply enabled for an overlapping candidate. Apply itself validates the candidate
+    /// synchronously before the typed operation runs.
+    /// </remarks>
+    public override bool CanApply => base.CanApply && fieldsValid && candidateValidated && !HasCandidateErrors;
 
     /// <summary>
     /// Gets the command that opens one dependent's navigation target.
@@ -396,12 +404,26 @@ internal sealed partial class CellSiteDetailViewModel : ModelDetailViewModel
     protected override string Description => IsNew ? "Add cell site" : "Update cell site";
 
     /// <inheritdoc />
-    protected override ProjectEditResult ApplyCore(ProjectEditor editor, ProjectModel projectSnapshot) =>
-        TryBuildSite(out var site)
-            ? IsNew
-                ? editor.AddCellSite(projectSnapshot, site)
-                : editor.UpdateCellSite(projectSnapshot, site)
-            : new ProjectEditResult(projectSnapshot, null, []);
+    protected override ProjectEditResult ApplyCore(ProjectEditor editor, ProjectModel projectSnapshot)
+    {
+        if (!TryBuildSite(out var site))
+        {
+            return new ProjectEditResult(projectSnapshot, null, []);
+        }
+
+        // The debounced preview is display-only: Apply re-validates the candidate synchronously so an overlapping
+        // site can never be committed during the debounce window (m-14/STR007).
+        var computation = ComputeCandidatePreview(projectSnapshot, site);
+        if (computation.Diagnostics.Any(static diagnostic => diagnostic.Severity == DiagnosticSeverity.Error))
+        {
+            ApplyPreview(computation);
+            return new ProjectEditResult(projectSnapshot, null, computation.Diagnostics);
+        }
+
+        return IsNew
+            ? editor.AddCellSite(projectSnapshot, site)
+            : editor.UpdateCellSite(projectSnapshot, site);
+    }
 
     /// <inheritdoc />
     protected override void RevertCore()
@@ -596,6 +618,8 @@ internal sealed partial class CellSiteDetailViewModel : ModelDetailViewModel
 
     private void SchedulePreview()
     {
+        candidateValidated = false;
+        NotifyCanApplyChanged();
         if (previewScheduler is null)
         {
             RefreshPreviewNow();
@@ -608,15 +632,8 @@ internal sealed partial class CellSiteDetailViewModel : ModelDetailViewModel
             return;
         }
 
-        var structure = project.Structure;
-        var sites = structure.Sites.IsDefault ? ImmutableArray<CellSite>.Empty : structure.Sites;
-        var candidateSites = IsNew
-            ? sites.Add(site)
-            : sites.Select(candidate => candidate.Id == site.Id ? site : candidate).ToImmutableArray();
-        var candidateStructure = structure with { Sites = candidateSites };
-        var currentStructure = structure;
         previewScheduler.Schedule(
-            () => ComputePreview(candidateStructure, currentStructure, candidateSites),
+            () => ComputeCandidatePreview(project, site),
             ApplyPreview);
     }
 
@@ -636,20 +653,31 @@ internal sealed partial class CellSiteDetailViewModel : ModelDetailViewModel
                 return;
             }
 
-            var structure = project.Structure;
-            var sites = structure.Sites.IsDefault ? ImmutableArray<CellSite>.Empty : structure.Sites;
-            var candidateSites = IsNew
-                ? sites.Add(site)
-                : sites.Select(candidate => candidate.Id == site.Id ? site : candidate).ToImmutableArray();
-            ApplyPreview(ComputePreview(
-                structure with { Sites = candidateSites },
-                structure,
-                candidateSites));
+            ApplyPreview(ComputeCandidatePreview(project, site));
         }
         finally
         {
             refreshing = false;
         }
+    }
+
+    /// <summary>
+    /// Builds the candidate structure with the form's site value and computes its validation and preview.
+    /// </summary>
+    /// <param name="projectSnapshot">The project the candidate is built from.</param>
+    /// <param name="site">The candidate site.</param>
+    /// <returns>The candidate computation.</returns>
+    private SitePreviewComputation ComputeCandidatePreview(ProjectModel projectSnapshot, CellSite site)
+    {
+        var structure = projectSnapshot.Structure;
+        var sites = structure.Sites.IsDefault ? ImmutableArray<CellSite>.Empty : structure.Sites;
+        var candidateSites = IsNew
+            ? sites.Add(site)
+            : sites.Select(candidate => candidate.Id == site.Id ? site : candidate).ToImmutableArray();
+        return ComputePreview(
+            structure with { Sites = candidateSites },
+            structure,
+            candidateSites);
     }
 
     private SitePreviewComputation InvalidComputation() =>
@@ -680,6 +708,7 @@ internal sealed partial class CellSiteDetailViewModel : ModelDetailViewModel
 
     private void ApplyPreview(SitePreviewComputation computation)
     {
+        candidateValidated = true;
         candidatePreview = computation.Candidate;
         currentPreview = computation.Current;
         candidateDiagnostics = computation.Diagnostics;

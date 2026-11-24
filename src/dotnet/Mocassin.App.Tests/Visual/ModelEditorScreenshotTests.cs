@@ -41,11 +41,17 @@ public sealed class ModelEditorScreenshotTests
                 await CaptureEditorAsync("particles-dark", Dark(), ModelEditorDomains.Particle);
                 await CaptureEditorAsync("particles-highcontrast", HighContrast(), ModelEditorDomains.Particle);
                 await CaptureEditorAsync("sets-light", Light(), ModelEditorDomains.ParticleSet);
+                await CaptureEditorAsync("sets-dark", Dark(), ModelEditorDomains.ParticleSet);
+                await CaptureEditorAsync("sets-highcontrast", HighContrast(), ModelEditorDomains.ParticleSet);
                 await CaptureEditorAsync("structure-light", Light(), ModelEditorDomains.Structure);
+                await CaptureEditorAsync("structure-dark", Dark(), ModelEditorDomains.Structure);
+                await CaptureEditorAsync("structure-highcontrast", HighContrast(), ModelEditorDomains.Structure);
                 await CaptureEditorAsync("sites-light", Light(), ModelEditorDomains.CellSite);
                 await CaptureEditorAsync("sites-dark", Dark(), ModelEditorDomains.CellSite);
                 await CaptureEditorAsync("sites-highcontrast", HighContrast(), ModelEditorDomains.CellSite);
                 await CaptureEditorAsync("dummies-light", Light(), ModelEditorDomains.CellDummyPosition);
+                await CaptureEditorAsync("dummies-dark", Dark(), ModelEditorDomains.CellDummyPosition);
+                await CaptureEditorAsync("dummies-highcontrast", HighContrast(), ModelEditorDomains.CellDummyPosition);
                 await CaptureEditorAsync(
                     "sites-narrow-light",
                     Light(),

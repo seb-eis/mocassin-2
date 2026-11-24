@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using Avalonia.Controls;
 using Avalonia.VisualTree;
 using Mocassin.App.Tests.TestSupport;
+using Mocassin.App.ViewModels.Editing;
 using Mocassin.App.ViewModels.Editors.Sites;
 using Mocassin.App.Views.Editors;
 using Mocassin.App.Views.Editors.Sites;
@@ -109,6 +110,127 @@ public sealed class CellSiteEditorTests
         Assert.Contains("STR007", detail.DiagnosticsText, StringComparison.Ordinal);
         Assert.False(detail.ApplyCommand.CanExecute(null));
         Assert.Equal(original, entry.Session.Project.Structure.Sites.Length);
+    }
+
+    [Fact]
+    public async Task TheProductionDebouncedFormRefusesAnOverlapBeforeThePreviewRuns()
+    {
+        var entry = await ProjectFixtures.LoadCeriaAsync();
+        var clock = new ManualTimeProvider();
+        using var editor = new SitesEditorViewModel(
+            entry.Session,
+            new ShellRegionsViewModel(),
+            new StructurePreviewService(),
+            new StructureValidator(),
+            clock,
+            new InlineUiDispatcher());
+        var transitionSite = entry.Project.Structure.Sites.First(candidate => candidate.Name == "O transition");
+        Assert.True(editor.RequestSelection(transitionSite.Id.Value));
+        var detail = Assert.IsType<CellSiteDetailViewModel>(editor.Detail);
+        var originalSites = entry.Session.Project.Structure.Sites.Length;
+        var undoDepth = entry.Session.Document.UndoStack.Length;
+
+        detail.FieldA = "0.25";
+        detail.FieldB = "0.25";
+        detail.FieldC = "0.25";
+
+        // The 250 ms preview has not run: Apply must not stay enabled from a stale preview.
+        Assert.False(detail.CanApply);
+        Assert.False(detail.ApplyCommand.CanExecute(null));
+
+        // The production commit path validates synchronously even when a caller forces it before the debounce.
+        var result = detail.Commit();
+        Assert.Equal(EditApplyOutcome.Rejected, result.Outcome);
+        Assert.True(detail.HasOverlap);
+        Assert.True(detail.HasCandidateErrors);
+        Assert.Contains("STR007", detail.DiagnosticsText, StringComparison.Ordinal);
+        Assert.Equal(originalSites, entry.Session.Project.Structure.Sites.Length);
+        Assert.Equal(undoDepth, entry.Session.Document.UndoStack.Length);
+        var committed = entry.Session.Project.Find(transitionSite.Id);
+        Assert.NotNull(committed);
+        Assert.Equal(transitionSite.Fractional, committed.Fractional);
+
+        clock.Advance(TimeSpan.FromMilliseconds(250));
+        Assert.True(detail.HasOverlap);
+        Assert.False(detail.CanApply);
+        Assert.False(detail.ApplyCommand.CanExecute(null));
+        Assert.Equal(undoDepth, entry.Session.Document.UndoStack.Length);
+    }
+
+    [Fact]
+    public async Task DisposingTheSitesEditorCancelsThePendingPreview()
+    {
+        var entry = await ProjectFixtures.LoadCeriaAsync();
+        var clock = new ManualTimeProvider();
+        var dispatcher = new RecordingUiDispatcher();
+        var editor = new SitesEditorViewModel(
+            entry.Session,
+            new ShellRegionsViewModel(),
+            new StructurePreviewService(),
+            new StructureValidator(),
+            clock,
+            dispatcher);
+        var site = entry.Project.Structure.Sites.First(candidate => candidate.Name == "O");
+        Assert.True(editor.RequestSelection(site.Id.Value));
+        var detail = Assert.IsType<CellSiteDetailViewModel>(editor.Detail);
+        var posts = dispatcher.InvokeCount;
+
+        detail.FieldA = "0.11";
+        editor.Dispose();
+        clock.Advance(TimeSpan.FromMilliseconds(250));
+
+        Assert.Equal(posts, dispatcher.InvokeCount);
+    }
+
+    [Fact]
+    public async Task TheSiteTableEnablesMultiSelectAndBulkDeleteIsOneUndoEntry()
+    {
+        var entry = await ProjectFixtures.LoadCeriaAsync();
+        var p1 = new SpaceGroupRef(1, AxisSetting.None, OriginChoice.None);
+        var cell = new Mocassin.Core.Model.CellParameters(
+            new Mocassin.Core.Units.LengthAngstrom(5d),
+            new Mocassin.Core.Units.LengthAngstrom(5d),
+            new Mocassin.Core.Units.LengthAngstrom(5d),
+            new Mocassin.Core.Units.AngleDegrees(90d),
+            new Mocassin.Core.Units.AngleDegrees(90d),
+            new Mocassin.Core.Units.AngleDegrees(90d));
+        var set = entry.Project.Model.ParticleSets[0];
+        var sites = new[] { ("S0", 0.1d), ("S1", 0.2d), ("S2", 0.3d) }
+            .Select(item => new CellSite(
+                CellSiteId.New(),
+                item.Item1,
+                new Mocassin.Core.Geometry.Fractional3(item.Item2, 0.13, 0.27),
+                set.Id,
+                SiteStability.Stable))
+            .ToImmutableArray();
+        var structure = entry.Project.Structure with
+        {
+            SpaceGroup = p1,
+            Cell = cell,
+            Sites = sites,
+            DummyPositions = [],
+        };
+        var model = new Mocassin.Core.Model.ModelDefinition
+        {
+            Particles = entry.Project.Model.Particles,
+            ParticleSets = entry.Project.Model.ParticleSets,
+            Structure = structure,
+        };
+        var project = entry.Project with { Model = model };
+        var session = ProjectSession.CreateStandalone(project, "multi-select-sites.mocprj");
+        using var editor = CreateEditor(session);
+
+        Assert.True(editor.Table.IsMultiSelectEnabled);
+        Assert.Equal(3, editor.Table.TotalCount);
+        editor.Table.UpdateSelection(editor.Table.Rows.Take(2));
+        Assert.Equal(2, editor.Table.SelectedRows.Count);
+        Assert.True(editor.RemoveCommand.CanExecute(null));
+        var undoDepth = session.Document.UndoStack.Length;
+
+        editor.RemoveCommand.Execute(null);
+
+        Assert.Single(session.Project.Structure.Sites);
+        Assert.Equal(undoDepth + 1, session.Document.UndoStack.Length);
     }
 
     [Fact]
