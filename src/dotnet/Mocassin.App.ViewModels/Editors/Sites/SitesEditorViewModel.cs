@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Globalization;
 using Mocassin.App.ViewModels.Editing;
 using Mocassin.App.ViewModels.Editors.ModelTable;
+using Mocassin.App.ViewModels.Editors.Structure;
 using Mocassin.App.ViewModels.Projects;
 using Mocassin.App.ViewModels.Shell;
 using Mocassin.Core.Diagnostics;
@@ -40,6 +41,7 @@ internal sealed class SitesEditorViewModel : ModelEditorViewModel<CellSite>
 
     private readonly IStructurePreviewService? previewService;
     private readonly IStructureValidator validator;
+    private readonly StructurePreviewScheduler? previewScheduler;
     private StructurePreview? preview;
     private ProjectModel? previewSnapshot;
     private Dictionary<Guid, int> siteIndices = [];
@@ -51,15 +53,22 @@ internal sealed class SitesEditorViewModel : ModelEditorViewModel<CellSite>
     /// <param name="layout">The shell-owned editor pane layout.</param>
     /// <param name="previewService">The structure preview service.</param>
     /// <param name="validator">The structure validator.</param>
+    /// <param name="timeProvider">The optional preview clock; omitted for synchronous test editors.</param>
+    /// <param name="uiDispatcher">The optional preview dispatcher; omitted for synchronous test editors.</param>
     public SitesEditorViewModel(
         ProjectSession session,
         IEditorPaneLayout layout,
         IStructurePreviewService previewService,
-        IStructureValidator validator)
+        IStructureValidator validator,
+        TimeProvider? timeProvider = null,
+        IUiDispatcher? uiDispatcher = null)
         : base(session, ModelEditorDomains.Sites, layout)
     {
         this.previewService = previewService ?? throw new ArgumentNullException(nameof(previewService));
         this.validator = validator ?? throw new ArgumentNullException(nameof(validator));
+        previewScheduler = timeProvider is not null && uiDispatcher is not null
+            ? new StructurePreviewScheduler(timeProvider, uiDispatcher)
+            : null;
         Table.SetColumns(Columns);
         RebuildRows();
     }
@@ -103,7 +112,7 @@ internal sealed class SitesEditorViewModel : ModelEditorViewModel<CellSite>
 
     /// <inheritdoc />
     protected override ModelDetailViewModel? CreateDetailFor(CellSite model) =>
-        new CellSiteDetailViewModel(model, false, Project, previewService!, validator);
+        new CellSiteDetailViewModel(model, false, Project, previewService!, validator, previewScheduler);
 
     /// <inheritdoc />
     protected override void AddCore()
@@ -115,7 +124,7 @@ internal sealed class SitesEditorViewModel : ModelEditorViewModel<CellSite>
             new Fractional3(0d, 0d, 0d),
             set?.Id ?? ParticleSetId.Empty,
             SiteStability.Stable);
-        var detail = new CellSiteDetailViewModel(site, true, Project, previewService!, validator);
+        var detail = new CellSiteDetailViewModel(site, true, Project, previewService!, validator, previewScheduler);
         detail.Added += (_, id) => RequestSelection(id);
         ShowDetail(detail);
     }

@@ -1,11 +1,19 @@
 // SPDX-License-Identifier: MIT
 
+using System.Collections.Immutable;
+using Avalonia.Controls;
+using Avalonia.VisualTree;
 using Mocassin.App.Tests.TestSupport;
 using Mocassin.App.ViewModels.Editors.Sites;
+using Mocassin.App.Views.Editors;
+using Mocassin.App.Views.Editors.Sites;
 using Mocassin.App.ViewModels.Editors.Usage;
 using Mocassin.App.ViewModels.Projects;
 using Mocassin.App.ViewModels.Shell;
 using Mocassin.Core.Diagnostics;
+using Mocassin.Core.Ids;
+using Mocassin.Core.Model.Structure;
+using Mocassin.Core.Symmetry;
 using Mocassin.Packages.Projects;
 using Mocassin.Symmetry.Structure;
 
@@ -130,6 +138,125 @@ public sealed class CellSiteEditorTests
 
         Assert.True(entry.Session.EditCoordinator.Undo());
         Assert.Equal(original, entry.Session.Project.Structure.Sites.Length);
+    }
+
+    [Fact]
+    public async Task OneThousandSitesVirtualizeAndTheLastRowIsSelectable()
+    {
+        var entry = await ProjectFixtures.LoadCeriaAsync();
+        var p1 = new SpaceGroupRef(1, AxisSetting.None, OriginChoice.None);
+        var cell = new Mocassin.Core.Model.CellParameters(
+            new Mocassin.Core.Units.LengthAngstrom(5d),
+            new Mocassin.Core.Units.LengthAngstrom(5d),
+            new Mocassin.Core.Units.LengthAngstrom(5d),
+            new Mocassin.Core.Units.AngleDegrees(90d),
+            new Mocassin.Core.Units.AngleDegrees(90d),
+            new Mocassin.Core.Units.AngleDegrees(90d));
+        var set = entry.Project.Model.ParticleSets[0];
+        var sites = Enumerable.Range(0, 1_000)
+            .Select(index => new CellSite(
+                CellSiteId.New(),
+                $"S{index}",
+                new Mocassin.Core.Geometry.Fractional3((index + 0.5) / 1_000d, 0.13, 0.27),
+                set.Id,
+                SiteStability.Stable))
+            .ToImmutableArray();
+        var structure = entry.Project.Structure with
+        {
+            SpaceGroup = p1,
+            Cell = cell,
+            Sites = sites,
+            DummyPositions = [],
+        };
+        var project = entry.Project with { Model = entry.Project.Model with { Structure = structure } };
+        var session = ProjectSession.CreateStandalone(project, "thousand-sites.mocprj");
+
+        await HeadlessSession.DispatchAsync(
+            () =>
+            {
+                using var editor = CreateEditor(session);
+                var surface = new ModelTableSurface { DataContext = editor };
+                var window = new Window { Width = 900, Height = 360, Content = surface };
+                window.Show();
+                HeadlessSession.Pump(window);
+                try
+                {
+                    Assert.Equal(1_000, editor.Table.TotalCount);
+                    var realized = surface.Rows.GetVisualDescendants().OfType<ListBoxItem>().Count();
+                    Assert.InRange(realized, 1, 999);
+                    var last = sites[^1];
+                    Assert.True(editor.RequestSelection(last.Id.Value));
+                    HeadlessSession.Pump(window);
+                    surface.Rows.ScrollIntoView(editor.Table.SelectedRow!);
+                    HeadlessSession.Pump(window);
+                    Assert.Equal(last.Id.Value, editor.Table.SelectedRow?.ObjectId);
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+    }
+
+    [Fact]
+    public async Task APreviewOfMoreThanOneThousandPositionsIsVirtualized()
+    {
+        var entry = await ProjectFixtures.LoadCeriaAsync();
+        var pMinus1 = new SpaceGroupRef(2, AxisSetting.None, OriginChoice.None);
+        var cell = new Mocassin.Core.Model.CellParameters(
+            new Mocassin.Core.Units.LengthAngstrom(5d),
+            new Mocassin.Core.Units.LengthAngstrom(5d),
+            new Mocassin.Core.Units.LengthAngstrom(5d),
+            new Mocassin.Core.Units.AngleDegrees(80d),
+            new Mocassin.Core.Units.AngleDegrees(70d),
+            new Mocassin.Core.Units.AngleDegrees(75d));
+        var set = entry.Project.Model.ParticleSets[0];
+        var sites = Enumerable.Range(0, 1_000)
+            .Select(index => new CellSite(
+                CellSiteId.New(),
+                $"S{index}",
+                new Mocassin.Core.Geometry.Fractional3(0.0001 + (index / 2_000d), 0.13, 0.27),
+                set.Id,
+                SiteStability.Stable))
+            .ToImmutableArray();
+        var structure = entry.Project.Structure with
+        {
+            SpaceGroup = pMinus1,
+            Cell = cell,
+            Sites = sites,
+            DummyPositions = [],
+        };
+        var project = entry.Project with { Model = entry.Project.Model with { Structure = structure } };
+        var session = ProjectSession.CreateStandalone(project, "large-p1.mocprj");
+
+        await HeadlessSession.DispatchAsync(
+            () =>
+            {
+                var editor = CreateEditor(session);
+                Assert.True(editor.RequestSelection(sites[0].Id.Value));
+                var detail = Assert.IsType<CellSiteDetailViewModel>(editor.Detail);
+                Assert.True(detail.WholeStructureRows.Count > 1_000);
+
+                var view = new CellSiteDetailView { DataContext = detail };
+                var window = new Window { Width = 1000, Height = 800, Content = view };
+                window.Show();
+                HeadlessSession.Pump(window);
+                try
+                {
+                    var list = window.GetVisualDescendants().OfType<ListBox>()
+                        .Single(box => Avalonia.Automation.AutomationProperties.GetName(box) == "P1 whole-structure rows");
+                    Assert.Equal(detail.WholeStructureRows.Count, list.ItemCount);
+                    Assert.InRange(
+                        list.GetVisualDescendants().OfType<ListBoxItem>().Count(),
+                        1,
+                        detail.WholeStructureRows.Count - 1);
+                }
+                finally
+                {
+                    window.Close();
+                    editor.Dispose();
+                }
+            });
     }
 
     [Fact]

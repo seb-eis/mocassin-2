@@ -14,18 +14,26 @@ internal sealed class SitesEditorViewModelFactory : IModelEditorFactory
 {
     private readonly IStructurePreviewService previewService;
     private readonly IStructureValidator validator;
+    private readonly TimeProvider timeProvider;
+    private readonly IUiDispatcher uiDispatcher;
 
     /// <summary>
     /// Initializes the factory.
     /// </summary>
     /// <param name="previewService">The structure preview service.</param>
     /// <param name="validator">The structure validator.</param>
+    /// <param name="timeProvider">The preview clock.</param>
+    /// <param name="uiDispatcher">The preview apply dispatcher.</param>
     public SitesEditorViewModelFactory(
         IStructurePreviewService previewService,
-        IStructureValidator validator)
+        IStructureValidator validator,
+        TimeProvider timeProvider,
+        IUiDispatcher uiDispatcher)
     {
         this.previewService = previewService ?? throw new ArgumentNullException(nameof(previewService));
         this.validator = validator ?? throw new ArgumentNullException(nameof(validator));
+        this.timeProvider = timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
+        this.uiDispatcher = uiDispatcher ?? throw new ArgumentNullException(nameof(uiDispatcher));
     }
 
     /// <inheritdoc />
@@ -33,5 +41,5 @@ internal sealed class SitesEditorViewModelFactory : IModelEditorFactory
 
     /// <inheritdoc />
     public ModelEditorViewModel Create(ProjectSession session, IEditorPaneLayout layout) =>
-        new SitesEditorViewModel(session, layout, previewService, validator);
+        new SitesEditorViewModel(session, layout, previewService, validator, timeProvider, uiDispatcher);
 }

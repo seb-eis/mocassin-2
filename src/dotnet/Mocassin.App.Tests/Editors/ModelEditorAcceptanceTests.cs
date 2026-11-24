@@ -4,9 +4,14 @@ using System.Collections.Immutable;
 using Mocassin.App.Tests.TestSupport;
 using Mocassin.App.ViewModels.Editors.Particles;
 using Mocassin.App.ViewModels.Editors.Sets;
+using Mocassin.App.ViewModels.Editors.Sites;
+using Mocassin.App.ViewModels.Editors.Structure;
 using Mocassin.App.ViewModels.Projects;
 using Mocassin.App.ViewModels.Shell;
+using Mocassin.Core.Symmetry;
 using Mocassin.Packages.Projects;
+using Mocassin.Symmetry.SpaceGroups;
+using Mocassin.Symmetry.Structure;
 
 namespace Mocassin.App.Tests.Editors;
 
@@ -25,6 +30,16 @@ public sealed class ModelEditorAcceptanceTests
         var session = ProjectSession.CreateStandalone(blank.Project, blank.Path);
         using var particles = new ParticlesEditorViewModel(session, new ShellRegionsViewModel());
         using var sets = new ParticleSetsEditorViewModel(session, new ShellRegionsViewModel());
+        using var structure = new StructureEditorViewModel(
+            session,
+            new ShellRegionsViewModel(),
+            new StructurePreviewService(),
+            new StructureValidator());
+        using var sites = new SitesEditorViewModel(
+            session,
+            new ShellRegionsViewModel(),
+            new StructurePreviewService(),
+            new StructureValidator());
 
         foreach (var source in ceria.Project.Particles)
         {
@@ -67,6 +82,46 @@ public sealed class ModelEditorAcceptanceTests
                 authored.ParticleIds.Select(id => session.Project.Find(id)!.Name));
         }
 
+        var setting = SpaceGroupCatalog.Default.GetSetting(225, AxisSetting.None, OriginChoice.None)!;
+        structure.SpaceGroupEditor.Select(setting);
+        Assert.True(structure.SpaceGroupEditor.CanApply);
+        structure.SpaceGroupEditor.ApplyCommand.Execute(null);
+        Assert.Equal(225, session.Project.Structure.SpaceGroup.Number);
+
+        structure.CellParameters.Fields.Single(field => field.Kind == CellFieldKind.A).Text = "5.41";
+        Assert.True(structure.CellParameters.CanApply);
+        structure.CellParameters.ApplyCommand.Execute(null);
+        Assert.Equal(5.41d, session.Project.Structure.Cell.A.Value, 10);
+        Assert.Equal(5.41d, session.Project.Structure.Cell.B.Value, 10);
+        Assert.Equal(5.41d, session.Project.Structure.Cell.C.Value, 10);
+
+        foreach (var source in ceria.Project.Structure.Sites)
+        {
+            sites.AddCommand.Execute(null);
+            var detail = Assert.IsType<CellSiteDetailViewModel>(sites.Detail);
+            detail.Name = source.Name;
+            detail.FieldA = source.Fractional.A.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            detail.FieldB = source.Fractional.B.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            detail.FieldC = source.Fractional.C.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            detail.Stability = source.Stability;
+            var setName = ceria.Project.Find(source.ParticleSetId)!.Name;
+            detail.ParticleSetPicker.Selected = detail.ParticleSetPicker.FilteredOptions
+                .Single(option => option.DisplayName == setName);
+            Assert.True(detail.CanApply);
+            detail.ApplyCommand.Execute(null);
+        }
+
+        Assert.Equal(ceria.Project.Structure.Sites.Length, session.Project.Structure.Sites.Length);
+        foreach (var source in ceria.Project.Structure.Sites)
+        {
+            var authored = session.Project.Structure.Sites.Single(site => site.Name == source.Name);
+            Assert.Equal(source.Fractional, authored.Fractional);
+            Assert.Equal(source.Stability, authored.Stability);
+            Assert.Equal(
+                ceria.Project.Find(source.ParticleSetId)!.Name,
+                session.Project.Find(authored.ParticleSetId)!.Name);
+        }
+
         while (session.EditCoordinator.CanUndo)
         {
             Assert.True(session.EditCoordinator.Undo());
@@ -74,6 +129,9 @@ public sealed class ModelEditorAcceptanceTests
 
         Assert.Empty(session.Project.Particles);
         Assert.Empty(session.Project.Model.ParticleSets);
+        Assert.Empty(session.Project.Structure.Sites);
+        Assert.Equal(1, session.Project.Structure.SpaceGroup.Number);
+        Assert.Equal(1d, session.Project.Structure.Cell.A.Value, 10);
         Assert.False(session.Document.IsDirty);
     }
 

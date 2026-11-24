@@ -742,24 +742,81 @@ cross-step interfaces — more overhead without a smaller audit surface.
 
 ## Acceptance criteria
 
-- [ ] The layout is used as recorded in ADR 0003: the table selects, the splitter resizes the detail pane, and the
-      detail pane edits. No new grid/control dependency is added.
-- [ ] A user can author the ceria particles, sets, structure, and sites **from an empty project**
+- [x] The layout is used as recorded in ADR 0003: the table selects, the splitter resizes the detail pane, and the
+      detail pane edits. No new grid/control dependency is added. — `ModelTableSurfaceTests`,
+      `ModelEditorScreenshotTests`, ADR 0003.
+- [x] A user can author the ceria particles, sets, structure, and sites **from an empty project**
       (`samples/blank`) without the CLI, and the authored values match the ceria sample. (The oxygen migration is
-      24B's criterion; 24A does not claim it.)
-- [ ] Drag-and-drop and keyboard-only flows both work for particle-set membership and produce the same order.
-- [ ] Changing the space group previews the new orbit sizes and overlaps **before** applying, and cancelling
-      changes nothing.
-- [ ] Overlapping sites are shown inline and cannot be applied; the rejection changes nothing.
-- [ ] The P1 preview shows positions with their canonical `P` index and orbit-member index, matches the engine's
-      orbit/position data, and renders no generating-operation label (M-1).
-- [ ] Every particle/structure diagnostic navigates to the offending field by keyboard and by click.
-- [ ] Undo/redo works across every 24A edit, and the save point stays correct.
-- [ ] `Tab` reaches the detail pane from the selection surface after `Home`/`End`; the surface is one tab stop.
-- [ ] The site table stays aligned and virtualizes exactly 1,000 sites; a preview of more than 1,000 P1 positions
-      is bounded and cancellable.
-- [ ] Read-only sessions disable every edit path and show the 23B banner, proved by `EditorReadOnlyTests`.
-- [ ] Documentation written (the §12 pages).
+      24B's criterion; 24A does not claim it.) — `ModelEditorAcceptanceTests` (full authoring and undo-to-blank).
+- [x] Drag-and-drop and keyboard-only flows both work for particle-set membership and produce the same order. —
+      `ParticleSetEditorTests.DragAndKeyboardPathsProduceTheSameOrder`.
+- [x] Changing the space group previews the new orbit sizes and overlaps **before** applying, and cancelling
+      changes nothing. — `SpaceGroupPreviewTests`.
+- [x] Overlapping sites are shown inline and cannot be applied; the rejection changes nothing. —
+      `CellSiteEditorTests.AnOverlappingCandidateIsShownAndRefused` (m-14).
+- [x] The P1 preview shows positions with their canonical `P` index and orbit-member index, matches the engine's
+      orbit/position data, and renders no generating-operation label (M-1). — `CellSiteEditorTests.TheTableAndP1PreviewMatchTheEngineData`.
+- [x] Every particle/structure diagnostic navigates to the offending field by keyboard and by click. —
+      `ModelEditorFrameworkTests.ADiagnosticNavigatesIntoAnEditorAndRequestsTheField`,
+      `EditorIntegrationTests` (all five domain providers and a stale id), and the `NavigationRequested` relay
+      covered by `CellSiteEditorTests.OpeningADependentRequestsShellNavigation`.
+- [x] Undo/redo works across every 24A edit, and the save point stays correct. — `ModelEditorFrameworkTests`,
+      `ParticleEditorTests`, `ParticleSetEditorTests`, `SpaceGroupPreviewTests`, `CellParameterTests`,
+      `CellSiteEditorTests`, `DummyPositionTests`, `EditorRefreshTests`, and the Core
+      `ProjectDocumentApplyOverloadTests`.
+- [x] `Tab` reaches the detail pane from the selection surface after `Home`/`End`; the surface is one tab stop. —
+      `ModelTableSurfaceTests.HomeOrEndThenTabReachesTheDetailPane`.
+- [x] The site table stays aligned and virtualizes exactly 1,000 sites; a preview of more than 1,000 P1 positions
+      is bounded and cancellable. — `CellSiteEditorTests.OneThousandSitesVirtualizeAndTheLastRowIsSelectable`,
+      `CellSiteEditorTests.APreviewOfMoreThanOneThousandPositionsIsVirtualized`, and
+      `StructurePreviewSchedulerTests` (coalescing and superseded/disposed schedules).
+- [x] Read-only sessions disable every edit path and show the 23B banner, proved by `EditorReadOnlyTests`. —
+      `ParticleEditorTests.ReadOnlySessionDisablesEveryParticlePath`,
+      `ParticleSetEditorTests.ReadOnlySessionDisablesSetEdits`, `CellParameterTests.ReadOnlyDisablesBothStructureForms`,
+      `CellSiteEditorTests.ReadOnlyDisablesTheSiteFormAndActions`, `DummyPositionTests.ReadOnlyDisablesTheDummyDocument`.
+- [x] Documentation written (the §12 pages). — `particles.md`, `structure.md`, `ui-architecture.md`,
+      `ui-interaction-contract.md`, `errors.md`, and `tutorials/ceria-model.md`; strict docs build below.
+
+## Pre-audit gate and closeout record
+
+Recorded 2026-11-24 by the dev (`dev`; `dev-free` free-limit fallback). Design class: **Full**; no waiver.
+
+| Check | Result |
+| --- | --- |
+| Every ticked acceptance criterion maps to evidence | Mapped below |
+| Step page, dashboard, feature log, closeout evidence agree | Step page/dashboard/feature log updated; closeout evidence prepared with the CI fields explicitly incomplete |
+| Structure / link / secret / licence checks | `./tools/verify.sh structure`, `./tools/verify.sh docs`, and `./tools/verify.sh policy` green on the feature branch; re-run in `all --require` |
+| Design class / waiver recorded | **Full**, no waiver |
+| POC report and PNGs on `main` (m-11) | Present on `main` at `3e904ed` (POC merge `3e904ed`) |
+| Parity rows mapped to 24A/24B (n-2) | 24A rows name the particle/set/structure/dummy/P1/summary/framework work; transition/editor rows name 24B |
+| `python tools/check_closeout_evidence.py docs/planning/closeout/step-24a.json` | **Blocked** — no GitHub token and `gh` is absent; closeout CI/platform runs cannot be dispatched from this environment. Evidence remains explicitly incomplete (`closeout_ci.run_id` empty); the checker is expected to reject it until the owner dispatches the runs. |
+
+**Evidence map**
+
+| Acceptance criterion | Evidence |
+| --- | --- |
+| ADR 0003 layout, one table/splitter/detail, no grid dependency | `ModelTableSurfaceTests`, `ModelEditorScreenshotTests`, ADR 0003 |
+| Author the ceria particles, sets, structure, and sites from `samples/blank` | `ModelEditorAcceptanceTests.CeriaParticlesAndSetsAreAuthoredFromBlankAndFullyUndone` (full structure/site authoring and undo-to-blank) |
+| Drag and keyboard set membership produce the same order | `ParticleSetEditorTests.DragAndKeyboardPathsProduceTheSameOrder` |
+| Space-group preview/cancel | `SpaceGroupPreviewTests` |
+| Overlap inline and refused | `CellSiteEditorTests.AnOverlappingCandidateIsShownAndRefused` (m-14) |
+| P1 preview indices and no operation label | `CellSiteEditorTests.TheTableAndP1PreviewMatchTheEngineData` |
+| Diagnostic navigation | `ModelEditorFrameworkTests`, `EditorIntegrationTests`, `CellSiteEditorTests.OpeningADependentRequestsShellNavigation` |
+| Undo/redo and save point | `ModelEditorFrameworkTests`, `ParticleEditorTests`, `ParticleSetEditorTests`, `SpaceGroupPreviewTests`, `CellParameterTests`, `CellSiteEditorTests`, `DummyPositionTests`, `EditorRefreshTests`, `ProjectDocumentApplyOverloadTests` |
+| `Home`/`End` → `Tab`, one tab stop | `ModelTableSurfaceTests.HomeOrEndThenTabReachesTheDetailPane` |
+| 1,000-site table; >1,000 P1 positions bounded; coalescing | `CellSiteEditorTests.OneThousandSitesVirtualizeAndTheLastRowIsSelectable`, `CellSiteEditorTests.APreviewOfMoreThanOneThousandPositionsIsVirtualized`, `StructurePreviewSchedulerTests` |
+| Read-only paths | `ParticleEditorTests`, `ParticleSetEditorTests`, `CellParameterTests`, `CellSiteEditorTests`, `DummyPositionTests` |
+| Documentation | `particles.md`, `structure.md`, `ui-architecture.md`, `ui-interaction-contract.md`, `errors.md`, `tutorials/ceria-model.md`; strict docs build |
+
+**Closeout status.** `./tools/verify.sh all --require` and the single closeout CI/platform dispatches are recorded in the
+feature-6 handoff. CI dispatch is **blocked** in this environment: `gh` is absent, no `GH_TOKEN`/`GITHUB_TOKEN`
+is available, and an unauthenticated dispatch returns HTTP 401. The owner must dispatch:
+
+1. `CI` (`ci.yml`) on `step/24a-model-editors-particles-and-structure`, `platforms=ubuntu` (the single closeout run).
+2. `CI` with `platforms=windows` and `platforms=macos` (required for the GUI keyboard/focus/drag/screenshot surface).
+
+The audit request is deliberately **not created** and the step is not marked `In audit` until those runs exist and
+the evidence check passes. This is the recorded stop-and-relay point.
 
 ## Documentation
 

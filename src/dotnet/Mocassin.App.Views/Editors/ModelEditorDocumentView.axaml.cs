@@ -38,6 +38,7 @@ internal sealed partial class ModelEditorDocumentView : UserControl
             }
         };
         EditorSplitter.AddHandler(PointerReleasedEvent, OnSplitterReleased, RoutingStrategies.Bubble);
+        AddHandler(KeyDownEvent, OnEditorKeyDown, RoutingStrategies.Tunnel, handledEventsToo: true);
         AttachedToVisualTree += (_, _) => Dispatcher.UIThread.Post(FocusInitial);
     }
 
@@ -79,6 +80,42 @@ internal sealed partial class ModelEditorDocumentView : UserControl
             case nameof(ModelEditorViewModel.IsReadOnly):
                 ApplyEditorFraction();
                 break;
+        }
+    }
+
+    private void OnEditorKeyDown(object? sender, KeyEventArgs args)
+    {
+        if (viewModel is null)
+        {
+            return;
+        }
+
+        if (args.Key == Key.Escape && viewModel.Editor.Detail is not null)
+        {
+            args.Handled = true;
+            viewModel.Editor.Detail.RevertCommand.Execute(null);
+            return;
+        }
+
+        var focused = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement();
+        if (focused is TextBox)
+        {
+            return;
+        }
+
+        if (args.Key == Key.Delete && viewModel.Editor.RemoveCommand.CanExecute(null))
+        {
+            args.Handled = true;
+            viewModel.Editor.RemoveCommand.Execute(null);
+            return;
+        }
+
+        if (args.Key == Key.D
+            && (args.KeyModifiers & KeyModifiers.Control) != 0
+            && viewModel.Editor.DuplicateCommand.CanExecute(null))
+        {
+            args.Handled = true;
+            viewModel.Editor.DuplicateCommand.Execute(null);
         }
     }
 

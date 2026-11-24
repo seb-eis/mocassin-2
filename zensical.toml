@@ -54,6 +54,7 @@ nav = [
       { "Metropolis Monte Carlo" = "physics/mmc.md" },
     ] },
   { "Tutorials" = "tutorials/index.md" },
+  { "Author the ceria model in the GUI" = "tutorials/ceria-model.md" },
   { "Reference" = [
       { "Overview" = "reference/index.md" },
       { "Repository and file layout" = "reference/file-layout.md" },

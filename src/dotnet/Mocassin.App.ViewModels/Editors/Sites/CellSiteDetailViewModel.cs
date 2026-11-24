@@ -6,6 +6,7 @@ using System.Globalization;
 using CommunityToolkit.Mvvm.Input;
 using Mocassin.App.ViewModels.Editors.Expressions;
 using Mocassin.App.ViewModels.Editors.ReferencePicker;
+using Mocassin.App.ViewModels.Editors.Structure;
 using Mocassin.App.ViewModels.Editors.Usage;
 using Mocassin.App.ViewModels.Editing;
 using Mocassin.Core.Diagnostics;
@@ -49,6 +50,7 @@ internal sealed partial class CellSiteDetailViewModel : ModelDetailViewModel
     private string selectedPlane = "a–b";
     private bool refreshingOptions;
     private bool refreshing;
+    private readonly StructurePreviewScheduler? previewScheduler;
 
     /// <summary>
     /// Initializes a site detail.
@@ -58,14 +60,17 @@ internal sealed partial class CellSiteDetailViewModel : ModelDetailViewModel
     /// <param name="project">The current project snapshot.</param>
     /// <param name="previewService">The structure preview service.</param>
     /// <param name="validator">The structure validator.</param>
+    /// <param name="previewScheduler">The optional debounced preview scheduler.</param>
     public CellSiteDetailViewModel(
         CellSite site,
         bool isNew,
         ProjectModel project,
         IStructurePreviewService previewService,
-        IStructureValidator validator)
+        IStructureValidator validator,
+        StructurePreviewScheduler? previewScheduler = null)
         : base(site.Id.Value)
     {
+        this.previewScheduler = previewScheduler;
         this.previewService = previewService ?? throw new ArgumentNullException(nameof(previewService));
         this.validator = validator ?? throw new ArgumentNullException(nameof(validator));
         this.project = project ?? throw new ArgumentNullException(nameof(project));
@@ -85,7 +90,7 @@ internal sealed partial class CellSiteDetailViewModel : ModelDetailViewModel
         ConfirmEnergyDeleteCommand = new RelayCommand(ConfirmEnergyDelete, () => HasPendingEnergyDelete && CanEditForm);
         CancelEnergyDeleteCommand = new RelayCommand(CancelEnergyDelete, () => HasPendingEnergyDelete);
         RefreshParticleSetOptions(site.ParticleSetId);
-        RefreshPreview();
+        RefreshPreviewNow();
     }
 
     /// <summary>
@@ -109,7 +114,7 @@ internal sealed partial class CellSiteDetailViewModel : ModelDetailViewModel
             if (SetProperty(ref name, value))
             {
                 HasUncommittedChanges = true;
-                RefreshPreview();
+                SchedulePreview();
             }
         }
     }
@@ -125,7 +130,7 @@ internal sealed partial class CellSiteDetailViewModel : ModelDetailViewModel
             if (SetProperty(ref fieldA, value))
             {
                 HasUncommittedChanges = true;
-                RefreshPreview();
+                SchedulePreview();
             }
         }
     }
@@ -141,7 +146,7 @@ internal sealed partial class CellSiteDetailViewModel : ModelDetailViewModel
             if (SetProperty(ref fieldB, value))
             {
                 HasUncommittedChanges = true;
-                RefreshPreview();
+                SchedulePreview();
             }
         }
     }
@@ -157,7 +162,7 @@ internal sealed partial class CellSiteDetailViewModel : ModelDetailViewModel
             if (SetProperty(ref fieldC, value))
             {
                 HasUncommittedChanges = true;
-                RefreshPreview();
+                SchedulePreview();
             }
         }
     }
@@ -174,7 +179,7 @@ internal sealed partial class CellSiteDetailViewModel : ModelDetailViewModel
             {
                 HasUncommittedChanges = true;
                 UpdateStabilityWarning();
-                RefreshPreview();
+                SchedulePreview();
             }
         }
     }
@@ -418,7 +423,7 @@ internal sealed partial class CellSiteDetailViewModel : ModelDetailViewModel
         OnPropertyChanged(nameof(FieldC));
         OnPropertyChanged(nameof(Stability));
         RefreshParticleSetOptions(site.ParticleSetId);
-        RefreshPreview();
+        RefreshPreviewNow();
     }
 
     /// <inheritdoc />
@@ -427,7 +432,7 @@ internal sealed partial class CellSiteDetailViewModel : ModelDetailViewModel
         project = projectSnapshot;
         RefreshParticleSetOptions(ParticleSetPicker.Selected?.Value ?? default);
         RefreshDependents();
-        RefreshPreview();
+        RefreshPreviewNow();
     }
 
     /// <inheritdoc />
@@ -435,7 +440,7 @@ internal sealed partial class CellSiteDetailViewModel : ModelDetailViewModel
     {
         OnPropertyChanged(nameof(CanEditForm));
         RefreshDependents();
-        RefreshPreview();
+        RefreshPreviewNow();
     }
 
     /// <inheritdoc />
@@ -504,7 +509,7 @@ internal sealed partial class CellSiteDetailViewModel : ModelDetailViewModel
         }
 
         HasUncommittedChanges = true;
-        RefreshPreview();
+        SchedulePreview();
     }
 
     private void RefreshParticleSetOptions(ParticleSetId selected)
@@ -589,7 +594,33 @@ internal sealed partial class CellSiteDetailViewModel : ModelDetailViewModel
         return false;
     }
 
-    private void RefreshPreview()
+    private void SchedulePreview()
+    {
+        if (previewScheduler is null)
+        {
+            RefreshPreviewNow();
+            return;
+        }
+
+        if (!TryBuildSite(out var site))
+        {
+            ApplyPreview(InvalidComputation());
+            return;
+        }
+
+        var structure = project.Structure;
+        var sites = structure.Sites.IsDefault ? ImmutableArray<CellSite>.Empty : structure.Sites;
+        var candidateSites = IsNew
+            ? sites.Add(site)
+            : sites.Select(candidate => candidate.Id == site.Id ? site : candidate).ToImmutableArray();
+        var candidateStructure = structure with { Sites = candidateSites };
+        var currentStructure = structure;
+        previewScheduler.Schedule(
+            () => ComputePreview(candidateStructure, currentStructure, candidateSites),
+            ApplyPreview);
+    }
+
+    private void RefreshPreviewNow()
     {
         if (refreshing)
         {
@@ -601,19 +632,7 @@ internal sealed partial class CellSiteDetailViewModel : ModelDetailViewModel
         {
             if (!TryBuildSite(out var site))
             {
-                candidatePreview = null;
-                candidateDiagnostics = [];
-                currentPreview = TryCreatePreview(project.Structure);
-                previewSites = project.Structure.Sites.IsDefault
-                    ? ImmutableArray<CellSite>.Empty
-                    : project.Structure.Sites;
-                RebuildOrbitRows();
-                RebuildWholeStructureRows();
-                RebuildProjection();
-                PreviewStatus = HasFieldError
-                    ? "The site form is incomplete."
-                    : "No preview available.";
-                RefreshDerived();
+                ApplyPreview(InvalidComputation());
                 return;
             }
 
@@ -622,36 +641,67 @@ internal sealed partial class CellSiteDetailViewModel : ModelDetailViewModel
             var candidateSites = IsNew
                 ? sites.Add(site)
                 : sites.Select(candidate => candidate.Id == site.Id ? site : candidate).ToImmutableArray();
-            var candidateStructure = structure with { Sites = candidateSites };
-            previewSites = candidateSites;
-            var validation = validator.Validate(candidateStructure);
-            candidatePreview = previewService.TryCreatePreview(
-                candidateStructure,
-                1,
-                1,
-                1,
-                out var previewDiagnostics);
-            candidateDiagnostics = validation
-                .Concat(previewDiagnostics)
-                .Distinct()
-                .OrderBy(static diagnostic => diagnostic.Code, StringComparer.Ordinal)
-                .ToImmutableArray();
-            currentPreview = TryCreatePreview(structure);
-            RebuildOrbitRows();
-            RebuildWholeStructureRows();
-            RebuildProjection();
-            PreviewStatus = candidatePreview is not null
-                ? "Candidate preview."
-                : HasOverlap
-                    ? "No candidate preview: the candidate overlaps (STR007); showing the current structure."
-                    : "The candidate has errors; showing the current structure.";
-            RefreshDerived();
+            ApplyPreview(ComputePreview(
+                structure with { Sites = candidateSites },
+                structure,
+                candidateSites));
         }
         finally
         {
             refreshing = false;
         }
     }
+
+    private SitePreviewComputation InvalidComputation() =>
+        new(null, TryCreatePreview(project.Structure), [], project.Structure.Sites.IsDefault
+            ? ImmutableArray<CellSite>.Empty
+            : project.Structure.Sites);
+
+    private SitePreviewComputation ComputePreview(
+        StructureModel candidateStructure,
+        StructureModel currentStructure,
+        ImmutableArray<CellSite> candidateSites)
+    {
+        var validation = validator.Validate(candidateStructure);
+        var candidate = previewService.TryCreatePreview(
+            candidateStructure,
+            1,
+            1,
+            1,
+            out var previewDiagnostics);
+        var current = TryCreatePreview(currentStructure);
+        var diagnostics = validation
+            .Concat(previewDiagnostics)
+            .Distinct()
+            .OrderBy(static diagnostic => diagnostic.Code, StringComparer.Ordinal)
+            .ToImmutableArray();
+        return new SitePreviewComputation(candidate, current, diagnostics, candidateSites);
+    }
+
+    private void ApplyPreview(SitePreviewComputation computation)
+    {
+        candidatePreview = computation.Candidate;
+        currentPreview = computation.Current;
+        candidateDiagnostics = computation.Diagnostics;
+        previewSites = computation.PreviewSites;
+        RebuildOrbitRows();
+        RebuildWholeStructureRows();
+        RebuildProjection();
+        PreviewStatus = candidatePreview is not null
+            ? "Candidate preview."
+            : HasOverlap
+                ? "No candidate preview: the candidate overlaps (STR007); showing the current structure."
+                : HasFieldError
+                    ? "The site form is incomplete."
+                    : "The candidate has errors; showing the current structure.";
+        RefreshDerived();
+    }
+
+    private sealed record SitePreviewComputation(
+        StructurePreview? Candidate,
+        StructurePreview? Current,
+        ImmutableArray<Diagnostic> Diagnostics,
+        ImmutableArray<CellSite> PreviewSites);
 
     private void RefreshDependents()
     {

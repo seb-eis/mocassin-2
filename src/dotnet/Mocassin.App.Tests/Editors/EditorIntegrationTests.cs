@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 using Avalonia.Controls;
+using Avalonia.Automation;
 using Avalonia.Input;
 using Avalonia.VisualTree;
 using Mocassin.App.Composition;
@@ -70,6 +71,12 @@ public sealed class EditorIntegrationTests
                     var particleDocument = Assert.IsType<ModelEditorDocumentViewModel>(shell.Documents.ActiveDocument);
                     Assert.IsType<ParticlesEditorViewModel>(particleDocument.Editor);
                     HeadlessSession.Pump(window);
+                    Assert.Contains(
+                        window.GetVisualDescendants().OfType<ListBox>(),
+                        list => AutomationProperties.GetName(list) == "Model table rows");
+                    Assert.Contains(
+                        window.GetVisualDescendants().OfType<GridSplitter>(),
+                        splitter => AutomationProperties.GetName(splitter) == "Resize editor panes");
                     Assert.NotNull(window.GetVisualDescendants().OfType<TextBox>()
                         .FirstOrDefault(box => Avalonia.Automation.AutomationProperties.GetName(box) == "Bulk action value"));
 
@@ -99,6 +106,18 @@ public sealed class EditorIntegrationTests
                     Assert.True(sitesEditor.RequestSelection(entry.Project.Structure.Sites[0].Id.Value));
                     HeadlessSession.Pump(window);
                     Assert.NotNull(window.GetVisualDescendants().OfType<CellSiteDetailView>().FirstOrDefault());
+                    Assert.Contains(
+                        window.GetVisualDescendants().OfType<TextBox>(),
+                        box => AutomationProperties.GetName(box) == "Site name");
+                    Assert.Contains(
+                        window.GetVisualDescendants().OfType<CheckBox>(),
+                        box => AutomationProperties.GetName(box) == "Toggle P1 preview");
+                    Assert.Contains(
+                        window.GetVisualDescendants().OfType<ListBox>(),
+                        list => AutomationProperties.GetName(list) == "P1 orbit rows");
+                    Assert.False(await shell.Navigation.NavigateToAsync(
+                        new ModelPath(ModelEditorDomains.CellSite, Guid.NewGuid()),
+                        NavigationIntent.SelectObject));
 
                     Assert.True(await shell.Navigation.NavigateToAsync(
                         new ModelPath(ModelEditorDomains.CellDummyPosition, Guid.Empty),

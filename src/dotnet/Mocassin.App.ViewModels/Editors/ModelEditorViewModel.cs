@@ -589,22 +589,31 @@ internal abstract partial class ModelEditorViewModel : ObservableObject, IDispos
 
         if (args.Kind is ProjectChangeKind.Edited or ProjectChangeKind.Undo or ProjectChangeKind.Redo)
         {
-            var open = Detail?.ObjectId;
-            var changed = open is { } id && IsValueChanged(previous, current, id);
+            var openDetail = Detail;
+            var openId = openDetail?.ObjectId;
+            var changed = openId is { } id && IsValueChanged(previous, current, id);
             Reload(selectedId);
             RefreshOptions(current);
-            if (open is { } openId && Detail is not null && Detail.ObjectId == openId)
+            if (openDetail is not null && openId is { } detailId)
             {
-                if (!RowExists(openId))
+                if (!RowExists(detailId))
                 {
-                    Detail.MarkRemoved();
+                    openDetail.MarkRemoved();
+                    ShowDetail(openDetail);
                 }
-                else if (changed)
+                else if (ReferenceEquals(Detail, openDetail))
                 {
-                    Detail.MarkConflict();
-                }
+                    if (changed)
+                    {
+                        openDetail.MarkConflict();
+                    }
 
-                Detail.RefreshOptions(current);
+                    openDetail.RefreshOptions(current);
+                }
+                else if (selectedId == detailId)
+                {
+                    ShowDetail(openDetail);
+                }
             }
 
             return;
