@@ -34,7 +34,7 @@ Status legend:
 | Model statistics and feasibility | Y | Implemented | 07 | Counts, rule/memory estimates, buildability warnings |
 | Headless `mocassin validate` | Y | Done | 07/12 | `validation-v1`, diagnostics, statistics, and exit codes in 07; the complete CLI command surface, shared report family, and parser conventions in 12 |
 | `validation-v1` report | Y | Implemented | 07 | Sorted diagnostics, summary, optional statistics; schema checked |
-| GUI diagnostic navigation | Y | Partial | 07/23B/24/25 | `ModelPath` navigation and the target registry in 23A; status indicator, Problems channel, and error banner in 23B; domain providers and stats panels in 24/25 |
+| GUI diagnostic navigation | Y | Partial | 07/23B/24A/24B/25 | `ModelPath` navigation and the target registry in 23A; status indicator, Problems channel, and error banner in 23B; the 24A particle/set/structure/site/dummy providers and the 24B transition providers; energy/lattice/simulation panels in 25 |
 
 ## 2. Particles and structure
 
@@ -44,14 +44,14 @@ Status legend:
 | Implicit void particle | Y | Implemented | 03 | Reserved ID; compiled index 0 belongs to 08 |
 | 63 custom particle limit | Y | Implemented | 03 | Enforced |
 | Particle sets with first-as-default | Y | Implemented | 03 | Ordered `particleIds`; composed validation |
-| Drag-and-drop set membership | Y | Planned | 24 | + keyboard |
-| Space group selection (274 settings) | Y | Partial | 02/03/24 | Catalog, lookup, and validation in 02/03; selection UI in 24 |
-| Space-group operation display | Y | Planned | 24 | Operations are available from the catalog |
-| Cell parameters + crystal-system locks | Y | Partial | 02/03/24 | Corrected transform, validation, and tolerances in 02/03; UI locks in 24 |
+| Drag-and-drop set membership | Y | Implemented | 24A | Set detail's own project-particle drag source plus keyboard Add/Remove/Move; both paths share one insertion method |
+| Space group selection (274 settings) | Y | Implemented | 02/03/24A | Catalog, lookup, and validation in 02/03; searchable picker, settings selector, operation details, and pre-apply orbit/overlap preview in 24A |
+| Space-group operation display | Y | Implemented | 24A | Operation count, general multiplicity, matrix/translation, and human-readable form from the catalog |
+| Cell parameters + crystal-system locks | Y | Implemented | 02/03/24A | Corrected transform, validation, and tolerances in 02/03; expression fields, locks, live vectors/volume, geometry diagnostics, and undoable resets in 24A |
 | Stable/unstable sites | Y | Implemented | 03 | Unstable sites default to void |
-| P1 expansion preview | Y | Partial | 02/03/24 | Encoder and P1 order in 02; preview API/cache in 03; UI in 24 |
+| P1 expansion preview | Y | Implemented | 02/03/24A | Encoder and P1 order in 02; preview API/cache in 03; orbit/whole-structure rows, canonical indices, and deterministic 2D projection in 24A |
 | Site overlap validation | Y | Implemented | 03 | Exact grid; structured `CellSiteId` paths |
-| Dummy position editor | Y | Planned | 24 | Model, JSON, and validation in 03; editor UI in 24 |
+| Dummy position editor | Y | Implemented | 24A | Model, JSON, and validation in 03; distinct-glyph visual-only document with save/load round-trip in 24A |
 | Correct triclinic/rhombohedral cell vectors | Y | Improvement | 02 | Implemented in 02; fixes original bug |
 | Valid group 47 data | Y | Improvement | 02 | Implemented in 02; fixes corrupt setting |
 | Multiple site definitions per orbit | Y | Implemented | 03 | With overlap diagnostics |
@@ -60,9 +60,9 @@ Status legend:
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
-| State changes [D,A] | Y | Partial | 04/24 | Model, validation, persistence, preview, and editor API in 04; editor UI in 24 |
-| State-change groups | Y | Partial | 04/24 | Mixed physical/charge and stable/unstable roles rejected; editor UI in 24 |
-| Abstract chains with D/S linkers | Y | Partial | 04/24 | Six patterns + custom grammar; `D S D` rejected; editor UI in 24 |
+| State changes [D,A] | Y | Partial | 04/24B | Model, validation, persistence, preview, and editor API in 04; editor UI in 24B |
+| State-change groups | Y | Partial | 04/24B | Mixed physical/charge and stable/unstable roles rejected; editor UI in 24B |
+| Abstract chains with D/S linkers | Y | Partial | 04/24B | Six patterns + custom grammar; `D S D` rejected; editor UI in 24B |
 | 2-site MMC | Y | Partial | 04/08/17 | Model, validation, and preview in 04; exchange rules in 08/17 |
 | 3-site KMC migration | Y | Partial | 04/08/16 | Model, path validation, and preview in 04; rules and KMC dual-DOF default in 08/16 |
 | 5-site interstitialcy | Y | Partial | 04/08 | Model, path validation, preview, and sample in 04; rules in 08 |
@@ -73,9 +73,9 @@ Status legend:
 | Reverse rule generation (2/3-site) | Y | Done | 08 | Auto-inverse for `Metropolis2`/`Migration3`; `CeriaKineticMigrationCompilesForwardAndInverseRules` and `MetropolisExchangeCompilesForwardAndInverseRulesWithoutState1`; explicit reverse stays separate |
 | No reverse for complex mechanisms | Y | Done | 08 | `CorrectedVehicleCompilesUnidirectionalRules`, `CorrectedInterstitialcyCompilesWithASpectatorCentre`, and `ExplicitReverseCompilationTests`; `GeneratesReverse` validated in 04 |
 | Dependent/hidden rules | Y | Partial | 08/29 | Explicit deduplication and dependent/hidden counts exist; equivalent-start orbit reduction and `DependentRules` emission are the accepted Step 08 audit m1 gap. Step 29's release gate requires every required parity item to be implemented or explicitly deferred (roadmap M12; Step 29 §9). |
-| Reference path editing/preview | Y | Partial | 04/24 | Preview API in 04; editor UI in 24 |
+| Reference path editing/preview | Y | Partial | 04/24B | Preview API in 04; editor UI in 24B |
 | Ambiguity detection | Y | Improvement | 08 | Compile-time `CMP004` with both identities |
-| Transition rule count preview | N | Improvement | 24 | Step 07 statistics are advisory; Step 08 is authoritative |
+| Transition rule count preview | N | Improvement | 24B | Step 07 statistics are advisory; Step 08 is authoritative; the transition editor's rule-count preview is 24B |
 
 ## 4. Energy and lattice
 
@@ -225,14 +225,16 @@ Status legend:
 | Shell/tree/tabs/console/status | Y | Implemented | 23A | Regions, document tabs, project switcher/explorer, Application console, populated status bar; Problems channel in 23B |
 | Project lifecycle | Y | Implemented | 23A | New/open/save/save-as/close/reload, recents, locks, read-only, external-change detection |
 | Undo/redo | N | Improvement | 23B | Single per-project stack over `ProjectDocument`, bounded, save-point correct; Edit-menu Undo/Redo commands follow the active project |
-| Model validator/problems | Y | Partial | 23B/07 | Validity status item, Problems channel seeded from the retained load result (conditional `Load` stage), severity/code/text/source filters, sorting, help anchors, revalidate, edit diagnostics, and navigable `ModelPath` targets in 23B; domain providers and full statistics panels in 24/25 |
+| Model validator/problems | Y | Partial | 23B/07/24A/24B/25 | Validity status item, Problems channel seeded from the retained load result (conditional `Load` stage), severity/code/text/source filters, sorting, help anchors, revalidate, edit diagnostics, and navigable `ModelPath` targets in 23B; 24A particle/set/structure/site/dummy providers and 24B transition providers; full statistics panels in 25 |
 | Command palette and shortcut cheat sheet | N | Implemented | 23A | Searchable command catalog with platform gestures |
 | Application settings and logging | N | Implemented | 23A/23B | Versioned `mocassin.settings` v1 with migration and retention in 23A; `autosave`/`session` additive fields in 23B; structured rolling logs replace the original XML settings file |
 | Crash recovery dialog | N | Improvement | 23A/23B | Global exception boundary, log entry, and "open log folder" in 23A; captured dirty-session snapshots, the 2 s bounded async recovery writer, per-session status, and the recovery action in 23B; the dead-UI path writes no snapshots, and the autosave fallback is failure-injected in a PR-fast test |
 | Application diagnostics | N | Deferred | 23A/23B | App-side environment report (distinct from CLI `doctor`) |
-| Particle/set editor | Y | Planned | 24 | |
-| Structure editor | Y | Planned | 24 | |
-| Transition editor | Y | Planned | 24 | |
+| Shared model-editor framework | Y | Implemented | 24A | ADR 0003 table + detail surface, one column/header policy, one-tab-stop focus with `Home`/`End` + `Tab`, typed sort, multi-select, reusable reference picker, in-house numeric expression, lazy usage index with resolved KMC paths, and the additive typed `ProjectDocument.Apply` overload; shell-owned `layout.editorFraction`. The particle and structure UX is delivered in the same step's later features |
+| Particle/set editor | Y | Implemented | 24A | Pinned void, usage counts, blocked delete, bulk charge, drag/keyboard ordered membership, default badge, empty-set error, occupation chips |
+| Structure editor | Y | Implemented | 24A | Space-group picker and preview, cell parameters with locks/expressions, site table and P1 preview, dummy document, and the structure summary; transitions remain 24B |
+| Structure summary | Y | Implemented | 24A | Reference sites, P1/stable/unstable position counts, volume, reference-site density, orbit table, and `STR009` from the structure value and preview; no `ModelStatistics` call |
+| Transition editor | Y | Planned | 24B | State changes, groups, chains, reference paths, and the rule-count preview |
 | Energy editor | Y | Planned | 25 | |
 | Lattice/doping editor | Y | Planned | 25 | |
 | Simulation editor | Y | Planned | 25 | |
@@ -249,7 +251,7 @@ Status legend:
 | Lattice recycle tool | Y | Planned | 28 | |
 | Remote deploy | N | Deferred | post-1.0 | Local + HPC scripts first |
 | Accessibility/high contrast | N | Partial | 23A | Automation-name sweep, automation-role and deterministic Tab-order tests, light/dark/high-contrast baselines, and an automated Xvfb real-window capture in 23A; manual screen-reader checks remain release evidence |
-| Numeric expression input | Y | Planned | 24/25 | |
+| Numeric expression input | Y | Implemented | 24A | Shared nested-only expression grammar for fractional and cell fields; trigonometric functions deliberately deferred |
 | Localization | N | Deferred | post-1.0 | Invariant first; resources ready |
 
 ## 10. Platform, packaging, and quality

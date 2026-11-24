@@ -1,0 +1,77 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Mocassin.App.ViewModels.Editors.Particles"
+             xmlns:automation="using:Avalonia.Automation"
+             x:Class="Mocassin.App.Views.Editors.Particles.ParticleDetailView"
+             x:DataType="vm:ParticleDetailViewModel">
+  <ScrollViewer Classes="scroll-gutter-right" Background="{DynamicResource Mocassin.WorkspaceBackground}">
+    <StackPanel Spacing="10" Margin="14">
+      <TextBlock Text="Particle" FontWeight="SemiBold" FontSize="{DynamicResource Mocassin.TitleFontSize}" />
+
+      <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="8">
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Name" VerticalAlignment="Center" />
+        <TextBox Grid.Row="0" Grid.Column="1"
+                 x:Name="name"
+                 Text="{Binding Name, Mode=TwoWay}"
+                 IsEnabled="{Binding CanEditForm}"
+                 automation:AutomationProperties.Name="Particle name"
+                 LostFocus="OnNameLostFocus"
+                 KeyDown="OnFieldKeyDown" />
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Symbol" VerticalAlignment="Center" />
+        <TextBox Grid.Row="1" Grid.Column="1"
+                 x:Name="symbol"
+                 Text="{Binding Symbol, Mode=TwoWay}"
+                 IsEnabled="{Binding CanEditForm}"
+                 automation:AutomationProperties.Name="Particle symbol"
+                 automation:AutomationProperties.HelpText="Mass-conservation group; the recommended pattern is an uppercase letter followed by up to ten letters, digits, or +-()."
+                 LostFocus="OnSymbolLostFocus"
+                 KeyDown="OnFieldKeyDown" />
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Charge (e)" VerticalAlignment="Center" />
+        <TextBox Grid.Row="2" Grid.Column="1"
+                 x:Name="charge"
+                 Text="{Binding Charge, Mode=TwoWay}"
+                 IsEnabled="{Binding CanEditForm}"
+                 automation:AutomationProperties.Name="Particle charge"
+                 LostFocus="OnChargeLostFocus"
+                 KeyDown="OnFieldKeyDown" />
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="Vacancy" VerticalAlignment="Center" />
+        <CheckBox Grid.Row="3" Grid.Column="1"
+                  x:Name="isVacancy"
+                  IsChecked="{Binding IsVacancy, Mode=TwoWay}"
+                  IsEnabled="{Binding CanEditForm}"
+                  Content="This particle represents an empty state"
+                  automation:AutomationProperties.Name="Particle is a vacancy"
+                  Click="OnVacancyClick" />
+      </Grid>
+
+      <TextBlock Text="{Binding ErrorMessage}"
+                 IsVisible="{Binding HasError}"
+                 Foreground="{DynamicResource Mocassin.ErrorForeground}"
+                 TextWrapping="Wrap"
+                 automation:AutomationProperties.Name="Particle inline error" />
+      <Border Classes="banner-warning"
+              Padding="8"
+              IsVisible="{Binding HasWarning}">
+        <TextBlock Text="{Binding WarningMessage}"
+                   TextWrapping="Wrap"
+                   automation:AutomationProperties.Name="Particle inline warning" />
+      </Border>
+      <TextBlock Text="{Binding ConflictMessage}"
+                 IsVisible="{Binding HasConflict}"
+                 Foreground="{DynamicResource Mocassin.WarningForeground}"
+                 TextWrapping="Wrap" />
+
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <Button Content="Apply" Command="{Binding ApplyCommand}" automation:AutomationProperties.Name="Apply particle changes" />
+        <Button Content="Revert" Command="{Binding RevertCommand}" automation:AutomationProperties.Name="Revert particle changes" />
+        <TextBlock Text="No unsaved changes"
+                   IsVisible="{Binding !HasUncommittedChanges}"
+                   VerticalAlignment="Center"
+                   Classes="caption" />
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

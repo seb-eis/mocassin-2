@@ -474,7 +474,10 @@ public sealed class AccessibilityTests
                     var tree = window.GetVisualDescendants()
                         .OfType<TreeView>()
                         .Single(control => AutomationProperties.GetName(control) == "Project explorer");
-                    var nodes = tree.GetVisualDescendants().OfType<TreeViewItem>().ToList();
+                    var nodes = tree.GetVisualDescendants()
+                        .OfType<TreeViewItem>()
+                        .Where(node => node.GetVisualDescendants().OfType<ContentControl>().Any(control => control.Name == "NodeIconSlot" && control.IsEffectivelyVisible))
+                        .ToList();
                     Assert.Equal(2, nodes.Count);
                     foreach (var node in nodes)
                     {

@@ -58,7 +58,7 @@ public sealed class WorkspaceRenderTests
 
                     var entry = await ProjectFixtures.LoadCeriaAsync();
                     shell.Workspace.Add(entry);
-                    Assert.Equal(2, shell.Explorer.Nodes.Count);
+                    Assert.Equal(3, shell.Explorer.Nodes.Count);
 
                     await shell.Navigation.NavigateToAsync(
                         new ModelPath("project", entry.Id, "overview"),

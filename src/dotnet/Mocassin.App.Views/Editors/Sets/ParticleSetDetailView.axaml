@@ -1,0 +1,127 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Mocassin.App.ViewModels.Editors.Sets"
+             xmlns:automation="using:Avalonia.Automation"
+             x:Class="Mocassin.App.Views.Editors.Sets.ParticleSetDetailView"
+             x:DataType="vm:ParticleSetDetailViewModel">
+  <ScrollViewer Classes="scroll-gutter-right" Background="{DynamicResource Mocassin.WorkspaceBackground}">
+    <StackPanel Spacing="10" Margin="14">
+      <TextBlock Text="Particle set" FontWeight="SemiBold" FontSize="{DynamicResource Mocassin.TitleFontSize}" />
+
+      <Grid ColumnDefinitions="120,*">
+        <TextBlock Text="Name" VerticalAlignment="Center" />
+        <TextBox Grid.Column="1"
+                 x:Name="name"
+                 Text="{Binding Name, Mode=TwoWay}"
+                 IsEnabled="{Binding CanEditForm}"
+                 automation:AutomationProperties.Name="Particle set name"
+                 LostFocus="OnNameLostFocus"
+                 KeyDown="OnNameKeyDown" />
+      </Grid>
+
+      <Grid ColumnDefinitions="*,Auto,*" RowDefinitions="Auto,*" ColumnSpacing="8" RowSpacing="6">
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Project particles" FontWeight="SemiBold" />
+        <TextBlock Grid.Row="0" Grid.Column="2" Text="Ordered members" FontWeight="SemiBold" />
+
+        <ListBox Grid.Row="1" Grid.Column="0"
+                 x:Name="ProjectParticles"
+                 ItemsSource="{Binding ProjectParticles}"
+                 SelectedItem="{Binding SelectedProjectParticle, Mode=TwoWay}"
+                 IsEnabled="{Binding CanEditForm}"
+                 PointerPressed="OnSourcePointerPressed"
+                 automation:AutomationProperties.Name="Project particles drag source"
+                 automation:AutomationProperties.HelpText="Select a particle and use Add, or drag it onto the member list.">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="vm:ProjectParticleChoiceViewModel">
+              <TextBlock Text="{Binding DisplayName}" />
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+
+        <StackPanel Grid.Row="1" Grid.Column="1" Spacing="4" VerticalAlignment="Top">
+          <Button Content="Add →"
+                  Command="{Binding AddMemberCommand}"
+                  automation:AutomationProperties.Name="Add selected particle to the set" />
+          <Button Content="← Remove"
+                  Command="{Binding RemoveMemberCommand}"
+                  automation:AutomationProperties.Name="Remove selected member" />
+          <Button Content="Move up"
+                  Command="{Binding MoveUpCommand}"
+                  automation:AutomationProperties.Name="Move selected member up" />
+          <Button Content="Move down"
+                  Command="{Binding MoveDownCommand}"
+                  automation:AutomationProperties.Name="Move selected member down" />
+        </StackPanel>
+
+        <ListBox Grid.Row="1" Grid.Column="2"
+                 x:Name="Members"
+                 ItemsSource="{Binding Members}"
+                 SelectedItem="{Binding SelectedMember, Mode=TwoWay}"
+                 IsEnabled="{Binding CanEditForm}"
+                 DragDrop.AllowDrop="True"
+                 DragDrop.DragOver="OnMembersDragOver"
+                 DragDrop.Drop="OnMembersDrop"
+                 automation:AutomationProperties.Name="Ordered set members"
+                 automation:AutomationProperties.HelpText="Drop a project particle here, or select and use Add.">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="vm:ParticleSetMemberViewModel">
+              <TextBlock Text="{Binding DisplayName}" />
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </Grid>
+
+      <TextBlock Text="Occupation chips (member order; the first is the default occupation)"
+                 FontWeight="SemiBold" />
+      <ItemsControl ItemsSource="{Binding OccupationChips}"
+                    automation:AutomationProperties.Name="Occupation chips">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <WrapPanel />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <Border Background="{DynamicResource Mocassin.CardBackground}"
+                    BorderBrush="{DynamicResource Mocassin.BorderBrush}"
+                    BorderThickness="{DynamicResource Mocassin.BorderThickness}"
+                    CornerRadius="{DynamicResource Mocassin.RadiusCard}"
+                    Padding="6,2"
+                    Margin="0,0,6,4">
+              <TextBlock Text="{Binding}" />
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+
+      <TextBlock Text="{Binding ValidationMessage}"
+                 IsVisible="{Binding HasValidationMessage}"
+                 Foreground="{DynamicResource Mocassin.ErrorForeground}"
+                 TextWrapping="Wrap"
+                 automation:AutomationProperties.Name="Set validation error" />
+      <TextBlock Text="{Binding StatusMessage}"
+                 IsVisible="{Binding HasStatusMessage}"
+                 Foreground="{DynamicResource Mocassin.WarningForeground}"
+                 TextWrapping="Wrap"
+                 automation:AutomationProperties.Name="Set drop status" />
+      <TextBlock Text="{Binding ErrorMessage}"
+                 IsVisible="{Binding HasError}"
+                 Foreground="{DynamicResource Mocassin.ErrorForeground}"
+                 TextWrapping="Wrap" />
+      <Border Classes="banner-warning" Padding="8" IsVisible="{Binding HasWarning}">
+        <TextBlock Text="{Binding WarningMessage}" TextWrapping="Wrap" />
+      </Border>
+      <TextBlock Text="{Binding ConflictMessage}"
+                 IsVisible="{Binding HasConflict}"
+                 Foreground="{DynamicResource Mocassin.WarningForeground}"
+                 TextWrapping="Wrap" />
+      <TextBlock Text="{Binding MemberCount, StringFormat='{}{0} member(s)'}"
+                 Classes="caption" />
+
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <Button Content="Apply" Command="{Binding ApplyCommand}" automation:AutomationProperties.Name="Apply particle set changes" />
+        <Button Content="Revert" Command="{Binding RevertCommand}" automation:AutomationProperties.Name="Revert particle set changes" />
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

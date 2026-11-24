@@ -36,6 +36,26 @@ the normal project load path (64 MiB), and the seven-day sweep deletes only know
 patterns. Sidecars are never swept. See
 [Repository and file layout](../reference/file-layout.md#application-data-layout).
 
+## Model-editor inline errors versus diagnostic codes
+
+The model editors show inline messages for the same checks the validation surface reports, but the two channels
+have different jobs:
+
+- A code-bearing inline message (`PAR001`, `PAR005`, `STR003`, `STR007`, `STR009`, `TRN012`, …) is a real
+  diagnostic. The message is the validator's own text; the editor does not invent or reword codes. **Open
+  Problems** shows the full instance, path, related paths, and help anchor.
+- **Apply is disabled** while the candidate has an error. This includes the site form's `STR007` overlap: the
+  candidate has no preview because `TryCreatePreview` returns null for an overlap, so the form lists the
+  `STR007` diagnostics instead of claiming preview rows.
+- A blocked delete is not an error code; it is the usage index's pre-check. The detail lists the dependents
+  (MMC/KMC transitions, occupation exchanges/dopings, energy references) and offers navigation. The
+  energy-reference-only action is available only when every dependent is an energy reference.
+- Expression parse failures (for example `1e` or `2 pi`), an out-of-range numeric value, and the read-only
+  “changes cannot be saved” message are app-level messages, not diagnostic codes. They keep the project, undo
+  stack, save point, and dirty state unchanged.
+- A stability change warning is advisory. The Problems channel reports the `TRN012`/`TRN020` diagnostics after
+  the edit; the warning does not block the edit.
+
 ## Common failures
 
 | Symptom | Likely cause | Fix |

@@ -66,12 +66,15 @@ internal sealed class AppHost : IDisposable
                 OperatingSystem.IsWindows() || OperatingSystem.IsMacOS()));
         builder.Services.AddMocassinApp();
         builder.Services.AddMocassinViewModels();
+        builder.Services.AddMocassinModelEditors();
         builder.Services.AddMocassinViews();
         builder.Services.AddMocassinShell();
         builder.Services.AddSingleton<ILoggerProvider>(
             provider => new ConsoleLoggerProvider(provider.GetRequiredService<IConsoleService>()));
 
         var host = builder.Build();
+        host.Services.GetRequiredService<Mocassin.App.ViewModels.Editors.Navigation.ModelEditorCommandRegistrar>()
+            .Register();
         if (settingsLoad.IsFatal)
         {
             var settingsLogger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger<AppHost>();

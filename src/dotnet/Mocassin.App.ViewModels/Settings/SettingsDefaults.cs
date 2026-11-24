@@ -68,6 +68,21 @@ internal static class SettingsDefaults
     public const double DefaultConsoleFraction = 0.32d;
 
     /// <summary>
+    /// The default editor selection-pane share.
+    /// </summary>
+    public const double DefaultEditorFraction = 0.42d;
+
+    /// <summary>
+    /// The minimum persisted editor selection-pane share.
+    /// </summary>
+    public const double MinEditorFraction = 0.25d;
+
+    /// <summary>
+    /// The maximum persisted editor selection-pane share.
+    /// </summary>
+    public const double MaxEditorFraction = 0.70d;
+
+    /// <summary>
     /// The pre-refresh left panel fraction used to detect a never-dragged layout.
     /// </summary>
     public const double LegacyDefaultLeftFraction = 260d / LegacyDesignWidth;

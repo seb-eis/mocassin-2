@@ -86,7 +86,7 @@ public sealed class IconAssetTests
 
                     var tree = FindTree(window);
                     var nodes = tree.GetVisualDescendants().OfType<TreeViewItem>().ToList();
-                    Assert.Equal(2, nodes.Count);
+                    Assert.Equal(3, nodes.Count);
                     AssertGlyph(nodes[0], "NodeIconSlot", "Overview", IconKeys.Overview);
                     AssertGlyph(nodes[1], "NodeIconSlot", "Json", IconKeys.Json);
 
@@ -166,7 +166,7 @@ public sealed class IconAssetTests
                         }
 
                         var nodes = FindTree(window).GetVisualDescendants().OfType<TreeViewItem>().ToList();
-                        Assert.Equal(2, nodes.Count);
+                        Assert.Equal(3, nodes.Count);
                         AssertGlyphFill(nodes[0], "NodeIconSlot", "Mocassin.SelectedForeground");
                         AssertGlyphFill(nodes[1], "NodeIconSlot", "Mocassin.ForegroundMutedBrush");
 

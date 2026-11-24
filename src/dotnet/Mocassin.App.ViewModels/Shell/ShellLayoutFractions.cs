@@ -58,6 +58,27 @@ internal static class ShellLayoutFractions
             : SettingsDefaults.DefaultConsoleFraction;
 
     /// <summary>
+    /// Clamps the editor selection-pane share to its persisted range. Non-finite input falls back to the default.
+    /// </summary>
+    /// <param name="value">The candidate fraction.</param>
+    /// <returns>The clamped fraction.</returns>
+    public static double ClampEditor(double value) =>
+        double.IsFinite(value)
+            ? Math.Clamp(value, SettingsDefaults.MinEditorFraction, SettingsDefaults.MaxEditorFraction)
+            : SettingsDefaults.DefaultEditorFraction;
+
+    /// <summary>
+    /// Normalizes the editor selection-pane share read from settings. An out-of-range value falls back to the
+    /// default, matching the tolerant settings reader.
+    /// </summary>
+    /// <param name="value">The candidate fraction.</param>
+    /// <returns>The valid fraction or the default.</returns>
+    public static double NormalizeEditor(double value) =>
+        double.IsFinite(value) && value >= SettingsDefaults.MinEditorFraction && value <= SettingsDefaults.MaxEditorFraction
+            ? value
+            : SettingsDefaults.DefaultEditorFraction;
+
+    /// <summary>
     /// Gets the centre column share for the supplied side fractions.
     /// </summary>
     /// <param name="left">The left fraction.</param>

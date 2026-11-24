@@ -21,4 +21,29 @@ internal static class DocumentKinds
     /// The read-only canonical project JSON.
     /// </summary>
     public const string ProjectJson = "project.json";
+
+    /// <summary>
+    /// The particle editor document.
+    /// </summary>
+    public const string ModelParticles = "model.particles";
+
+    /// <summary>
+    /// The particle-set editor document.
+    /// </summary>
+    public const string ModelParticleSets = "model.particleSets";
+
+    /// <summary>
+    /// The structure form document.
+    /// </summary>
+    public const string ModelStructure = "model.structure";
+
+    /// <summary>
+    /// The reference-site editor document.
+    /// </summary>
+    public const string ModelSites = "model.sites";
+
+    /// <summary>
+    /// The dummy-position editor document.
+    /// </summary>
+    public const string ModelDummyPositions = "model.dummyPositions";
 }

@@ -5,7 +5,7 @@ using Mocassin.Core.Editing;
 namespace Mocassin.App.ViewModels.Editing;
 
 /// <summary>
-/// Result of one <see cref="ProjectEditCoordinator.Apply"/> call.
+/// Result of one <c>ProjectEditCoordinator.Apply</c> call.
 /// </summary>
 /// <param name="Outcome">The app-level outcome.</param>
 /// <param name="Edit">

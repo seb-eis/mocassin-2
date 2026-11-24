@@ -65,6 +65,7 @@ internal static class AppSettingsValidator
                 SettingsDefaults.DefaultConsoleFraction,
                 "console fraction",
                 warnings),
+            EditorFraction = EditorFraction(layout.EditorFraction, warnings),
             LeftVisible = layout.LeftVisible,
             RightVisible = layout.RightVisible,
             ConsoleVisible = layout.ConsoleVisible,
@@ -151,6 +152,27 @@ internal static class AppSettingsValidator
             CleanExit = session.CleanExit,
             SavedUtc = session.SavedUtc,
         };
+    }
+
+    private static double EditorFraction(double value, List<string> warnings)
+    {
+        if (!double.IsFinite(value))
+        {
+            warnings.Add("The editor fraction is not finite; the default was used.");
+            return SettingsDefaults.DefaultEditorFraction;
+        }
+
+        var clamped = Math.Clamp(
+            value,
+            SettingsDefaults.MinEditorFraction,
+            SettingsDefaults.MaxEditorFraction);
+        if (clamped != value)
+        {
+            warnings.Add(
+                $"The editor fraction was clamped to {SettingsDefaults.MinEditorFraction}–{SettingsDefaults.MaxEditorFraction}.");
+        }
+
+        return clamped;
     }
 
     private static double Fraction(
