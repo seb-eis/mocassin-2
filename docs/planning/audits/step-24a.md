@@ -211,7 +211,10 @@ Severity values: **Blocker**, **Major**, **Minor**, **Note**. Origin: **design**
 
 ## Record state
 
-**State:** Fixes required — audit round 1 (see `Audit rounds`); the dev owns the resolution/fix commit and a fresh re-audit.
+**State:** Re-audit required — audit round 1 returned `Fixes required`; the dev applied F-1…F-8 on
+`feature/step-24a-model-editors-particles-and-structure/fix-audit-round-1` (squashed into the step branch as
+`10c7206`), reran the local closeout gate and the Ubuntu/Windows/macOS CI gates at `10c7206`, and completed the
+closeout evidence. No finding is deferred. A fresh/continuing review agent appends round 2.
 
 ## Reviewer independence
 
@@ -237,11 +240,24 @@ Follow-up issue/step: Step 24A re-audit after the F-1 fix and a new closeout CI 
 
 ## Resolution status
 
+Filled by the dev after the round-1 verdict. The review agent-authored findings, evidence, verdict, and round text
+above are unchanged.
+
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| F-1 | **Fixed** — `CellSiteDetailViewModel.ApplyCore` re-validates the candidate synchronously (the 250 ms preview is display-only), and `CanApply` stays false until the current candidate is validated. Evidence: `CellSiteEditorTests.TheProductionDebouncedFormRefusesAnOverlapBeforeThePreviewRuns` (real `SitesEditorViewModel` + `ManualTimeProvider` + `InlineUiDispatcher`), plus the existing synchronous test. Nothing is committed and `STR007` is shown before/after the debounce. | Dev | `10c7206` |
+| F-2 | **Fixed** — `SitesEditorViewModel` sets `Table.IsMultiSelectEnabled = true`, so the surface switches to multi-select and `RemoveManyCore` is reachable. Evidence: `CellSiteEditorTests.TheSiteTableEnablesMultiSelectAndBulkDeleteIsOneUndoEntry` (two-site bulk delete is one undo entry). | Dev | `10c7206` |
+| F-3 | **Fixed** — the document view binds `SelectedUsages` (with per-row **Go**) and the `ShowUsagesCommand`/`OpenUsageCommand` navigation for every master-detail domain. Evidence: `EditorIntegrationTests.TheBlockedDeleteDependentsAndShowUsagesAreBoundInTheDocumentView`, plus the blocked-delete navigation assertions in `ParticleEditorTests`/`ParticleSetEditorTests`. | Dev | `10c7206` |
+| F-4 | **Fixed** — `Delete` now opens a Remove/Cancel confirmation bar (`PendingRemovalViewModel`); the site/cell/dummy/space-group forms apply on `Enter` in a single-line field (`EditorKeyGestures`); `StructureEditorDocumentView` declares and focuses the space-group search field. Evidence: `EditorKeyboardTests.DeleteAsksForConfirmationBeforeRemoving`, `EditorKeyboardTests.EnterAppliesTheFocusedSiteForm`, `EditorKeyboardTests.EnterAppliesTheCellParameterForm`, `EditorAccessibilityTests`. | Dev | `10c7206` |
+| F-5 | **Fixed** — added the named `EditorReadOnlyTests` (rendered banner in both document shapes, disabled commands, forced `ReadOnly` apply), `EditorAccessibilityTests` (control names, table list role, textual severity, named/keyboard-resizable splitter, committed pane fraction), and `EditorPerformanceTests` (100 vs 1,000 realized containers, all rows, last row selectable, coalescing, no dropped rows). Added dark/high-contrast baselines for sets, structure, and dummies. Recorded the non-gating timing evidence in the step page §13. The §13 names, criterion 11, and the acceptance claims now match the delivered classes. | Dev | `10c7206` |
+| F-6 | **Fixed** — the status dashboard “Active work” paragraph now reflects the accepted design, the step branch, the six squashed features, audit round 1 `Fixes required`, the fixes, and the round-2 re-audit state. The 24A row carries the round-2 runs and commit. | Dev | `10c7206` |
+| F-7 | **Fixed** — `docs/tutorials/ceria-model.md` uses the sample's vacancy symbol `Vc`. | Dev | `10c7206` |
+| F-8 | **Fixed** — `SitesEditorViewModel.OnDisposed` disposes its `StructurePreviewScheduler`; a pending timer cannot fire after the editor/document closes. Evidence: `CellSiteEditorTests.DisposingTheSitesEditorCancelsThePendingPreview` (manual clock + recording dispatcher; no post after dispose). | Dev | `10c7206` |
 
-The dev fills this section after the verdict. Do not alter the review agent-authored findings, evidence, or verdict.
+**Verification at `10c7206`:** `./tools/verify.sh dotnet` (App 467, 0 failed; build 0 warnings; format clean),
+`api`, `structure`, `docs`, then `all --require` → exit 0. Ubuntu `45491888826`, Windows `45492513811`, and macOS
+`45493153286` are green at `10c7206`; `python tools/check_closeout_evidence.py
+docs/planning/closeout/step-24a.json` → `Closeout evidence: OK`.
 
 ## Approval summary
 

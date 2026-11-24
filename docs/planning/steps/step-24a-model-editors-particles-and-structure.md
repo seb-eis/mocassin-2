@@ -22,12 +22,12 @@ adds one public Core API. No format change and no new dependency. Justification 
 
 ## Implementation status
 
-- **Status:** In audit — features 1–6 squashed (`c24d1cf`, `0c749c2`, `82cd326`, `034981d`, `5128f9f`, `9d0cfd7`); audit round 1 returned **Fixes required** (F-1…F-8) and the fixes are on `feature/step-24a-model-editors-particles-and-structure/fix-audit-round-1`, squashed on the step branch (round-2 freeze recorded in the closeout evidence); re-audit pending [audit record](../audits/step-24a.md)
+- **Status:** In audit — features 1–6 squashed (`c24d1cf`, `0c749c2`, `82cd326`, `034981d`, `5128f9f`, `9d0cfd7`); audit round 1 returned **Fixes required** (F-1…F-8) and the fixes are squashed as `10c7206`; round 2 is requested [audit record](../audits/step-24a.md)
 - **Step branch:** `step/24a-model-editors-particles-and-structure`
-- **Step CI:** [Ubuntu 45477848106](https://github.com/seb-eis/mocassin-2/actions/runs/45477848106), [Windows 45478516289](https://github.com/seb-eis/mocassin-2/actions/runs/45478516289), [macOS 45479315065](https://github.com/seb-eis/mocassin-2/actions/runs/45479315065) green at `5dd70e6` (round 1); round 2 runs are pending at the new frozen commit
+- **Step CI:** Round 2 at `10c7206`: [Ubuntu 45491888826](https://github.com/seb-eis/mocassin-2/actions/runs/45491888826), [Windows 45492513811](https://github.com/seb-eis/mocassin-2/actions/runs/45492513811), [macOS 45493153286](https://github.com/seb-eis/mocassin-2/actions/runs/45493153286) green. Round 1 at `5dd70e6`: [Ubuntu 45477848106](https://github.com/seb-eis/mocassin-2/actions/runs/45477848106), [Windows 45478516289](https://github.com/seb-eis/mocassin-2/actions/runs/45478516289), [macOS 45479315065](https://github.com/seb-eis/mocassin-2/actions/runs/45479315065) green
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** [Fixes required — round 1](../audits/step-24a.md); round-1 fixes recorded in the resolution section; closeout evidence [`step-24a.json`](../closeout/step-24a.json)
+- **Audit:** [Fixes required — round 1; re-audit required](../audits/step-24a.md); round-2 frozen audited commit `10c7206`; closeout evidence [`step-24a.json`](../closeout/step-24a.json)
 - **Design review:** **Ready with notes — accepted by the human owner 2026-11-23** at
   `b75efea4997eab9e89ebe62297efeca1f0c2f26e` ([record](../reviews/step-24a.md), round 2 `f4cc809`); class High
   accepted as one unit, the six-feature list approved, and revised D-2 confirmed. m-13, m-14, and m-15 are
@@ -54,7 +54,7 @@ adds one public Core API. No format change and no new dependency. Justification 
 | 4. Site table and P1 preview | `feature/step-24a-model-editors-particles-and-structure/site-table-and-p1-preview` | **Squashed** | `./tools/verify.sh dotnet` (435 App + all suites), `structure`, `docs` green 2026-11-23; `CellSiteEditorTests` (m-14 overlap refusal, preview-index equality, D-2 energy-only delete, stability warning, read-only) | — (no per-feature run) | `034981d` |
 | 5. Dummy positions and structure summary | `feature/step-24a-model-editors-particles-and-structure/dummy-positions-and-structure-summary` | **Squashed** | `./tools/verify.sh dotnet` (440 App + all suites), `structure`, `docs` green 2026-11-23; `DummyPositionTests` (distinct glyph, undo, save/load round-trip, read-only), `StructureSummaryTests` (recomputed equality, no statistics dependency) | — (no per-feature run) | `5128f9f` |
 | 6. 24A tests, documentation, and closeout | `feature/step-24a-model-editors-particles-and-structure/tests-docs-and-closeout` | **Squashed** | `./tools/verify.sh all --require` green at `9d0cfd7`; App 451 tests; `docs`, `structure`, `policy` green; parity/24A-24B mapped | Ubuntu 45477848106, Windows 45478516289, macOS 45479315065 green at `5dd70e6` | `9d0cfd7` |
-| 7. Audit round 1 fixes | `feature/step-24a-model-editors-particles-and-structure/fix-audit-round-1` | **Squashed** | `./tools/verify.sh dotnet`, `api`, `structure`, `docs`, then `all --require` green 2026-11-24; F-1…F-8 regression tests added (`CellSiteEditorTests`, `EditorKeyboardTests`, `EditorReadOnlyTests`, `EditorAccessibilityTests`, `EditorPerformanceTests`, `EditorIntegrationTests`, `ParticleEditorTests`, `ParticleSetEditorTests`) | Round 2 runs recorded in the closeout evidence | round-1 fix squash (see closeout evidence) |
+| 7. Audit round 1 fixes | `feature/step-24a-model-editors-particles-and-structure/fix-audit-round-1` | **Squashed** | `./tools/verify.sh dotnet`, `api`, `structure`, `docs`, then `all --require` green at `10c7206`; App 467 tests; F-1…F-8 regression tests added (`CellSiteEditorTests`, `EditorKeyboardTests`, `EditorReadOnlyTests`, `EditorAccessibilityTests`, `EditorPerformanceTests`, `EditorIntegrationTests`, `ParticleEditorTests`, `ParticleSetEditorTests`) | Round 2: Ubuntu 45491888826, Windows 45492513811, macOS 45493153286 green at `10c7206` | `10c7206` |
 
 ## Goal
 
@@ -789,17 +789,18 @@ cross-step interfaces — more overhead without a smaller audit surface.
 
 ## Pre-audit gate and closeout record
 
-Recorded 2026-11-24 by the dev (`dev`; `dev-free` free-limit fallback). Design class: **Full**; no waiver.
+Recorded 2026-11-24 by the dev (`dev`; `dev-free` free-limit fallback); re-run 2026-11-24 after the audit
+round-1 fixes. Design class: **Full**; no waiver.
 
 | Check | Result |
 | --- | --- |
 | Every ticked acceptance criterion maps to evidence | Mapped below |
-| Step page, dashboard, feature log, closeout evidence agree | Step page/dashboard/feature log updated; closeout evidence prepared with the CI fields explicitly incomplete |
-| Structure / link / secret / licence checks | `./tools/verify.sh all --require` green at `9d0cfd7` (App 451 tests; structure/docs/policy; AOT evidence recorded) |
+| Step page, dashboard, feature log, closeout evidence agree | Step page/dashboard/feature log updated; closeout evidence binds `10c7206` |
+| Structure / link / secret / licence checks | `./tools/verify.sh all --require` green at `10c7206` (App 467 tests; structure/docs/policy; AOT evidence recorded) |
 | Design class / waiver recorded | **Full**, no waiver |
 | POC report and PNGs on `main` (m-11) | Present on `main` at `3e904ed` (POC merge `3e904ed`) |
 | Parity rows mapped to 24A/24B (n-2) | 24A rows name the particle/set/structure/dummy/P1/summary/framework work; transition/editor rows name 24B |
-| `python tools/check_closeout_evidence.py docs/planning/closeout/step-24a.json` | **Pass** — `Closeout evidence: OK` at the frozen audited commit. |
+| `python tools/check_closeout_evidence.py docs/planning/closeout/step-24a.json` | **Pass** — `Closeout evidence: OK` at the frozen audited commit `10c7206`. |
 
 **Evidence map**
 
@@ -809,7 +810,7 @@ Recorded 2026-11-24 by the dev (`dev`; `dev-free` free-limit fallback). Design c
 | Author the ceria particles, sets, structure, and sites from `samples/blank` | `ModelEditorAcceptanceTests.CeriaParticlesAndSetsAreAuthoredFromBlankAndFullyUndone` (full structure/site authoring and undo-to-blank) |
 | Drag and keyboard set membership produce the same order | `ParticleSetEditorTests.DragAndKeyboardPathsProduceTheSameOrder` |
 | Space-group preview/cancel | `SpaceGroupPreviewTests` |
-| Overlap inline and refused | `CellSiteEditorTests.AnOverlappingCandidateIsShownAndRefused` (m-14) |
+| Overlap inline and refused (synchronous and debounced production paths) | `CellSiteEditorTests.AnOverlappingCandidateIsShownAndRefused` (m-14), `CellSiteEditorTests.TheProductionDebouncedFormRefusesAnOverlapBeforeThePreviewRuns` (F-1) |
 | P1 preview indices and no operation label | `CellSiteEditorTests.TheTableAndP1PreviewMatchTheEngineData` |
 | Diagnostic navigation | `ModelEditorFrameworkTests`, `EditorIntegrationTests`, `CellSiteEditorTests.OpeningADependentRequestsShellNavigation` |
 | Undo/redo and save point | `ModelEditorFrameworkTests`, `ParticleEditorTests`, `ParticleSetEditorTests`, `SpaceGroupPreviewTests`, `CellParameterTests`, `CellSiteEditorTests`, `DummyPositionTests`, `EditorRefreshTests`, `ProjectDocumentApplyOverloadTests` |
@@ -820,14 +821,15 @@ Recorded 2026-11-24 by the dev (`dev`; `dev-free` free-limit fallback). Design c
 | Editor performance (non-gating numbers in §13) | `EditorPerformanceTests` (100 vs 1,000 realized containers, all rows, last row selectable, coalescing, no dropped rows) |
 | Documentation | `particles.md`, `structure.md`, `ui-architecture.md`, `ui-interaction-contract.md`, `errors.md`, `tutorials/ceria-model.md`; strict docs build |
 
-**Closeout status.** `./tools/verify.sh all --require` is **green at `9d0cfd7`** (App 451 tests; docs, structure,
-policy, contracts, secret/licence checks, AOT evidence). The single closeout CI run
-[45477848106](https://github.com/seb-eis/mocassin-2/actions/runs/45477848106) and the Windows/macOS platform gates
-[45478516289](https://github.com/seb-eis/mocassin-2/actions/runs/45478516289) /
-[45479315065](https://github.com/seb-eis/mocassin-2/actions/runs/45479315065) are green at
-`5dd70e652c2885d2b439b4b495c0cd3f7e79b742`. `python tools/check_closeout_evidence.py
-docs/planning/closeout/step-24a.json` reports `Closeout evidence: OK`. The audit request
-[`../audits/step-24a.md`](../audits/step-24a.md) is `Ready for audit`; the branch is frozen for the review agent.
+**Closeout status.** `./tools/verify.sh all --require` is **green at `10c7206`** (App 467 tests; docs, structure,
+policy, contracts, secret/licence checks, AOT evidence). The round-2 closeout CI run
+[45491888826](https://github.com/seb-eis/mocassin-2/actions/runs/45491888826) and the Windows/macOS platform gates
+[45492513811](https://github.com/seb-eis/mocassin-2/actions/runs/45492513811) /
+[45493153286](https://github.com/seb-eis/mocassin-2/actions/runs/45493153286) are green at
+`10c72066bd71e121c9deef7fb92a6b6efe14be3a`. `python tools/check_closeout_evidence.py
+docs/planning/closeout/step-24a.json` reports `Closeout evidence: OK`. The audit record
+[`../audits/step-24a.md`](../audits/step-24a.md) is `Re-audit required`; the branch is frozen at the round-2
+audited commit for the review agent.
 
 ## Documentation
 

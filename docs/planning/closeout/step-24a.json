@@ -1,25 +1,25 @@
 {
   "step": "step-24a",
-  "audit_commit": "5dd70e652c2885d2b439b4b495c0cd3f7e79b742",
+  "audit_commit": "10c72066bd71e121c9deef7fb92a6b6efe14be3a",
   "closeout_ci": {
-    "run_id": "45477848106",
-    "head_sha": "5dd70e652c2885d2b439b4b495c0cd3f7e79b742"
+    "run_id": "45491888826",
+    "head_sha": "10c72066bd71e121c9deef7fb92a6b6efe14be3a"
   },
   "main_sha_at_freeze": "3e904ed21a5004dcf41cfd9060adaaf33a1967b7",
-  "merge_candidate": "5dd70e652c2885d2b439b4b495c0cd3f7e79b742",
+  "merge_candidate": "10c72066bd71e121c9deef7fb92a6b6efe14be3a",
   "merge_tree_ci": {
     "run_id": "",
     "head_sha": ""
   },
-  "platform_ci": "windows run 45478516289 at 5dd70e652c2885d2b439b4b495c0cd3f7e79b742 (green, https://github.com/seb-eis/mocassin-2/actions/runs/45478516289); macos run 45479315065 at 5dd70e652c2885d2b439b4b495c0cd3f7e79b742 (green, https://github.com/seb-eis/mocassin-2/actions/runs/45479315065)",
+  "platform_ci": "windows run 45492513811 at 10c72066bd71e121c9deef7fb92a6b6efe14be3a (green, https://github.com/seb-eis/mocassin-2/actions/runs/45492513811); macos run 45493153286 at 10c72066bd71e121c9deef7fb92a6b6efe14be3a (green, https://github.com/seb-eis/mocassin-2/actions/runs/45493153286)",
   "tag": "",
   "notes": [
-    "Ubuntu closeout CI run 45477848106 is the workflow_dispatch at audited commit 5dd70e652c2885d2b439b4b495c0cd3f7e79b742 (platforms=ubuntu, force_all=false). It is green: Detect changes, .NET (ubuntu-latest), Contracts and policy, and Public API compatibility succeeded; Rust and Python were skipped by path filters.",
-    "Windows platform gate run 45478516289 and macOS platform gate run 45479315065 were dispatched sequentially at the same commit and are green. Each ran Detect changes and the focused .NET platform job; the Ubuntu-only jobs were skipped.",
+    "Ubuntu closeout CI run 45491888826 is the workflow_dispatch at audited commit 10c72066bd71e121c9deef7fb92a6b6efe14be3a (platforms=ubuntu, force_all=false). It is green: Detect changes, .NET (ubuntu-latest), Contracts and policy, and Public API compatibility succeeded; Rust and Python were skipped by path filters.",
+    "Windows platform gate run 45492513811 and macOS platform gate run 45493153286 were dispatched sequentially at the same commit and are green. Each ran Detect changes and the focused .NET platform job; the Ubuntu-only jobs were skipped.",
     "The runs were dispatched sequentially because the CI workflow's per-ref concurrency group cancels overlapping dispatches on the same branch.",
-    "main 3e904ed21a5004dcf41cfd9060adaaf33a1967b7 (the step start base) is an ancestor of the audited commit and did not move; no merge-tree CI applies, and the audit-to-merge-candidate delta is empty.",
-    "Local closeout gate: ./tools/verify.sh all --require exited 0 at 9d0cfd7e2f50203742f07199e7e95695566e6762 (App 451 tests; strict docs build; contracts/policy; structure; Rust; Python; AOT evidence recorded). The audited commit 5dd70e6 adds only the closeout evidence, feature-6 status, and dashboard records on top of 9d0cfd7.",
-    "The closeout evidence and the audit request are documentation-only commits after the audited commit; no code, tests, contracts, or configuration changed after 5dd70e6. The audit record is ready for a fresh review agent; no verdict exists yet.",
+    "main 3e904ed21a5004dcf41cfd9060adaaf33a1967b7 (the step start base) is an ancestor of the audited commit and did not move; no merge-tree CI applies, and the audit-to-merge candidate delta is empty.",
+    "Local closeout gate: ./tools/verify.sh all --require exited 0 at 10c72066bd71e121c9deef7fb92a6b6efe14be3a (App 467 tests; strict docs build; contracts/policy; structure; Rust; Python; AOT evidence recorded). It is the same tree that passed the feature-branch gate at a8d90d5; the step squash 10c7206 has a byte-identical tree.",
+    "This evidence and the audit-record resolutions are documentation-only commits after the audited commit; no code, tests, contracts, or configuration changed after 10c7206. The audit record is ready for round 2 of a fresh/continuing review agent.",
     "tag is empty because the step has not been merged into main and no tag is permitted before owner approval."
   ]
 }
