@@ -22,9 +22,9 @@ adds one public Core API. No format change and no new dependency. Justification 
 
 ## Implementation status
 
-- **Status:** In progress — started 2026-11-23 from `main` at `3e904ed`; features 1–5 squashed (`c24d1cf`, `0c749c2`, `82cd326`, `034981d`, `5128f9f`), feature 6 pending
+- **Status:** In progress — features 1–6 squashed (`c24d1cf`, `0c749c2`, `82cd326`, `034981d`, `5128f9f`, `9d0cfd7`); closeout CI/platform dispatch is the remaining owner step, so the audit is not requested
 - **Step branch:** `step/24a-model-editors-particles-and-structure`
-- **Step CI:** — (the single closeout dispatch runs at the end of the step)
+- **Step CI:** **Not dispatched** — `gh` absent and no token; owner must dispatch `ci.yml` (`platforms=ubuntu`, then `windows`, then `macos`) at the frozen step commit
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
@@ -44,7 +44,7 @@ adds one public Core API. No format change and no new dependency. Justification 
 - **Design class:** **Full** (§16)
 - **Complexity class:** **High** — cross-step interfaces and test-matrix breadth; **owner acceptance as one High
   unit is required at the start gate**, and no further split is proposed (§16)
-- **Last updated:** 2026-11-23 (feature 5)
+- **Last updated:** 2026-11-24 (feature 6; closeout blocked on CI dispatch)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
@@ -53,6 +53,7 @@ adds one public Core API. No format change and no new dependency. Justification 
 | 3. Space group and cell parameters | `feature/step-24a-model-editors-particles-and-structure/space-group-and-cell-parameters` | **Squashed** | `./tools/verify.sh dotnet` (426 App + all suites), `structure`, `docs` green 2026-11-23; `SpaceGroupPreviewTests`, `CellParameterTests`, `EditorIntegrationTests` | — (no per-feature run) | `82cd326` |
 | 4. Site table and P1 preview | `feature/step-24a-model-editors-particles-and-structure/site-table-and-p1-preview` | **Squashed** | `./tools/verify.sh dotnet` (435 App + all suites), `structure`, `docs` green 2026-11-23; `CellSiteEditorTests` (m-14 overlap refusal, preview-index equality, D-2 energy-only delete, stability warning, read-only) | — (no per-feature run) | `034981d` |
 | 5. Dummy positions and structure summary | `feature/step-24a-model-editors-particles-and-structure/dummy-positions-and-structure-summary` | **Squashed** | `./tools/verify.sh dotnet` (440 App + all suites), `structure`, `docs` green 2026-11-23; `DummyPositionTests` (distinct glyph, undo, save/load round-trip, read-only), `StructureSummaryTests` (recomputed equality, no statistics dependency) | — (no per-feature run) | `5128f9f` |
+| 6. 24A tests, documentation, and closeout | `feature/step-24a-model-editors-particles-and-structure/tests-docs-and-closeout` | **Squashed** | `./tools/verify.sh all --require` green at `9d0cfd7`; App 451 tests; `docs`, `structure`, `policy` green; parity/24A-24B mapped | **Blocked** — closeout/platform dispatch needs owner (no token) | `9d0cfd7` |
 
 ## Goal
 
@@ -785,11 +786,11 @@ Recorded 2026-11-24 by the dev (`dev`; `dev-free` free-limit fallback). Design c
 | --- | --- |
 | Every ticked acceptance criterion maps to evidence | Mapped below |
 | Step page, dashboard, feature log, closeout evidence agree | Step page/dashboard/feature log updated; closeout evidence prepared with the CI fields explicitly incomplete |
-| Structure / link / secret / licence checks | `./tools/verify.sh structure`, `./tools/verify.sh docs`, and `./tools/verify.sh policy` green on the feature branch; re-run in `all --require` |
+| Structure / link / secret / licence checks | `./tools/verify.sh all --require` green at `9d0cfd7` (App 451 tests; structure/docs/policy; AOT evidence recorded) |
 | Design class / waiver recorded | **Full**, no waiver |
 | POC report and PNGs on `main` (m-11) | Present on `main` at `3e904ed` (POC merge `3e904ed`) |
 | Parity rows mapped to 24A/24B (n-2) | 24A rows name the particle/set/structure/dummy/P1/summary/framework work; transition/editor rows name 24B |
-| `python tools/check_closeout_evidence.py docs/planning/closeout/step-24a.json` | **Blocked** — no GitHub token and `gh` is absent; closeout CI/platform runs cannot be dispatched from this environment. Evidence remains explicitly incomplete (`closeout_ci.run_id` empty); the checker is expected to reject it until the owner dispatches the runs. |
+| `python tools/check_closeout_evidence.py docs/planning/closeout/step-24a.json` | **Blocked** — no GitHub token and `gh` is absent; closeout CI/platform runs cannot be dispatched from this environment. The evidence is explicitly incomplete (`closeout_ci.run_id` empty); the checker rejects it with `closeout_ci.run_id is required` until the owner dispatches the runs and updates `audit_commit`/`head_sha`/`merge_candidate` to that frozen commit. |
 
 **Evidence map**
 
@@ -808,9 +809,10 @@ Recorded 2026-11-24 by the dev (`dev`; `dev-free` free-limit fallback). Design c
 | Read-only paths | `ParticleEditorTests`, `ParticleSetEditorTests`, `CellParameterTests`, `CellSiteEditorTests`, `DummyPositionTests` |
 | Documentation | `particles.md`, `structure.md`, `ui-architecture.md`, `ui-interaction-contract.md`, `errors.md`, `tutorials/ceria-model.md`; strict docs build |
 
-**Closeout status.** `./tools/verify.sh all --require` and the single closeout CI/platform dispatches are recorded in the
-feature-6 handoff. CI dispatch is **blocked** in this environment: `gh` is absent, no `GH_TOKEN`/`GITHUB_TOKEN`
-is available, and an unauthenticated dispatch returns HTTP 401. The owner must dispatch:
+**Closeout status.** `./tools/verify.sh all --require` is **green at `9d0cfd7`** (App 451 tests; docs, structure,
+policy, contracts, secret/licence checks, AOT evidence). CI dispatch is **blocked** in this environment: `gh` is
+absent, no `GH_TOKEN`/`GITHUB_TOKEN` is available, and an unauthenticated dispatch returns HTTP 401. The owner
+must dispatch:
 
 1. `CI` (`ci.yml`) on `step/24a-model-editors-particles-and-structure`, `platforms=ubuntu` (the single closeout run).
 2. `CI` with `platforms=windows` and `platforms=macos` (required for the GUI keyboard/focus/drag/screenshot surface).

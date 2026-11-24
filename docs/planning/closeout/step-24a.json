@@ -1,0 +1,24 @@
+{
+  "step": "step-24a",
+  "audit_commit": "9d0cfd7e2f50203742f07199e7e95695566e6762",
+  "closeout_ci": {
+    "run_id": "",
+    "head_sha": "9d0cfd7e2f50203742f07199e7e95695566e6762"
+  },
+  "main_sha_at_freeze": "3e904ed21a5004dcf41cfd9060adaaf33a1967b7",
+  "merge_candidate": "9d0cfd7e2f50203742f07199e7e95695566e6762",
+  "merge_tree_ci": {
+    "run_id": "",
+    "head_sha": ""
+  },
+  "platform_ci": "not run — owner must dispatch windows and macos at the frozen step commit",
+  "tag": "",
+  "notes": [
+    "BLOCKED / EXPLICITLY INCOMPLETE: the closeout CI and Windows/macOS platform runs do not exist yet. This environment has no gh executable and no GH_TOKEN/GITHUB_TOKEN; an unauthenticated workflow_dispatch returns HTTP 401.",
+    "Local closeout evidence: ./tools/verify.sh all --require exited 0 at 9d0cfd7e2f50203742f07199e7e95695566e6762 (App 451 tests; strict docs build; contracts/policy; structure; Rust; Python; AOT evidence recorded).",
+    "Owner dispatch required, in this order: (1) CI workflow ci.yml at the step branch with platforms=ubuntu (the single closeout run); (2) platforms=windows; (3) platforms=macos. The step touches GUI keyboard/focus/drag/screenshot behaviour, so both platform gates are required.",
+    "After the runs exist, set closeout_ci.run_id to the Ubuntu run, set audit_commit and closeout_ci.head_sha and merge_candidate to the frozen commit the runs checked, record the Windows/macOS run ids in platform_ci, then re-run python tools/check_closeout_evidence.py docs/planning/closeout/step-24a.json. The audit record docs/planning/audits/step-24a.md is deliberately not created until that check passes.",
+    "main 3e904ed21a5004dcf41cfd9060adaaf33a1967b7 (the step start base) is an ancestor of the frozen step commit and has not moved since; no merge-tree CI applies while the audit-to-candidate delta is documentation-only.",
+    "The step page's pre-audit gate records the acceptance/evidence map and the same stop-and-relay point; the dashboard row remains In progress, not In audit."
+  ]
+}
