@@ -12,7 +12,7 @@
 | --- | --- |
 | Review ID | `POLICY-2026-11-27-CI` |
 | Type | Process policy update — CI gate and enforcement coverage |
-| Record path | `docs/planning/reviews/policy-update-2026-11-27-ci-process-guardrails.md` |
+| Record path | `docs/planning/reviews/policy-2026-11-27-ci-process-guardrails.md` |
 | Design class | **Full** |
 | Design-class trigger | [`docs/development/design-proportionality.md`](../../development/design-proportionality.md) §1, “Policy-update reviews”: the change edits the **CI policy** and the **enforcement coverage of a gate** (which changes start the process/binding guardrails). |
 | Branch | `fix/ci-process-checks` |
@@ -172,7 +172,7 @@ equals the `tools/verify.sh` command, and the `process` output is exported by th
 | `workflow_dispatch`, `platforms=ubuntu` (closeout), process paths changed | **runs** | Closeout run, path-filtered |
 | `workflow_dispatch`, `platforms=windows` or `macos` | skipped | Ubuntu-only condition; verified by the platform-gate test |
 | `workflow_dispatch`, `platforms=all` | **runs** if `process=true` | Ubuntu path is part of `all` |
-| `workflow_dispatch` with `force_all=true` | **runs** | Every area flag is forced true |
+| `workflow_dispatch` with `force_all=true` (`platforms=ubuntu` or `all`) | **runs** | Every area flag is forced true; Windows/macOS still skip the Ubuntu-only job |
 | Any event, `.github/workflows/ci.yml` changed | **runs** | `ci=true` → `all=true` and `process=true` |
 | Docs-only commit with `[skip ci]` | no run at all | Existing policy; accepted residual |
 
@@ -468,7 +468,7 @@ Severity values: **Blocker**, **Major**, **Minor**, **Note**. Origin: **design**
 
 ## Record state
 
-**State:** Changes required — round 1; F-1 (Major, Spec) is open.
+**State:** Re-review required — round 1 resolutions complete; fresh round 2 requested at `06a861b`.
 
 `Ready for review` means the design and the reviewed tree are frozen at `f00fd0f` and the request is complete. A
 `Changes required` verdict returns the work to the dev for a fix commit and a fresh round; `Ready for
@@ -496,3 +496,38 @@ Follow-up change: F-1 (Major, Spec) — add the omitted normative process paths 
 
 Approved by:
 Date:
+
+## Dev resolutions — round 1
+
+Dev-owned resolution and evidence section. The review agent's round-1 findings, evidence, verdict, and checklist
+text above are unchanged.
+
+**Fix commit (round-2 reviewed tree):** `06a861b6c123b9cb796309a9a7332cc237a08734`.
+**Request tip:** this documentation-only record commit; its parent is the fix commit.
+
+| Finding | Resolution |
+| --- | --- |
+| F-1 | Added bounded `process` patterns for the planning index and roadmap; closeout, incident, research, prototype, and retrospective homes; `tools/check_closeout_evidence.py`; and `tools/verify.sh`. The workflow, `ci-policy.md` §3, and `AGENTS.md` §3.13 now agree. `test_every_process_checker_input_matches_the_workflow_filter` imports `REQUIRED_FILES`, `NORMATIVE_FILES`, and `VERDICT_FILES` from the checker and requires every exported path, plus the two gate scripts, to match a live workflow pattern. Representative paths also exercise the shipped Bash filter. The checker was not weakened. |
+| F-2 | Added `process/binding` to the Ubuntu-only job list in the `ci.yml` header comment. |
+| F-3 | Renamed this record with `git mv` to `policy-2026-11-27-ci-process-guardrails.md` and updated its `Record path` field. No other Markdown link targeted the old name. The original naming rationale and the reviewer's old-name evidence remain as historical round-1 text, as requested. |
+| F-4 | Qualified the `force_all=true` decision-table row with `platforms=ubuntu` or `all` and stated that Windows/macOS still skip the Ubuntu-only process job. |
+| F-5 | Chose the wording fix: `ci-policy.md` §5 and `AGENTS.md` §3.13 now require owner approval before adding a new "run or job" while the budget guard is active. |
+| F-6 | Accepted. The approved combined Full pass reviews the design and implemented tree at one commit, so no separate post-implementation verification section is added. |
+
+### Resolution evidence
+
+| Check | Result |
+| --- | --- |
+| Pre-fix red reproduction | `detect(["docs/planning/closeout/_template.json"])` returned `process=false`; assertion exited 1. |
+| New regression before the fix | `Ran 1 test`; `FAILED (failures=13)` for the 13 omitted checker/gate paths. |
+| Filtered coverage after the fix | 73 distinct checker/process paths each returned `process=true` and every other area flag `false`; `tools/contracts/manifest.json`, `tools/check-license-headers.py`, and `src/dotnet/Mocassin.Core/Particle.cs` remained `process=false`. |
+| Negative proof at `06a861b` | In a disposable `git archive` of the fix commit, added `docs/planning/future-required-file.md` to `REQUIRED_FILES`; the new test failed only for that path: `Ran 1 test`, `FAILED (failures=1)`, exit 1 as expected. The scratch tree was removed. |
+| `python -m unittest discover -s tools/tests -t .` | `Ran 78 tests in 0.886s` — `OK`. |
+| `python tools/check_process_consistency.py` | `Process consistency: OK`. |
+| `python tools/check_docs_links.py` | `Documentation links OK (238 files scanned).` |
+| `python tools/check_doc_math.py` | `Documentation math conventions OK (234 files scanned).` |
+| `./tools/verify.sh docs --require` | Exit 0; .NET build 0 warnings/errors; math and link checks passed; strict Zensical `No issues found`; DocFX 0 warnings/errors; rustdoc documented 7 crates; site built; required closeout gate completed. |
+| `./tools/verify.sh policy --require` | Exit 0; public API compatible; 26 contract artifacts current; 274 space-group settings current; process checker and 78 tool tests passed; SPDX headers in 1211 source files; no secret patterns in 1790 tracked text files; `cargo deny` advisories/bans/licences/sources OK; required closeout gate completed. |
+
+No CI run was dispatched. This remains a maintenance branch with local validation only; no merge, tag, or `main`
+push is part of this resolution.
