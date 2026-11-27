@@ -134,7 +134,7 @@ jobs:
                 contracts=true ;;
               tools/check-api-compat.sh|tools/update-api-baseline.sh|tools/api-projects.txt)
                 api=true ;;
-              .opencode/*|AGENTS.md|GLOSSARY.md|opencode.json|docs/development/*|docs/planning/reviews/*|docs/planning/audits/*|docs/planning/README.md|docs/planning/04-roadmap.md|docs/planning/ci-policy.md|docs/planning/status.md|docs/planning/maintenance/*|docs/planning/drift-checks/*|docs/planning/closeout/*|docs/planning/incidents/*|docs/planning/research/*|docs/planning/prototypes/*|docs/planning/retrospectives/*|zensical.toml|tools/check_process_consistency.py|tools/check_closeout_evidence.py|tools/check_docs_links.py|tools/check_doc_math.py|tools/verify.sh|tools/tests/*)
+              README.md|CONTRIBUTING.md|SECURITY.md|.opencode/*|AGENTS.md|GLOSSARY.md|opencode.json|docs/**|docs/development/*|docs/planning/reviews/*|docs/planning/audits/*|docs/planning/README.md|docs/planning/04-roadmap.md|docs/planning/ci-policy.md|docs/planning/status.md|docs/planning/maintenance/*|docs/planning/drift-checks/*|docs/planning/closeout/*|docs/planning/incidents/*|docs/planning/research/*|docs/planning/prototypes/*|docs/planning/retrospectives/*|zensical.toml|tools/check_process_consistency.py|tools/check_closeout_evidence.py|tools/check_docs_links.py|tools/check_doc_math.py|tools/verify.sh|tools/tests/*)
                 process=true ;;
               .github/workflows/ci.yml)
                 ci=true ;;
