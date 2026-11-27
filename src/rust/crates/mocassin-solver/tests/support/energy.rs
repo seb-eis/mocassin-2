@@ -65,6 +65,20 @@ pub fn cluster_only_job(particles: &[u8]) -> JobPackage {
     })
 }
 
+/// A multi-cell real-package job with deterministic cell-specific occupations.
+pub fn multi_cell(mut job: JobPackage, cells: &[&[u8]]) -> JobPackage {
+    assert!(!cells.is_empty());
+    let p = job.model.structure.positions.len();
+    job.lattice.lattice_size = [cells.len() as u32, 1, 1];
+    job.lattice.position_count = p as u32;
+    job.lattice.particles = cells
+        .iter()
+        .flat_map(|cell| cell.iter().copied().map(ParticleId::new))
+        .collect();
+    job.settings.electric_field_vm = 0.0;
+    job
+}
+
 /// Initializes a real job after the caller's in-process model mutation.
 pub fn context(job: JobPackage) -> mocassin_solver::context::SimulationContext {
     initialize(job)

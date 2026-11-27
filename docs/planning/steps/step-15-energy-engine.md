@@ -38,12 +38,12 @@ owner-acceptance request per
 - **Design review:** Round 1 `Changes required` (2026-11-22, reviewed `31d5e34`, record commit `04f9a0a`);
   round-2 `Ready with notes` at design freeze `af9ded8` (record `3bec909`) — **accepted by the human owner
   2026-11-27**. See [`docs/planning/reviews/step-15.md`](../reviews/step-15.md).
-- **Last updated:** 2026-11-27 (feature 1 squashed as `49ca6af`)
+- **Last updated:** 2026-11-27 (feature 2 squashed; squash commit recorded on the step branch)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
 | 1 Transition evaluation | `feature/step-15-energy-engine/transition-evaluation` | Squashed | All required feature gates pass; see evidence below | — | `49ca6af` |
-| 2 State application | `feature/step-15-energy-engine/state-application` | Planned | — | — | — |
+| 2 State application | `feature/step-15-energy-engine/state-application` | Squashed | All required feature gates pass; see evidence below | — | Recorded on the step branch after the squash |
 | 3 MMC exchange | `feature/step-15-energy-engine/mmc-exchange` | Planned | — | — | — |
 | 4 Benchmark, docs, and closeout | `feature/step-15-energy-engine/benchmarks-docs-and-closeout` | Planned | — | — | — |
 
@@ -64,6 +64,44 @@ owner-acceptance request per
 - **Limitations / next:** state application, MMC exchange, the allocation proof, and the Criterion benchmark are
   deliberately not in feature 1. `ExchangeEnergies` and the commit methods land with features 2–3; feature 4 owns
   allocation/benchmark/closeout evidence. Feature 2 may start from this squash.
+
+### Feature 2 evidence
+
+- **Branch / squash:** `feature/step-15-energy-engine/state-application` → squash commit recorded on
+  `step/15-energy-engine` after the feature gates pass.
+- **Diff summary:** adds `energy/path.rs` (the shared `(selected, direction, rule)` resolution and six-bit state
+  decoding used by both evaluation and commit), `energy/commit.rs` (`apply_state_change`, the fixed-order
+  particles/flags/tracker-id/pool/owner/cluster passes, the exact incremental `ΔU`, and the resolve-before-mutate
+  pre-validation), and `context/derivation.rs` (the per-environment flag refresh modulo a full scan and the
+  identity-following tracker permutation). `context/lattice.rs` gains crate-internal flag/id setters and
+  `context/mod.rs` exposes the void-member helper for the commit path. The new tests are `energy_state`
+  (six PR-fast cases: centre-only, conserving migration, shared-instance dedup, vacancy hop, owner outside the
+  path, non-KMC rejection) and `energy_state_property` (repeated incremental-vs-full, the unstable-owner hand
+  oracle, and the failed-resolution snapshot). Physics, solver-architecture, testing, error, status, and parity
+  documentation are updated.
+- **Implementation notes:** the owner-major pair delta is distributed to every `incoming` owner for all `pc`
+  rows, including owners outside the path. The member-side `ClusterAssoc` route and the centre-side
+  `centres(position(V)) × cell(V)` route are enumerated as one union; deduplication is by the stored final raw
+  code, so an instance whose code already equals the freshly built final tuple is a zero-delta skip and every
+  affected `(instance, cell)` is rebuilt and accounted exactly once. This removes the fixed scratch-set bound
+  while preserving §4/§6's once-per-entry rule. The pre-commit row `C` is read immediately before the
+  overwrite; `ΔU` weights every unchanged owner by `σ_O`, reads changed rows after the owner pass, and counts
+  the cluster term once per affected `(instance, cell)`. The tracker permutation keeps an unchanged node's
+  identity, gives each changed node the id of a same-particle source, pairs any non-conserving leftovers in
+  ascending path order, and clears a void destination. `apply_state_change` rejects an MMC context and a
+  `state0` that no longer matches the current occupation with exit 12 before mutating. Counters, histograms,
+  tracker values, and time are not touched.
+- **Gates:** `cargo fmt --manifest-path src/rust/Cargo.toml --all --check` passes;
+  `cargo clippy --manifest-path src/rust/Cargo.toml --workspace --all-targets -- -D warnings` passes;
+  `cargo test --manifest-path src/rust/Cargo.toml --workspace` passes. `./tools/verify.sh structure` passes
+  (9/9 architecture tests), `./tools/verify.sh docs --require` passes (strict Zensical, DocFX, rustdoc,
+  links/math), `python tools/check_process_consistency.py` reports `Process consistency: OK`, and
+  `./tools/verify.sh policy --require` passes (API, contracts, process, licence, secrets, dependency policy).
+- **CI:** none; feature branches use local gates only.
+- **Limitations / next:** `apply_exchange`/MMC (feature 3), the allocation-counting proof and Criterion benchmark
+  (feature 4), and closeout remain. The commit path is KMC-only by contract; Step 17's MMC engine uses its own
+  entry point. A non-conserving synthetic state pair is accepted only as a test fixture; Step 16's rule
+  resolution supplies conserving transitions.
 
 ## Goal
 
@@ -660,14 +698,14 @@ observable effect. D-5's decomposition and D-4's fail-closed rule are recorded a
 
 ## Implementation tasks
 
-- [ ] Add the `energy/` concept module (`EnergyEngine`, `TransitionEnergies`, `ExchangeEnergies`, the
+- [x] Add the `energy/` concept module (`EnergyEngine`, `TransitionEnergies`, `ExchangeEnergies`, the
       acceptance-exponential kernel) on top of the post-F-3 split context layout; keep every touched file below
       800 lines.
 - [x] Implement the read-only transition evaluation (§2/§3): path resolution via `resolve_path`, S0/raw-S1
       vector reads, per-node owner-major pair deltas over **every** path node's own links (changed and spectator
       receivers; the partner-change filter is a zero-delta skip), override-based cluster S2 codes with the void
       zero-row rule, the field term, and the `Result` error mapping.
-- [ ] Implement `apply_state_change` (§6): the fixed update order, the full owner-vector updates via
+- [x] Implement `apply_state_change` (§6): the fixed update order, the full owner-vector updates via
       `incoming`, the deduplicated member-side and centre-side cluster rebuild from the committed state,
       flags/tracker ids/pool membership, and the on-the-fly exact `ΔU` (§5, with `σ_O` on unchanged-owner
       deltas) with the debug consistency assertion.
@@ -698,23 +736,23 @@ observable effect. D-5's decomposition and D-4's fail-closed rule are recorded a
       accumulates every link's delta (deviation D-2).
 - [x] A **spectator receiver** (`S0_i = S2_i`) that owns a link to a changed node receives its own-row delta;
       `s2` equals a brute-force recomputation over every path node's links (round-1 F-1).
-- [ ] The incremental `ΔU` weights an unchanged owner's per-link delta by `σ_O`; an unstable unchanged owner of
+- [x] The incremental `ΔU` weights an unchanged owner's per-link delta by `σ_O`; an unstable unchanged owner of
       a link to a changed environment contributes no pair row, and the incremental total equals the full
       recomputation (round-1 F-2).
-- [ ] A cluster whose **centre** changes while no member changes is rebuilt (code, `code_id`, rows) and its
+- [x] A cluster whose **centre** changes while no member changes is rebuilt (code, `code_id`, rows) and its
       `C' − C` term enters `ΔU`; an instance reached by both the member-side and centre-side routes is rebuilt
       once (round-1 F-3).
 - [x] A rule with `static_correction = Some(..)` (hand-mutated; the v1 writer emits `None` for every rule) is
       rejected fail-closed with the documented exit-12 error; every real sample rule is `None` and dynamic.
-- [ ] `apply_state_change` updates every owner of a changed environment — including owners outside the path —
+- [x] `apply_state_change` updates every owner of a changed environment — including owners outside the path —
       plus particles, flags, mobile tracker ids, pool membership, and the affected instances' codes and rows
       (including a centre-only instance).
-- [ ] The incremental lattice energy equals the full recomputation after every accepted step (debug assertion
+- [x] The incremental lattice energy equals the full recomputation after every accepted step (debug assertion
       and property test) on a multi-cell lattice with pair and cluster terms and an unstable link owner.
 - [ ] MMC exchange energies equal brute-force recomputations in the linked, unlinked, and one-directionally
       linked cases (the last is deviation D-7), and the two-state detailed-balance ratio holds under a minimal
       in-test Metropolis driver.
-- [ ] Fast-exp is off by default and its relative error is bounded (≤ 3.5 %) when on.
+- [x] Fast-exp is off by default and its relative error is bounded (≤ 3.5 %) when on.
 - [ ] A counting allocator observes zero allocations in the evaluation and commit hot paths; the engine adds
       no context arrays and no memory-plan entries.
 - [ ] The `energy` Criterion benchmark records same-runner-class medians with a `baselines.json` entry.

@@ -43,6 +43,7 @@ use mocassin_types::{ClusterTable, JobPackage, SimulationKind};
 
 mod build;
 mod clusters;
+pub(crate) mod derivation;
 mod dimensions;
 mod energy;
 mod error;
@@ -55,6 +56,7 @@ mod links;
 mod pools;
 mod resume;
 
+pub(crate) use clusters::raw_has_void_member;
 pub use clusters::{ClusterArena, ClusterInstance, MAX_CLUSTER_SLOTS, NO_CLUSTER_CODE};
 pub use dimensions::{Dimensions, EnvId};
 pub use energy::{EnergyRuntime, FIELD_SCALE_PER_VM, K_B_EV};

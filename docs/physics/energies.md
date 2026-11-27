@@ -148,6 +148,35 @@ undefined; every v1 rule uses the dynamic path.
 The acceptance kernel returns \(\exp(-b_{01})\). Libm is the default; the job's `useFastExp` flag opts into
 the bounded binary-exponent approximation.
 
+## State application and the incremental lattice energy (Step 15 feature 2)
+
+When a caller accepts a transition, `apply_state_change` commits the rule's final (\(S2\)) occupation at the
+resolved path. The write order is fixed: affected cluster tuples are resolved before the first mutation;
+particles and derived flags follow; the mobile tracker ids are permuted so each identity follows the moved ion
+(an unchanged node keeps its identity, and a void destination has none); each changed environment leaves its old
+selection pool and joins its new one; every owner in the inverse link index receives the owner-major pair delta
+for all particles; and each affected cluster is rebuilt once from the final state. The affected cluster set is
+the union of the member-side `ClusterAssoc` route and the centre-side
+`centres(position(V)) × cell(V)` route, so a centre-only change cannot leave a stale row. Counters, tracker
+values, and time are not touched.
+
+The lattice energy is updated on the fly from the exact decomposition:
+
+$$
+\Delta U = \sum_V (\sigma'_V s'_V - \sigma_V s_V)
+ + \tfrac12\Bigl[\sum_V (\sigma'_V p'_V - \sigma_V p_V)
+ + \sum_{V}\ \sum_{\substack{O \in \mathrm{incoming}(V)\\ O\ \text{unchanged}}}
+   \sigma_O\,\delta_{(O,V)}\Bigr]
+ + \sum_{(i,c)} (C'_{i,c} - C_{i,c}),
+$$
+
+where \(s\) is the site background, \(p\) the pair part of the environment vector, \(C\) the per-centre
+cluster row, and \(\sigma\) the `STABLE` flag. The 0.5 pair factor appears exactly once; an unchanged unstable
+owner contributes no pair row even though its vector entry is updated. A changed environment's after-value is
+read after the owner pass, so the intra-path deltas are already included. The cluster rows \(C\) are read
+immediately before they are overwritten. In debug builds the stored total is checked against the independent
+full recomputation after every accepted step.
+
 ## Units
 
 Model and parameter tables use electronvolts (eV). The solver computes \(kT_eV = k_B T\) once per job and

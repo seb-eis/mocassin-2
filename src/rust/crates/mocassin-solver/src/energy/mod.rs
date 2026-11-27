@@ -2,10 +2,12 @@
 
 //! Transition-energy evaluation over one [`SimulationContext`](crate::context::SimulationContext).
 //!
-//! Step 15 feature 1 adds the read-only KMC evaluation and the acceptance-exponential kernel. State
-//! application and MMC exchange are separate features of the same concept module.
+//! The read-only KMC evaluation, fixed-order state application, and acceptance-exponential kernel live
+//! here. MMC exchange is a separate feature of the same concept module.
 
+mod commit;
 mod exponential;
+mod path;
 mod transition;
 
 pub use exponential::acceptance_exponential;

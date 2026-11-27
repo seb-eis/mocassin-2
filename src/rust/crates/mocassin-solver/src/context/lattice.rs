@@ -156,6 +156,16 @@ impl LatticeState {
         self.particles[env.index()] = particle;
     }
 
+    /// Replaces the derived flags of one environment after a committed particle change.
+    pub(crate) fn set_flags(&mut self, env: EnvId, flags: u8) {
+        self.flags[env.index()] = flags;
+    }
+
+    /// Replaces one environment's identity-only tracker id.
+    pub(crate) fn set_mobile_tracker(&mut self, env: EnvId, id: u32) {
+        self.mobile_tracker[env.index()] = id;
+    }
+
     /// Returns the raw flags of one environment.
     #[must_use]
     pub fn flags_at(&self, env: EnvId) -> u8 {

@@ -201,9 +201,9 @@ error.
 
 **Energy engine (Step 15).** Feature 1 exposes `EnergyEngine::new(&mut context)`,
 `EnergyEngine::transition_energies`, `TransitionEnergies` (including the no-field barrier accessors), and
-`acceptance_exponential(barrier, use_fast_exp)`. The supported composition is a short-lived engine per call;
-no struct may hold both the context and a second mutable engine borrow. Evaluation allocates nothing and
-mutates nothing. State application and MMC exchange land in later Step 15 features.
+`acceptance_exponential(barrier, use_fast_exp)`. Feature 2 adds `EnergyEngine::apply_state_change`. The
+supported composition is a short-lived engine per call; no struct may hold both the context and a second
+mutable engine borrow. Evaluation allocates nothing and mutates nothing. MMC exchange lands in feature 3.
 
 S0 and raw S1 read the context vectors. The S2 correction walks **every** path node's own forward links —
 changed and spectator receivers alike — because the vectors sum every link. The partner-change test is only a
@@ -215,13 +215,24 @@ Cluster S2 tuples are built once from the final state and resolved through `clus
 tuples use the zero row without a lookup. A present v1 `static_correction` fails closed with exit 12, a
 non-finite field term is exit 13, and other computed non-finite energies are invariant failures.
 
-On commit, the affected cluster set will be the deduplicated union of the member-side `ClusterAssoc` route from
-`incoming(V)` and `centres(position(V)) × cell(V)` for each changed environment, rebuilt once per
-`(instance, cell)` (Step 15 §4/§6; F-3). The pre-commit row `C` is captured before the step-6 overwrite, for
-example in the step-1 resolve pass, and the cluster difference uses that captured value (round-2 F-11). The
-incremental lattice energy applies the 0.5 pair factor once and weights every unchanged owner's pair delta by
-that owner's `STABLE` flag, because the total sums pair rows over stable environments only (Step 15 §5; F-2).
-The MMC exchange will apply each direction's own cross-term, recorded as deviation D-7.
+`apply_state_change` commits in the frozen order: resolve the affected final tuples before the first mutation;
+write particles and refresh each changed environment's flags; permute the mobile tracker ids; update pool
+membership; distribute the owner-major pair deltas to every `incoming` owner (owners outside the path included);
+rebuild each affected cluster; and add the exact `ΔU`. The affected set is the union of the member-side
+`ClusterAssoc` route from `incoming(V)` and `centres(position(V)) × cell(V)` for every changed environment
+(Step 15 §4/§6; F-3). The engine enumerates that union without a fixed scratch array and deduplicates by the
+stored final code: an instance whose stored raw code already equals the freshly built final tuple is a
+zero-delta skip, so a shared or centre-only instance is rebuilt and accounted exactly once. The pre-commit row
+`C` is read immediately before the overwrite that replaces it, and the cluster difference uses that captured
+value (round-2 F-11). The incremental total applies the 0.5 pair factor once and weights every unchanged
+owner's pair delta by that owner's `STABLE` flag, because the total sums pair rows over stable environments only
+(Step 15 §5; F-2). A changed row's after-value is read after the owner pass, so it already contains the
+intra-path pair changes. Flags follow the Step 14 rules (`STABLE`/`MOBILE`/`HAS_MOBILE_TRACKER`, never a
+full-array scan). Tracker ids are a permutation of the changed path nodes: a node whose particle does not change
+keeps its identity, a changed node takes the id of a source with the same particle, and a void destination holds
+no id; the rule's `tracker_order` is not the permutation source. Counters, histograms, tracker values, and time
+are never touched. The MMC exchange will share the kernel and apply each direction's own cross-term, recorded as
+deviation D-7.
 
 **Clusters.** A cluster link's `byte_position` is the environment's own slot (slot `0` = a centre). A cluster
 table can have **more than one centre**: the writer adds slot `0` to every P1 position of the centre site, so the

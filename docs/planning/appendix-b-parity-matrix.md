@@ -170,7 +170,7 @@ Status legend:
 | Pre-run/normalization | Y | Planned | 16 | Auto + fixed |
 | Time-step calculation | Y | Planned | 16 | |
 | Electric field | Y | Partial | 15/16 | Step 15 feature 1 implements the signed field term and non-finite rejection; KMC acceptance/use lands in 16 |
-| Pair/cluster/site energy | Y | Partial | 15 | Read-only S0/raw-S1/S2 evaluation, owner-major spectator/duplicate-image deltas, cluster expansion/void rules, and fail-closed static correction are implemented in feature 1; commit and MMC exchange follow in features 2–3 |
+| Pair/cluster/site energy | Y | Partial | 15 | Read-only S0/raw-S1/S2 evaluation, owner-major spectator/duplicate-image deltas, cluster expansion/void rules, and fail-closed static correction are implemented in feature 1; feature 2 adds the fixed-order state application, owner-major commit deltas to every incoming owner, member-side + centre-only cluster rebuild, flag/mobile-id/pool maintenance, and the exact incremental lattice energy with `σ_O`; MMC exchange follows in feature 3 |
 | Fast exponential | Y | Done | 15/16 | Opt-in bounded binary-exponent approximation with libm default; Step 16 owns the acceptance comparison |
 | MMC equilibrium break | Y | Planned | 17 | |
 | Abort conditions | Y | Planned | 16/17 | MCSP/time/rate/cancel |

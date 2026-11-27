@@ -162,9 +162,19 @@ or SQLite. Prefer real temporary directories and real files produced by the real
 - **Acceptance exponential.** `energy_exponential` proves libm is the default, the job flag is off by default,
   non-finite semantics match `f64::exp`, and the opt-in approximation stays within the 3.5% relative-error
   bound over `[-700, 700]`; extreme inputs use libm. PR-fast.
-- **No mocks.** Tests use real packages, real context/domain values, and independent direct sums. The later
-  allocation-counting and Criterion benchmark evidence belongs to feature 4; state-application and MMC tests
-  belong to features 2 and 3.
+- **Feature 2 state application.** `energy_state` proves the fixed commit order on real fixtures: a centre-only
+  change rebuilds the code, code id, and both centre rows and contributes `C' - C`; a conserving migration
+  permutes the mobile ids (each identity follows its ion, unchanged nodes keep theirs) and updates pool
+  membership; a transition that changes the centre and a member of the same instance rebuilds that instance
+  once; a vacancy hop clears the departed environment's flags, tracker id, and pool slot; and an owner outside
+  the path receives its owner-major pair delta. `energy_state_property` alternates a migration and its inverse
+  across three cells for 30 accepted steps and compares the incremental total with the independent full
+  recomputation after every step, with a structurally unstable P1 owner and non-zero site, pair, and cluster
+  terms. A separate hand oracle proves that the unstable unchanged owner's 99 eV vector delta is applied but
+  weighted by `sigma_O = 0`. A failure-injection test removes a final cluster tuple and proves the
+  resolve-before-mutate rule leaves particles, flags, tracker ids, inverse mapping, vectors, codes, and the total
+  unchanged. A non-KMC context is rejected with exit 12. These are PR-fast; the allocation-counting and Criterion
+  benchmark evidence belongs to feature 4, and MMC tests belong to feature 3.
 
 ## Avalonia workspace (Step 23A)
 

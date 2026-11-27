@@ -2,11 +2,11 @@
 
 //! Read-only KMC transition-energy evaluation.
 
-use mocassin_types::{JumpDirectionId, JumpRule, ParticleId, PositionId, StateCode};
+use mocassin_types::{JumpDirectionId, JumpRule, ParticleId, PositionId};
 
+use super::commit;
+use super::path::{MAX_PATH_NODES, resolve_rule_path};
 use crate::context::{ContextError, EnvId, SimulationContext};
-
-const MAX_PATH_NODES: usize = 10;
 
 /// The transition-energy view over one simulation context.
 ///
@@ -24,6 +24,24 @@ impl<'a> EnergyEngine<'a> {
         Self { ctx }
     }
 
+    /// Commits the rule's S2 occupations and updates the exact incremental lattice energy.
+    ///
+    /// Every affected final cluster tuple is resolved before the first mutation. The operation does not draw,
+    /// accept/reject, update counters/histograms/tracker values, or advance time.
+    ///
+    /// # Errors
+    ///
+    /// Returns the Step 14 cluster-code and input errors before mutation, and an invariant error for a
+    /// non-finite computed delta. A failed resolve leaves the context unchanged.
+    pub fn apply_state_change(
+        &mut self,
+        selected: EnvId,
+        direction: JumpDirectionId,
+        rule: &JumpRule,
+    ) -> Result<(), ContextError> {
+        commit::apply_state_change(self.ctx, selected, direction, rule)
+    }
+
     /// Evaluates one KMC rule application without mutating the context.
     ///
     /// All returned energies and barriers are in kT. The caller resolves the rule from the current start
@@ -39,75 +57,12 @@ impl<'a> EnergyEngine<'a> {
         direction: JumpDirectionId,
         rule: &JumpRule,
     ) -> Result<TransitionEnergies, ContextError> {
-        if rule.static_correction.is_some() {
-            return Err(ContextError::InvalidInput {
-                what: "static S2 correction",
-                detail: "static S2 correction is not defined for this package version; rebuild the package"
-                    .to_owned(),
-            });
-        }
-        if selected.index() >= self.ctx.dimensions.environment_count() as usize {
-            return Err(ContextError::InvalidInput {
-                what: "selected environment",
-                detail: format!("environment {} is outside the supercell", selected.index()),
-            });
-        }
-
-        let direction_data = self
-            .ctx
-            .job
-            .model
-            .transitions
-            .directions
-            .get(direction.get() as usize)
-            .ok_or_else(|| ContextError::InvalidInput {
-                what: "jump direction",
-                detail: format!("direction {} is outside the model", direction.get()),
-            })?;
-        if direction_data.collection_id != rule.collection_id {
-            return Err(ContextError::InvalidInput {
-                what: "transition collection",
-                detail: "the direction and rule belong to different collections".to_owned(),
-            });
-        }
-
-        let length = direction_data.path.len();
-        if length == 0 || length > MAX_PATH_NODES {
-            return Err(ContextError::InvalidInput {
-                what: "jump path",
-                detail: format!("the path has {length} nodes; the supported range is 1..=10"),
-            });
-        }
-
-        let mut path = [EnvId::new(0); MAX_PATH_NODES];
-        if self.ctx.resolve_path(selected, direction_data, &mut path) != length {
-            return Err(ContextError::InvalidInput {
-                what: "jump path",
-                detail: "the path could not be resolved at the selected environment".to_owned(),
-            });
-        }
-
-        let mut s0_particles = [0_u8; MAX_PATH_NODES];
-        let mut s1_particles = [0_u8; MAX_PATH_NODES];
-        let mut s2_particles = [0_u8; MAX_PATH_NODES];
-        decode_state(
-            rule.state0,
-            length,
-            self.ctx.dimensions.pc(),
-            &mut s0_particles,
-        )?;
-        decode_state(
-            rule.state1,
-            length,
-            self.ctx.dimensions.pc(),
-            &mut s1_particles,
-        )?;
-        decode_state(
-            rule.state2,
-            length,
-            self.ctx.dimensions.pc(),
-            &mut s2_particles,
-        )?;
+        let resolved = resolve_rule_path(self.ctx, selected, direction, rule)?;
+        let path = resolved.nodes();
+        let s0_particles = resolved.state0();
+        let s1_particles = resolved.state1();
+        let s2_particles = resolved.state2();
+        let length = resolved.len();
 
         let mut s0 = 0.0_f64;
         let mut s0_clusters = 0.0_f64;
@@ -135,9 +90,7 @@ impl<'a> EnergyEngine<'a> {
                 .node_energy(receiver, ParticleId::new(s2_particles[node]));
             for link in self.ctx.link_range(position) {
                 let partner = self.ctx.partner_of(receiver, link);
-                let Some(partner_node) = path[..length]
-                    .iter()
-                    .position(|candidate| *candidate == partner)
+                let Some(partner_node) = path.iter().position(|candidate| *candidate == partner)
                 else {
                     continue;
                 };
@@ -162,7 +115,7 @@ impl<'a> EnergyEngine<'a> {
                     - table.energies[row * particles + old])
                     * self.ctx.ev_to_kt();
             }
-            s2_clusters += self.cluster_s2(path[node], &path[..length], &s2_particles[..length])?;
+            s2_clusters += self.cluster_s2(path[node], path, s2_particles)?;
             s2 += value;
         }
         s2 += s2_clusters;
@@ -340,31 +293,4 @@ impl TransitionEnergies {
     pub const fn barrier_backward_no_field(self) -> f64 {
         self.s1 - self.s2
     }
-}
-
-fn decode_state(
-    state: StateCode,
-    length: usize,
-    particle_count: u32,
-    output: &mut [u8; MAX_PATH_NODES],
-) -> Result<(), ContextError> {
-    if !state.has_clear_bits_above(length) {
-        return Err(ContextError::InvalidInput {
-            what: "transition state code",
-            detail: "the state carries occupation bits above the path length".to_owned(),
-        });
-    }
-    for (node, slot) in output.iter_mut().enumerate().take(length) {
-        let particle = state.node(node);
-        if u32::from(particle) >= particle_count {
-            return Err(ContextError::InvalidInput {
-                what: "transition state particle",
-                detail: format!(
-                    "node {node} names particle {particle}, outside the particle table"
-                ),
-            });
-        }
-        *slot = particle;
-    }
-    Ok(())
 }
