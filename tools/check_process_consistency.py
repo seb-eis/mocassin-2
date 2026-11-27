@@ -39,8 +39,39 @@ REQUIRED_FILES = (
     ".opencode/agents/dev-free.md",
     ".opencode/agents/dev.md",
     ".opencode/agents/review.md",
+    ".opencode/agents/senior.md",
     ".opencode/commands/step-start.md",
     ".opencode/commands/step-closeout.md",
+    ".opencode/commands/grill.md",
+    ".opencode/commands/handoff.md",
+    ".opencode/commands/retro.md",
+    ".opencode/skills/codebase-design/SKILL.md",
+    ".opencode/skills/diagnosing-bugs/SKILL.md",
+    ".opencode/skills/domain-modeling/SKILL.md",
+    ".opencode/skills/grilling/SKILL.md",
+    ".opencode/skills/prototype/SKILL.md",
+    ".opencode/skills/research/SKILL.md",
+    ".opencode/skills/review-axes/SKILL.md",
+    ".opencode/skills/tdd/SKILL.md",
+    "GLOSSARY.md",
+    "docs/development/codebase-design.md",
+    "docs/development/diagnosing-bugs.md",
+    "docs/development/domain-language.md",
+    "docs/development/discovery.md",
+    "docs/development/prototypes.md",
+    "docs/development/research.md",
+    "docs/development/review-axes.md",
+    "docs/development/tdd.md",
+    "docs/development/retrospectives.md",
+    "docs/development/senior-consultation.md",
+    "docs/planning/research/README.md",
+    "docs/planning/research/_template.md",
+    "docs/planning/prototypes/README.md",
+    "docs/planning/prototypes/_template.md",
+    "docs/planning/retrospectives/README.md",
+    "docs/planning/retrospectives/_template.md",
+    "docs/planning/reviews/senior/README.md",
+    "docs/planning/reviews/senior/_template.md",
 )
 
 REQUIRED_INTEGRATION = (
@@ -65,6 +96,26 @@ REQUIRED_INTEGRATION = (
     ("AGENTS.md", ".opencode/agents"),
     ("docs/development/orchestration.md", ".opencode/agents"),
     ("docs/development/orchestration.md", "default_agent"),
+    ("AGENTS.md", "output contract"),
+    ("AGENTS.md", "senior consultation"),
+    ("AGENTS.md", "`policy-*.md`"),
+    ("AGENTS.md", "Senior consultant"),
+    ("docs/development/senior-consultation.md", "two completed standard rounds"),
+    ("docs/development/senior-consultation.md", "policy-update review"),
+    ("docs/development/review-axes.md", "Standards"),
+    ("docs/development/review-axes.md", "Spec"),
+    ("docs/planning/reviews/step-design-review-template.md", "| Axis |"),
+    ("docs/planning/audits/step-audit-template.md", "| Axis |"),
+    ("docs/planning/reviews/cross-cutting/cross-cutting-review-template.md", "| Axis |"),
+    (".opencode/agents/review.md", "policy-*.md"),
+    (".opencode/agents/lead.md", "senior"),
+    ("docs/development/model-economics.md", "default"),
+    ("docs/development/model-economics.md", "senior"),
+    ("docs/development/orchestration.md", "`policy-*.md`"),
+    ("docs/development/orchestration.md", "Senior consultant"),
+    ("docs/development/agent-workflow.md", "senior consultation"),
+    ("docs/planning/reviews/README.md", "policy-update"),
+    ("docs/planning/reviews/README.md", "senior-consultation.md"),
 )
 
 FORBIDDEN_TERMS = (
@@ -91,6 +142,25 @@ NORMATIVE_FILES = (
     "docs/planning/audits/README.md",
     "docs/planning/audits/step-audit-template.md",
     "docs/planning/closeout/README.md",
+    "GLOSSARY.md",
+    "docs/development/codebase-design.md",
+    "docs/development/diagnosing-bugs.md",
+    "docs/development/domain-language.md",
+    "docs/development/discovery.md",
+    "docs/development/prototypes.md",
+    "docs/development/research.md",
+    "docs/development/review-axes.md",
+    "docs/development/tdd.md",
+    "docs/development/retrospectives.md",
+    "docs/development/senior-consultation.md",
+    "docs/planning/research/README.md",
+    "docs/planning/research/_template.md",
+    "docs/planning/prototypes/README.md",
+    "docs/planning/prototypes/_template.md",
+    "docs/planning/retrospectives/README.md",
+    "docs/planning/retrospectives/_template.md",
+    "docs/planning/reviews/senior/README.md",
+    "docs/planning/reviews/senior/_template.md",
 )
 
 VERDICT_FILES = (
@@ -103,6 +173,28 @@ VERDICT_STATES = ("Re-review required", "Re-audit required")
 STEP_ID_RE = re.compile(r"\d{2}[a-z]?")
 AUDIT_RE = re.compile(r"^docs/planning/audits/step-(\d{2}[a-z]?)\.md$")
 GATE_RE = re.compile(r"GATE_[A-Z_]+")
+TIER_VOCABULARY_PAGES = (
+    "docs/development/model-economics.md",
+    "docs/development/orchestration.md",
+    "docs/development/design-proportionality.md",
+    "docs/development/agent-workflow.md",
+)
+AGENT_DIR = ".opencode/agents"
+RETIRED_TIER_RE = re.compile(r"\b(?:workhorse|strong(?:[ -]tier)?)\b", re.IGNORECASE)
+FINDINGS_COLUMNS = (
+    (
+        "docs/planning/reviews/step-design-review-template.md",
+        "| ID | Axis | Severity | Origin | Finding | Evidence | Recommendation |",
+    ),
+    (
+        "docs/planning/audits/step-audit-template.md",
+        "| ID | Axis | Severity | Origin | Finding | Evidence | Recommendation |",
+    ),
+    (
+        "docs/planning/reviews/cross-cutting/cross-cutting-review-template.md",
+        "| ID | Axis | Severity | Area | Finding | Evidence | Recommendation |",
+    ),
+)
 
 
 def iter_markdown(root: Path) -> list[Path]:
@@ -212,6 +304,56 @@ def check_closeout_template(root: Path) -> list[str]:
     return [f"closeout template is missing field: {field}" for field in required if field not in text]
 
 
+def findings_header(path: Path) -> str | None:
+    """Return the first table header after a '## Findings' heading."""
+    in_findings = False
+    for line in path.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if stripped == "## Findings":
+            in_findings = True
+            continue
+        if not in_findings:
+            continue
+        if stripped.startswith("|"):
+            return stripped
+        if stripped.startswith("## "):
+            return None
+    return None
+
+
+def check_findings_columns(root: Path) -> list[str]:
+    errors: list[str] = []
+    for rel, expected in FINDINGS_COLUMNS:
+        path = root / rel
+        if not path.is_file():
+            errors.append(f"missing required file: {rel}")
+            continue
+        header = findings_header(path)
+        if header is None:
+            errors.append(f"{rel}: no findings table under '## Findings'")
+        elif header != expected:
+            errors.append(f"{rel}: findings table header is '{header}', expected '{expected}'")
+    return errors
+
+
+def check_tier_vocabulary(root: Path) -> list[str]:
+    errors: list[str] = []
+    files = list(TIER_VOCABULARY_PAGES)
+    agents = root / AGENT_DIR
+    if agents.is_dir():
+        files.extend(sorted(str(path.relative_to(root)) for path in agents.glob("*.md")))
+
+    for rel in files:
+        path = root / rel
+        if not path.is_file():
+            continue
+        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+            match = RETIRED_TIER_RE.search(line)
+            if match:
+                errors.append(f"{rel}:{number}: retired tier vocabulary '{match.group(0)}'")
+    return errors
+
+
 def check(root: Path) -> list[str]:
     errors: list[str] = []
     errors.extend(check_required_files(root))
@@ -222,6 +364,8 @@ def check(root: Path) -> list[str]:
     errors.extend(check_unused_audit_records(root))
     errors.extend(check_verify_script(root))
     errors.extend(check_closeout_template(root))
+    errors.extend(check_findings_columns(root))
+    errors.extend(check_tier_vocabulary(root))
     return errors
 
 
