@@ -236,6 +236,7 @@ early-warning signal for the next cross-cutting review.
 | --- | --- | --- | --- | --- |
 | 2026-11-12 | `38a22d2` | Fresh independent drift-check context (OpenCode subagent) | Drift found — 3 Major, 9 Minor, 3 Note; Major status/documentation drift remediated before checkpoint freeze | [2026-11-12-phase-b.md](drift-checks/2026-11-12-phase-b.md) |
 | 2026-11-18 | `dcbf499` | Phase C maintenance worktree (implementor; not a fresh reviewer) | Drift found — 2 Major, 5 Minor; all findings fixed on the maintenance branch; PowerShell docs path and Windows verification left for `XC-04` | [2026-11-18-phase-c.md](drift-checks/2026-11-18-phase-c.md) |
+| 2026-11-27 | `476b66b` | Implementor self-check (not a fresh reviewer) | No drift found — the task disciplines, review axes, senior escalation, output contract, and `default`/`senior` names agree across the normative pages, templates, prompts, and checker; the docs and policy gates are green | [POLICY-2026-11-27](reviews/policy-update-2026-11-27-workflow-disciplines.md) |
 
 ## Notes
 
