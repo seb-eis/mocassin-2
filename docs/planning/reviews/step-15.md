@@ -606,8 +606,8 @@ additionally needs an ADR).
 | Fixed point | `04f9a0a` (round-1 record HEAD). The design delta under review is `git diff 51f6636..af9ded8`; `51f6636` is the `origin/main` merge and is not part of the Step 15 design. |
 | Record request commit | The documentation-only record commit that appends this request; its parent is the reviewed commit `af9ded8` |
 | Docs branch | `docs/step-15-design`; `origin/main` = `be930c4` merged at `51f6636` (a merge commit, not a rebase) |
-| Review date | — (pending round 2) |
-| Review agent | — (fresh review agent, spawned by the lead) |
+| Review date | 2026-11-27 (round 2) |
+| Review agent | DeepSeek V4.1 Flash (opencode-go) — fresh context, no shared conversation with the design agent, dev, lead, or other review agents |
 
 Step page: [`Step 15 — Energy Engine`](../steps/step-15-energy-engine.md)
 
@@ -662,49 +662,94 @@ layout or prose.
 
 **Spec axis**
 
-- [ ] **F-1.** The §3 receiver enumeration walks every path node's own forward links, changed or spectator; the
+- [x] **F-1.** The §3 receiver enumeration walks every path node's own forward links, changed or spectator; the
       receiver change filter is gone and the partner-change filter is only a zero-delta skip. The text states
       that the walk is unfiltered by structural stability and why the jump-status receiver set is not the source.
-- [ ] **F-2.** The §5 formula weights every unchanged owner's per-link delta `δ_{(O,V)}` by `σ_O`, and the text
+      — *Verified in the step page §3 (step 2 and its explanation); D-1/D-2, the spectator hand system, test
+      row, acceptance criterion, and risk row match. The "why" sentence misstates what the jump-status set drops
+      — F-10 (Minor, Standards); the operative rule is correct.*
+- [x] **F-2.** The §5 formula weights every unchanged owner's per-link delta `δ_{(O,V)}` by `σ_O`, and the text
       ties this to the `Σ_stable` pair-row definition. An unstable unchanged owner's delta is zero.
-- [ ] **F-3.** The §4/§6 affected set is the deduplicated union of the member-side `ClusterAssoc` route and
+      — *Verified. `σ_O` is in the §5 bracket, `δ_{(O,V)}` is defined per link, and the `Σ_stable` rationale is
+      stated; the hand system, property coverage, acceptance criterion, and risk row exist. `STABLE` is
+      "position stable and particle not void" (`context/lattice.rs:97`), so an unchanged owner's flag is fixed.*
+- [x] **F-3.** The §4/§6 affected set is the deduplicated union of the member-side `ClusterAssoc` route and
       `centres(position(V)) × cell(V)` for every changed `V`; the rebuild and `ΔU` are per `(instance, cell)`;
       the centre-only case is reachable and is not double-counted.
-- [ ] **F-1/F-2/F-3 coverage.** The §9 hand systems, §Tests matrix, acceptance criteria, and risks each contain
+      — *Verified. §4 defines the union and §6 step 6 uses it; `centres` is position → instance ids
+      (`context/mod.rs:408`) and the cluster array is `[instance, cell, p]` (Step 14 §6.3/§7.3), so
+      `(instance, cell(V))` is the copy centred at `V`. Centre-only test row, acceptance criterion, and risk row
+      present.*
+- [x] **F-1/F-2/F-3 coverage.** The §9 hand systems, §Tests matrix, acceptance criteria, and risks each contain
       the spectator-receiver, unstable-link-owner, and centre-only-change cases, so the matrix would expose the
       three original defects.
-- [ ] **F-4.** The §1 composition rule names the per-call `EnergyEngine::new(&mut *self.ctx)` form as the only
+      — *Verified in all four places: §9 hand systems, the Tests matrix ("Spectator receiver", "Centre-only
+      cluster change", "Lattice energy"/"Energy property" with an unstable owner), the acceptance criteria, and
+      the risk table.*
+- [x] **F-4.** The §1 composition rule names the per-call `EnergyEngine::new(&mut *self.ctx)` form as the only
       supported composition, removes the accessorless hosting alternative, and explicitly defers the Step 17
       struct fix to Step 17's design review.
-- [ ] **F-5.** Deviation D-7 records the independent per-side one-directional MMC exchange against the
+      — *Verified in §1; Step 17's page is deliberately unchanged (its §1 edit is deferred to that step's
+      design review, and the deferral names the owner and reason).*
+- [x] **F-5.** Deviation D-7 records the independent per-side one-directional MMC exchange against the
       original's both-or-nothing rule, and the test matrix names the asymmetric one-directional case.
-- [ ] **F-6.** The transport-vector residual risk is tracked in `05-open-decisions.md` §4 and the Step 15 §2
+      — *Verified: D-7 row with rationale and test, §7 text, §9 case, "MMC exchange" matrix row, and the
+      acceptance criterion.*
+- [x] **F-6.** The transport-vector residual risk is tracked in `05-open-decisions.md` §4 and the Step 15 §2
       citations name Step 13 §3.5/§12 (not the absent Step 14 §23 item).
-- [ ] **F-7.** The S0/S2 sums, the 0.5 pair convention, and the cluster-at-centre rule are distinguished from the
+      — *Verified: the §4 deferred row exists (owner Step 13/14, trigger the next `.msl` revision), and §2
+      cites Step 13 §3.5/§12 plus that row while noting Step 14 §23 does not carry the item.*
+- [x] **F-7.** The S0/S2 sums, the 0.5 pair convention, and the cluster-at-centre rule are distinguished from the
       S1 midpoint rule; the latter's first normative home is this page, restated from the original's default.
-- [ ] **F-8/F-9.** F-8 states the per-read conversion unambiguously and records the Step 14 wording deferral with
+      — *Verified: §0.2 and §2 name this page as the S1 rule's first normative home, restate it from
+      `SetDefaultKmcTransitionStateEnergy`, and no longer cite AGENTS.md §10, ADR 0012, or `energies.md` for S1.*
+- [x] **F-8/F-9.** F-8 states the per-read conversion unambiguously and records the Step 14 wording deferral with
       an owner; F-9 is deferred to Step 18's design review with a stated reason. Neither is silently dropped.
-- [ ] **Precondition.** The request records that `fix/step-14-structure-and-tests` is merged into `main`
+      — *Verified. F-8: §2 states the per-read rule and what the Step 14 §7.2 shorthand means; the deferral
+      names the owner (dev, `docs/` branch) and the reason. F-9: the resolution names Step 18's design review and
+      the reason, and §6 step 3 already states the global-index definition.*
+- [x] **Precondition.** The request records that `fix/step-14-structure-and-tests` is merged into `main`
       (`b632565`) and shows the split layout; the step page, roadmap note, and open-decisions row agree.
-- [ ] **No new Major.** No Blocker or Major remains in the corrected §1–§6 design; any new Major is reported and
+      — *Verified. `b632565` is a merge commit on `origin/main` (parents `536c8b3`/`4eb56c9`); the tree has
+      `context/mod.rs` 770, `context/limits.rs` 737, and `context/build.rs`, `context/invariants.rs`,
+      `context/limits/tests.rs`. Step page, roadmap §3.1 note, and `05-open-decisions.md` §3 all say satisfied.*
+- [x] **No new Major.** No Blocker or Major remains in the corrected §1–§6 design; any new Major is reported and
       stops the start gate.
+      — *Verified: no Blocker or Major remains; the corrections close F-1–F-3 and introduce no new Major. Two
+      lower findings (F-10 Minor, F-11 Note) are recorded below.*
 
 **Standards axis**
 
-- [ ] The re-freeze touches only design and planning documents; no code, test, configuration, contract artifact,
+- [x] The re-freeze touches only design and planning documents; no code, test, configuration, contract artifact,
       generated file, ADR text, or historical record is edited.
-- [ ] The corrections are inside the frozen §2–§6 conventions and the §1 API: no convention, formula semantics,
+      — *Verified. `git show --stat af9ded8` is the Step 15 page, `04-roadmap.md`, `05-open-decisions.md`, and
+      `solver-architecture.md` only; no code, test, configuration, contract artifact, generated file, ADR, or
+      earlier record.*
+- [x] The corrections are inside the frozen §2–§6 conventions and the §1 API: no convention, formula semantics,
       invariant, public type, or feature boundary changes; the §0.2 guard still holds.
-- [ ] The design class remains `Full` and the complexity class remains `High`; the split decision,
+      — *Verified. F-1/F-3 correct enumerations; F-2 makes the incremental term match the already-frozen `U`
+      decomposition without changing `U`; F-5 records behaviour §7 already specified; F-4 removes an
+      unimplementable alternative. No invariant, public type, or guard change.*
+- [x] The design class remains `Full` and the complexity class remains `High`; the split decision,
       owner-acceptance request, and fallback are intact and consistent with `04-roadmap.md` §3.1 and
       `05-open-decisions.md` §3.
-- [ ] Round 1's review text, evidence, verdict, and checklist item text are unaltered; round 1 has no backfilled
+      — *Verified; the round-1 corrections note states they change no class decision, and the roadmap/registry
+      rows agree.*
+- [x] Round 1's review text, evidence, verdict, and checklist item text are unaltered; round 1 has no backfilled
       `Axis` column; the resolutions are in the separate `Resolution status` section; this round-2 request uses
       the `Spec`/`Standards` vocabulary and design-time phrasing.
-- [ ] The step page's implementation status, the review record, and the design pages agree on the round-2 state
+      — *Verified byte-for-byte: the round-1 section from `### Review round 1` to the end of its verdict is
+      identical to `04f9a0a`; the only pre-append changes are the dev-owned `Record state` line and the
+      `Resolution status` table (`git diff -U0 04f9a0a HEAD`). No `Axis` column was backfilled.*
+- [x] The step page's implementation status, the review record, and the design pages agree on the round-2 state
       and the precondition; `status.md` is deliberately untouched because step status is the dev's scope (the
       known dashboard drift is reported to the lead, not fixed here).
-- [ ] `./tools/verify.sh docs --require` and `./tools/verify.sh policy --require` pass at the request commit.
+      — *Verified for the step page, this record, and the design pages. `status.md:71` still reads "Not
+      requested" for Step 15 — the known dev-owned dashboard drift, not a design finding per
+      `design-proportionality.md` §2; reported for the start-gate update.*
+- [x] `./tools/verify.sh docs --require` and `./tools/verify.sh policy --require` pass at the request commit.
+      — *Verified: both exit 0 at `66a2e40` (see Commands and results), plus `check_docs_links.py` and
+      `check_process_consistency.py` exit 0.*
 
 #### Local gate baseline (request owner)
 
@@ -720,3 +765,120 @@ agent re-runs independently):
   (5/4/2 fixtures); space-group catalog current (274 settings, sha256 `1f3bf67d…`); "Process consistency: OK";
   68 tool tests OK; "SPDX headers present in 1210 source files"; "No secret patterns found in 1789 tracked text
   files"; "advisories ok, bans ok, licenses ok, sources ok".
+
+#### Independence and frozen state (round 2)
+
+I am a fresh, independent review agent (DeepSeek V4.1 Flash, opencode-go) for round 2. I did not author or
+implement the Step 15 design and have no shared conversation with the design agent, the dev, the lead, the
+round-1 review agent, or any other review agent. I received only the round-2 request, the frozen and request
+commits, and the required commands/scope; no desired verdict or design summary beyond the request record was
+supplied. I read the repository at `af9ded8` myself — the Step 15 page in full, the round-1 record, the Step
+13/14/16/17/18 pages, the data contracts, `docs/physics/energies.md`, the process pages, the merged Rust context
+code the fixed formulas depend on, and Step 17 §3's original-reference text — rather than relying on the
+resolution table. The review was read-only apart from this record: I edited and committed only
+`docs/planning/reviews/step-15.md`; I did not merge, tag, push `main`, delete branches, or fix any finding.
+
+Frozen state: the reviewed design commit is `af9ded8` (parent `51f6636`); branch tip `66a2e40`;
+`git diff --name-only af9ded8 66a2e40` is exactly this record, so no design, code, test, configuration,
+contract, or generated artifact moved after the freeze. The design delta under review is `git diff
+51f6636..af9ded8` = four documentation files (the Step 15 page, `04-roadmap.md`, `05-open-decisions.md`,
+`solver-architecture.md`). The `origin/main` merge `51f6636` has parents `04f9a0a` and `be930c4`; it is a merge
+commit, not a rebase, and `git diff 04f9a0a 51f6636 -- docs/planning/steps/step-15-energy-engine.md` is empty,
+so the branch's Step 15 design content survived the merge. Precondition: `b632565` is a merge commit on
+`origin/main` with parents `536c8b3`/`4eb56c9`; the merged tree has `context/mod.rs` 770, `context/limits.rs`
+737, and `context/build.rs`, `context/invariants.rs`, `context/limits/tests.rs`. The request, step page,
+roadmap §3.1 note, and `05-open-decisions.md` §3 agree that the precondition is satisfied.
+
+Round-1 immutability: the round-1 section from `### Review round 1` through the end of its verdict is
+byte-identical to `04f9a0a`; `git diff -U0 04f9a0a HEAD -- docs/planning/reviews/step-15.md` shows only the
+dev-owned `Record state` line, the `Resolution status` table/detail, and the appended round-2 section. No `Axis`
+column was backfilled into round 1 and none of its checklist item text changed.
+
+#### Commands and results (round 2)
+
+- `./tools/verify.sh docs --require` → **exit 0**: "Documentation math conventions OK (234 files scanned)";
+  "Documentation links OK (238 files scanned)"; Zensical strict "No issues found"; DocFX 0 warnings / 0 errors;
+  rustdoc generated for all seven crates; "Documentation built in …/site"; "Closeout gate completed with
+  required checks enabled."
+- `./tools/verify.sh policy --require` → **exit 0**: ApiCompat "Public API is compatible with the checked-in
+  baseline" (all eight assemblies); "Contract artifacts are current (26 files)"; model/parameterization/lattice
+  projection checks OK (5/4/2 fixtures); "space-group catalog is current: 274 settings, sha256
+  `1f3bf67d…`"; "Process consistency: OK"; "Ran 68 tests … OK"; "SPDX headers present in 1210 source files";
+  "No secret patterns found in 1789 tracked text files"; "advisories ok, bans ok, licenses ok, sources ok".
+- `python tools/check_docs_links.py` → **exit 0**: "Documentation links OK (238 files scanned)."
+- `python tools/check_process_consistency.py` → **exit 0**: "Process consistency: OK".
+- Git checks: `git diff --stat 51f6636 af9ded8` = the four design files; `git diff --name-only af9ded8 66a2e40`
+  = this record; `git show -s --format='%P' 51f6636` = `04f9a0a be930c4`; `wc -l` on
+  `context/mod.rs`/`context/limits.rs` = 770/737; `git merge-base --is-ancestor b632565 origin/main` = true.
+
+Code/contract facts checked while verifying the corrected formulas (read-only):
+
+- `src/rust/crates/mocassin-solver/src/context/energy.rs`: the site+pair vectors are built for **every**
+  environment and sum **every** owner forward link regardless of stability, while
+  `initial_lattice_energy_kt` skips environments where `!lattice.is_stable(env)` — the premise of both §3's
+  "unfiltered" walk and §5's `σ_O`.
+- `src/rust/crates/mocassin-solver/src/context/lattice.rs:97`: `STABLE` = compiled position stable **and**
+  particle not void, so an unchanged environment's `σ` cannot change.
+- `src/rust/crates/mocassin-solver/src/context/mod.rs:408`: `centres(position) -> &[u32]`; cluster arrays are
+  `[instance, cell, p]` (Step 14 §6.3/§7.3), so `(instance, cell(V))` names the copy centred at `V`.
+- Step 14 §9.2: a jump link exists for every ordered path-node pair with **both** nodes structurally stable; the
+  receiver filter is structural, not initial-occupation-based; the first sorted receiver link per pair wins.
+- Step 17 §3: the original MMC applies both deltas only when the sites "are linked in both directions" and
+  otherwise computes each side independently (no cross-term) — the premise of D-7.
+
+#### Findings (round 2)
+
+Round-1 finding verification (the fixes are in the design documents, not only in the resolution table):
+
+| Finding | Round-1 severity | Round-2 status | Evidence in the re-freeze |
+| --- | --- | --- | --- |
+| F-1 | Major | **Closed** | Step page §3 step 2 and its explanation walk every path node (changed or spectator) over its own links, remove the receiver filter, keep only the partner filter as a zero-delta skip, and state the walk is unfiltered by structural stability; D-1/D-2, §9 spectator system, "Spectator receiver (round-1 F-1)" matrix row, acceptance criterion, and risk row match. |
+| F-2 | Major | **Closed** | §5 sums `σ_O·δ_{(O,V)}` per link, defines `δ_{(O,V)}` per link, and ties the weight to the `Σ_stable` decomposition; the unstable-unchanged-owner hand system, property-test coverage, "Lattice energy" matrix row, acceptance criterion, and risk row exist. |
+| F-3 | Major | **Closed** | §4/§5/§6 define the deduplicated union of the member-side `ClusterAssoc` route and `centres(position(V)) × cell(V)`, rebuilt/accounted once per `(instance, cell)`; the centre-only hand system, matrix row, acceptance criterion, and risk row exist. |
+| F-4 | Minor | **Closed in Step 15**; Step 17 edit deferred to its design review (owner and reason named) | §1 makes the per-call form the only supported composition, removes the accessorless hosting alternative, and names Step 17's sketch as the forbidden borrow. |
+| F-5 | Minor | **Closed** | Deviation D-7 (rationale + test), §7 text, §9 case, matrix row, acceptance criterion; Step 17 §3 confirms the original's both-or-nothing rule. |
+| F-6 | Minor | **Closed** | `05-open-decisions.md` §4 deferred row (owner Step 13/14, trigger the next `.msl` revision); §2 cites Step 13 §3.5/§12 and the row. |
+| F-7 | Minor | **Closed** | §0.2/§2 name this page as the S1 midpoint rule's first normative home and stop citing AGENTS.md §10/ADR 0012/`energies.md` for S1. |
+| F-8 | Minor | **Closed for this step**; Step 14 §7.2 wording deferred (owner: dev, `docs/` branch; reason: outside this re-freeze) | §2 states the per-read eV→kT rule and what the Step 14 shorthand means. |
+| F-9 | Note | **Deferred** to Step 18's design review (reason: its §1 wording predates the contract; §6 already states the global-index definition) | Resolution table and §6 step 3. |
+
+New findings:
+
+| ID | Axis | Severity | Origin | Finding | Evidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- |
+| F-10 | Standards | **Minor** | design | The new §3 rationale for F-1 misstates what the jump-status link set drops. It says the structural-stability receiver filter "would drop a spectator receiver, a path node that is void at initialization but occupied later (Step 14 §9.2's correctness fix), and duplicate periodic images". Step 14 §9.2 builds a jump link for every ordered path-node pair with both nodes structurally stable, so a **stable** spectator receiver is in the set; the void-at-initialization receiver is precisely the case Step 14 deliberately **includes** (the *original* excluded it); and duplicate images are dropped by the first-sorted-link rule, not the stability filter. The operative rule (walk every path node's own links, unfiltered) and its D-1/D-2, hand-system, test, acceptance, and risk rows are correct, so this is a rationale defect, not a formula defect. | Step page §3 (lines 390–397); Step 14 §9.2 ("For every ordered pair … with both nodes structurally stable"; "Receiver filter: structural, not initial-occupation-based"; "the first sorted link wins"); the new `solver-architecture.md` paragraph states the reason correctly ("the jump-status receiver set (structural stability) is not the evaluation source"). | Attribute each filter correctly: the jump-status set keeps one sorted receiver link per ordered pair and filters receivers by structural stability; the original additionally excluded initially-void receivers, which Step 14 fixed. No change to the walk or its tests. |
+| F-11 | Spec | **Note** | design | The stage at which the pre-commit cluster row `C` is read is not stated, and §4/§6 can be read as reading it after the rebuild. §5 defines `C`/`C'` as the affected rows "at the centre's current particle"; §6 step 6 rebuilds and overwrites those rows, step 7 accumulates `ΔU`; §4's "Rebuild and account once per affected `(instance, cell)`" does not say where `C` is captured. A literal step-6-then-step-7 reading gives `C = C'` and a zero cluster term, including the new centre-only case. The `check_lattice_energy` debug assertion and the incremental-vs-full property would catch a misimplementation. | Step page §5 (lines 494–503), §4 (line 468), §6 steps 6–7 (lines 529–532). | State that `C` is captured before the step-6 overwrite (for example in the step-1 resolve pass) and that the cluster difference is accumulated from that captured value; keep the formula unchanged. |
+
+Severity summary for round 2: **0 Blocker, 0 Major, 1 Minor, 1 Note.** All three round-1 Majors (F-1, F-2, F-3)
+are closed in the design documents; no correction introduced a new Blocker or Major. The two new findings are a
+rationale inconsistency (F-10) and a missing capture-point detail (F-11); under the Full stop rule they are
+recorded for acceptance or correction and do not justify another round.
+
+#### Verdict (round 2)
+
+- [ ] Ready for implementation
+- [x] Ready with notes
+- [ ] Changes required
+- [ ] Waived
+
+**Ready with notes.** The three round-1 Majors are closed by the re-freeze: §3 now walks every path node's own
+links (spectators included) and is explicitly unfiltered by structural stability; §5 weights every unchanged
+owner's per-link delta by `σ_O`, which the merged code's `STABLE` derivation and `initial_lattice_energy_kt`
+confirm is exact; §4/§6 define the deduplicated member-side + `centres(position(V)) × cell(V)` affected set with
+matching tests. The Minor/Note dispositions (F-4, F-6, F-7, F-8, F-9) are present where they belong, and the two
+deferrals name the owning step/owner and the reason. The corrections stay inside the frozen §1–§6 conventions
+and change no invariant, public type, class, or split decision. Both required local gates and both extra checks
+pass at the reviewed tree.
+
+No Blocker or Major remains, so the design may proceed to the start gate. The verdict is `Ready with notes`
+because F-10 (Minor, Standards — a rationale sentence in §3 contradicts Step 14 §9.2) and F-11 (Note, Spec — the
+cluster `C` capture point is unstated) remain for explicit owner acceptance. Either finding may be corrected in
+the feature-1 documentation without changing any operative rule, and neither requires a round 3. Reporting to the
+lead: the `status.md` Step 15 design-review cell still reads "Not requested" (dev-owned bookkeeping for the
+start-gate update, not a design finding).
+
+Follow-up owner: design agent/dev for F-10/F-11 (correction or explicit acceptance); human owner for the verdict
+acceptance and start gate.
+Follow-up step: Step 15 implementation may start from the reviewed `main` commit once the owner accepts this
+verdict, the High complexity class, and the two notes; the `fix/step-14-structure-and-tests` precondition is
+already satisfied on `main`.
