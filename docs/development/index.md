@@ -62,6 +62,23 @@ The detailed architecture is in the internal plan; the repository layout is summ
 - [Platform checklist](platform-checklist.md) — automated Windows/macOS headless gates and the manual
   real-window checklist.
 
+## Task disciplines
+
+Short task-level practices with a matching skill trigger. Each page links the normative rule for the related
+repository area instead of restating it.
+
+- [Codebase design](codebase-design.md) — deep modules, seams, interfaces, and the deletion test.
+- [Diagnosing bugs](diagnosing-bugs.md) — a red-capable loop, minimisation, falsifiable hypotheses, and regression
+  tests.
+- [Domain language](domain-language.md) — the root glossary, the published glossary boundary, and when to write an
+  ADR.
+- [Discovery and grilling](discovery.md) — frontier rounds, the question budget, and the round format.
+- [Prototypes](prototypes.md) — one question, throwaway code, and a recorded decision.
+- [Research](research.md) — primary sources, citations, and cited notes under `docs/planning/research/`.
+- [Review axes](review-axes.md) — Standards and Spec, one label per finding, and one verdict.
+- [Test-driven development](tdd.md) — agree the seam, red-green, and test quality.
+- [Retrospectives](retrospectives.md) — improving the agent environment after a step or session.
+
 ## Current phase
 
 Steps 00–14 are complete: the build/test/docs skeleton, the immutable project kernel and `.mocprj` format, the
