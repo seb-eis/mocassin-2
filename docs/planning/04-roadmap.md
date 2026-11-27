@@ -272,8 +272,11 @@ owner-major rule and the cluster rebuild, and "KMC" vs. "MMC" would split one sh
 consumer; both halves stay High on cross-step interfaces. The owner-acceptance request, the fallback, and the
 convention guard are recorded on the [Step 15 page](steps/step-15-energy-engine.md) §0.2 and in
 [`05-open-decisions.md`](05-open-decisions.md) §3. This note records the class request; it does not itself
-approve it. The Step 15 start gate additionally requires the `fix/step-14-structure-and-tests` maintenance
-branch (the Step 14 audit F-1–F-3/N-1–N-3 deferrals) to be merged into `main` before the step branch is cut.
+approve it. The Step 15 start gate additionally required the `fix/step-14-structure-and-tests` maintenance
+branch (the Step 14 audit F-1–F-3/N-1–N-3 deferrals) to be merged into `main` before the step branch was cut;
+that precondition is satisfied (`b632565`, verified 2026-11-27, with the split `context/` layout present). The
+round-1 design-review corrections (spectator-receiver enumeration, unchanged-owner stability weight,
+centre-only affected instances) change no class decision.
 
 #### Historical exceptions (previous time-based rule)
 
