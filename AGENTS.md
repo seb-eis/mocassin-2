@@ -357,7 +357,7 @@ Review-agent rules:
   `docs: record step-NN audit Passed [skip ci]`.
 - Optional scratch notes may live under `.tmp/`. They are not gate artifacts and are never committed.
 
-**Harness binding.** The six roles are bound as OpenCode agents in `.opencode/agents/` (`lead`, `design`, `dev-free`,
+**Harness binding.** The six agent bindings are defined in `.opencode/agents/` (`lead`, `design`, `dev-free`,
 `dev`, `review`, `senior`), and `opencode.json` makes the lead the `default_agent`. `.opencode/commands/step-start.md`,
 `step-closeout.md`, `grill.md`, `handoff.md`, and `retro.md` are thin routers. The binding enforces five rules only:
 the lead cannot edit and can spawn only `design`, `dev-free`, `dev`, `review`, and `senior`; the review agent can

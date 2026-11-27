@@ -65,7 +65,7 @@ Every bug fix gets a regression test. A scientific change gets a physics or pari
 ## 6. Budget
 
 - Test the critical paths and the complex logic, not every getter.
-- One strong acceptance test is worth more than many private-helper tests.
+- One well-targeted acceptance test is worth more than many private-helper tests.
 - If the loop feels heavy for a one-line mechanical change, record why the change is exempt; do not silently skip
   the regression test for a real bug.
 
