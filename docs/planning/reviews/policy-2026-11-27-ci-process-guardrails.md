@@ -302,6 +302,9 @@ standards.
       `AGENTS.md` §3.13 agree.
       _Not met: the three filter homes agree, but several files that `check_process_consistency.py` validates are
       not in the arm — see F-1._
+      _Round 2: F-1 is closed — all 64 process-checker inputs match the live arm and the derived guard fails on an
+      uncovered required file. The docs link/math half is still partial (123 of 238 Markdown files outside the
+      arm); see F-7. The item stays open only for that Minor._
 - [x] **Spec** — The four added families each have a stated reason tied to a check the job runs.
       _Verified: D3 ties `ci-policy.md`/`status.md` to the status vocabulary and `maintenance`/`drift-checks` to the
       checker's template and required-file checks; all four are in the arm._
@@ -309,9 +312,11 @@ standards.
       never enables `process`.
       _Verified with the shipped filter and by `test_contract_tooling_does_not_enable_the_process_job` and
       `test_code_changes_do_not_enable_the_process_job`._
+      _Round 2: re-run over the 64 checker paths; none enables another area._
 - [x] **Spec** — `ci.yml`, `force_all`, and `platforms=all` enable the job; `platforms=windows`/`macos` do not.
       _Verified against the condition and the platform-gate evaluator; `force_all` with `windows`/`macos` is still
       skipped because the `platforms` clause is false (F-4)._
+      _Round 2: the decision-table row now states the platforms qualification (F-4 closed)._
 
 ### D. Cost and budget
 
@@ -333,10 +338,14 @@ standards.
       the negative `tools/contracts/**` case.
       _Verified: 16 positive families, `.opencode/agents/dev-free.md`, `docs/planning/status.md`, and the
       `tools/contracts/manifest.json` / `tools/check-license-headers.py` negatives._
+      _Round 2: `PROCESS_PATHS` now includes the new homes; all 64 checker paths return `process=true` with every
+      other area false._
 - [x] **Standards** — The new tests fail on the pre-fix tree for the reasons claimed, and the drift guard is a
       divergence check, not a restatement of the current list.
       _Verified: six failures at `80cffd6` with only the new test file copied in; the documented-list test passed
       there because the workflow and both prose homes agreed on the smaller list, as the request says._
+      _Round 2: the new derived guard fails on an injected uncovered `REQUIRED_FILES` entry (red reproduction in
+      Evidence), and the 78-test suite is green at the fix commit._
 
 ### F. Documentation, evidence, and gates
 
@@ -344,10 +353,14 @@ standards.
       and with each other.
       _Verified: the two normative filter lists equal the case arm after `**`→`*` normalisation; the job-table row
       and the status note match. The stale workflow header comment is F-2._
+      _Round 2: the header now lists process/binding (F-2 closed); the three homes are still equal (25 tokens
+      each)._
 - [x] **Standards** — `check_process_consistency.py`, `check_docs_links.py`, `check_doc_math.py`, and both
       `verify.sh --require` modes pass at the reviewed commit, and the recorded counts match the tree.
       _Verified: exact outputs in Evidence; 238 link files, 234 math files, 77 tests, 1211 SPDX files, 1790 tracked
       text files._
+      _Round 2: 78 tests, 238 link files, 234 math files; both `verify.sh --require` modes exit 0; the counts were
+      re-verified at the fix commit._
 - [x] **Spec** — No step page, audit, closeout, tag, code, contract, format, or generated artifact is touched.
       _Verified: the 7-file `git diff --name-only` contains only the workflow, three docs, the status note, and two
       test files._
@@ -355,6 +368,8 @@ standards.
       record commit with `[skip ci]`.
       _Verified shape; the filename pattern is a separate §9.1 deviation (F-3). This record commit touches only this
       file._
+      _Round 2: the filename now follows `policy-<date>-<slug>.md` (F-3 closed); the round-2 record commit touches
+      only this file._
 
 ## Evidence
 
@@ -452,6 +467,102 @@ line); `tools/check_process_consistency.py`; `tools/check_docs_links.py`; `tools
 `docs/development/contributing.md`; `docs/planning/status.md`; the prior policy record's post-implementation
 verification section; `.opencode/agents/review.md`.
 
+### Re-review round 2 — 2026-11-27
+
+> **Reviewer independence.** I am a fresh, independent review context for this round. I did not author or
+> implement the change, and I have no shared conversation with the dev, design agent, lead, or the round-1 review
+> agent. The lead supplied only the reviewed commit, the request tip, this record, the branch/worktree, and the
+> required commands; no desired verdict, summary, or conversation history was supplied. My model is DeepSeek
+> V4.1 Flash 1017 (`opencode-go/deepseek-v4.1-flash`).
+
+**Pinned point.** Branch `fix/ci-process-checks`; base `be930c4e1d21bb96cde08bdb67ed20cb59631a20`; reviewed commit
+`06a861b6c123b9cb796309a9a7332cc237a08734`; request tip `ee4327d91e32ee5e817f403531de515ac67886ea`. The record
+commit's parent is the request tip. `git diff --stat 06a861b..ee4327d` is one file, `38 insertions(+), 3
+deletions(-)`, and touches only this record (rename, `Record path`, the F-4 decision-table row, `Record state`,
+and the appended Dev resolutions). That is a documented documentation-only request commit under
+[`README.md`](README.md) §8.1, so the code tree under review is still `06a861b`; the delta is recorded here
+rather than treated as a new design change.
+
+**Round-1 immutability.** `git diff --find-renames 3838d7c..HEAD -- docs/planning/reviews/` shows only the request
+commit's hunks plus the append. The F-1–F-6 rows, their evidence, the round-1 Evidence text, every checklist item
+text, and the round-1 verdict block are unchanged. The old filename survives only in round-1 historical prose
+(the old-name evidence and the F-3 row) and in the F-3 resolution.
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Tool suite | `python -m unittest discover -s tools/tests -t .` | `Ran 78 tests in 0.784s` — `OK` |
+| Process checker | `python tools/check_process_consistency.py` | `Process consistency: OK` |
+| Links | `python tools/check_docs_links.py` | `Documentation links OK (238 files scanned).` |
+| Math | `python tools/check_doc_math.py` | `Documentation math conventions OK (234 files scanned).` |
+| Docs gate | `./tools/verify.sh docs --require` | exit 0 — strict Zensical `No issues found`; DocFX `0 warning(s), 0 error(s)`; rustdoc documented 7 crates; `Closeout gate completed with required checks enabled.` |
+| Policy gate | `./tools/verify.sh policy --require` | exit 0 — API compatible; `Contract artifacts are current (26 files)`; 274 space-group settings; `Process consistency: OK`; `Ran 78 tests … OK`; SPDX headers in 1211 files; no secrets in 1790 files; `advisories ok, bans ok, licenses ok, sources ok` |
+
+**F-1 (Major) — closed.** The `process` arm now carries 25 patterns, including `docs/planning/README.md`,
+`docs/planning/04-roadmap.md`, the closeout/incident/research/prototype/retrospective homes,
+`tools/check_closeout_evidence.py`, and `tools/verify.sh`. The guard
+`test_every_process_checker_input_matches_the_workflow_filter` imports `REQUIRED_FILES`, `NORMATIVE_FILES`, and
+`VERDICT_FILES` from `tools/check_process_consistency.py`, unions the two gate scripts, and matches every path
+against the live case arm. I executed the shipped Bash filter over all 64 paths: every one returns `process=true`
+and every other area `false`; `docs/planning/closeout/_template.json` (the round-1 failure) now returns
+`process=true`. **Red reproduction:** in a disposable `git archive` of `HEAD` at `/home/node/tmp/r2red`, I
+injected `"docs/planning/future-required-file.md"` into `REQUIRED_FILES` and ran the single guard: `Ran 1 test`,
+`FAILED (failures=1)`, with `docs/planning/future-required-file.md is validated by the process checks but no
+process filter matches it`. The scratch tree was removed; the repository was not modified.
+
+**F-2 (Minor) — closed.** `.github/workflows/ci.yml:19` now reads "The Rust, Python, contracts, process/binding,
+and API-compatibility jobs are Ubuntu-only by job condition".
+
+**F-3 (Minor) — closed.** The record is `policy-2026-11-27-ci-process-guardrails.md`, `Record path` is updated,
+and `grep -rn policy-update-2026-11-27-ci-process-guardrails --include='*.md'` finds only round-1 historical
+text and the resolution; no Markdown link targets the old filename.
+
+**F-4 (Note) — closed.** The decision-table row reads "`workflow_dispatch` with `force_all=true`
+(`platforms=ubuntu` or `all`)" and states that Windows/macOS still skip the Ubuntu-only job.
+
+**F-5 (Note) — closed.** `docs/planning/ci-policy.md` §5 (lines 202 and 208) and `AGENTS.md` §3.13 (line 655) now
+say "run or job"; the owner decision and the unchanged `on:` block still support the no-new-trigger reading.
+
+**F-6 (Note) — accepted.** No separate post-implementation section is added. The combined Full pass and the
+reviewed commit are stated in the record; no action and no further round.
+
+**Regression sweep.** The arm enables only `process` for process paths: the 64-path execution above left
+`dotnet`, `rust`, `python`, `contracts`, and `api` false everywhere. `tools/contracts/manifest.json`,
+`tools/check-license-headers.py`, and `src/dotnet/Mocassin.Core/Particle.cs` remain `process=false`. The three
+filter homes are equal as token sets (25 each) after the documented `**`→`*` normalisation. The job block keeps
+the four commands, `ubuntu-latest`, `timeout-minutes: 10`, no matrix, and no dependency install.
+
+**Docs-link coverage (F-7).** `check_docs_links.py` scans the five root guides and every `docs/**/*.md` (238
+files). Matching that file set against the live arm matches 115 and leaves 123 outside, including `README.md`,
+`CONTRIBUTING.md`, `SECURITY.md`, `docs/user-guide/**` (13 files), `docs/planning/steps/**`, and the ADRs. A link
+break in those files still fails the checker without starting the process job. This is the same failure mode as
+F-1 but outside the process-checker inputs; the published docs have their own gate (`verify.sh docs`, manual
+`docs.yml`), and the job is deliberately process-scoped, so it is recorded as F-7 (Minor), not a Major.
+
+**Merge tree (F-8).** `origin/main` is `895b20b33e8d747c6875bfa603c9b891da1dd4ad` at review time, not the
+`be930c4` recorded as the base. Main advanced with the step-15 design commits, including
+`docs/planning/04-roadmap.md` and `docs/development/solver-architecture.md`. `git merge-tree --write-tree
+origin/main HEAD` produced tree `f61365dbcb36b0ff90bd0e0a2aeb37c81f16dced`; in an archive of that tree
+`check_process_consistency.py`, `check_docs_links.py` (239 files), `check_doc_math.py` (235 files), and the
+78-test suite all pass. The merge candidate must still be rechecked if main moves again before merge (F-8).
+
+**Round-2 request metadata (F-9).** The Request table still pins the round-1 reviewed commit (`f00fd0f`) and
+request tip, and its naming paragraph still says the record uses the `policy-update-` prefix. The round-2 fixed
+point and the rename are recorded only in the Dev resolutions block. The review used the lead-supplied
+`06a861b`/`ee4327d` and that block, so the gate is not ambiguous; the table is stale (F-9, Note).
+
+**Guard completeness (F-10).** The derived guard imports the three tuples. `REQUIRED_INTEGRATION` and
+`TIER_VOCABULARY_PAGES` are not imported; every current member is already covered by those tuples or the
+`docs/development/*` glob, but a future checker input outside both would not trip the guard. Note only; the
+current tree is fully covered.
+
+**Files read.** `AGENTS.md` §3.9–§3.13 and §17; `docs/planning/reviews/README.md` §2.1–§9.1;
+`docs/development/design-proportionality.md` §1–§2; `docs/development/review-axes.md`;
+`docs/planning/ci-policy.md` §2–§5; `.github/workflows/ci.yml` (full); `tools/verify.sh`;
+`tools/check_process_consistency.py`; `tools/check_docs_links.py`; `tools/check_doc_math.py`;
+`tools/tests/test_ci_process_job.py`; `tools/tests/test_ci_platform_gate.py`;
+`docs/development/contributing.md`; `docs/planning/status.md`; the round-1 record text and the Dev resolutions;
+`.opencode/agents/review.md`.
+
 ## Findings
 
 | ID | Axis | Severity | Origin | Finding | Evidence | Recommendation |
@@ -466,9 +577,19 @@ verification section; `.opencode/agents/review.md`.
 Severity values: **Blocker**, **Major**, **Minor**, **Note**. Origin: **design**, **implementation**,
 **evidence**, or **documentation**. Axis: **Standards** or **Spec**.
 
+### Re-review round 2 findings — 2026-11-27
+
+| ID | Axis | Severity | Origin | Finding | Evidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- |
+| F-7 | Spec | **Minor** | design | The job and the request say the change closes the gap for the four guardrails, but the `process` filter covers only 115 of the 238 Markdown files `check_docs_links.py` scans. A link or math break in `README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `docs/user-guide/**`, `docs/planning/steps/**`, or an ADR still fails the checker without starting the job. The `check_process_consistency.py` half of round-1 F-1 is fully closed. | Live-arm match over the checker's file set: 115 matched, 123 unmatched (75 under `docs/planning/`, 13 under `docs/user-guide/`, plus the root guides and published docs). `detect(["README.md"])`, `detect(["docs/user-guide/index.md"])`, and `detect(["docs/planning/adr/0011-immutable-package-and-results-store.md"])` all return `process=false`. | Either qualify the "closes that gap" and "every path family the four checks read" claims to the process-checker inputs and process homes, or add the remaining root guides and docs homes to the arm and both lists. If deferred, the owner accepts the residual; the published-docs gate is `verify.sh docs` and the manual `docs.yml`. |
+| F-8 | Standards | Note | evidence | The request records `be930c4` as `origin/main`, but `origin/main` is `895b20b` at review time; the branch has not merged the new main. The step-15 design commits touch `docs/planning/04-roadmap.md` and `docs/development/solver-architecture.md`, both process-filtered. The merge candidate was checked, but a later main move would stale it again. | `git rev-parse origin/main` → `895b20b…`; `git log --oneline be930c4..origin/main` lists the step-15 records; `git merge-tree --write-tree origin/main HEAD` → `f61365db…`, and the four checks pass on that tree. | Recheck the merge tree against current `main` immediately before merge; no rebase is needed. This is the §3.4 merge-tree rule applied to a maintenance branch, not a design defect. |
+| F-9 | Standards | Note | documentation | The Request table still pins the round-1 reviewed commit (`f00fd0f`) and request tip, and its naming paragraph still says the record uses the `policy-update-` prefix. The round-2 fixed point and the rename are recorded only in the Dev resolutions block. | Record lines 20–21 and 33–37 are unchanged round-1 text; the round-2 commit is named only at lines 505–506. The lead-supplied reviewed commit and the resolution block made the gate unambiguous. | Add a round-2 request line or header with `06a861b`/`ee4327d` and mark the old naming rationale as superseded; a bookkeeping note, not a re-review trigger. |
+| F-10 | Standards | Note | design | The derived coverage guard imports `REQUIRED_FILES`, `NORMATIVE_FILES`, and `VERDICT_FILES`; `REQUIRED_INTEGRATION` and `TIER_VOCABULARY_PAGES` are not imported. Every current member is covered by those tuples or the `docs/development/*` glob, but a future checker input outside both would not trip the guard. | `tools/tests/test_ci_process_job.py` lines 68–75; `tools/check_process_consistency.py` tuples. All 64 current checker paths return `process=true`; `model-economics.md` and `design-proportionality.md` are covered by `docs/development/*`. | When the checker grows, union the remaining tuples (or every file the checker reads) into the guard; not a defect in the current tree. |
+
 ## Record state
 
-**State:** Re-review required — round 1 resolutions complete; fresh round 2 requested at `06a861b`.
+**State:** Ready for implementation — round 2 complete at `06a861b` (request tip `ee4327d`); F-1 is closed and
+no Blocker or Major remains. F-7 (Minor) and F-8–F-10 (Notes) are recorded for owner acceptance or deferral.
 
 `Ready for review` means the design and the reviewed tree are frozen at `f00fd0f` and the request is complete. A
 `Changes required` verdict returns the work to the dev for a fix commit and a fresh round; `Ready for
@@ -486,6 +607,20 @@ Reviewer only. Tick one.
 
 Follow-up owner: Dev
 Follow-up change: F-1 (Major, Spec) — add the omitted normative process paths to the `process` arm, both normative filter lists, and the filter proof. F-2/F-3 are Minor and can ride with the fix; F-4–F-6 are Notes for owner acceptance or deferral.
+
+### Re-review round 2 verdict — 2026-11-27
+
+Reviewer only. Tick one.
+
+- [x] Ready for implementation
+- [ ] Ready with notes
+- [ ] Changes required
+- [ ] Waived
+
+No Blocker or Major remains. Round-1 F-1 is closed; F-2–F-5 are closed; F-6 is accepted. The remaining F-7
+(Minor, Spec) and F-8–F-10 (Notes, Standards) are non-blocking under the Full stop rule and do not justify another
+round. Follow-up owner: Dev for the F-7 wording-or-paths choice and F-9 metadata; Lead/Dev to recheck the merge
+tree against current `main` immediately before merge (F-8).
 
 ## Human approval
 
