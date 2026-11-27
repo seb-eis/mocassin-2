@@ -35,9 +35,10 @@ The design set contains the record and the minimal normative edits needed to mak
 correct the round-1 findings: the policy-update record class and the `policy-*.md` binding
 (`docs/planning/reviews/README.md` §9.1 and `.opencode/agents/review.md`), the policy-update class in
 `docs/development/design-proportionality.md`, the senior consultation page
-`docs/development/senior-consultation.md`, the retired tier wording in the agent prompts, and the lead's
-discovery facilitation line in `docs/development/orchestration.md`. The remaining normative pages are not
-rewritten here; the dev implements them after the verdict.
+`docs/development/senior-consultation.md` and its navigation entry, the retired tier wording in the agent
+prompts and `docs/development/orchestration.md`, and the lead's discovery facilitation line in
+`docs/development/orchestration.md`. The remaining normative pages are not rewritten here; the dev implements
+them after the verdict.
 
 ## Purpose
 
