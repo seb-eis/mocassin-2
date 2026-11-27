@@ -7,10 +7,11 @@ but no CI job ran them. These assertions execute the shipped change-detection
 snippet over sample file lists and guard the lightweight job that consumes it,
 so the guardrails cannot silently drop out of CI again.
 
-Three drift guards sit on top of the behaviour checks: every path exported by
-the process checker must match the workflow's case arm, the normative filter
-lists in `docs/planning/ci-policy.md` and `AGENTS.md` must match that arm, and the
-job's test command must be the one `tools/verify.sh` runs.
+Coverage guards sit on top of the behaviour checks: every path exported by the
+process checker and every Markdown file in the documentation checker's scan must
+match the workflow's case arm, the normative filter lists in
+`docs/planning/ci-policy.md` and `AGENTS.md` must match that arm, and the job's
+test command must be the one `tools/verify.sh` runs.
 """
 
 from __future__ import annotations
@@ -22,6 +23,7 @@ import unittest
 from fnmatch import fnmatchcase
 from pathlib import Path
 
+from tools.check_docs_links import iter_markdown
 from tools.check_process_consistency import NORMATIVE_FILES, REQUIRED_FILES, VERDICT_FILES
 
 REPO = Path(__file__).resolve().parents[2]
@@ -39,12 +41,18 @@ AREA_FLAGS = ("dotnet", "rust", "python", "contracts", "api", "process")
 # Every path family that must enable the process/binding job.
 PROCESS_PATHS = (
     ".opencode/agents/dev-free.md",
+    "README.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
     "AGENTS.md",
     "GLOSSARY.md",
     "opencode.json",
     "docs/development/index.md",
+    "docs/user-guide/index.md",
     "docs/planning/reviews/step-15.md",
     "docs/planning/audits/step-15.md",
+    "docs/planning/steps/step-14-simulation-context-initialization.md",
+    "docs/planning/adr/0011-immutable-package-and-results-store.md",
     "docs/planning/ci-policy.md",
     "docs/planning/status.md",
     "docs/planning/maintenance/2026-11-27-temporary-free-dev-binding.md",
@@ -86,6 +94,9 @@ CONTRACTS_INSTALL_COMMAND = "python -m pip install -r tools/contracts/requiremen
 # prose (for example `tools/contracts/manifest.json`) out of the comparison.
 SINGLE_FILE_FILTERS = frozenset(
     {
+        "README.md",
+        "CONTRIBUTING.md",
+        "SECURITY.md",
         "AGENTS.md",
         "GLOSSARY.md",
         "opencode.json",
@@ -240,6 +251,20 @@ class ProcessJobTests(unittest.TestCase):
                     any(fnmatchcase(path, pattern) for pattern in patterns),
                     f"{path} is validated by the process checks but no process filter matches it",
                 )
+
+    def test_every_documentation_markdown_file_matches_the_process_filter(self) -> None:
+        """PR-fast regression: the link checker's whole scan must enable the process job."""
+        paths = sorted(path.relative_to(REPO).as_posix() for path in iter_markdown(REPO))
+        self.assertTrue(paths, "the documentation checker must discover Markdown files")
+        patterns = workflow_filter_patterns()
+        uncovered = [
+            path for path in paths if not any(fnmatchcase(path, pattern) for pattern in patterns)
+        ]
+        self.assertEqual(
+            uncovered,
+            [],
+            "documentation Markdown files bypass the process job:\n" + "\n".join(uncovered),
+        )
 
     def test_contract_tooling_does_not_enable_the_process_job(self) -> None:
         for path in ("tools/contracts/manifest.json", "tools/check-license-headers.py"):

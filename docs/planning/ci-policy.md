@@ -148,7 +148,7 @@ enables only affected jobs:
 | Rust | `src/rust/`, Cargo files, toolchain, or `deny.toml` change | Ubuntu only |
 | Python | `src/python/` or its `pyproject.toml` change | Ubuntu only |
 | Contracts and policy | any code changes, or contract/symmetry/licence/secret tooling changes | Ubuntu only |
-| Process and binding | `.opencode/**`, `AGENTS.md`, `GLOSSARY.md`, `opencode.json`, `docs/development/**`, `docs/planning/reviews/**`, `docs/planning/audits/**`, `docs/planning/README.md`, `docs/planning/04-roadmap.md`, `docs/planning/ci-policy.md`, `docs/planning/status.md`, `docs/planning/maintenance/**`, `docs/planning/drift-checks/**`, `docs/planning/closeout/**`, `docs/planning/incidents/**`, `docs/planning/research/**`, `docs/planning/prototypes/**`, `docs/planning/retrospectives/**`, `zensical.toml`, `tools/check_process_consistency.py`, `tools/check_closeout_evidence.py`, `tools/check_docs_links.py`, `tools/check_doc_math.py`, `tools/verify.sh`, or `tools/tests/**` change | Ubuntu only |
+| Process and binding | `README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `.opencode/**`, `AGENTS.md`, `GLOSSARY.md`, `opencode.json`, `docs/**`, `docs/development/**`, `docs/planning/reviews/**`, `docs/planning/audits/**`, `docs/planning/README.md`, `docs/planning/04-roadmap.md`, `docs/planning/ci-policy.md`, `docs/planning/status.md`, `docs/planning/maintenance/**`, `docs/planning/drift-checks/**`, `docs/planning/closeout/**`, `docs/planning/incidents/**`, `docs/planning/research/**`, `docs/planning/prototypes/**`, `docs/planning/retrospectives/**`, `zensical.toml`, `tools/check_process_consistency.py`, `tools/check_closeout_evidence.py`, `tools/check_docs_links.py`, `tools/check_doc_math.py`, `tools/verify.sh`, or `tools/tests/**` change | Ubuntu only |
 | Public API compatibility | .NET public surface changes | Ubuntu only |
 | Documentation | separate manual workflow | Ubuntu only |
 
@@ -164,13 +164,18 @@ The process/binding job is deliberately cheap: it installs only the pinned contr
 `tools/check_docs_links.py`, `tools/check_doc_math.py`, and the `tools/tests` suite. The process checkers use
 only the Python standard library; the install is required by the existing parameterization projection test.
 It exists because the 2026-11-27 workflow adoption added those guardrails without a CI consumer; licence,
-secret, contract, and dependency checks stay in the contracts/policy job. The filter also covers the planning
-index and roadmap, the closeout, incident,
-research, prototype, and retrospective homes, maintenance and drift checks, and `tools/check_closeout_evidence.py`
-and `tools/verify.sh`, because the process checker validates those pages and templates and the job mirrors the
-local gate. A regression test imports the checker's required, normative, and verdict path lists, so adding a new
-checked file without a matching filter fails the suite. It does not widen any other job, and the test step uses
-`-t .` so it discovers exactly the `tools/tests` set that `tools/verify.sh` runs.
+secret, contract, and dependency checks stay in the contracts/policy job.
+
+The filter covers every tracked Markdown file read by the documentation checks: the root guides and `docs/**`,
+including published guides, step pages, ADRs, and review/audit records. The explicit process-tool and planning
+paths remain because the process checker validates them and the job mirrors the local gate. The owner accepted
+the F-7 follow-up cost on 2026-11-27: documentation changes now start this job. Each such run installs one pinned
+wheel and runs the standard-library checks and tool tests, about a minute, without a .NET or Rust build.
+
+Regression coverage derives from both the process checker's required, normative, and verdict path lists and the
+documentation link checker's complete Markdown scan, so a new checked file or Markdown page without a matching
+filter fails the suite. It does not widen any other job, and the test step uses `-t .` so it discovers exactly the
+`tools/tests` set that `tools/verify.sh` runs.
 
 A change to `.github/workflows/ci.yml` forces all jobs so the pipeline itself is validated. Because
 `platforms=windows`/`macos` suppresses the Ubuntu-only jobs even when their paths changed, a workflow-validation

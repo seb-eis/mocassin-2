@@ -666,3 +666,22 @@ text above are unchanged.
 
 No CI run was dispatched. This remains a maintenance branch with local validation only; no merge, tag, or `main`
 push is part of this resolution.
+
+## Dev resolutions — F-7 follow-up
+
+Dev-owned resolution and evidence for round-2 finding F-7. The review agent's findings, evidence, verdict, and
+checklist text above are unchanged.
+
+**Fix commit:** `97b6c48e9dd640c46bcd9b5b264c5dea7d166b62` on `fix/ci-process-filter`; owner approved the merge on
+2026-11-27.
+
+F-7 is resolved. The `process` arm now covers every tracked Markdown file the documentation checks read: the root
+guides (`README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `AGENTS.md`, `GLOSSARY.md`) plus `docs/**`, with the
+pre-existing explicit process paths retained. `test_every_documentation_markdown_file_matches_the_process_filter`
+derives the file set from the documentation link checker's scan and requires every file to match a live filter
+pattern.
+
+Red proof at `97b6c48`: removing `docs/**` left 122 paths uncovered, including step pages, ADRs, and a temporary
+`docs/planning/steps/zz-f7-red-proof.md`; removing the `README.md` token made the shipped-filter proof fail with
+`process=false`. The owner accepted the cost: documentation changes now start the job, which installs the single
+pinned `msgpack==1.2.4` wheel and takes about one billable minute, with no .NET or Rust build.

@@ -637,8 +637,9 @@ Rules:
 - Automatic CI is Ubuntu-only. Windows and macOS are manual. Promote Windows to automatic closeout/main when
   platform-specific code first appears; keep macOS manual until there is macOS-specific behaviour to validate.
 - Path filters must ensure that only affected jobs run. A change to `.github/workflows/ci.yml` forces all jobs.
-- The `Process and binding checks` job runs when process-relevant paths change: `.opencode/**`, `AGENTS.md`,
-  `GLOSSARY.md`, `opencode.json`, `docs/development/**`, `docs/planning/reviews/**`, `docs/planning/audits/**`,
+- The `Process and binding checks` job runs when process-relevant paths change: `README.md`, `CONTRIBUTING.md`,
+  `SECURITY.md`, `.opencode/**`, `AGENTS.md`, `GLOSSARY.md`, `opencode.json`, `docs/**`, `docs/development/**`,
+  `docs/planning/reviews/**`, `docs/planning/audits/**`,
   `docs/planning/README.md`, `docs/planning/04-roadmap.md`, `docs/planning/ci-policy.md`,
   `docs/planning/status.md`, `docs/planning/maintenance/**`, `docs/planning/drift-checks/**`,
   `docs/planning/closeout/**`, `docs/planning/incidents/**`, `docs/planning/research/**`,
