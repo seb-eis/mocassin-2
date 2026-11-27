@@ -29,6 +29,7 @@ WORKFLOW = REPO / ".github" / "workflows" / "ci.yml"
 CI_POLICY = REPO / "docs" / "planning" / "ci-policy.md"
 AGENTS = REPO / "AGENTS.md"
 VERIFY = REPO / "tools" / "verify.sh"
+CONTRACTS_REQUIREMENTS = REPO / "tools" / "contracts" / "requirements.txt"
 
 JOB_RE = re.compile(r"(?m)^  (?P<name>[a-z][a-z-]*):\n")
 JOB_IF_RE = re.compile(r"(?m)^    if: (?P<expression>\S.*)$")
@@ -76,6 +77,9 @@ CHECKER_INPUT_PATHS = tuple(
 
 # The tool-test discovery command shared by the job and `tools/verify.sh`.
 DISCOVERY_COMMAND = "python -m unittest discover -s tools/tests -t ."
+
+# The only dependency install permitted in the lightweight process job.
+CONTRACTS_INSTALL_COMMAND = "python -m pip install -r tools/contracts/requirements.txt"
 
 # Single-file filter tokens. A documented token is a filter token when it ends
 # with `*` or is one of these; that keeps unrelated backticked paths in the same
@@ -277,7 +281,22 @@ class ProcessJobTests(unittest.TestCase):
         ):
             with self.subTest(command=command):
                 self.assertIn(command, block)
-        for absent in ("dotnet", "cargo", "pip install"):
+        install_commands = [
+            line.strip().removeprefix("run: ")
+            for line in block.splitlines()
+            if line.strip().startswith("run: ") and "install" in line.lower()
+        ]
+        self.assertEqual(
+            install_commands,
+            [CONTRACTS_INSTALL_COMMAND],
+            "the process job must install only the pinned contracts requirements",
+        )
+        self.assertEqual(
+            CONTRACTS_REQUIREMENTS.read_text(encoding="utf-8").splitlines(),
+            ["msgpack==1.2.4"],
+            "the contracts test requirement must stay pinned",
+        )
+        for absent in ("dotnet", "cargo"):
             with self.subTest(absent=absent):
                 self.assertNotIn(absent, block, "the process job must stay cheap")
 

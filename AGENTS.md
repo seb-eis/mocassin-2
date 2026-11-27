@@ -645,9 +645,10 @@ Rules:
   `docs/planning/prototypes/**`, `docs/planning/retrospectives/**`, `zensical.toml`,
   `tools/check_process_consistency.py`, `tools/check_closeout_evidence.py`, `tools/check_docs_links.py`,
   `tools/check_doc_math.py`, `tools/verify.sh`, and `tools/tests/**`. A `ci.yml` change enables it together with
-  every other job. It is Ubuntu-only, installs no dependencies, builds neither .NET nor Rust, and runs the
-  process checker, the documentation link and math checks, and the `tools/tests` suite with the same discovery
-  root as `tools/verify.sh`.
+  every other job. It is Ubuntu-only, installs only the pinned contracts requirements (`msgpack==1.2.4`) needed
+  by the existing parameterization projection test, builds neither .NET nor Rust, and runs the process checker,
+  the documentation link and math checks, and the `tools/tests` suite with the same discovery root as
+  `tools/verify.sh`.
 - Documentation is validated locally with `zensical build --strict` (and the other docs commands). The
   separate `docs.yml` workflow is manual until the documentation is mature enough to justify automatic runs.
 - Keep Nightly manual-only; do not add a schedule until real long-running suites exist. If a schedule is later introduced, run it weekly on Ubuntu.
