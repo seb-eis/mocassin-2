@@ -48,4 +48,6 @@ container restarts. Commit and push durable work before leaving it idle. On an u
 the branch, worktree, and any CI/merge/tag state before retrying; never repeat an irreversible step on assumption.
 See [`orchestration.md`](../../docs/development/orchestration.md) §9.
 
-Finish by restating the verdict and the evidence behind it in your report to the lead.
+Finish by restating the verdict and the evidence behind it in your report to the lead. Use the applicable
+`AGENTS.md` §17 fields: report the record path, the verdict, the commands and results, and the docs/status updated
+rather than a narrative.

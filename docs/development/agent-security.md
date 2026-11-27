@@ -23,7 +23,7 @@ minimum controls for MOCASSIN.
 | **Command injection** | A repository script or generated command executes untrusted input. |
 | **Dependency compromise** | A new or updated dependency has a malicious install hook or licence problem. |
 | **Data exfiltration** | The agent sends repository or user data to an external service. |
-| **Review agent manipulation** | A record or diff is crafted to make a review agent approve without reading the code. |
+| **Review or senior agent manipulation** | A record or diff is crafted to make a review or senior agent approve without reading the code, or to feed a senior a preferred answer. |
 | **Process bypass** | The agent marks a gate as passed, edits an audit record, or merges without approval. |
 
 ## 3. Minimum controls
@@ -58,6 +58,9 @@ minimum controls for MOCASSIN.
 ### Review and approval
 
 - A review agent is a fresh, read-only context and does not fix findings.
+- The senior consultant is a fresh, read-only context with a narrower inspection scope; it receives only the
+  bounded assignment and named paths, and never the lead's history, the owner's preferred answer, or another
+  reviewer's reasoning.
 - The human owner approves merges, tags, waivers, and high-risk operations.
 - Do not let an agent approve its own work, edit its own audit record, or merge to `main`.
 - Keep approval evidence in durable records; do not rely on chat.
@@ -96,4 +99,6 @@ postmortem. Do not “clean up” the evidence before the incident record is wri
 - [ ] Every new dependency is justified, pinned, and licence-checked.
 - [ ] CI actions and release steps are pinned and use minimal permissions.
 - [ ] The human owner approved every high-risk operation.
+- [ ] The senior consultant was used only on its trigger, with a bounded assignment and no lead history or
+      preferred answer.
 - [ ] The evidence is durable, redacted, and linked to the commit or CI run.

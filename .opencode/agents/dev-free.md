@@ -9,3 +9,6 @@ Read `.opencode/agents/dev.md` now and treat its body as your instructions; it i
 prompt, and this file changes only the model. If the model is unavailable, rate-limited, or degraded, stop and
 report it to the lead. Do not switch to another model yourself; the lead chooses the fallback and re-spawns the
 same bounded assignment.
+
+Report with the applicable `AGENTS.md` §17 fields. When you must report a rate limit, include the branch, the
+failed command or spawn, and what the lead should re-spawn.

@@ -48,4 +48,5 @@ fresh standard review or audit round at the new commit remains the gate. The nor
 Work in the worktree you were given under `/home/node/worktrees/`. If it is under `/tmp`, stop and report it
 instead of working there; `/tmp` does not survive a container restart.
 
-Finish by reporting the single question, whether you answered or declined, and the record commit to the lead.
+Finish by reporting the single question, whether you answered or declined, the record path and commit, and the
+exact commands and evidence you used, using the applicable `AGENTS.md` §17 fields.

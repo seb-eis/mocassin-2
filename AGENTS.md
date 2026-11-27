@@ -91,6 +91,12 @@ Before changing anything, read these in order:
    [`docs/planning/adr/0014-extension-abi-and-trust-boundary.md`](docs/planning/adr/0014-extension-abi-and-trust-boundary.md),
    and [`docs/planning/steps/step-30-standalone-documentation.md`](docs/planning/steps/step-30-standalone-documentation.md)
    — documentation toolchain, contract/format, and extension decisions.
+24. [`GLOSSARY.md`](GLOSSARY.md) — the working ubiquitous language for contributors and agents (process and
+    project terms). Scientific terms, notation, and units are in [`docs/glossary/`](docs/glossary/index.md).
+
+The task-level practices are indexed in [`docs/development/index.md`](docs/development/index.md): codebase design,
+bug diagnosis, domain language, discovery, prototypes, research, review axes, TDD, and retrospectives. Each links
+the normative repository rule it depends on.
 
 The plan is the source of truth. If code and plan disagree, stop and reconcile them rather than silently
 following one.
@@ -299,8 +305,8 @@ after the Step 31 release gates pass.
 
 ### 3.8 Agent roles and write scopes
 
-The workflow has four roles and one owner. Each role edits only the artifacts it owns. There is no scribe and no
-transcription step.
+The workflow has four standing roles, one escalation role, and one owner. Each role edits only the artifacts it
+owns. There is no scribe and no transcription step.
 
 | Role | May edit | May commit | Must not edit |
 | --- | --- | --- | --- |
@@ -308,6 +314,7 @@ transcription step.
 | Design agent | Design and planning docs; the review record's request, scope, checklists, and resolutions | Documentation-only commits on the design branch | Code, tests, configuration, contracts, audit or design verdicts, step status, merges, tags |
 | Dev (`dev-free` or `dev`) | Code, tests, configuration, contracts, step page, status dashboard, parity matrix; the audit/review record's request, scope, checklists, and resolutions | Feature-branch commits; documentation-only record and status commits | The review agent's findings, evidence, or verdict text; merges and tags without approval |
 | Review agent (design review or audit) | Only the assigned review or audit record: its own metadata, checklist completion marks (not item text), evidence, findings, and verdict | At most one documentation-only record commit per round, with `[skip ci]` | Everything else, including code, tests, configuration, design docs, step page, status dashboard, parity matrix, request scope, checklist item text, resolutions, merges, tags, and pushes to `main` |
+| Senior consultant (escalation only) | Only the assigned senior record under `docs/planning/reviews/senior/`: its own metadata, assignment check, answer or decline, evidence, and limitations | At most one documentation-only record commit per consultation, with `[skip ci]` | Everything else, including code, tests, configuration, design docs, the parent record, findings, verdicts, waivers, merges, tags, and pushes to `main` |
 | Human owner | Approve gates, merges, and tags | — | — |
 
 Orchestration rule: the lead is the human owner's only direct interaction point and spawns every role agent. The
@@ -350,13 +357,14 @@ Review-agent rules:
   `docs: record step-NN audit Passed [skip ci]`.
 - Optional scratch notes may live under `.tmp/`. They are not gate artifacts and are never committed.
 
-**Harness binding.** The four roles are bound as OpenCode agents in `.opencode/agents/` (`lead`, `design`,
-`dev-free`, `dev`, `review`), and `opencode.json` makes the lead the `default_agent`. `.opencode/commands/step-start.md`
-and `step-closeout.md` are the two entry points. The binding enforces four rules only: the lead cannot edit and can
-spawn only the design, dev, and review roles; the review agent can edit only `step-*.md`/`xc-*.md` records and
-cannot spawn; the design agent cannot edit code areas. Shell, pushes, merges, and tags are procedural, so owner
-approval and branch protection remain the real controls. See
-[`docs/development/orchestration.md`](docs/development/orchestration.md) §9 for the full statement, and
+**Harness binding.** The six roles are bound as OpenCode agents in `.opencode/agents/` (`lead`, `design`, `dev-free`,
+`dev`, `review`, `senior`), and `opencode.json` makes the lead the `default_agent`. `.opencode/commands/step-start.md`,
+`step-closeout.md`, `grill.md`, `handoff.md`, and `retro.md` are thin routers. The binding enforces five rules only:
+the lead cannot edit and can spawn only `design`, `dev-free`, `dev`, `review`, and `senior`; the review agent can
+edit only `step-*.md`, `policy-*.md`, and `xc-*.md` records and cannot spawn; the senior consultant can edit only
+its assigned record under `docs/planning/reviews/senior/` and cannot spawn; the design agent cannot edit code areas.
+Shell, pushes, merges, and tags are procedural, so owner approval and branch protection remain the real controls.
+See [`docs/development/orchestration.md`](docs/development/orchestration.md) §9 for the full statement, and
 [`docs/development/model-economics.md`](docs/development/model-economics.md) for the model tiers.
 
 
@@ -404,11 +412,21 @@ checked there, not in another design-review round.
    change any other file. If it cannot commit, it writes the record and the dev commits it unchanged.
 5. The review agent's write scope is defined in section 3.8. It may edit only its own metadata, evidence,
    findings, and verdict. It must not edit the request scope, checklists, resolutions, design docs, step page,
-   status dashboard, parity matrix, code, tests, or configuration.
+   status dashboard, parity matrix, code, tests, or configuration. It labels every finding on the **Spec** or
+   **Standards** review axis per
+   [`docs/development/review-axes.md`](docs/development/review-axes.md); one record carries one verdict.
 6. If the verdict is `Changes required`, the design agent and dev update the design docs directly, the dev adds
    the resolutions and marks the review `Re-review required`, and the lead spawns a fresh review agent for the
    new commit. The new round is appended; earlier rounds are not overwritten. Do not open a new round for Minor
    or Note findings alone.
+
+   After two completed standard rounds of the same review each ended blocked and at least one Blocker or Major is
+   still open, the lead may request **one** senior focused consultation before a third standard round. The same
+   escalation is available to a step audit, a cross-cutting review, and a policy-update review. The trigger,
+   request contract, senior rules, and advisory effect are in
+   [`docs/development/senior-consultation.md`](docs/development/senior-consultation.md). The answer is advisory,
+   the human owner decides, and a fresh standard round at the new commit remains the gate; a senior consultation
+   is not a round and not a verdict.
 7. Only a `Ready for implementation` verdict, or a `Ready with notes` verdict the owner accepts, permits the human
    owner to approve starting the step. The lead presents the verdict and the feature list and stops for approval;
    it does not approve them. The cumulative report in section 3.12 is for a merge, a tag, or a Blocker/Major
@@ -456,13 +474,22 @@ resolutions; the lead spawns the review agent and relays the verdict; the human 
    change any other file. If it cannot commit, it writes the record and the dev commits it unchanged.
 7. The review agent's write scope is defined in section 3.8. It may edit only its own metadata, evidence,
    findings, and verdict. It must not edit the scope, checklists, resolutions, code, tests, configuration, step
-   page, status dashboard, or parity matrix.
+   page, status dashboard, or parity matrix. It labels every finding on the **Spec** or **Standards** review axis
+   per [`docs/development/review-axes.md`](docs/development/review-axes.md); one record carries one verdict.
 8. If fixes are needed, the dev adds the resolutions, fixes the findings on a new feature branch, squash-merges
    into the step branch, merges current `main`, updates the closeout evidence, dispatches one new closeout CI
    run, and sets the audit status to `Re-audit required`.
 9. The lead spawns a fresh review agent for the new commit; it re-audits and appends a new round to the record.
    The same review agent may continue if it stayed within the review write scope; otherwise start a fresh
    context. Keep every earlier round in the record.
+
+   After two completed standard audit rounds each ended blocked and at least one Blocker or Major is still open,
+   the lead may request **one** senior focused consultation before a third standard round. The same escalation is
+   available to a design review, a cross-cutting review, and a policy-update review. The trigger, request
+   contract, senior rules, and advisory effect are in
+   [`docs/development/senior-consultation.md`](docs/development/senior-consultation.md). The answer is advisory,
+   the human owner decides, and a fresh standard audit round at the new commit remains the gate; a senior
+   consultation is not an audit round and not a verdict.
 10. Only a `Passed` audit, or a `Passed with notes` audit the owner accepts, permits the step-to-main approval
     request. The lead presents the request with the cumulative approval report in section 3.12, covering every
     audit and review round, every finding and resolution, every accepted note or waiver, and the residual risk,
@@ -685,7 +712,12 @@ Each rule has one normative home. Summaries link to it; do not copy it into a se
 | Adoption profile and gate matrix | This section, `AGENTS.md` §3.15, and `docs/planning/README.md` |
 | Lead role and delegation | `docs/development/orchestration.md` |
 | Model tiers, role assignment, free-first binding, escalation | `docs/development/model-economics.md` |
-| Design classes, review stop rule, pre-audit gate, finding-origin metric | `docs/development/design-proportionality.md` |
+| Design classes, the policy-update class trigger, review stop rule, pre-audit gate, finding-origin metric | `docs/development/design-proportionality.md` |
+| Senior escalation trigger, request contract, senior rules, effect | `docs/development/senior-consultation.md` |
+| Review axes (Standards and Spec) | `docs/development/review-axes.md` |
+| Task disciplines (codebase design, bug diagnosis, domain language, discovery, prototypes, research, TDD, retrospectives) | `docs/development/index.md` and each discipline page |
+| Agent output contract | §17 |
+| Policy-update review records | `docs/planning/reviews/README.md` §9.1 |
 | Design review and audit records | `docs/planning/reviews/README.md` and `docs/planning/audits/README.md` |
 | Cross-cutting phase reviews | `docs/planning/reviews/cross-cutting/README.md` |
 | Step sizing, complexity class, and split triggers | `docs/planning/04-roadmap.md` §3.1 |
@@ -711,6 +743,11 @@ the `None` pre-authorization apply from Step 15 and to any amendment started aft
 reviews, audits, closeouts, and tags are historical and are not rewritten; historical records keep the role names
 in force when they were written. The `Design class` field is added to Step 15 onward and to new amendment pages,
 not backfilled into completed step pages.
+
+**Effective from 2026-11-27.** The task disciplines, review axes, the `senior` escalation role, the agent output
+contract in §17, and the `default`/`senior` tier names apply from the 2026-11-27 policy update. Historical records,
+including the earlier tier wording in `docs/planning/maintenance/` and the `status.md` note that records it, are
+not rewritten; they keep the vocabulary in force when they were written.
 
 Changing the process:
 
@@ -1214,3 +1251,32 @@ from the original and the plan’s “Original reference” sections.
       and resolution, accepted notes and waivers, residual risk, and the no-Blocker/no-Major gate statement.
 - [ ] The CI cost policy in section 3.13 is followed: local validation, one closeout run, one main run, no
       per-feature CI, and platform runs only when required.
+- [ ] The applicable task discipline from `docs/development/index.md` was used, and its durable output is in the
+      named home rather than only in chat.
+- [ ] Every review or audit finding is labelled with its review axis, `Spec` or `Standards`.
+- [ ] The completion report follows the agent output contract in section 17.
+
+## 17. Agent output contract
+
+Every role uses the same everyday report. It is the single home for the fields; the cumulative approval report in
+section 3.12 is separate and is required only for a merge, a tag, or a Blocker/Major waiver.
+
+```text
+Step / feature:
+Branch:
+Commits:
+Commands run and results:
+CI run (if any):
+Docs/status/parity updated:
+Known limitations and risks:
+Approval requested for:
+```
+
+Rules:
+
+- Do not ask for approval from prose alone; provide the diff and the evidence.
+- For a merge, a tag, or a Blocker/Major waiver, also provide the cumulative approval report from section 3.12.
+- A review or senior agent reports the record path, the verdict or answer, and the exact commands and evidence
+  behind it, instead of a narrative.
+- The lead reports the role, assignment, and handoff state; it does not restate another role's evidence in place of
+  the durable record.

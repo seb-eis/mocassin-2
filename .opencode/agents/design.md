@@ -38,4 +38,6 @@ container restarts. Commit and push durable work before leaving it idle. On an u
 the branch, worktree, and any CI/merge/tag state before retrying; never repeat an irreversible step on assumption.
 See [`orchestration.md`](../../docs/development/orchestration.md) §9.
 
-Finish by reporting the design files changed, the commit, the design class, and the open questions for the owner.
+Finish by reporting the design files changed, the commit, the design class, and the open questions for the owner,
+using the applicable `AGENTS.md` §17 fields: branch, commits, commands and results, docs/status updated, known
+limitations and risks, and approval requested.

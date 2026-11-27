@@ -27,7 +27,7 @@ Your job:
 
 `dev-free` is the ordinary path; the lead chooses the `dev` fallback. Report to the lead when the local gate fails
 twice, the same file is edited three times without a green gate, or the change crosses a public contract, schema,
-or dependency. The lead may re-brief on the default model; a senior consultation is only for a review/audit
+or dependency. The lead may re-brief on the default model; a senior consultation is only for a review or audit
 deadlock after two completed blocked rounds. Do not change model or tier yourself; report the failure evidence to
 the lead.
 
@@ -43,5 +43,5 @@ container restarts. Commit and push durable work before leaving it idle. On an u
 the branch, worktree, and any CI/merge/tag state before retrying; never repeat an irreversible step on assumption.
 See [`orchestration.md`](../../docs/development/orchestration.md) §9.
 
-Finish with the output contract in `docs/development/agent-workflow.md`: branch, commits, commands and results,
-docs/parity updated, known limitations, and what approval you are asking for.
+Finish with the output contract in `AGENTS.md` §17: step/feature, branch, commits, commands and results, CI,
+docs/status/parity updated, known limitations and risks, and what approval you are asking for.

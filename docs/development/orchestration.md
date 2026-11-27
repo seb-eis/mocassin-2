@@ -20,11 +20,13 @@ Human owner
     └── lead ──┬── design (design docs, ADRs, request scope in step pages)
                ├── dev-free (features, fixes, closeout; free variant of the default tier, first choice)
                ├── dev (same role, paid default fallback)
-               └── review (design review, step audit, cross-cutting review)
+               ├── review (design review, step audit, cross-cutting review, policy-update review)
+               └┄┄ senior (escalation only: one focused consultation, advisory)
 ```
 
 `dev-free` and `dev` are one dev role with two model bindings. There is no separate auditor role: design review
-and audit both use the `review` agent, in a fresh context each time.
+and audit both use the `review` agent, in a fresh context each time. `senior` is not a standing role: the lead
+requests it only on the trigger in [`senior-consultation.md`](senior-consultation.md), and its answer is advisory.
 
 ## 2. Responsibilities
 
@@ -32,7 +34,8 @@ and audit both use the `review` agent, in a fresh context each time.
   change, and surface the stop-and-ask triggers in [`agent-workflow.md`](agent-workflow.md) §8.
 - **Route.** Spawn `design` for design work, `review` for a frozen design or a frozen closeout, and `dev-free`
   for approved features and fixes, falling back to the paid `dev` on a rate limit, a degraded model, or
-  unavailability. Spawn one fresh context per assignment.
+  unavailability. Spawn one fresh context per assignment. Request the `senior` escalation only on its trigger and
+  only with a bounded assignment.
 - **Assign the tier.** Use [`model-economics.md`](model-economics.md): the default tier for lead, design, dev,
   and review, with the dev's free variant first. A senior consultation is an escalation, not a standing tier.
   Never upgrade a role to a premium model on your own; a frontier upgrade is an owner decision.
@@ -62,7 +65,9 @@ The lead must not:
   resolutions, or verdicts;
 - approve a verdict, accept notes, waive a gate, merge, tag, push `main`, or delete a shared branch;
 - spawn a generic general-purpose agent in place of a defined role agent;
-- pass its own conversation history, assumptions, or preferred outcome to a review agent;
+- use `senior` as a normal review round, a third standard round, a standing reviewer, or a verdict;
+- pass its own conversation history, assumptions, preferred outcome, or the owner's preference to a review or
+  senior agent;
 - promote itself or a role to a premium model.
 
 For a merge, a tag, or a Blocker/Major waiver the lead assembles and presents the cumulative approval report from
@@ -83,7 +88,9 @@ steps and phases. That is the one exception to the fresh-context-per-step rule i
 - spawn a **review** agent again only after the closeout feature, local gates, pre-audit gate, and closeout CI
   are complete;
 - spawn a **review** agent for a phase-boundary cross-cutting review after the phase's last step is merged and
-  tagged.
+  tagged;
+- spawn a **senior** consultant only after two completed blocked standard rounds of the same gate, with one open
+  Blocker or Major and one answerable question.
 
 Do not carry a dev into a review, or a review agent into implementation. Give a review agent only the frozen
 commit, the request record, repository links, and the required checks. A review agent must be able to state that
@@ -91,6 +98,20 @@ it had no shared conversation with the design agent, dev, or lead.
 
 If the lead's context becomes unreliable, write the handoff card, start a fresh lead, and read the repository
 before continuing. The outgoing and incoming leads must not both direct the same work.
+
+### Senior consultation
+
+A senior consultation is a bounded escalation, not a round. The lead may request it only when two completed
+standard rounds of the same design review, audit, cross-cutting review, or policy-update review each ended blocked,
+at least one Blocker or Major from the second round is still open, and the remaining disagreement reduces to one
+answerable question. The trigger, request contract, senior rules, and advisory effect are in
+[`senior-consultation.md`](senior-consultation.md); this page only records the lead's duty.
+
+- Check the trigger before requesting it, and give the senior a bounded assignment: frozen commit, parent record,
+  finding IDs, and exact paths or diff range.
+- Never pass the lead's history, the owner's preferred answer, or another reviewer's reasoning to the senior.
+- The answer is advisory. It does not change a record's status or verdict, waive a gate, or authorize a merge or
+  tag; the owner decides, and a fresh standard round at the new commit remains the gate.
 
 ## 5. Simple documentation
 
@@ -119,8 +140,8 @@ role.
 
 ## 6. Spawning and handoff rules
 
-- Spawn only the defined role agents: `design`, `dev-free`, `dev`, and `review`. Do not use an undifferentiated
-  agent for role work. `dev-free` and `dev` are one role, not two.
+- Spawn only the defined role agents: `design`, `dev-free`, `dev`, `review`, and `senior` (escalation only). Do not
+  use an undifferentiated agent for role work. `dev-free` and `dev` are one role, not two.
 - Assign the model tier from [`model-economics.md`](model-economics.md). Do not upgrade a role to a premium model
   because the task feels hard; escalation follows the triggers on that page.
 - Prefer `dev-free`. When the spawn fails or the child reports a rate limit, a degraded model, or
@@ -154,6 +175,7 @@ role.
 - The lead treating a relayed message as durable evidence.
 - One lead per role, or multiple leads directing the same work.
 - Treating "lead", "dev", and "design agent" as synonyms in a record or template.
+- Treating the senior consultation as a third standard round, a standing reviewer, or a verdict.
 - The lead silently upgrading to a premium model.
 
 ## 8. Transition note
@@ -168,22 +190,23 @@ names they used.
 ## 9. Harness binding
 
 The repository binds the roles as OpenCode agents in `.opencode/agents/` (`lead`, `design`, `dev-free`, `dev`,
-`review`) and sets the lead as the `default_agent` in `opencode.json`. `.opencode/commands/step-start.md` and
-`step-closeout.md` are thin routers.
+`review`, `senior`) and sets the lead as the `default_agent` in `opencode.json`. `.opencode/commands/` holds the
+thin routers: `step-start`, `step-closeout`, `grill`, `handoff`, and `retro`.
 
 The binding enforces only what a permission list can enforce:
 
 | Rule | Enforced how |
 | --- | --- |
 | The lead cannot edit any file | `edit "*"` denied |
-| The lead can spawn only `design`, `dev-free`, `dev`, and `review` | `subagent "*"` denied, then those four allowed |
-| The review agent can edit only `step-*.md` and `xc-*.md` records, and cannot spawn helpers | `edit "*"` denied, then the record paths allowed; `subagent "*"` denied |
+| The lead can spawn only `design`, `dev-free`, `dev`, `review`, and `senior` | `subagent "*"` denied, then those five allowed |
+| The review agent can edit only `step-*.md`, `policy-*.md`, and `xc-*.md` records, and cannot spawn helpers | `edit "*"` denied, then the record paths allowed; `subagent "*"` denied |
+| The senior consultant can edit only its assigned `step-*.md`, `xc-*.md`, or `policy-*.md` record under `docs/planning/reviews/senior/`, and cannot spawn helpers | `edit "*"` denied, then the senior record paths allowed; `subagent "*"` denied |
 | The design agent cannot edit `src/`, `tests/`, `tools/`, or `contracts/` | those `edit` paths denied |
 | Each role binding runs on its assigned model tier | `model:` in each agent file, per [`model-economics.md`](model-economics.md) |
 
 Everything else is procedural. Shell is unrestricted, so an agent can still write through a command; pushes,
-merges, and tags are not restricted and rely on owner approval and branch protection; the review agent's
-assigned-record rule is not enforceable; and the lead cannot make even a handoff-card or status edit, so those
+merges, and tags are not restricted and rely on owner approval and branch protection; the review and senior
+assigned-record rules are not enforceable; and the lead cannot make even a handoff-card or status edit, so those
 are routed to the dev. A human can select another agent with the agent picker (shift+tab in the container) and
 bypass the binding entirely. Another harness ports the same prompts; the binding is an adapter, not a second
 rule set.

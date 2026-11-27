@@ -116,6 +116,8 @@ each phase boundary, compare the distribution with the design effort spent.
 ## 6. Relation to other rules
 
 - Model tiers: [`model-economics.md`](model-economics.md).
+- Senior escalation after two blocked full rounds: [`senior-consultation.md`](senior-consultation.md).
+- Review axes and one verdict: [`review-axes.md`](review-axes.md).
 - Step sizing and split triggers: [`docs/planning/04-roadmap.md` §3.1](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/04-roadmap.md#31-step-sizing-and-split-triggers).
 - Design-review records and statuses: [`docs/planning/reviews/README.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/reviews/README.md).
 - Audit records and statuses: [`docs/planning/audits/README.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/audits/README.md).

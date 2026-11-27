@@ -46,3 +46,6 @@ the branch, worktree, and any CI/merge/tag state before retrying; never repeat a
 See [`orchestration.md`](../../docs/development/orchestration.md) §9.
 
 Start with `/step-start <NN-slug>` and finish with `/step-closeout <NN-slug>`.
+
+Finish every handoff with the applicable `AGENTS.md` §17 fields: step/feature, branch, commits, commands and
+results, CI run, docs/status/parity updated, known limitations and risks, and approval requested.
