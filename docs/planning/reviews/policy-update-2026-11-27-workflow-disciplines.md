@@ -16,7 +16,7 @@
 | Design class | **Full** |
 | Base commit | `245e34aff7255476d73539d4cc43f068627f0cba` (`origin/main` at start) |
 | Design freeze commit | `9fc8c7b0327beff529f1a84847e110bf02bedef3` |
-| Review request commit | This commit (documentation-only; records the freeze SHA and the design-set file list) |
+| Review request commit | This commit (documentation-only; freeze SHA, design-set file list, and supporting-page clarifications) |
 | Request owner | Design agent, with the dev for implementation |
 | Lead | — |
 | Review initiated by | Lead, on request of the design agent |
@@ -274,6 +274,8 @@ bounded assignment. The lead must not use it as a normal review round or pass a 
   links the normative page, names the record path, and repeats only the record-format facts the reviewer needs.
 - `model-economics.md`: the senior tier and the one-consultation budget.
 - `agent-workflow.md` §8 and §12: add the senior trigger and the senior anti-patterns.
+- `agent-security.md`: add the senior consultant to the read-only contexts and the least-privilege checklist.
+  It has the review agent's threat model but a narrower inspection scope.
 
 ### C. Review axes
 
@@ -429,6 +431,16 @@ the missing `Axis` column, and the retired tier vocabulary. The repository-wide 
   content stays a link, not a copy.
 - `tools/check_docs_links.py`, `python tools/check_doc_math.py`, and `zensical build --strict` are the link
   gates. Any new page that is not linked is a drift finding, not an orphan.
+
+**H2. Supporting pages.** Keep these one-line changes; do not add a second copy of a rule:
+
+- `docs/development/drift-checks.md`: add a policy-and-process item covering the task disciplines, review
+  axes, senior escalation, output contract, and retired tier names. Run the drift check after this process
+  change.
+- `docs/development/agent-security.md`: add the senior consultant to the read-only contexts and the
+  least-privilege checklist. It has the review agent's threat model but a narrower inspection scope.
+- `docs/development/contributing.md`: add gate-reference rows for the task disciplines, review axes, senior
+  escalation, and output contract. Link; do not restate.
 
 ### I. Post-implementation verification pass
 
@@ -611,7 +623,8 @@ Commands and results at the design freeze (the design-set commit) are recorded h
 - `git diff --name-only origin/main...9fc8c7b` — exactly
   `docs/planning/reviews/policy-update-2026-11-27-workflow-disciplines.md`,
   `docs/planning/reviews/README.md`, and `.opencode/agents/review.md`. No other path is changed at the design
-  freeze. The request commit adds only this record's freeze pointer and this evidence line.
+  freeze. The request commit adds this record's freeze pointer, this evidence line, and the supporting-page
+  clarifications; it changes no rule.
 
 > The review agent may rerun the commands and replace this evidence with its own observations. The request
 > owner evidence is part of the request and is not the review agent’s verdict.
@@ -632,6 +645,8 @@ Mark what was reviewed; add short inline notes only. Do not change item text.
       design agent or dev without writing them.
 - [ ] The new pages are in `docs/development/index.md` and the Zensical navigation; `docs/planning/` stays
       excluded.
+- [ ] `drift-checks.md`, `agent-security.md`, and `contributing.md` get the one-line supporting updates in H2,
+      not a second rule copy.
 
 ### B. Senior escalation
 
