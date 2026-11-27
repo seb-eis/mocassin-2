@@ -15,8 +15,8 @@
 | Type | Process and workflow policy update |
 | Design class | **Full** |
 | Base commit | `245e34aff7255476d73539d4cc43f068627f0cba` (`origin/main` at start) |
-| Design freeze commit | Recorded after the design-set commit; the lead handoff carries the full SHA |
-| Review request commit | This commit (documentation-only; adds the review record and the record-home enablement) |
+| Design freeze commit | `9fc8c7b0327beff529f1a84847e110bf02bedef3` |
+| Review request commit | This commit (documentation-only; records the freeze SHA and the design-set file list) |
 | Request owner | Design agent, with the dev for implementation |
 | Lead | — |
 | Review initiated by | Lead, on request of the design agent |
@@ -608,9 +608,10 @@ Commands and results at the design freeze (the design-set commit) are recorded h
   settings), `Process consistency: OK`, the tool suite (`Ran 62 tests … OK`), SPDX headers (1210 source
   files), the secret scan (1755 tracked text files), and `cargo-deny` (`advisories ok, bans ok, licenses ok,
   sources ok`), finishing with `Closeout gate completed with required checks enabled.`
-- `git diff --name-only origin/main...HEAD` — recorded in the request commit (commit B) as the design-set
-  delta: this record, `docs/planning/reviews/README.md`, and `.opencode/agents/review.md`. No other path is
-  changed at the design freeze.
+- `git diff --name-only origin/main...9fc8c7b` — exactly
+  `docs/planning/reviews/policy-update-2026-11-27-workflow-disciplines.md`,
+  `docs/planning/reviews/README.md`, and `.opencode/agents/review.md`. No other path is changed at the design
+  freeze. The request commit adds only this record's freeze pointer and this evidence line.
 
 > The review agent may rerun the commands and replace this evidence with its own observations. The request
 > owner evidence is part of the request and is not the review agent’s verdict.
