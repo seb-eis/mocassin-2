@@ -38,12 +38,12 @@ owner-acceptance request per
 - **Design review:** Round 1 `Changes required` (2026-11-22, reviewed `31d5e34`, record commit `04f9a0a`);
   round-2 `Ready with notes` at design freeze `af9ded8` (record `3bec909`) — **accepted by the human owner
   2026-11-27**. See [`docs/planning/reviews/step-15.md`](../reviews/step-15.md).
-- **Last updated:** 2026-11-27 (feature 2 squashed; squash commit recorded on the step branch)
+- **Last updated:** 2026-11-27 (feature 2 squashed as `80113e0`)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
 | 1 Transition evaluation | `feature/step-15-energy-engine/transition-evaluation` | Squashed | All required feature gates pass; see evidence below | — | `49ca6af` |
-| 2 State application | `feature/step-15-energy-engine/state-application` | Squashed | All required feature gates pass; see evidence below | — | Recorded on the step branch after the squash |
+| 2 State application | `feature/step-15-energy-engine/state-application` | Squashed | All required feature gates pass; see evidence below | — | `80113e0` |
 | 3 MMC exchange | `feature/step-15-energy-engine/mmc-exchange` | Planned | — | — | — |
 | 4 Benchmark, docs, and closeout | `feature/step-15-energy-engine/benchmarks-docs-and-closeout` | Planned | — | — | — |
 
@@ -67,8 +67,8 @@ owner-acceptance request per
 
 ### Feature 2 evidence
 
-- **Branch / squash:** `feature/step-15-energy-engine/state-application` → squash commit recorded on
-  `step/15-energy-engine` after the feature gates pass.
+- **Branch / squash:** `feature/step-15-energy-engine/state-application` → `80113e0` (tree
+  `2ec1354e7895e880f2af4ee3f80b8f7dac968827`).
 - **Diff summary:** adds `energy/path.rs` (the shared `(selected, direction, rule)` resolution and six-bit state
   decoding used by both evaluation and commit), `energy/commit.rs` (`apply_state_change`, the fixed-order
   particles/flags/tracker-id/pool/owner/cluster passes, the exact incremental `ΔU`, and the resolve-before-mutate
