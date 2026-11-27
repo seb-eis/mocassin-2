@@ -35,6 +35,18 @@ a review agent directly. The spawner must not be the review agent.
 - A re-audit requires a new commit with fixes, made by the dev. Do not re-spawn review agents until a
   preferred verdict appears.
 
+### 1.2 Senior escalation
+
+An audit may use the senior focused consultation only after two completed standard rounds of the same gate still
+leave a Blocker or Major. The trigger, request contract, senior rules, and advisory effect are in
+[`senior-consultation.md`](../../development/senior-consultation.md); do not repeat them here.
+
+- The senior record is `docs/planning/reviews/senior/step-NN-M.md`; the parent audit record links it.
+- The senior is a fresh context that edits only the assigned senior record and commits only that file with
+  `[skip ci]`; it answers one question or writes `Declined`.
+- The answer is advisory. The audit record's status and verdict, the findings, and the merge gate are unchanged; a
+  fresh standard audit round at the new commit remains the gate, and the human owner decides.
+
 ## 2. Audit status values
 
 | Status | Meaning |
@@ -160,6 +172,11 @@ Record each finding's **origin** as design, implementation, evidence, or documen
 distribution feeds the metric in
 [`../../development/design-proportionality.md`](../../development/design-proportionality.md) §4. A finding that
 the pre-audit gate should have caught is an evidence finding, not a design finding.
+
+Label each finding on one **review axis**: **Spec** (does the change implement the frozen request?) or
+**Standards** (does it follow the repository's documented standards?). An audit uses one review context and two
+passes, keeps the axes separate in the findings table, and writes one verdict reflecting the worst outcome. The
+rule is in [`review-axes.md`](../../development/review-axes.md); the template carries the `Axis` column.
 
 ## 6. Verdict
 

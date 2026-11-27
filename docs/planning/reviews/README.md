@@ -153,6 +153,11 @@ distribution feeds the metric in
 [`../../development/design-proportionality.md`](../../development/design-proportionality.md) §4: design-origin
 findings are the only ones that justify more design effort.
 
+Label each finding on one **review axis**: **Spec** (does the change implement the frozen request?) or
+**Standards** (does it follow the repository's documented standards?). Keep the axes separate in the findings table
+and write one verdict reflecting the worst outcome; do not merge or re-rank them. The rule is in
+[`review-axes.md`](../../development/review-axes.md); the template carries the `Axis` column.
+
 ## 7. Verdict
 
 - **Ready for implementation** — no blockers or majors remain.
@@ -216,9 +221,11 @@ earlier round.
 
 ### 9.1 Policy-update reviews
 
-A **policy-update review** is the design-review gate for a process, workflow, role, or agent-prompt change that
-is not a step design. It uses the same independence, evidence, finding-severity, and verdict rules as a step
-design review, but its record is `docs/planning/reviews/policy-<YYYY-MM-DD>-<slug>.md`.
+A **policy-update review** applies the design-review gate to a process, workflow, role, or agent-prompt change that
+is not a step design, using the classes in
+[`design-proportionality.md` §1](../../development/design-proportionality.md#1-design-class). Its record is
+`docs/planning/reviews/policy-<YYYY-MM-DD>-<slug>.md`, and it uses the same independence, evidence, finding-severity,
+and verdict rules as a step design review.
 
 - The record owner (design agent or dev) writes the request fields, scope, non-goals, decision and mapping
   tables, checklist, and resolutions. The review agent writes its own metadata, `Record state`, checklist
@@ -233,13 +240,21 @@ design review, but its record is `docs/planning/reviews/policy-<YYYY-MM-DD>-<slu
   checklist and stops when no Blocker or Major remains.
 - Historical policy records are not rewritten. A later policy update supersedes the affected rule in the
   normative pages and records the supersession in its own record.
-- A policy-update review may use the senior consultation after two completed standard rounds still leave a
-  Blocker or Major. The trigger and request contract are in
-  [`../../development/senior-consultation.md`](../../development/senior-consultation.md); the senior record is
-  `docs/planning/reviews/senior/policy-<date>-<slug>-M.md` and the senior answer is advisory.
 - The post-implementation verification pass is appended to the same record under
   `## Post-implementation verification`; it is not a second design round and does not change the design
   verdict.
+
+### 9.2 Senior escalation
+
+A policy-update review may use the senior focused consultation after two completed standard rounds still leave a
+Blocker or Major. The trigger, request contract, senior rules, and advisory effect are in
+[`senior-consultation.md`](../../development/senior-consultation.md); do not repeat them here.
+
+- The senior record is `docs/planning/reviews/senior/policy-<date>-<slug>-M.md`; the parent policy record links it.
+- The senior is a fresh context that edits only the assigned senior record and commits only that file with
+  `[skip ci]`; it answers one question or writes `Declined`.
+- The answer is advisory. The parent record's status and verdict, the findings, and the gate are unchanged; a fresh
+  standard round at the new commit remains the gate, and the human owner decides.
 
 ## 10. Step amendment reviews
 

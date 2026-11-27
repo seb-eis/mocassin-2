@@ -110,6 +110,23 @@ neighbor links, and incremental lattice-energy updates.
   appears.
 - The review agent records exact commands, results, and file references behind the verdict.
 
+Label each finding on one **review axis** — **Spec** (does the change implement the frozen request?) or
+**Standards** (does it follow the repository's documented standards?) — where the axis fits the finding. Keep the
+axes separate in the findings table and write one verdict reflecting the worst outcome. The rule is in
+[`review-axes.md`](../../../development/review-axes.md); the template carries the `Axis` column.
+
+### 5.1 Senior escalation
+
+A cross-cutting review may use the senior focused consultation only after two completed standard rounds of the same
+gate still leave a Blocker or Major. The trigger, request contract, senior rules, and advisory effect are in
+[`senior-consultation.md`](../../../development/senior-consultation.md); do not repeat them here.
+
+- The senior record is `docs/planning/reviews/senior/xc-NN-M.md`; the parent review record links it.
+- The senior is a fresh context that edits only the assigned senior record and commits only that file with
+  `[skip ci]`; it answers one question or writes `Declined`.
+- The answer is advisory. The phase gate, the record's status and verdict, and the findings are unchanged; a fresh
+  standard round at the new commit remains the gate, and the human owner decides.
+
 ## 6. Status values
 
 | Status | Meaning |

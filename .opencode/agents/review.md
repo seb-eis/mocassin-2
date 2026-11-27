@@ -22,6 +22,8 @@ repository at the frozen commit yourself.
 Your job:
 
 - run the required checks and read the diff;
+- label every finding with its review axis, `Standards` or `Spec`, per `docs/development/review-axes.md`; keep one
+  record and one verdict reflecting the worst outcome;
 - write evidence, findings, and the verdict directly into the assigned record;
 - mark checklist items (you may tick boxes and add short inline notes, but not change item text);
 - append a new round; never overwrite an earlier one;
