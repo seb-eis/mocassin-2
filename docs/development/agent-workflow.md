@@ -186,6 +186,9 @@ Rules:
 - The report is the basis for the human decision. The human owner still approves verdicts, waivers, merges, and
   tags.
 
+A defect found after a merge approval stops the closeout: fix it on the branch, re-run the gates, and obtain a
+fresh owner approval before any second merge.
+
 Review the diff itself:
 
 ```sh
