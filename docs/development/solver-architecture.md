@@ -137,8 +137,9 @@ The reader produces the types Step 14 consumes:
 - Environment pairs are one entry per periodic image: `target_position`, relative integer `offset`, and the
   shared pair-table index (payload `energy_id`). Step 14 expands `cell + offset` into the supercell target;
   Step 13 does not.
-- Energy tables keep payload order and strides; the pair table is `particle_count²` per table. Step 15 converts
-  eV to kT.
+- Energy tables keep payload order and strides; the pair table is `particle_count²` per table. Step 14
+  converts the site table, environment vectors, and cluster rows to kT once and exposes `ev_to_kt`; Step 15
+  scales each remaining model-table read (a pair delta or a raw-tuple cluster energy) exactly once per read.
 - Transitions keep collections, directions, rules, `jump_count`, the derived prefix-sum `jump_offsets`,
   `jump_mapping`, and the tracker mappings. `tracker_order` is variable-length with a `0xFF` sentinel.
 - `DirectionPool` was the Step 13 placeholder (`direction_count`, P1 `(PositionId, ParticleId)` members, and a
@@ -195,6 +196,16 @@ error.
 `linked(a, b)` (Step 17's local-update test) is true iff the payload has an interaction in either direction: owner
 `a` with partner `b`, or owner `b` with partner `a`. It is evaluated over `link_range(position(a))` and
 `incoming(a)`; it never synthesises a reverse link and is not an energy shortcut (the energy is the owner's row).
+
+**Energy-engine design (Step 15).** The transition evaluation is a read-only direct sum. S0/raw-S1 read the
+context vectors, and the S2 correction walks **every** path node's own forward links — changed and spectator
+receivers alike — because the vectors sum every link; the jump-status receiver set (structural stability) is not
+the evaluation source (Step 15 §3; design-review round-1 F-1). On commit, the affected cluster set is the
+deduplicated union of the member-side `ClusterAssoc` route from `incoming(V)` and
+`centres(position(V)) × cell(V)` for each changed environment, rebuilt once per `(instance, cell)` (Step 15
+§4/§6; F-3). The incremental lattice energy applies the 0.5 pair factor once and weights every unchanged
+owner's pair delta by that owner's `STABLE` flag, because the total sums pair rows over stable environments only
+(Step 15 §5; F-2). The MMC exchange applies each direction's own cross-term, recorded as deviation D-7.
 
 **Clusters.** A cluster link's `byte_position` is the environment's own slot (slot `0` = a centre). A cluster
 table can have **more than one centre**: the writer adds slot `0` to every P1 position of the centre site, so the
