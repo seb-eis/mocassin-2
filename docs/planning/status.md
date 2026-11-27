@@ -310,9 +310,13 @@ early-warning signal for the next cross-cutting review.
   `opencode-go/deepseek-v4.1-flash` default and fallback, and no other role changed. On **2026-12-11** the
   binding reverts to `opencode/deepseek-v4.1-flash-free`. Revert steps, scope, and risks:
   [`maintenance/2026-11-27-temporary-free-dev-binding.md`](maintenance/2026-11-27-temporary-free-dev-binding.md).
-- The CI coverage gap for the 2026-11-27 process guardrails was closed on `fix/ci-process-checks` (merge pending
-  owner approval): a `Process and binding checks` Ubuntu-only job runs `check_process_consistency.py`,
-  `check_docs_links.py`, `check_doc_math.py`, and the `tools/tests` suite when process-relevant paths change, and
-  a `ci.yml` change enables it together with every other job. Policy:
-  [`ci-policy.md`](ci-policy.md) §2–§3 and [`AGENTS.md`](../../AGENTS.md) §3.13.
+- The 2026-11-27 process-guardrail CI work is merged: `fix/ci-process-checks` as `d2ba15f`, the process-job
+  dependency correction as `fc6286d` (main CI
+  [`46074962344`](https://github.com/seb-eis/mocassin-2/actions/runs/46074962344) green), and the token-free CI
+  status helper as `dfe68d4`, corrected as `aa090e1` (main CI
+  [`46076462706`](https://github.com/seb-eis/mocassin-2/actions/runs/46076462706) green). The
+  `Process and binding checks` Ubuntu-only job runs `check_process_consistency.py`, `check_docs_links.py`,
+  `check_doc_math.py`, and the `tools/tests` suite when process-relevant paths change, and a `ci.yml` change enables
+  it together with every other job. Policy: [`ci-policy.md`](ci-policy.md) §2–§3 and
+  [`AGENTS.md`](../../AGENTS.md) §3.13.
 - Tag names record completed checkpoints; they do not replace this dashboard.

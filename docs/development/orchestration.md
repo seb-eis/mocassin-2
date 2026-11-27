@@ -101,11 +101,8 @@ before continuing. The outgoing and incoming leads must not both direct the same
 
 ### Senior consultation
 
-A senior consultation is a bounded escalation, not a round. The lead may request it only when two completed
-standard rounds of the same design review, audit, cross-cutting review, or policy-update review each ended blocked,
-at least one Blocker or Major from the second round is still open, and the remaining disagreement reduces to one
-answerable question. The trigger, request contract, senior rules, and advisory effect are in
-[`senior-consultation.md`](senior-consultation.md); this page only records the lead's duty.
+A senior consultation is a bounded escalation, not a round; its normative trigger is in
+[`senior-consultation.md` §1](senior-consultation.md#1-trigger). This section records only the lead's duties.
 
 - Check the trigger before requesting it, and give the senior a bounded assignment: frozen commit, parent record,
   finding IDs, and exact paths or diff range.
