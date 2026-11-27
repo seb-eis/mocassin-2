@@ -1045,6 +1045,60 @@ commit context.
 - **n-2 (Accepted).** The 1755 → 1756 → 1757 progression is explained by the record and the new senior page
   being tracked at each freeze; the new evidence records the count and its commit. No action.
 
+### Implementation evidence (2026-11-27)
+
+**Model-binding fallback.** The lead spawned this assignment on `dev-free` first. That binding stopped with
+`Free usage limit reached` before applying any work; the lead verified the branch was clean at
+`943195f96adba471f6ff31fe122ed90b774415c9` with no partial commits or working-tree changes. The paid `dev` fallback
+then implemented the same bounded assignment. No work was duplicated.
+
+**Frozen design implemented.** The authoritative specification is this record at the round-2 freeze; review rounds
+are `7b3148d` (`Changes required`) and `8f55aeb` (`Ready with notes`, accepted by the human owner with implementation
+approval). No rule was redesigned. The implementation is four stage commits on `docs/adopt-workflow-disciplines`:
+
+| Stage | Commit | Content |
+| --- | --- | --- |
+| 1 | `92800fa` | Eight skills, `/grill`, `/handoff`, `/retro`, nine discipline pages, root `GLOSSARY.md`, research/prototype/retrospective record homes, `docs/development/index.md` and `zensical.toml` navigation, glossary boundary note |
+| 2 | `01a29e2` | `senior` agent, senior record home, `Axis`/`ID`/`Recommendation` findings columns in the three templates, review-axes and senior-escalation rules in the review, audit, and cross-cutting READMEs, lead spawn allow |
+| 3 | `4dbf510` | `AGENTS.md` §2/§3.8/§3.9/§3.10/§3.15/§16/§17, `model-economics.md` and `orchestration.md` default/senior rewrite, `agent-workflow.md`, `agent-security.md`, `drift-checks.md`, `contributing.md`, all six role prompts, planning README, status adoption note |
+| 4 | `476b66b` | Checker requirements and exact findings-column check, retired-tier vocabulary check, `GLOSSARY.md` in `check_docs_links.ROOT_FILES`, focused negative tests, binding tests for senior/commands/retired vocabulary |
+
+**Round-2 notes folded in.**
+
+- **R2-1 (fixed).** `docs/planning/reviews/README.md` §9.1 now opens with a one-line summary that links the class
+  definition in `docs/development/design-proportionality.md` §1; the duplicate definition sentence is gone.
+- **R2-2 (fixed).** `.opencode/agents/dev.md` now says “review or audit deadlock”.
+- **R2-3 (fixed by the stricter option).** `tools/check_process_consistency.py` verifies the exact findings header of
+  all three templates, so it requires `ID`, `Axis`, `Severity`, `Origin` or `Area`, `Finding`, `Evidence`, and
+  `Recommendation`, not only `Axis`. `tools/tests/test_process_consistency.py` fails on a missing `Axis`.
+
+**Durable scope boundary.** `git diff --name-only origin/main...476b66b` contains no `src/`, `tests/`,
+`contracts/`, `.github/workflows/`, `tools/verify.sh`, `.githooks/`, `docs/planning/steps/`, or historical
+review/audit/closeout/`XC-04` path. `tools/` changed only in `check_process_consistency.py`, `check_docs_links.py`,
+`tests/test_process_consistency.py`, and `tests/test_opencode_binding.py`. No provider or existing model ID changed;
+the only model addition is `senior` = `opencode-go/deepseek-v4-pro`. No `docs/process/` directory, `wp-*`
+vocabulary, or `.githooks`/`GATE_HISTORY` was introduced.
+
+**Commands and results.**
+
+| Command | Result |
+| --- | --- |
+| `python tools/check_docs_links.py` | exit 0, `Documentation links OK (236 files scanned).` |
+| `python tools/check_doc_math.py` | exit 0, `Documentation math conventions OK (232 files scanned).` |
+| `python tools/check_process_consistency.py` | exit 0, `Process consistency: OK` |
+| `./tools/verify.sh docs --require` | exit 0; strict Zensical, DocFX 0 warnings/0 errors, rustdoc 7 crates; `Documentation built in …/site`; `Closeout gate completed with required checks enabled.` |
+| `./tools/verify.sh policy --require` | exit 0; 26 contract files; 5 + 4 + 2 projection fixtures; 274 space-group settings; `Process consistency: OK`; `Ran 67 tests … OK`; `SPDX headers present in 1210 source files`; `No secret patterns found in 1787 tracked text files`; `advisories ok, bans ok, licenses ok, sources ok`; `Closeout gate completed with required checks enabled.` |
+| `git diff --check` | exit 0, no output |
+
+Stage-1 and stage-2 commits were also checked with the docs gate (exit 0; links 233/235 files). The policy gate was
+run after stage 4 because that is the first stage that changes `tools/` and the test suite. The repo-wide
+`test_repository_process_is_consistent` positive test and the new negative tests pass.
+
+**Deferred.** The bounded post-implementation verification pass is left to the independent verification agent in
+`## Post-implementation verification`; nothing else is deferred. Residual risk: the senior tier's availability and
+cost were owner-confirmed for this environment but are not exercised by this documentation-only change; the
+checker and gates are the mechanical backstop.
+
 ## Re-review request (round 2)
 
 Round 1 verdict: `Changes required` at `7b3148d44496b6feab0bf33c437085e122bd5481` (record commit
