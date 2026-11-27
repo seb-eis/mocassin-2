@@ -1330,20 +1330,174 @@ owner acceptance or deferral; none blocks implementation. Round-1 text is unchan
 
 ## Post-implementation verification
 
-Not run. The dev implements the frozen design, then a fresh verification agent records here. This section is not
-a second design round and does not change the design verdict.
+**Verification state:** Verified
 
-**Verification state:** Not run
+> **Verifier independence.** I am a fresh, independent verification context. I did not author this design and did
+> not implement the change, and I have no shared conversation with the design agent, the dev, the lead, or any
+> other review agent. The lead supplied only the verified commit, the design freeze and base commits, this record,
+> the repository, and the required commands; no desired verdict, summary, or conversation history was provided.
+> My model is DeepSeek V4.1 Flash 1017 (`opencode-go/deepseek-v4.1-flash`).
+>
+> This is the bounded post-implementation pass from design decision I: it checks whether the frozen design was
+> implemented exactly and the gates pass. It is not a second design round and does not change the design verdict.
+
+| Field | Value |
+| --- | --- |
+| Verified commit | `662f27c00a80621793ed94061533ea92db5980da` (branch tip) |
+| Branch | `docs/adopt-workflow-disciplines` |
+| Worktree | `/home/node/worktrees/adopt-workflow-disciplines` |
+| Design freeze (reviewed) | `fcbd20ed8ef2ad201746fb46b064c9db2e80d056` |
+| Pre-implementation base | `943195f96adba471f6ff31fe122ed90b774415c9` (round-2 record commit) |
+| `origin/main` | `245e34aff7255476d73539d4cc43f068627f0cba` |
+| Verification date | 2026-11-27 |
+| Scope | Implemented groups A–E, G, and H; R2-1–R2-3; checker and tests; both required gates; the historical and code boundary |
 
 ### Verification evidence
+
+#### Frozen state and scope boundary
+
+| Command | Result |
+| --- | --- |
+| `git rev-parse HEAD` | `662f27c00a80621793ed94061533ea92db5980da` |
+| `git rev-parse origin/main` | `245e34aff7255476d73539d4cc43f068627f0cba` |
+| `git status --short` | empty (clean worktree) |
+| `git diff --shortstat origin/main...HEAD` | 60 files changed, +3645/−133 (32 added, 28 modified) |
+| `git diff --name-only origin/main...HEAD` | 8 skills, 3 commands, 6 agents, `AGENTS.md`, `GLOSSARY.md`, 18 `docs/development` pages, 1 `docs/glossary` page, 17 `docs/planning` paths (this record, the three record-home pairs, the senior record home, the four READMEs, the three templates, `README.md`, `status.md`), `zensical.toml`, 4 `tools/tests`/checker paths |
+| `git diff --check` | exit 0, no output |
+| `git log --oneline 943195f..HEAD` | 11 commits: the four stages `92800fa`, `01a29e2`, `4dbf510`, `476b66b` plus seven docs-only follow-ups (`9af8f31`, `ff3af6c`, `ad4f589`, `e6d5de7`, `a0d131f`, `8cba401`, `662f27c`) |
+| Forbidden-path filter over `git diff --name-only origin/main...HEAD` | no `src/`, `tests/`, `contracts/`, `.github/`, `.githooks/`, `tools/verify.sh`, `docs/planning/steps/`, `docs/planning/closeout/`, `docs/planning/amendments/`, `docs/planning/maintenance/`, `docs/planning/audits/step-*.md`, `docs/planning/reviews/step-*.md`, or `docs/planning/reviews/cross-cutting/xc-*.md` path. The only `step-*`-prefixed changes are `docs/planning/reviews/step-design-review-template.md` and `docs/planning/audits/step-audit-template.md`, both in the approved manifest and both templates, not historical records |
+| `git diff --name-only origin/main...HEAD -- tools/` | `tools/check_docs_links.py`, `tools/check_process_consistency.py`, `tools/tests/test_opencode_binding.py`, `tools/tests/test_process_consistency.py` — exactly the manifest's four tool paths |
+| 60 changed paths checked against the file manifest | added and changed paths match the manifest one-for-one; the only path not listed in the manifest sections is this record, which is the design record itself. No path outside the manifest is changed |
+
+#### Required gates at the verified commit
+
+| Command | Result |
+| --- | --- |
+| `python tools/check_process_consistency.py` | **exit 0** — `Process consistency: OK` |
+| `python tools/check_docs_links.py` | **exit 0** — `Documentation links OK (236 files scanned).` |
+| `python tools/check_doc_math.py` | **exit 0** — `Documentation math conventions OK (232 files scanned).` |
+| `python -m unittest discover -s tools/tests -v` | **exit 0** — `Ran 67 tests … OK` |
+| `./tools/verify.sh docs --require` | **exit 0** — `git diff --check` clean; math 232 files; links 236 files; `zensical build --strict` → `No issues found`; DocFX 0 warnings / 0 errors (465 models); rustdoc for 7 crates; `Documentation built in …/site`; `Closeout gate completed with required checks enabled.` |
+| `./tools/verify.sh policy --require` | **exit 0** — Release build; NuGet licence/vulnerability audit; ApiCompat `Public API is compatible with the checked-in baseline.`; `Contract artifacts are current (26 files)`; 5 + 4 + 2 projection fixtures; 274 space-group settings; `Process consistency: OK`; `Ran 67 tests … OK`; `SPDX headers present in 1210 source files`; `No secret patterns found in 1787 tracked text files`; `advisories ok, bans ok, licenses ok, sources ok`; `Closeout gate completed with required checks enabled.` |
+| `git diff --check` | exit 0, no output |
+
+The dev's recorded counts reproduce exactly (236 links, 232 math pages, 26 contract files, 5 + 4 + 2 fixtures, 274
+space groups, 67 tests, 1210 SPDX files, 1787 tracked text files). The dev recorded the gate run at `8cba401`; I
+re-ran it at the verified tip `662f27c`, whose only change after `8cba401` is this record (+9 lines), so the results
+are equivalent. After writing this verification section I re-ran the three standalone checks and the tool suite:
+`check_process_consistency.py` → `OK`, `check_docs_links.py` → 236 files OK, `check_doc_math.py` → 232 files OK, 67
+tests OK. This record is a planning record outside the published site and outside the policy-check inputs.
+
+#### Group-by-group implementation
+
+| Item | Result |
+| --- | --- |
+| **A1 — eight skills** | **Implemented.** `codebase-design`, `diagnosing-bugs`, `domain-modeling`, `grilling`, `prototype`, `research`, `review-axes`, `tdd` each have `name`/`description` frontmatter and a body that points at the matching `docs/development` page; the optional question tool is worded as preferred, not required. |
+| **A2 — nine discipline pages** | **Implemented.** All nine exist, state when to use the discipline, link the owning page(s) (`code-structure`, `testing-and-parity`, `agent-workflow`, `design-proportionality`, `drift-checks`, `agent-security`, `incident-and-rollback`, `03-quality-strategy`, `05-open-decisions`, `docs/planning/adr/`) instead of restating them, name their durable output home, and each has a short anti-pattern section. Published-to-root/planning links use the absolute GitHub URL convention stated in A2. |
+| **A3 — `GLOSSARY.md` boundary** | **Implemented.** Root `GLOSSARY.md` has ten process terms with one-to-two-sentence definitions and `_Avoid_` synonyms; `docs/glossary/index.md` carries the boundary note; `grep` over `docs/glossary/` shows no term defined in both. |
+| **A4 — record homes** | **Implemented.** `docs/planning/{research,prototypes,retrospectives}/README.md` and `_template.md` carry the design's fields; also `docs/planning/reviews/senior/{README.md,_template.md}` with the design's request, assignment-check, answer/decline, and follow-up fields. |
+| **A5 — three commands** | **Implemented.** `grill`, `handoff`, `retro` all use `agent: lead`, `step-*` vocabulary, no `/wp-*`, and route records to the design agent or dev without writing; `/grill` says "Recommending is not deciding"; `/handoff` uses `agent-workflow.md` §2 plus the discipline line; `/retro` uses the seven candidate groups and requires an owner and action. |
+| **A6 — index and navigation** | **Implemented.** The nine discipline pages are in a nested "Task disciplines" nav group, `senior-consultation.md` is in the Development nav, all ten are in `docs/development/index.md`, the three record homes and `reviews/senior/` are `docs/planning/README.md` items 20–21, and `planning/` stays excluded. |
+| **B1 — senior page** | **Implemented.** `senior-consultation.md` §1–§5 is the single home for the four-gate-type trigger, request contract, fresh-context senior rules, advisory effect, and record naming (`step-NN-M.md`, `xc-NN-M.md`, `policy-<date>-<slug>-M.md`). |
+| **B2 — senior binding** | **Implemented.** `opencode-go/deepseek-v4-pro`, `mode: subagent`, `edit "*"` deny then the three senior record globs allowed, `subagent "*"` denied, and a body with fresh context, decline-before-inspecting, one question, record-only commit, advisory effect, and the normative link. The lead's allow list gains `senior`. |
+| **B3 — integration** | **Implemented with one Minor deviation (V-1).** `AGENTS.md` §3.8 ("four standing roles, one escalation role, and one owner", senior row, six-binding paragraph), §3.9/§3.10 paragraphs naming the four gate types, §3.15 rows, the orchestration diagram/route/tier/context/boundaries/binding table **and** §9 prose, the review/audit/cross-cutting README subsections, `model-economics.md` §3/§4/§6, `agent-workflow.md` §8/§12/§15, and `agent-security.md` are all present. `orchestration.md` §4 and `model-economics.md` §4.2 restate the trigger conditions even though B3 says the orchestration subsection carries no duplicated trigger text (V-1). |
+| **C1 — review axes page** | **Implemented.** Standards/Spec definitions, when each applies per gate family, the pinned base/reviewed commit and three-dot diff rule, the missing-spec rule, one record/one verdict, and the anti-patterns; it links the gate rules instead of restating them. |
+| **C2 — template columns** | **Implemented.** Design review and audit are `ID \| Axis \| Severity \| Origin \| Finding \| Evidence \| Recommendation`; cross-cutting is `ID \| Axis \| Severity \| Area \| Finding \| Evidence \| Recommendation`. Other columns keep their order and `Origin`/`Area` stay family-specific. |
+| **C3 — record and prompt text** | **Implemented.** The axis rule is in `reviews/README.md` §6, `audits/README.md` §5, the cross-cutting README, `AGENTS.md` §3.9/§3.10/§3.15, `.opencode/agents/review.md`, and the spawn card. |
+| **D1 — `AGENTS.md` §17** | **Implemented.** New §17 after §16 with the eight exact fields and the evidence/approval rules; no §4–§16 renumbering. |
+| **D2 — role prompts** | **Implemented.** All six prompts end with the applicable §17 fields; `dev.md` now points at `AGENTS.md` §17 instead of `agent-workflow.md`, and the review/senior record-only and advisory rules are unchanged. |
+| **D3 — one output-contract home** | **Implemented.** `agent-workflow.md` §5 links §17 and keeps only the cumulative approval report. |
+| **E1/E2 — model economics** | **Implemented.** `default`/`senior` names, default binding for lead/design/dev/review, `dev-free` then `dev`, fresh-context independence, senior = `opencode-go/deepseek-v4-pro` escalation only, role table and reference binding table match the six agent files. |
+| **E3/E4 — escalation and cost** | **Implemented.** Re-brief-on-default in §4.1, senior focused consultation in §4.2, one-consultation budget and repeat rule in §5. |
+| **E5 — tier retirement** | **Implemented.** `grep` finds no `workhorse`, `strong tier`, `strong-tier`, or bare `strong` in `model-economics.md`, `orchestration.md`, `design-proportionality.md`, `agent-workflow.md`, or `.opencode/agents/*.md`. The historical `docs/planning/maintenance/2026-11-22-policy-adoption.md` and the `status.md` strong-tier note are unchanged. |
+| **E6/G3 — binding tests** | **Implemented.** Senior model and `mode: subagent`, lead may spawn `senior`, review may edit `policy-*.md`, the three new commands use the lead and their pages, senior denies subagents and edits outside its record paths, and the retired-vocabulary test scans the six agents and four pages. |
+| **F — record home and binding** | **Implemented.** This record is at the policy path; `reviews/README.md` §9.1 defines the class and write scope; `.opencode/agents/review.md` allows `docs/planning/reviews/policy-*.md` and its body names the policy record. This edit succeeding is the evidence that the frozen definition loaded (design I.4). |
+| **G1 — checker** | **Implemented.** `REQUIRED_FILES` gains every new page, record home, agent, command, and skill; `REQUIRED_INTEGRATION` gains the AGENTS/orchestration binding strings (`policy-*.md`, `Senior consultant`), the axis/template strings, the senior page strings, and the review/lead/model-economics entries; `check_tier_vocabulary` scans the four pages and `.opencode/agents/*.md` for `workhorse`, `strong tier`, `strong-tier`, and bare `strong`; `check_findings_columns` requires the exact three findings headers; `GLOSSARY.md` joins `check_docs_links.ROOT_FILES`; the new pages join `NORMATIVE_FILES`. No existing check was weakened or removed. |
+| **G2/G4 — checker tests** | **Implemented.** Three focused temporary-tree tests cover the new required file, the missing `Axis` column (the exact-header check), and the retired vocabulary in a page **and** an agent; the repo-wide positive test remains; standard library only. |
+| **H1/H2 — links, navigation, supporting pages** | **Implemented.** No page moved; both gates are green; `drift-checks.md`, `agent-security.md`, and `contributing.md` gained the one-line rows without a second copy of a rule. |
+
+#### One-home map
+
+| Rule | Home observed | Second normative copy |
+| --- | --- | --- |
+| Branch model, roles, approval report | `AGENTS.md` §3 | none |
+| Lead role and delegation | `orchestration.md` | `AGENTS.md` §3.8 summary only |
+| Model tiers and escalation | `model-economics.md` | `orchestration.md` §2 and the §6 reference binding table summarise the tier assignment; §4.2 of the home page itself also restates the *senior trigger*, whose home is `senior-consultation.md` — V-1 |
+| Design classes and the policy-update class trigger | `design-proportionality.md` §1 | `reviews/README.md` §9.1 links it and explicitly does not repeat the trigger |
+| Senior trigger, request contract, rules, effect | `senior-consultation.md` §1–§4 | `AGENTS.md` §3.9/§3.10, the three READMEs, the senior agent, the spawn card, and the senior record home repeat a compressed trigger — permitted by B1/B3/C3; `orchestration.md` §4 duplicates it despite B3 (V-1) |
+| Review axes | `review-axes.md` | the three templates carry the column; each record README states the labelling rule per C3; no separate axis verdict |
+| Agent output contract | `AGENTS.md` §17 | role prompts carry the fields; `agent-workflow.md` §5 links and does not copy |
+| Task disciplines | each `docs/development/<discipline>.md` | skills are triggers plus pointers; no discipline rule lives only in a skill |
+| Research/prototype/retrospective records | their `README.md`/`_template.md` | discipline pages link them |
+| Policy-update review records | `reviews/README.md` §9.1 | `AGENTS.md` §3.15 row and `review.md` |
+| Drift checks, agent security, incident, closeout | their existing pages | relation rows only |
+
+No rule has two homes that disagree. The only duplication beyond the design's own summary sites is V-1.
+
+#### Round-2 findings folded in
+
+| Finding | Where | Result |
+| --- | --- | --- |
+| R2-1 | `docs/planning/reviews/README.md` §9.1 opening | **Folded in.** It opens with a one-line summary of the class that links `design-proportionality.md` §1, and the Full/Light/None trigger list exists only in §1. The summary still restates the class definition in one sentence by design; it is not a second trigger. |
+| R2-2 | `.opencode/agents/dev.md` escalation paragraph | **Folded in.** The prompt now says "a senior consultation is only for a review or audit deadlock after two completed blocked rounds", exactly the recommended wording, and points at re-brief-on-default first. |
+| R2-3 | `tools/check_process_consistency.py`, `tools/tests/test_process_consistency.py` | **Folded in via the stricter option.** `check_findings_columns` now requires the exact header of all three templates (`ID`, `Axis`, `Severity`, `Origin` or `Area`, `Finding`, `Evidence`, `Recommendation`), and `test_missing_axis_column_is_reported` fails when `Axis` is removed. The repo-wide positive test also runs this check, so losing any required column fails the suite. |
+
+#### Checker and test coverage
+
+| Property | Where it is checked | Fails on regression |
+| --- | --- | --- |
+| New role `senior` (model, mode, lead spawn, record-only edits, no subagents) | `test_opencode_binding.py` (`test_every_agent_has_a_description_and_mode`, `test_agents_use_the_assigned_model_tiers`, `test_lead_cannot_edit_and_spawns_only_the_roles`, `test_senior_writes_only_its_record_and_cannot_spawn`) | yes — removing an allow rule or changing the model/mode fails a named assertion |
+| Three new commands | `test_commands_use_the_lead_and_keep_the_gate_order` (frontmatter, page link, `step` vocabulary, no `/wp-`) plus `check_required_files` | yes |
+| Policy-update record path | `test_review_writes_only_its_record_paths`, the `policy-*.md` allow rule in `review.md`, and `REQUIRED_INTEGRATION` (`policy-*.md`, `policy-update`, `senior-consultation.md`) | yes |
+| Review axes | `check_findings_columns` (exact headers), `test_missing_axis_column_is_reported`, `REQUIRED_INTEGRATION` (`\| Axis \|`, `Standards`, `Spec`) | yes |
+| Retired tier vocabulary | `check_tier_vocabulary` over the four pages and six agents; `test_retired_tier_vocabulary_is_reported_in_a_page_and_an_agent`; `test_live_instructions_do_not_use_retired_tier_names` | yes — a `workhorse` line in `dev.md` or `model-economics.md` fails both the checker and the test |
+| New required files and record homes | `check_required_files` and `test_missing_task_discipline_skill_is_reported` | yes |
+| Documentation links, including root `GLOSSARY.md` | `check_docs_links.ROOT_FILES`, `check_docs_links.py`, strict Zensical in the docs gate | yes |
+
+I inspected the negative tests: they build temporary trees that are missing the file, the column, or that contain
+the retired term, and assert the specific error, so they exercise the new code rather than the repository's current
+green state.
+
+#### Files read
+
+- This record in full; `AGENTS.md` (whole file, including §2, §3.1–§3.15, §5–§17); `docs/planning/reviews/README.md`
+  (including §9.1–§9.2), `docs/planning/audits/README.md`, `docs/planning/reviews/cross-cutting/README.md`.
+- `docs/development/`: `index.md`, `senior-consultation.md`, `review-axes.md`, `codebase-design.md`,
+  `diagnosing-bugs.md`, `domain-language.md`, `discovery.md`, `prototypes.md`, `research.md`, `tdd.md`,
+  `retrospectives.md`, `model-economics.md`, `orchestration.md`, `design-proportionality.md`, `agent-workflow.md`,
+  `agent-security.md`, `drift-checks.md`, `contributing.md`.
+- `GLOSSARY.md`, `docs/glossary/index.md`, `docs/planning/README.md`, `docs/planning/status.md`,
+  `docs/planning/{research,prototypes,retrospectives}/README.md` and `_template.md`,
+  `docs/planning/reviews/senior/README.md` and `_template.md`, the three findings templates.
+- `.opencode/agents/*.md` (all six), `.opencode/commands/{grill,handoff,retro}.md`, all eight
+  `.opencode/skills/*/SKILL.md`, `opencode.json`, `zensical.toml`.
+- `tools/check_process_consistency.py`, `tools/check_docs_links.py`, `tools/tests/test_process_consistency.py`,
+  `tools/tests/test_opencode_binding.py`; the commit list and per-commit stats for `943195f..HEAD`.
 
 ### Verification findings
 
 | ID | Axis | Severity | Origin | Finding | Evidence | Recommendation |
 | --- | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — | — |
+| V-1 | Spec | **Minor** | **implementation** | **`orchestration.md` §4 restates the senior trigger even though B3 says the subsection carries no duplicated trigger text, and `model-economics.md` §4.2 repeats the same three conditions; both then tell the reader the trigger is not repeated there.** The normative trigger is `senior-consultation.md` §1, and the one-home map lists only `AGENTS.md` §3.9/§3.10, the record READMEs, and `orchestration.md` as summary sites. The duplicated text is accurate today, so this is a drift risk rather than a contradiction, but a future change to the trigger would have to be mirrored in two more pages. | `docs/development/orchestration.md:102-108`; `docs/development/model-economics.md:97-107`; record B3 line 297 ("no duplicated trigger text") and the one-home map row 544; `docs/development/senior-consultation.md:13-21` | Replace the three restated conditions in `orchestration.md` §4 and the three bullets in `model-economics.md` §4.2 with the link and the lead's/cost duty only, or delete the "do not repeat them here" sentence and accept the duplicate deliberately. No behavioural change; not worth another verification round on its own. |
+
+Severity values: **Blocker**, **Major**, **Minor**, **Note**. Origin: **design**, **implementation**,
+**evidence**, or **documentation**. Axis: **Standards** or **Spec**.
+
+No Blocker, Major, or Note finding was recorded. V-1 is Minor and does not affect the process rules, the binding,
+the checker, or either gate; under the design's stop rule it does not justify another round and is recorded for the
+dev and the owner rather than required as a fix.
 
 ### Verification verdict
 
-- [ ] Verified
+- [x] Verified
 - [ ] Changes required
+
+**Verified.** The frozen design is implemented as specified in every material respect. All of groups A–E and the
+G/H checker, navigation, and supporting-page work are present; the one-home map holds with the single Minor
+duplication in V-1; R2-1, R2-2, and R2-3 are folded in; the checker and tool tests cover the new roles, commands,
+record paths, review axes, and retired tier vocabulary and fail on the properties they check; the two changed
+templates are the approved ones, no historical record or step page changed, no `src/`, `tests/`, `contracts/`,
+workflow, hook, or `tools/verify.sh` path changed (the only `tools/` changes are the checker and its tests), and
+both required gates plus the three standalone checks pass at the verified commit with the dev's recorded counts.
+This pass does not change the design verdict (`Ready with notes`) and does not authorize a merge or tag; the human
+owner still approves those.
