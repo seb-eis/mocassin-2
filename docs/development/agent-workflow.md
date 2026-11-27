@@ -299,6 +299,34 @@ Rules:
 - Do not add CI triggers for feature branches or per-push checkpoint runs just to feel safe. Add a trigger only
   when it catches a class of regression that local gates cannot.
 
+### Checking CI
+
+Use [`tools/ci_status.py`](https://github.com/seb-eis/mocassin-2/blob/main/tools/ci_status.py) as the standard
+read-only method for checking the `CI` workflow. It derives the public repository from `origin`, uses the
+unauthenticated GitHub REST API, and needs only Python 3. Use `--repo owner/name` outside a checkout. Do not
+improvise with `curl`, `git credential fill`, or the credential store; see
+[`agent-security.md`](agent-security.md).
+
+One command per mode:
+
+```sh
+# Fetch one run and its jobs.
+python tools/ci_status.py --run-id 123456789
+
+# Select every CI run for a commit head SHA.
+python tools/ci_status.py --sha "$(git rev-parse HEAD)"
+
+# Poll every 15 seconds until completion (default timeout: 900 seconds).
+python tools/ci_status.py --run-id 123456789 --wait 300
+
+# Machine-readable output; wait progress stays on stderr.
+python tools/ci_status.py --sha "$(git rev-parse HEAD)" --json
+```
+
+The exit codes are `0` for all-successful runs, `1` for an unsuccessful run or wait timeout, `2` for usage/HTTP/
+parse errors, and `3` for an incomplete run without `--wait`. `GH_TOKEN` is optional and per command; it is not
+required for this public repository.
+
 ## 11. Reference data
 
 When generating reference data:
