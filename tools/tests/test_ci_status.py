@@ -135,6 +135,36 @@ class CiStatusTests(unittest.TestCase):
         self.assertIn("/repos/acme/mocassin/actions/runs?", request_url)
         self.assertEqual(query["head_sha"], [sha])
 
+    def test_abbreviated_sha_is_resolved_before_run_selection(self) -> None:
+        transport = FakeTransport(self.fixtures)
+        code, stdout, stderr = self.invoke(
+            ["--repo", "acme/mocassin", "--sha", "1111111"],
+            transport,
+        )
+
+        self.assertEqual(code, 0)
+        self.assertEqual(stderr, "")
+        self.assertIn("Run 101: CI", stdout)
+        self.assertEqual(
+            transport.requests[0][0],
+            "https://api.github.com/repos/acme/mocassin/commits/1111111",
+        )
+        self.assertEqual(
+            transport.requests[1][2]["head_sha"],
+            ["1111111111111111111111111111111111111111"],
+        )
+
+    def test_invalid_sha_exits_two_without_an_http_request(self) -> None:
+        transport = FakeTransport(self.fixtures)
+        code, stdout, stderr = self.invoke(
+            ["--repo", "acme/mocassin", "--sha", "not-a-sha"],
+            transport,
+        )
+        self.assertEqual(code, 2)
+        self.assertEqual(stdout, "")
+        self.assertIn("full or abbreviated hexadecimal commit SHA", stderr)
+        self.assertEqual(transport.requests, [])
+
     def test_json_output_contains_runs_and_jobs(self) -> None:
         transport = FakeTransport(self.fixtures)
         code, stdout, stderr = self.invoke(

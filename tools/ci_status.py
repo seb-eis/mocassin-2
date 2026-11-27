@@ -28,6 +28,8 @@ DEFAULT_WAIT_SECONDS = 900
 POLL_INTERVAL_SECONDS = 15
 REQUEST_TIMEOUT_SECONDS = 30
 REPOSITORY_RE = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+")
+FULL_SHA_RE = re.compile(r"[0-9a-fA-F]{40}")
+ABBREVIATED_SHA_RE = re.compile(r"[0-9a-fA-F]{4,39}")
 
 
 class StatusError(Exception):
@@ -211,6 +213,17 @@ class GitHubClient:
         payload = self.get_json(f"/repos/{self.repository}/actions/runs/{run_id}")
         return parse_run(payload, self.jobs(run_id))
 
+    def resolve_head_sha(self, sha: str) -> str:
+        if FULL_SHA_RE.fullmatch(sha):
+            return sha.lower()
+        if ABBREVIATED_SHA_RE.fullmatch(sha):
+            payload = self.get_json(f"/repos/{self.repository}/commits/{sha}")
+            resolved = _text(payload.get("sha"), "commit sha")
+            if not FULL_SHA_RE.fullmatch(resolved):
+                raise StatusError("GitHub returned an invalid resolved commit SHA")
+            return resolved.lower()
+        raise StatusError("--sha must be a full or abbreviated hexadecimal commit SHA")
+
     def ci_run_ids(self, sha: str) -> tuple[int, ...]:
         run_ids: list[int] = []
         seen = 0
@@ -347,7 +360,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     selector = parser.add_mutually_exclusive_group(required=True)
     selector.add_argument(
-        "--sha", metavar="SHA", help="select CI workflow runs for this head SHA"
+        "--sha",
+        metavar="SHA",
+        help="select CI workflow runs for this full or abbreviated head SHA",
     )
     selector.add_argument(
         "--run-id", type=positive_run_id, metavar="ID", help="fetch one workflow run"
@@ -501,7 +516,11 @@ def main(
             token,
             urllib_transport if transport is None else transport,
         )
-        sha = validate_sha(args.sha) if args.sha is not None else None
+        sha = (
+            client.resolve_head_sha(validate_sha(args.sha))
+            if args.sha is not None
+            else None
+        )
 
         def fetch_runs() -> list[Run]:
             run_ids = client.ci_run_ids(sha) if sha is not None else (args.run_id,)
