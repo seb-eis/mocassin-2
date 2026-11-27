@@ -1094,6 +1094,12 @@ Stage-1 and stage-2 commits were also checked with the docs gate (exit 0; links 
 run after stage 4 because that is the first stage that changes `tools/` and the test suite. The repo-wide
 `test_repository_process_is_consistent` positive test and the new negative tests pass.
 
+**H2 drift check.** Run as an implementor self-check (not a fresh reviewer) at `476b66b`: the task disciplines,
+review axes, senior escalation, output contract, and `default`/`senior` names agree across the normative pages,
+templates, prompts, and checker; no stale command, path, mode, or tag was found; the documentation and policy
+gates pass. The result is recorded in the `docs/planning/status.md` drift-check table. This is a maintenance signal,
+not a gate.
+
 **Deferred.** The bounded post-implementation verification pass is left to the independent verification agent in
 `## Post-implementation verification`; nothing else is deferred. Residual risk: the senior tier's availability and
 cost were owner-confirmed for this environment but are not exercised by this documentation-only change; the
