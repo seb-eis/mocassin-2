@@ -3,6 +3,9 @@
 This page is the task discipline for the project's vocabulary and for when a decision deserves an ADR. It keeps
 names stable, shortens explanations, and stops future agents from re-litigating settled decisions.
 
+Use it when naming a concept, resolving overloaded or conflicting vocabulary, or deciding whether a choice is
+irreversible and surprising enough to need an ADR.
+
 The glossary is a language reference, not a design document. The design lives in the step page, contracts, and
 ADRs.
 

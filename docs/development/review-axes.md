@@ -5,6 +5,8 @@ This page is the normative home for the review agent's two separate questions:
 - **Standards:** does the change follow this repository's documented engineering standards?
 - **Spec:** does the change implement what the frozen design, feature request, and acceptance criteria asked for?
 
+Use it when reviewing a design, an audit, or a cross-cutting record, and when writing a finding in any of them.
+
 The gate rules in [`AGENTS.md` §3.9/§3.10](https://github.com/seb-eis/mocassin-2/blob/main/AGENTS.md) and the
 review, audit, and cross-cutting READMEs decide *when* a review or audit runs. This page decides *what* the reviewer
 looks at and how to report it.
@@ -121,6 +123,9 @@ axis, `Standards` or `Spec`. The templates carry an `Axis` column:
 | Design review | `ID` \| `Axis` \| `Severity` \| `Origin` \| `Finding` \| `Evidence` \| `Recommendation` |
 | Step audit | `ID` \| `Axis` \| `Severity` \| `Origin` \| `Finding` \| `Evidence` \| `Recommendation` |
 | Cross-cutting | `ID` \| `Axis` \| `Severity` \| `Area` \| `Finding` \| `Evidence` \| `Recommendation` |
+
+The three record families stay aligned on `ID`, `Axis`, and `Severity`; `Origin` (design review and audit) and
+`Area` (cross-cutting) are family-specific and are not merged.
 
 Under each finding:
 

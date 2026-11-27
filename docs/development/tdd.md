@@ -5,8 +5,8 @@ This page is the task discipline for the red-green loop. It adds the loop and te
 [`docs/planning/03-quality-strategy.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/03-quality-strategy.md)
 do not cover; the test layers, doubles policy, fixtures, tiers, and definition of done remain there.
 
-TDD is a default for feature work and bug fixes, not a ritual for generated files, documentation, or mechanical
-renames.
+Use it for approved feature work and bug fixes. It is not a ritual for generated files, documentation, or
+mechanical renames.
 
 ## 1. Agree the seams first
 
