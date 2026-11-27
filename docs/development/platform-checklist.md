@@ -22,7 +22,7 @@ already in progress.
 
 | Runner | Automated headless suite | Screenshot comparison |
 | --- | --- | --- |
-| Ubuntu | Yes — full suite | Yes — checked-in light/dark/high-contrast baselines with a 5 % pixel tolerance |
+| Ubuntu | Yes — full suite | Yes — shared pixel comparer, channel delta 8, zero changed-pixel budget; volatile text/paths normalized |
 | Windows | Yes — focused platform job | No — rendering-dependent |
 | macOS | Yes — focused platform job | No — rendering-dependent |
 

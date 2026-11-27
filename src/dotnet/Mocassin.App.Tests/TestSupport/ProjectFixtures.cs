@@ -13,11 +13,14 @@ internal static class ProjectFixtures
     /// <summary>
     /// Loads the ceria sample into a workspace entry.
     /// </summary>
+    /// <param name="projectPath">An optional real project path used by deterministic screenshot captures.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The real loaded project entry.</returns>
-    public static async Task<ProjectWorkspaceEntry> LoadCeriaAsync(CancellationToken cancellationToken = default)
+    public static async Task<ProjectWorkspaceEntry> LoadCeriaAsync(
+        string? projectPath = null,
+        CancellationToken cancellationToken = default)
     {
-        var path = RepositoryPaths.Combine("samples", "ceria", "ceria.mocprj");
+        var path = projectPath ?? RepositoryPaths.Combine("samples", "ceria", "ceria.mocprj");
         var store = new ProjectStore(
             new ManualTimeProvider(),
             new ProjectStoreOptions { ValidateOnLoad = false });

@@ -176,9 +176,12 @@ or SQLite. Prefer real temporary directories and real files produced by the real
   cheat sheet, one dark tab-hover state, and the light/dark/high-contrast open-project captures. The shell
   captures show the welcome document and the two console tabs at 1000 × 700; high contrast keeps compact
   density. The open-project captures show an active project with both explorer node icons, the project-row icon,
-  and the Overview/JSON tab icons. Linux compares them with a documented 5 % pixel tolerance; Windows/macOS do
-  not pixel-compare. Regenerate with `MOCASSIN_REGENERATE_VISUAL_BASELINES=1` on the Linux reference
-  environment.
+  and the Overview/JSON tab icons. Linux compares shell and editor captures with the shared `VisualComparer`:
+  a channel delta greater than 8 counts a changed pixel, and the absolute changed-pixel budget is zero. Captures
+  fix the console timestamp, status-bar version, settings/data paths, and project path, and disable motion so the
+  result is deterministic. Windows/macOS do not pixel-compare. Regenerate with
+  `MOCASSIN_REGENERATE_VISUAL_BASELINES=1` on the Linux reference environment only after the owner approves the
+  baseline correction in the maintenance record.
 - The accessibility sweep asserts an accessible name on every primary interactive control type in the real
   shell, the expected automation role for the menu, tabs, project lists, explorer, and console filter, and a
   deterministic Tab order. The Xvfb harness captures the real X11 window for light, dark, high-contrast,

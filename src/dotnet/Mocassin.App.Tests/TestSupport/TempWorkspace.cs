@@ -18,12 +18,23 @@ internal sealed class TempWorkspace : IDisposable
     /// <summary>
     /// Initializes a new temporary directory.
     /// </summary>
-    public TempWorkspace()
+    /// <param name="deterministicName">
+    /// An optional screenshot-only name under a fixed temporary root. The directory is cleared before use so
+    /// paths rendered in visual baselines do not contain random GUIDs.
+    /// </param>
+    public TempWorkspace(string? deterministicName = null)
     {
-        Path = System.IO.Path.Combine(
-            System.IO.Path.GetTempPath(),
-            "mocassin-app-tests",
-            Guid.NewGuid().ToString("N"));
+        Path = deterministicName is null
+            ? System.IO.Path.Combine(
+                System.IO.Path.GetTempPath(),
+                "mocassin-app-tests",
+                Guid.NewGuid().ToString("N"))
+            : System.IO.Path.Combine(System.IO.Path.GetTempPath(), "mocassin-visual-baselines", deterministicName);
+        if (deterministicName is not null && Directory.Exists(Path))
+        {
+            Directory.Delete(Path, recursive: true);
+        }
+
         Directory.CreateDirectory(Path);
     }
 

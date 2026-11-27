@@ -7,7 +7,6 @@ using Avalonia.Headless;
 using Avalonia.Input;
 using Avalonia.Media.Imaging;
 using Avalonia.VisualTree;
-using System.Runtime.InteropServices;
 using Microsoft.Extensions.DependencyInjection;
 using Mocassin.App.Composition;
 using Mocassin.App.Tests.TestSupport;
@@ -39,8 +38,8 @@ public sealed class ScreenshotTests
                     return;
                 }
 
-                Capture("light", new AppSettings { Theme = ThemeSelection.Light });
-                Capture("dark", new AppSettings { Theme = ThemeSelection.Dark });
+                Capture("light", new AppSettings { Theme = ThemeSelection.Light, ReduceMotion = true });
+                Capture("dark", new AppSettings { Theme = ThemeSelection.Dark, ReduceMotion = true });
                 Capture(
                     "highcontrast",
                     new AppSettings
@@ -64,21 +63,21 @@ public sealed class ScreenshotTests
 
                 Capture(
                     "light-validation",
-                    new AppSettings { Theme = ThemeSelection.Light },
+                    new AppSettings { Theme = ThemeSelection.Light, ReduceMotion = true },
                     (_, shell) => shell.Console.ActiveChannel =
                         shell.Console.Channels.Single(channel => channel.Id == "problems"));
                 Capture(
                     "dark-validation",
-                    new AppSettings { Theme = ThemeSelection.Dark },
+                    new AppSettings { Theme = ThemeSelection.Dark, ReduceMotion = true },
                     (_, shell) => shell.Console.ActiveChannel =
                         shell.Console.Channels.Single(channel => channel.Id == "problems"));
                 Capture(
                     "light-settings",
-                    new AppSettings { Theme = ThemeSelection.Light },
+                    new AppSettings { Theme = ThemeSelection.Light, ReduceMotion = true },
                     (_, shell) => shell.Settings.Open());
                 Capture(
                     "dark-settings",
-                    new AppSettings { Theme = ThemeSelection.Dark },
+                    new AppSettings { Theme = ThemeSelection.Dark, ReduceMotion = true },
                     (_, shell) => shell.Settings.Open());
             });
 
@@ -94,8 +93,8 @@ public sealed class ScreenshotTests
 
                 foreach (var (name, settings) in new[]
                 {
-                    ("light-project", new AppSettings { Theme = ThemeSelection.Light }),
-                    ("dark-project", new AppSettings { Theme = ThemeSelection.Dark }),
+                    ("light-project", new AppSettings { Theme = ThemeSelection.Light, ReduceMotion = true }),
+                    ("dark-project", new AppSettings { Theme = ThemeSelection.Dark, ReduceMotion = true }),
                     (
                         "highcontrast-project",
                         new AppSettings
@@ -107,7 +106,7 @@ public sealed class ScreenshotTests
                         }),
                 })
                 {
-                    var entry = await ProjectFixtures.LoadCeriaAsync();
+                    var entry = await VisualCaptureSupport.LoadProjectAsync();
                     Capture(
                         name,
                         settings,
@@ -143,7 +142,7 @@ public sealed class ScreenshotTests
                 {
                     Capture(
                         name,
-                        new AppSettings { Theme = theme },
+                        new AppSettings { Theme = theme, ReduceMotion = true },
                         (_, shell) => shell.ShowPaletteCommand.Execute(null),
                         (window, _) =>
                         {
@@ -166,7 +165,7 @@ public sealed class ScreenshotTests
                 {
                     Capture(
                         name,
-                        new AppSettings { Theme = theme },
+                        new AppSettings { Theme = theme, ReduceMotion = true },
                         (_, shell) => shell.ShowShortcutsCommand.Execute(null),
                         (window, _) =>
                         {
@@ -181,7 +180,7 @@ public sealed class ScreenshotTests
 
                 Capture(
                     "dark-tab-hover",
-                    new AppSettings { Theme = ThemeSelection.Dark },
+                    new AppSettings { Theme = ThemeSelection.Dark, ReduceMotion = true },
                     (window, _) =>
                     {
                         var inactive = window.GetVisualDescendants()
@@ -206,7 +205,7 @@ public sealed class ScreenshotTests
         double width = 1000,
         double height = 700)
     {
-        using var workspace = new TempWorkspace();
+        using var workspace = new TempWorkspace("visual-baselines");
         using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
         var window = host.Services.GetRequiredService<ShellWindow>();
         new AvaloniaThemeApplier().Apply(settings);
@@ -216,15 +215,18 @@ public sealed class ScreenshotTests
         HeadlessSession.Pump(window);
         try
         {
+            var shell = Assert.IsType<ShellViewModel>(window.DataContext);
+            VisualCaptureSupport.NormalizeShell(host.Services, shell);
+            HeadlessSession.Pump(window);
             if (configure is not null)
             {
-                configure(window, Assert.IsType<ShellViewModel>(window.DataContext));
+                configure(window, shell);
                 HeadlessSession.Pump(window);
             }
 
             if (prepareRealized is not null)
             {
-                prepareRealized(window, Assert.IsType<ShellViewModel>(window.DataContext));
+                prepareRealized(window, shell);
                 HeadlessSession.Pump(window);
             }
 
@@ -241,7 +243,7 @@ public sealed class ScreenshotTests
             }
 
             Assert.True(File.Exists(path), $"Missing screenshot baseline {path}. Set {regenerateVariable}=1 to create it.");
-            AssertSimilar(path, frame);
+            VisualComparer.AssertBaselineMatches(path, frame, VisualComparer.DefaultTolerance);
         }
         finally
         {
@@ -258,55 +260,4 @@ public sealed class ScreenshotTests
             "Baselines",
             name + ".png");
 
-    private static void AssertSimilar(string baselinePath, WriteableBitmap actual)
-    {
-        using var expected = new Bitmap(baselinePath);
-        using var stream = new MemoryStream();
-        actual.Save(stream, PngBitmapEncoderOptions.Default);
-        stream.Position = 0;
-        using var actualBitmap = new Bitmap(stream);
-        Assert.Equal(expected.PixelSize, actualBitmap.PixelSize);
-        var width = expected.PixelSize.Width;
-        var height = expected.PixelSize.Height;
-        var stride = width * 4;
-        var expectedPixels = CopyPixels(expected, stride);
-        var actualPixels = CopyPixels(actualBitmap, stride);
-        var changedPixels = 0;
-        for (var y = 0; y < height; y++)
-        {
-            for (var x = 0; x < width; x++)
-            {
-                var offset = (y * stride) + (x * 4);
-                var different = Math.Abs(expectedPixels[offset] - actualPixels[offset]) > 8
-                    || Math.Abs(expectedPixels[offset + 1] - actualPixels[offset + 1]) > 8
-                    || Math.Abs(expectedPixels[offset + 2] - actualPixels[offset + 2]) > 8;
-                if (different)
-                {
-                    changedPixels++;
-                }
-            }
-        }
-
-        var total = width * height;
-        Assert.True(
-            changedPixels <= total / 20,
-            $"The {Path.GetFileName(baselinePath)} screenshot changed in {changedPixels} pixels (>{total / 20}).");
-    }
-
-    private static byte[] CopyPixels(Bitmap bitmap, int stride)
-    {
-        var size = stride * bitmap.PixelSize.Height;
-        var pointer = Marshal.AllocHGlobal(size);
-        try
-        {
-            bitmap.CopyPixels(new PixelRect(0, 0, bitmap.PixelSize.Width, bitmap.PixelSize.Height), pointer, size, stride);
-            var bytes = new byte[size];
-            Marshal.Copy(pointer, bytes, 0, size);
-            return bytes;
-        }
-        finally
-        {
-            Marshal.FreeHGlobal(pointer);
-        }
-    }
 }

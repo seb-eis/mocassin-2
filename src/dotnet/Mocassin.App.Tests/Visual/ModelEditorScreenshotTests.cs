@@ -60,9 +60,9 @@ public sealed class ModelEditorScreenshotTests
                     height: 900);
             });
 
-    private static AppSettings Light() => new() { Theme = ThemeSelection.Light };
+    private static AppSettings Light() => new() { Theme = ThemeSelection.Light, ReduceMotion = true };
 
-    private static AppSettings Dark() => new() { Theme = ThemeSelection.Dark };
+    private static AppSettings Dark() => new() { Theme = ThemeSelection.Dark, ReduceMotion = true };
 
     private static AppSettings HighContrast() => new()
     {
@@ -79,7 +79,7 @@ public sealed class ModelEditorScreenshotTests
         double width = 1280,
         double height = 900)
     {
-        using var workspace = new TempWorkspace();
+        using var workspace = new TempWorkspace("visual-baselines");
         using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
         var window = host.Services.GetRequiredService<ShellWindow>();
         new AvaloniaThemeApplier().Apply(settings);
@@ -90,7 +90,9 @@ public sealed class ModelEditorScreenshotTests
         try
         {
             var shell = Assert.IsType<ShellViewModel>(window.DataContext);
-            var entry = await ProjectFixtures.LoadCeriaAsync();
+            VisualCaptureSupport.NormalizeShell(host.Services, shell);
+            HeadlessSession.Pump(window);
+            var entry = await VisualCaptureSupport.LoadProjectAsync();
             shell.Workspace.Add(entry);
             HeadlessSession.Pump(window);
             Assert.True(await shell.Navigation.NavigateToAsync(
@@ -132,8 +134,7 @@ public sealed class ModelEditorScreenshotTests
             }
 
             Assert.True(File.Exists(path), $"Missing screenshot baseline {path}. Set {regenerateVariable}=1 to create it.");
-            using var baseline = new Bitmap(path);
-            Assert.Equal(baseline.PixelSize, frame.PixelSize);
+            VisualComparer.AssertBaselineMatches(path, frame, VisualComparer.DefaultTolerance);
         }
         finally
         {
