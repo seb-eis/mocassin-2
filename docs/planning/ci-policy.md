@@ -148,7 +148,7 @@ enables only affected jobs:
 | Rust | `src/rust/`, Cargo files, toolchain, or `deny.toml` change | Ubuntu only |
 | Python | `src/python/` or its `pyproject.toml` change | Ubuntu only |
 | Contracts and policy | any code changes, or contract/symmetry/licence/secret tooling changes | Ubuntu only |
-| Process and binding | `.opencode/**`, `AGENTS.md`, `GLOSSARY.md`, `opencode.json`, `docs/development/**`, `docs/planning/reviews/**`, `docs/planning/audits/**`, `docs/planning/ci-policy.md`, `docs/planning/status.md`, `docs/planning/maintenance/**`, `docs/planning/drift-checks/**`, `zensical.toml`, `tools/check_process_consistency.py`, `tools/check_docs_links.py`, `tools/check_doc_math.py`, or `tools/tests/**` change | Ubuntu only |
+| Process and binding | `.opencode/**`, `AGENTS.md`, `GLOSSARY.md`, `opencode.json`, `docs/development/**`, `docs/planning/reviews/**`, `docs/planning/audits/**`, `docs/planning/README.md`, `docs/planning/04-roadmap.md`, `docs/planning/ci-policy.md`, `docs/planning/status.md`, `docs/planning/maintenance/**`, `docs/planning/drift-checks/**`, `docs/planning/closeout/**`, `docs/planning/incidents/**`, `docs/planning/research/**`, `docs/planning/prototypes/**`, `docs/planning/retrospectives/**`, `zensical.toml`, `tools/check_process_consistency.py`, `tools/check_closeout_evidence.py`, `tools/check_docs_links.py`, `tools/check_doc_math.py`, `tools/verify.sh`, or `tools/tests/**` change | Ubuntu only |
 | Public API compatibility | .NET public surface changes | Ubuntu only |
 | Documentation | separate manual workflow | Ubuntu only |
 
@@ -163,11 +163,12 @@ The process/binding job is deliberately cheap: it installs nothing and builds ne
 `tools/check_process_consistency.py`, `tools/check_docs_links.py`, `tools/check_doc_math.py`, and the
 `tools/tests` suite, which use only the Python standard library. It exists because the 2026-11-27 workflow
 adoption added those guardrails without a CI consumer; licence, secret, contract, and dependency checks stay in
-the contracts/policy job. The filter also covers `docs/planning/ci-policy.md` and `docs/planning/status.md`
-(the normative CI and status pages) and `docs/planning/maintenance/**` and `docs/planning/drift-checks/**`,
-because `check_process_consistency.py` validates the maintenance and drift-check templates. It does not widen
-any other job, and the test step uses `-t .` so it discovers exactly the `tools/tests` set that
-`tools/verify.sh` runs.
+the contracts/policy job. The filter also covers the planning index and roadmap, the closeout, incident,
+research, prototype, and retrospective homes, maintenance and drift checks, and `tools/check_closeout_evidence.py`
+and `tools/verify.sh`, because the process checker validates those pages and templates and the job mirrors the
+local gate. A regression test imports the checker's required, normative, and verdict path lists, so adding a new
+checked file without a matching filter fails the suite. It does not widen any other job, and the test step uses
+`-t .` so it discovers exactly the `tools/tests` set that `tools/verify.sh` runs.
 
 A change to `.github/workflows/ci.yml` forces all jobs so the pipeline itself is validated. Because
 `platforms=windows`/`macos` suppresses the Ubuntu-only jobs even when their paths changed, a workflow-validation
@@ -198,13 +199,13 @@ two scopes.
 
 - Target: **≤300 billable minutes per month**.
 - If usage passes 50% of the allowance before mid-month, switch to closeout-only CI and ask the owner before
-  adding any run.
+  adding any run or job.
 - If a platform gate is needed, prefer Windows before macOS. The focused Windows gate costs about 16–20 billable
   minutes, not the ~36 of the former Ubuntu-plus-Windows run. A normal macOS gate still costs about 30 billable
   minutes even focused, because of the 10× multiplier; a long macOS job can cost hundreds.
 - Use `[skip ci]` for docs-only commits and merges.
 - **Status 2026-11-14:** about 1,320–1,340 of 2,000 minutes used (66–67%), so the 50% guard is active. Stay
-  closeout-only, add no new run without owner approval, and defer Windows/macOS platform gates to the next
+  closeout-only, add no new run or job without owner approval, and defer Windows/macOS platform gates to the next
   monthly reset unless a platform-specific change makes one mandatory.
 
 ## 6. Commands

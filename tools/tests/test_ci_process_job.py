@@ -7,9 +7,10 @@ but no CI job ran them. These assertions execute the shipped change-detection
 snippet over sample file lists and guard the lightweight job that consumes it,
 so the guardrails cannot silently drop out of CI again.
 
-Two drift guards sit on top of the behaviour checks: the normative filter lists
-in `docs/planning/ci-policy.md` and `AGENTS.md` must match the workflow's case
-arm, and the job's test command must be the one `tools/verify.sh` runs.
+Three drift guards sit on top of the behaviour checks: every path exported by
+the process checker must match the workflow's case arm, the normative filter
+lists in `docs/planning/ci-policy.md` and `AGENTS.md` must match that arm, and the
+job's test command must be the one `tools/verify.sh` runs.
 """
 
 from __future__ import annotations
@@ -18,7 +19,10 @@ import re
 import subprocess
 import tempfile
 import unittest
+from fnmatch import fnmatchcase
 from pathlib import Path
+
+from tools.check_process_consistency import NORMATIVE_FILES, REQUIRED_FILES, VERDICT_FILES
 
 REPO = Path(__file__).resolve().parents[2]
 WORKFLOW = REPO / ".github" / "workflows" / "ci.yml"
@@ -44,11 +48,30 @@ PROCESS_PATHS = (
     "docs/planning/status.md",
     "docs/planning/maintenance/2026-11-27-temporary-free-dev-binding.md",
     "docs/planning/drift-checks/2026-11-18-phase-c.md",
+    "docs/planning/README.md",
+    "docs/planning/04-roadmap.md",
+    "docs/planning/closeout/_template.json",
+    "docs/planning/incidents/_template.md",
+    "docs/planning/research/_template.md",
+    "docs/planning/prototypes/_template.md",
+    "docs/planning/retrospectives/_template.md",
     "zensical.toml",
     "tools/check_process_consistency.py",
+    "tools/check_closeout_evidence.py",
     "tools/check_docs_links.py",
     "tools/check_doc_math.py",
+    "tools/verify.sh",
     "tools/tests/test_ci_process_job.py",
+)
+
+# Every checker-owned input plus the gate scripts the process job invokes or mirrors.
+CHECKER_INPUT_PATHS = tuple(
+    sorted(
+        set(REQUIRED_FILES)
+        | set(NORMATIVE_FILES)
+        | set(VERDICT_FILES)
+        | {"tools/check_closeout_evidence.py", "tools/verify.sh"}
+    )
 )
 
 # The tool-test discovery command shared by the job and `tools/verify.sh`.
@@ -56,18 +79,22 @@ DISCOVERY_COMMAND = "python -m unittest discover -s tools/tests -t ."
 
 # Single-file filter tokens. A documented token is a filter token when it ends
 # with `*` or is one of these; that keeps unrelated backticked paths in the same
-# prose (for example `tools/verify.sh`) out of the comparison.
+# prose (for example `tools/contracts/manifest.json`) out of the comparison.
 SINGLE_FILE_FILTERS = frozenset(
     {
         "AGENTS.md",
         "GLOSSARY.md",
         "opencode.json",
         "zensical.toml",
+        "docs/planning/README.md",
+        "docs/planning/04-roadmap.md",
         "docs/planning/ci-policy.md",
         "docs/planning/status.md",
         "tools/check_process_consistency.py",
+        "tools/check_closeout_evidence.py",
         "tools/check_docs_links.py",
         "tools/check_doc_math.py",
+        "tools/verify.sh",
     }
 )
 
@@ -199,6 +226,16 @@ class ProcessJobTests(unittest.TestCase):
                             "false",
                             f"{path} must not enable the {flag} job",
                         )
+
+    def test_every_process_checker_input_matches_the_workflow_filter(self) -> None:
+        """PR-fast regression: checker inputs must never bypass the process job."""
+        patterns = workflow_filter_patterns()
+        for path in CHECKER_INPUT_PATHS:
+            with self.subTest(path=path):
+                self.assertTrue(
+                    any(fnmatchcase(path, pattern) for pattern in patterns),
+                    f"{path} is validated by the process checks but no process filter matches it",
+                )
 
     def test_contract_tooling_does_not_enable_the_process_job(self) -> None:
         for path in ("tools/contracts/manifest.json", "tools/check-license-headers.py"):

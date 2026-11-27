@@ -639,17 +639,20 @@ Rules:
 - Path filters must ensure that only affected jobs run. A change to `.github/workflows/ci.yml` forces all jobs.
 - The `Process and binding checks` job runs when process-relevant paths change: `.opencode/**`, `AGENTS.md`,
   `GLOSSARY.md`, `opencode.json`, `docs/development/**`, `docs/planning/reviews/**`, `docs/planning/audits/**`,
-  `docs/planning/ci-policy.md`, `docs/planning/status.md`, `docs/planning/maintenance/**`,
-  `docs/planning/drift-checks/**`, `zensical.toml`, `tools/check_process_consistency.py`,
-  `tools/check_docs_links.py`, `tools/check_doc_math.py`, and `tools/tests/**`. A `ci.yml` change enables it
-  together with every other job. It is Ubuntu-only, installs no dependencies, builds neither .NET nor Rust, and
-  runs the process checker, the documentation link and math checks, and the `tools/tests` suite with the same
-  discovery root as `tools/verify.sh`.
+  `docs/planning/README.md`, `docs/planning/04-roadmap.md`, `docs/planning/ci-policy.md`,
+  `docs/planning/status.md`, `docs/planning/maintenance/**`, `docs/planning/drift-checks/**`,
+  `docs/planning/closeout/**`, `docs/planning/incidents/**`, `docs/planning/research/**`,
+  `docs/planning/prototypes/**`, `docs/planning/retrospectives/**`, `zensical.toml`,
+  `tools/check_process_consistency.py`, `tools/check_closeout_evidence.py`, `tools/check_docs_links.py`,
+  `tools/check_doc_math.py`, `tools/verify.sh`, and `tools/tests/**`. A `ci.yml` change enables it together with
+  every other job. It is Ubuntu-only, installs no dependencies, builds neither .NET nor Rust, and runs the
+  process checker, the documentation link and math checks, and the `tools/tests` suite with the same discovery
+  root as `tools/verify.sh`.
 - Documentation is validated locally with `zensical build --strict` (and the other docs commands). The
   separate `docs.yml` workflow is manual until the documentation is mature enough to justify automatic runs.
 - Keep Nightly manual-only; do not add a schedule until real long-running suites exist. If a schedule is later introduced, run it weekly on Ubuntu.
 - Target at most 300 billable minutes per month. If usage passes 50% of the allowance before mid-month, switch
-  to closeout-only CI and ask the human owner before adding any run.
+  to closeout-only CI and ask the human owner before adding any run or job.
 - Use `[skip ci]` for docs-only commits and merges.
 - Never tag a red `main`; wait for the main merge CI before creating `step-NN`.
 
