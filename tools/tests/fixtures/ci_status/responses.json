@@ -40,6 +40,10 @@
       "head_sha": "3333333333333333333333333333333333333333"
     }
   },
+  "GET /repos/acme/mocassin/commits/1111111": {
+    "status": 200,
+    "body": {"sha": "1111111111111111111111111111111111111111"}
+  },
   "GET /repos/acme/mocassin/actions/runs/101": {
     "status": 200,
     "body": {

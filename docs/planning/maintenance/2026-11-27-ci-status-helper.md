@@ -17,7 +17,8 @@ not discover credentials through git, read a credential store or token file, or 
 ## 2. Scope and interface
 
 - Select either all `CI` workflow runs for `--sha <sha>` or one `--run-id <id>`; the selectors are mutually
-  exclusive.
+  exclusive. Full and abbreviated hexadecimal commit SHAs are accepted; abbreviated values are resolved through
+  the public commit endpoint before querying workflow runs.
 - Derive `owner/name` from the `origin` remote unless `--repo owner/name` is supplied. The API base defaults to
   `https://api.github.com` and can be overridden with `--api-base` for an HTTPS-compatible endpoint.
 - Print run id, workflow, event, status, conclusion, head SHA, and every job's name/status/conclusion. `--json`
@@ -49,18 +50,18 @@ responses name `GH_TOKEN` as the optional rate-limit remedy without displaying i
 ## 5. Tests
 
 The acceptance suite in [`tools/tests/test_ci_status.py`](../../../tools/tests/test_ci_status.py) covers run/job
-parsing, SHA selection, text and JSON output, success/failure/in-progress/timeout exits, pagination, rate-limit
-handling, malformed responses, and token non-disclosure.
+parsing, full and abbreviated SHA selection, text and JSON output, success/failure/in-progress/timeout exits,
+pagination, rate-limit handling, malformed responses, and token non-disclosure.
 
 | Command | Result on 2026-11-27 |
 | --- | --- |
-| `python -m unittest tools.tests.test_ci_status` | 14 tests passed. |
-| `python -m unittest discover -s tools/tests -t .` | 92 tests passed in 1.035 s. |
+| `python -m unittest tools.tests.test_ci_status` | 16 tests passed. |
+| `python -m unittest discover -s tools/tests -t .` | 94 tests passed in 0.805 s. |
 | `python tools/check_process_consistency.py` | `Process consistency: OK`. |
-| `python tools/check_docs_links.py` | OK; 240 files scanned. |
-| `python tools/check_doc_math.py` | OK; 236 files scanned. |
+| `python tools/check_docs_links.py` | OK; 241 files scanned. |
+| `python tools/check_doc_math.py` | OK; 237 files scanned. |
 | `./tools/verify.sh docs --require` | Passed; strict Zensical, DocFX, and rustdoc builds completed. |
-| `./tools/verify.sh policy --require` | Passed; API compatibility, contracts, SPDX, secret scan, 92 tests, and `cargo deny` completed. |
+| `./tools/verify.sh policy --require` | Passed; API compatibility, contracts, SPDX, secret scan, 94 tests, and `cargo deny` completed. |
 | `ruff check tools/ci_status.py tools/tests/test_ci_status.py` | All checks passed. |
 
 Live unauthenticated lookups also succeeded against the public API. The SHA lookup for
