@@ -1,7 +1,7 @@
 ---
 description: Turns an approved request into a frozen step design. Writes design docs and the review request; never code or verdicts.
 mode: subagent
-# Reference tier: strong. See docs/development/model-economics.md.
+# Reference tier: default. See docs/development/model-economics.md.
 model: opencode-go/deepseek-v4.1-flash
 permissions:
   - { action: edit, resource: "src/**", effect: deny }

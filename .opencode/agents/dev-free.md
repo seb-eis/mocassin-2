@@ -1,7 +1,7 @@
 ---
-description: Implements an approved feature or fix on the free workhorse tier, and reports a rate limit instead of switching models. Never reviews its own work or merges without approval.
+description: Implements an approved feature or fix on the free variant of the default tier, and reports a rate limit instead of switching models. Never reviews its own work or merges without approval.
 mode: subagent
-# Reference tier: workhorse, free variant first. See docs/development/model-economics.md.
+# Reference tier: default, free variant first. See docs/development/model-economics.md.
 model: opencode/deepseek-v4.1-flash-free
 ---
 

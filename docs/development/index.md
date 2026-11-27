@@ -53,6 +53,8 @@ The detailed architecture is in the internal plan; the repository layout is summ
   guardrails.
 - [Design proportionality](design-proportionality.md) — `Full`/`Light`/`None` design classes, the review stop rule,
   and the pre-audit gate.
+- [Senior focused consultation](senior-consultation.md) — advisory escalation after two completed standard
+  rounds still leave a Blocker or Major; not a round and not a verdict.
 - [Drift checks](drift-checks.md) — lightweight monthly and phase-boundary checks between cross-cutting reviews.
 - [Agent security](agent-security.md) — threat model, permissions, secrets, and prompt injection.
 - [Incident and rollback](incident-and-rollback.md) — severity, rollback, hotfix, and postmortem rules.

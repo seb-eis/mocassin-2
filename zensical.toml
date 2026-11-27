@@ -79,6 +79,7 @@ nav = [
       { "Orchestration" = "development/orchestration.md" },
       { "Agent workflow" = "development/agent-workflow.md" },
       { "Agent security" = "development/agent-security.md" },
+      { "Senior focused consultation" = "development/senior-consultation.md" },
       { "Drift checks" = "development/drift-checks.md" },
       { "Incident and rollback" = "development/incident-and-rollback.md" },
       { "Testing and parity" = "development/testing-and-parity.md" },

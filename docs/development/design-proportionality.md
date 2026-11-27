@@ -5,10 +5,10 @@ process, roles, and records are in [`docs/planning/reviews/README.md`](https://g
 [`docs/planning/audits/README.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/audits/README.md); this page decides the depth.
 
 A **step** is MOCASSIN's work package. The 32-step model, `step/<NN>-<slug>` branches, `feature/...` branches,
-and `step-NN` tags are unchanged. The design class is a property of a step or an amendment, not a new unit of
-work.
+and `step-NN` tags are unchanged. The design class is a property of a step, an amendment, or a policy-update
+review, not a new unit of work.
 
-Design is a cost: it consumes the strong tier's tokens and the owner's review time. Its value is avoiding contract
+Design is a cost: it consumes the default tier's tokens and the owner's review time. Its value is avoiding contract
 rework. Spend it on contract risk, not evenly across every change.
 
 ## 1. Design class
@@ -21,6 +21,15 @@ may not move down after the design is frozen without an owner decision.
 | **Full** | public API or contract; `.mocprj`, `.msl`, `.msr`, or `.mcs` format, schema, or version; dependency; cross-package interface; data migration; security or concurrency; an irreversible decision; an architecture boundary | Design section with interfaces, error behaviour, security, migration, and acceptance tests; an ADR for each irreversible decision | Independent design review; stop when no Blocker or Major remains |
 | **Light** | internal feature inside an existing boundary; no contract, format, dependency, or architecture change | One-page design section: scope, contracts touched, acceptance criteria with their tests, non-goals, risks | One review agent pass; Minor and Note findings are accepted and do not trigger a re-review |
 | **None** | documentation, typo, mechanical refactor, test-only change, generated-file refresh | One line in the step page: what changes and why no design is needed | No design review; record the decision |
+
+**Policy-update reviews.** A policy-update review is the design-review gate for a process, workflow, role, or
+agent-prompt change that is not a step design. Its record is
+`docs/planning/reviews/policy-<YYYY-MM-DD>-<slug>.md`. It uses the same classes. It is **Full** when it changes a
+gate, a role, the agent binding, the CI policy, or a normative process rule; **Light** for a bounded internal
+process edit inside an existing boundary; and **None** for a typo, link, or formatting-only change. The record
+class and write scope are in
+[`docs/planning/reviews/README.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/reviews/README.md)
+§9.1; the class trigger is here.
 
 Rules:
 

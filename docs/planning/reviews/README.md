@@ -227,13 +227,16 @@ design review, but its record is `docs/planning/reviews/policy-<YYYY-MM-DD>-<slu
 - The review agent may edit only the assigned policy record and commits only that file with `[skip ci]`. The
   binding's `docs/planning/reviews/policy-*.md` allow rule exists for this record class; it does not permit
   editing any other file.
-- A policy update is `Full` when it changes a gate, a role, the agent binding, the CI policy, or a normative
-  process rule. It uses the full checklist and stops when no Blocker or Major remains.
+- A policy update uses the classes in
+  [`../../development/design-proportionality.md`](../../development/design-proportionality.md) §1. Record the
+  class in the request and justify it; the trigger is not repeated here. A `Full` policy update uses the full
+  checklist and stops when no Blocker or Major remains.
 - Historical policy records are not rewritten. A later policy update supersedes the affected rule in the
   normative pages and records the supersession in its own record.
 - A policy-update review may use the senior consultation after two completed standard rounds still leave a
-  Blocker or Major; the senior record is `docs/planning/reviews/senior/policy-<date>-<slug>-M.md` and the
-  senior answer is advisory.
+  Blocker or Major. The trigger and request contract are in
+  [`../../development/senior-consultation.md`](../../development/senior-consultation.md); the senior record is
+  `docs/planning/reviews/senior/policy-<date>-<slug>-M.md` and the senior answer is advisory.
 - The post-implementation verification pass is appended to the same record under
   `## Post-implementation verification`; it is not a second design round and does not change the design
   verdict.

@@ -27,9 +27,17 @@
 | Upstream reference | `seb-eis/opencode-workflow` at `b3230863c7a526622079ef595236cdc696f5c23a` (2026-11-27) |
 | Authority | Owner decisions of 2026-11-27 (section “Owner decisions”) |
 
-This is a **pre-implementation design review**. The normative pages are not rewritten in the design set. The
-design decisions below are the specification the dev implements after the verdict; a separate, bounded
-post-implementation verification pass then checks the implemented commit.
+This is a **pre-implementation design review**. The design decisions below are the specification the dev
+implements after the verdict; a separate, bounded post-implementation verification pass then checks the
+implemented commit.
+
+The design set contains the record and the minimal normative edits needed to make this review writable and to
+correct the round-1 findings: the policy-update record class and the `policy-*.md` binding
+(`docs/planning/reviews/README.md` §9.1 and `.opencode/agents/review.md`), the policy-update class in
+`docs/development/design-proportionality.md`, the senior consultation page
+`docs/development/senior-consultation.md`, the retired tier wording in the agent prompts, and the lead's
+discovery facilitation line in `docs/development/orchestration.md`. The remaining normative pages are not
+rewritten here; the dev implements them after the verdict.
 
 ## Purpose
 
@@ -91,12 +99,13 @@ change except that the new `senior` binding uses `opencode-go/deepseek-v4-pro`.
 
 **Full.** The change alters process gates, the role set (adds `senior`), the agent binding, and the normative
 process pages. Those are public process contracts for every following step, and the review-record home needs a
-binding change. It is not an architecture or format change, but the blast radius and irreversibility match the
-Full trigger (“security or concurrency” is not the only high-trigger case; a gate/role/binding change is).
+binding change. The general policy-update class trigger is in
+[`docs/development/design-proportionality.md`](../../development/design-proportionality.md) §1; this change meets
+the Full branch because it changes a gate, a role, the agent binding, and a normative process rule.
 
-Review depth: the full checklist below. Stop when no Blocker or Major remains. Minor and Note findings are
-recorded and accepted or deferred; they do not justify another round unless they are design-origin and
-material. A third standard round needs an owner decision and a recorded reason.
+Review depth: the round-2 design-gate checklist below. Stop when no Blocker or Major remains. Minor and Note
+findings are recorded and accepted or deferred; they do not justify another round unless they are design-origin
+and material. A third standard round needs an owner decision and a recorded reason.
 
 ## Mapping table
 
@@ -196,6 +205,13 @@ does not guarantee.
 - record its durable output in the named home, not in chat;
 - keep the anti-pattern list short and concrete.
 
+**Published-page link convention.** A published page under `docs/` must not use a relative link to a root file
+(`GLOSSARY.md`, `AGENTS.md`) or to a `docs/planning/` file: `zensical build --strict` aborts because those targets
+are outside the published site or excluded. Use the absolute repository URL
+`https://github.com/seb-eis/mocassin-2/blob/main/<path>` instead; `check_docs_links.py` treats it as external.
+Relative links are for published-to-published targets only. This is the convention the existing published pages
+already use (`agent-workflow.md`, `model-economics.md`, `design-proportionality.md`).
+
 **A3. `GLOSSARY.md` boundary.** Create a root `GLOSSARY.md` as the ubiquitous language for contributors and
 agents: project-specific terms, one or two sentences each, rejected synonyms under `_Avoid_`. It must not become
 a specification. Add a boundary note to `docs/glossary/index.md`: root `GLOSSARY.md` is the working language for
@@ -215,7 +231,9 @@ All three are under `docs/planning/` and remain excluded from the published site
 
 **A5. Commands.** Add `.opencode/commands/grill.md`, `handoff.md`, and `retro.md`, all `agent: lead`:
 - `/grill <step-slug>` runs one discovery frontier round, numbers questions, recommends an answer, waits for the
-  owner, and routes settled decisions to the design agent or dev. It does not design or write records.
+  owner, and routes settled decisions to the design agent or dev. Recommending is not deciding: the design agent
+  or owner records the decision, and the lead does not choose for the owner or change scope. The permission for
+  this is in `orchestration.md` §2 (“Facilitate discovery”) and §3.
 - `/handoff <step-slug>` reads the durable records, builds the handoff card from `agent-workflow.md` §2 plus the
   applicable discipline/skill, and routes the card to the dev. It does not write.
 - `/retro <step-slug>` reads the durable evidence, presents candidates grouped by navigation, checks, standards,
@@ -223,21 +241,25 @@ All three are under `docs/planning/` and remain excluded from the published site
   an action. It routes the record to the dev and any process change through `docs/<slug>`.
 The commands use `step-*` vocabulary and never `/wp-*`.
 
-**A6. Index and navigation.** Add the nine pages to `docs/development/index.md` and to the Development section
-of `zensical.toml` (a nested “Task disciplines” group is acceptable). Add `research/`, `prototypes/`,
+**A6. Index and navigation.** Add the nine discipline pages **and** `senior-consultation.md` (ten new
+`docs/development` pages in total) to `docs/development/index.md` and to the Development section of
+`zensical.toml` (a nested “Task disciplines” group is acceptable). Add `research/`, `prototypes/`,
 `retrospectives/`, and `reviews/senior/` to the planning README reading order. `docs/planning/` stays excluded.
 
 ### B. Senior escalation
 
 **B1. Normative home.** Add `docs/development/senior-consultation.md` as the single home for:
-- **Trigger** — only when (a) two completed standard rounds of the *same* design review, audit, or cross-cutting
-  review each ended blocked (`Changes required` / `Fixes required`), (b) at least one Blocker or Major from the
-  second round is still open, and (c) the remaining disagreement reduces to **one** answerable question. A
-  first round, a round with only Minor/Note findings, or a wish for another opinion is not a trigger.
+- **Trigger** — only when (a) two completed standard rounds of the *same* design review, audit, cross-cutting
+  review, **or policy-update review** each ended blocked (`Changes required` / `Fixes required`), (b) at least one
+  Blocker or Major from the second round is still open, and (c) the remaining disagreement reduces to **one**
+  answerable question. A first round, a round with only Minor/Note findings, or a wish for another opinion is not
+  a trigger.
 - **Request contract** — parent record, gate, round numbers and verdicts, frozen commit, open finding IDs and
   contradictory evidence, one question, exact bounded paths/diff/commands, out-of-scope boundary, and what
   counts as an answer.
-- **Senior rules** — inspect only the assignment and named paths; if the assignment is incomplete, ambiguous,
+- **Senior rules** — the senior is a **fresh context** receiving only the bounded assignment and named paths; it
+  must not see the lead's history, the owner's preferred answer, another reviewer's reasoning, or the request
+  owner's notes. Inspect only the assignment and named paths; if the assignment is incomplete, ambiguous,
   contradictory, or too broad, write `Declined` before inspecting and name the missing information; answer only
   the question with evidence, assumptions, confidence, and what was not inspected; write only the assigned
   record and commit it with `[skip ci]`; no gate verdict, no waiver, no fix, no merge/tag/push, no subagents.
@@ -253,8 +275,9 @@ of `zensical.toml` (a nested “Task disciplines” group is acceptable). Add `r
 - deny all edits, then allow `docs/planning/reviews/senior/step-*.md`,
   `docs/planning/reviews/senior/xc-*.md`, and `docs/planning/reviews/senior/policy-*.md`;
 - deny `subagent *`;
-- a body that restates the decline-before-inspecting rule, the one-question rule, the record-only commit, and
-  the advisory effect, and points at `docs/development/senior-consultation.md`.
+- a body that states the senior is a fresh context with no access to the lead's history, the owner's preferred
+  answer, or another reviewer's reasoning; restates the decline-before-inspecting rule, the one-question rule,
+  the record-only commit, and the advisory effect; and points at `docs/development/senior-consultation.md`.
 
 Add `senior` to the lead’s allowed subagents. The lead may request it only on the trigger and only with a
 bounded assignment. The lead must not use it as a normal review round or pass a preferred answer.
@@ -264,12 +287,17 @@ bounded assignment. The lead must not use it as a normal review round or pass a 
   Senior consultant row; update the binding paragraph.
 - `AGENTS.md` §3.9 and §3.10: after the re-review/re-audit step, add one paragraph: after two completed full
   rounds still leave a Blocker or Major, the lead may request one senior consultation before a third standard
-  round; the answer is advisory, the owner decides, and a fresh standard round at the new commit remains the
+  round; the paragraph names the gate types as design review, audit, cross-cutting review, **and policy-update
+  review**; the answer is advisory, the owner decides, and a fresh standard round at the new commit remains the
   gate. Do not make senior a verdict or a round.
 - `AGENTS.md` §3.15: add a `Senior escalation` row pointing at `senior-consultation.md`.
 - `orchestration.md`: add senior to the diagram as a dashed escalation, to “Route”, to “Assign the tier”, to the
   context/spawn list, to the boundaries, and to the harness-binding table; add a short “Senior consultation”
-  subsection that links the normative page (no duplicated trigger text).
+  subsection that links the normative page (no duplicated trigger text). In §9, update the prose, not only the
+  table: the binding paragraph's role list becomes `(lead, design, dev-free, dev, review, senior)`; “the lead can
+  spawn only `design`, `dev-free`, `dev`, and `review`” adds `senior`; “the review agent can edit only
+  `step-*.md` and `xc-*.md`” adds `policy-*.md`; “those four allowed” becomes five (four standing plus the
+  escalation); the table gains a Senior consultant row and the lead row names senior.
 - `reviews/README.md`, `audits/README.md`, `cross-cutting/README.md`: add a “Senior escalation” subsection that
   links the normative page, names the record path, and repeats only the record-format facts the reviewer needs.
 - `model-economics.md`: the senior tier and the one-consultation budget.
@@ -294,10 +322,13 @@ bounded assignment. The lead must not use it as a normal review round or pass a 
   not invent a spec.
 - Pin the base and reviewed commit; use a three-dot diff; a bad ref or empty diff is a failed request.
 
-**C2. Templates.** Add an `Axis` column (values `Standards` / `Spec`) to the findings tables in
-`docs/planning/reviews/step-design-review-template.md`, `docs/planning/audits/step-audit-template.md`, and
-`docs/planning/reviews/cross-cutting/cross-cutting-review-template.md`. Keep the existing `Origin` column; axis
-and origin are different dimensions.
+**C2. Templates.** Add an `Axis` column (values `Standards` / `Spec`) to each findings table:
+- `docs/planning/reviews/step-design-review-template.md` and `docs/planning/audits/step-audit-template.md` become
+  `ID | Axis | Severity | Origin | Finding | Evidence | Recommendation` (they already have `Origin`);
+- `docs/planning/reviews/cross-cutting/cross-cutting-review-template.md` becomes
+  `ID | Axis | Severity | Area | Finding | Evidence | Recommendation`; it keeps `Area` and has no `Origin`.
+Do not reorder the other columns. The sets stay aligned on `ID`, `Axis`, and `Severity`; `Origin` and `Area` are
+family-specific and are not merged.
 
 **C3. Record and prompt text.** Add the axis rule to `reviews/README.md` §6, `audits/README.md` §5, and the
 cross-cutting README. Update `.opencode/agents/review.md` and the spawn card in `agent-workflow.md` §15. Add a
@@ -352,15 +383,26 @@ review/audit deadlock”.
 bill with the work. Add a senior budget: one consultation per unresolved gate question; repeat only with a new
 explicit question and after telling the owner why the earlier answer did not settle it.
 
-**E5. Retire the old tier words.** Remove `workhorse` and `strong tier` from the normative process pages:
-`model-economics.md`, `orchestration.md`, `design-proportionality.md`, `agent-workflow.md`, and the agent file
-comments. Historical records (`docs/planning/maintenance/2026-11-22-policy-adoption.md`, the `status.md` note
-about the earlier strong-tier decision) are not rewritten. Add a new `status.md` note that records the adoption
-and the default/senior names.
+**E5. Retire the old tier words.** Remove `workhorse`, `strong tier`, `strong-tier`, and bare `strong` from the
+normative process pages (`model-economics.md`, `orchestration.md`, `design-proportionality.md`,
+`agent-workflow.md`) **and** from `.opencode/agents/*.md` (frontmatter and body). The agent prompts are live
+instructions, not historical prose:
+- `dev.md`'s “strong-tier pass” escalation becomes the re-brief-on-default rule, with senior only after two
+  completed blocked review/audit rounds;
+- `dev-free.md`'s “free workhorse tier” becomes “free variant of the default tier”;
+- the `# Reference tier:` comments in `lead.md`, `design.md`, `review.md`, `dev.md`, and `dev-free.md` use
+  `default` (and `default, free variant`), not `strong`/`workhorse`;
+- `review.md` says independence is a fresh context, not a different model.
+This design set already applies those agent-prompt edits. The dev applies the remaining process-page rewrite.
+Historical records (`docs/planning/maintenance/2026-11-22-policy-adoption.md`, the `status.md` note about the
+earlier strong-tier decision) are not rewritten. Add a new `status.md` note that records the adoption and the
+default/senior names.
 
 **E6. Binding tests.** `tools/tests/test_opencode_binding.py` keeps the existing model assertions and adds:
 senior model and mode; lead may spawn senior; review may edit `docs/planning/reviews/policy-*.md`; the three new
-commands use the lead; `senior` denies subagents and edits outside its record paths.
+commands use the lead; `senior` denies subagents and edits outside its record paths. It also asserts that the
+agent prompts and the four process pages contain none of `workhorse`, `strong tier`, `strong-tier`, or bare
+`strong` (word-boundary), so the live-instruction regression is caught.
 
 ### F. Record home for policy-update reviews
 
@@ -396,17 +438,23 @@ open question to the lead (section “Open questions”), because the harness lo
   `docs/development/review-axes.md`, root `GLOSSARY.md`, the three record-home README/template pairs,
   `docs/planning/reviews/senior/README.md` and `_template.md`, `.opencode/agents/senior.md`,
   `.opencode/commands/{grill,handoff,retro}.md`, and the eight skill files.
-- Add to `REQUIRED_INTEGRATION`: `AGENTS.md` contains `output contract` and `senior consultation`;
-  `docs/development/senior-consultation.md` contains `two completed standard rounds`;
-  `docs/development/review-axes.md` contains `Standards` and `Spec`; the three findings templates contain
-  `| Axis |`; `.opencode/agents/review.md` contains `policy-*.md`; `.opencode/agents/lead.md` contains `senior`;
-  `docs/development/model-economics.md` contains `default` and `senior`;
-  `docs/development/orchestration.md` contains `senior`; `docs/development/agent-workflow.md` contains
-  `senior consultation`; `docs/planning/reviews/README.md` contains `policy-update`.
+- Add to `REQUIRED_INTEGRATION`: `AGENTS.md` contains `output contract`, `senior consultation`, `policy-*.md`,
+  and `Senior consultant`; `docs/development/senior-consultation.md` contains `two completed standard rounds`
+  and `policy-update review`; `docs/development/review-axes.md` contains `Standards` and `Spec`; the three
+  findings templates contain `| Axis |`; `.opencode/agents/review.md` contains `policy-*.md`;
+  `.opencode/agents/lead.md` contains `senior`; `docs/development/model-economics.md` contains `default` and
+  `senior`; `docs/development/orchestration.md` contains `senior`, `policy-*.md`, and `Senior consultant`;
+  `docs/development/agent-workflow.md` contains `senior consultation`;
+  `docs/planning/reviews/README.md` contains `policy-update` and `senior-consultation.md`. Require
+  `policy-*.md` and `Senior consultant` in the orchestration/AGENTS binding prose, not merely `senior` somewhere
+  in the file (m-5).
 - Add a targeted `check_tier_vocabulary` that fails if `model-economics.md`, `orchestration.md`,
-  `design-proportionality.md`, or `agent-workflow.md` still contain `workhorse` or `strong tier` (the historical
-  `status.md` and maintenance records are not scanned). This prevents the old tier names from returning without
-  forcing a rewrite of history.
+  `design-proportionality.md`, `agent-workflow.md`, **or `.opencode/agents/*.md`** still contain `workhorse`,
+  `strong tier`, `strong-tier`, or bare `strong` (word-boundary; case-insensitive). Historical `status.md` and
+  maintenance records are not scanned. This prevents the old tier names from returning in live instructions
+  without forcing a rewrite of history.
+- Add `GLOSSARY.md` to `tools/check_docs_links.py`'s `ROOT_FILES` so its own links are scanned. Do not add a
+  relative published-page link to a root or `docs/planning/` file; use the absolute URL in A2.
 - Add the new pages to `NORMATIVE_FILES` so the forbidden-term scan covers them.
 - Do not weaken an existing check. If a new required path cannot be satisfied without weakening one, stop and
   report.
@@ -424,8 +472,12 @@ the missing `Axis` column, and the retired tier vocabulary. The repository-wide 
 - Renaming or moving pages is out of scope; no existing page is moved. All new `docs/development` pages are
   linked from `docs/development/index.md` and added to `zensical.toml`; the planning record homes are excluded
   by `exclude_docs = "planning/"`.
-- `GLOSSARY.md` is a root file; link it from `docs/development/domain-language.md`, `AGENTS.md` §2, and
-  `docs/development/index.md` so it is discoverable and link-checked.
+- `GLOSSARY.md` is a root file. Link it from `AGENTS.md` §2 with a relative root link (the root guides are in
+  `check_docs_links.ROOT_FILES`), and from `docs/development/domain-language.md` with the absolute URL
+  `https://github.com/seb-eis/mocassin-2/blob/main/GLOSSARY.md`. Do **not** use a relative link from a published
+  page to the root file: `zensical build --strict` aborts. Add `GLOSSARY.md` to
+  `tools/check_docs_links.py`'s `ROOT_FILES` so its own links are scanned; “discoverable” does not by itself
+  mean “link-checked”.
 - `docs/glossary/index.md` gets the boundary note; it is not renamed.
 - `docs/planning/README.md` gains the new record homes and the senior record index in its reading order, but the
   content stays a link, not a copy.
@@ -487,8 +539,8 @@ pass?” at the implemented commit. Different commit, different question, differ
 | Branch model, feature integration, step completion, tags, roles, approval report | `AGENTS.md` §3 (this page's summaries do not replace it) | `orchestration.md`, `agent-workflow.md`, `CONTRIBUTING.md` |
 | Lead role, delegation, spawning | `docs/development/orchestration.md` | `AGENTS.md` §3.8, `agent-workflow.md` |
 | Model tiers, role assignment, free-first binding, escalation | `docs/development/model-economics.md` | `orchestration.md` §2, `AGENTS.md` §3.15 |
-| Design classes, stop rule, pre-audit gate, finding-origin metric | `docs/development/design-proportionality.md` | review/audit READMEs, `AGENTS.md` §3.9 |
-| Senior trigger, request contract, senior rules, effect | `docs/development/senior-consultation.md` | `AGENTS.md` §3.9/§3.10, review/audit/cross-cutting READMEs, `orchestration.md` |
+| Design classes and the policy-update class trigger, stop rule, pre-audit gate, finding-origin metric | `docs/development/design-proportionality.md` §1 | review/audit READMEs (including `reviews/README.md` §9.1, which links the class), `AGENTS.md` §3.9 |
+| Senior trigger **including policy-update reviews**, request contract, senior rules, effect | `docs/development/senior-consultation.md` §1–§4 | `AGENTS.md` §3.9/§3.10, review/audit/cross-cutting/policy-update READMEs, `orchestration.md` |
 | Review axes | `docs/development/review-axes.md` | templates' `Axis` column, review/audit READMEs, `review.md` |
 | Agent output contract | `AGENTS.md` §17 | role prompts, `agent-workflow.md` §5 |
 | Task disciplines | each `docs/development/<discipline>.md` | `.opencode/skills/*/SKILL.md`, `docs/development/index.md` |
@@ -541,6 +593,7 @@ pass?” at the implemented commit. Different commit, different question, differ
   `default_agent` stays `lead`
 - `zensical.toml`
 - `tools/check_process_consistency.py`
+- `tools/check_docs_links.py` (`ROOT_FILES` gains `GLOSSARY.md`)
 - `tools/tests/test_process_consistency.py`
 - `tools/tests/test_opencode_binding.py`
 
@@ -577,17 +630,17 @@ environment reason, it is reported, not waived, and the change stops.
 
 ## Risks
 
-| Risk | Severity | Mitigation |
-| --- | --- | --- |
-| The review agent cannot load the updated `review.md` in the frozen worktree, so it cannot write the policy record. | Major | Spawn from the frozen worktree; if the harness still loads the original root, stop and report `Blocked`; restart the service or obtain a one-off owner permission. Never transcribe. |
-| The new discipline pages duplicate existing MOCASSIN pages and drift. | Major | Each page is a discipline + pointer; the normative-home map and the checker’s required integration text enforce the links. |
-| The senior escalation becomes a third standard round or a verdict. | Major | Trigger is exactly two completed blocked standard rounds and one question; the record says advisory; the owner decides; fresh standard round remains the gate. |
-| The old `strong`/`workhorse` vocabulary survives in a normative page. | Minor | Targeted `check_tier_vocabulary` on the four process pages; historical records are excluded. |
-| The Axis column is added but findings are still merged or re-ranked. | Minor | The review prompt and the axis page require one label per finding and one verdict; the template shows the column. |
-| New development pages become orphans or break links. | Minor | Add to `index.md` and `zensical.toml`; `check_docs_links.py` and `zensical build --strict` are gates. |
-| Historical records are accidentally rewritten. | Major | File manifest excludes them; the verification pass checks `git diff --name-only origin/main...HEAD`. |
-| The senior model is unavailable or more expensive than expected. | Minor | Owner confirmed it resolves; one consultation per question; the lead reports the cost impact in the approval report. |
-| `GLOSSARY.md` and `docs/glossary/` overlap. | Minor | Explicit boundary note; no term defined in both; the discipline page points to the right one. |
+| Risk | Severity | Owner | Mitigation |
+| --- | --- | --- | --- |
+| The review agent cannot load the updated `review.md` in the frozen worktree, so it cannot write the policy record. | Major | Lead (human owner for a one-off permission) | Spawn from the frozen worktree; if the harness still loads the original root, stop and report `Blocked`; restart the service or obtain a one-off owner permission. Never transcribe. Round-1 evidence showed the frozen definition loaded for this worktree. |
+| The new discipline pages duplicate existing MOCASSIN pages and drift. | Major | Design agent; dev implements | Each page is a discipline + pointer; the normative-home map and the checker’s required integration text enforce the links. |
+| The senior escalation becomes a third standard round or a verdict. | Major | Lead; design agent for the rule text | Trigger is exactly two completed blocked standard rounds and one question; the record says advisory; the owner decides; fresh standard round remains the gate. |
+| The old `strong`/`workhorse` vocabulary survives in a normative page or agent prompt. | Minor | Dev (checker); design agent (prose) | Targeted `check_tier_vocabulary` on the four process pages and `.opencode/agents/*.md`, including `strong-tier` and bare `strong`; historical records are excluded. |
+| The Axis column is added but findings are still merged or re-ranked. | Minor | Review agent; design agent for the prompt | The review prompt and the axis page require one label per finding and one verdict; the templates show the column. |
+| New development pages become orphans or break links. | Minor | Dev | Add to `index.md` and `zensical.toml`; `check_docs_links.py` and `zensical build --strict` are gates; published-to-root/planning links use absolute URLs. |
+| Historical records are accidentally rewritten. | Major | Dev; verification agent | File manifest excludes them; the verification pass checks `git diff --name-only origin/main...HEAD`. |
+| The senior model is unavailable or more expensive than expected. | Minor | Lead; human owner | Owner confirmed it resolves; one consultation per question; the lead reports the cost impact in the approval report. |
+| `GLOSSARY.md` and `docs/glossary/` overlap. | Minor | Design agent | Explicit boundary note; no term defined in both; the discipline page points to the right one. |
 
 ## Open questions for the lead
 
@@ -595,7 +648,9 @@ environment reason, it is reported, not waived, and the change stops.
    worktree, or only from the original `/workspace` project root? The design requires the former so the review
    agent sees the `policy-*.md` allow rule. If the latter, the review of this very change cannot be written under
    the binding until the service is restarted with the frozen worktree or the owner grants a one-off permission.
-   This is not a repository fact and is not guessed. The fallback is recorded in section F.
+   Round-1 evidence: the reviewer's loaded definition contained the allow rule and its record edit succeeded in
+   this worktree, so the fallback was not needed for that round. That is evidence for the round, not a general
+   harness guarantee; the stop-and-report fallback in section F stays.
 2. **Policy record glob breadth.** The allow rule is `docs/planning/reviews/policy-*.md`; the procedural rule
    limits the reviewer to the assigned record. If the lead prefers a narrower pattern
    (`policy-20??-??-??-*.md`), the dev can narrow it and the binding test can assert the narrower path. The
@@ -626,12 +681,45 @@ Commands and results at the design freeze (the design-set commit) are recorded h
   freeze. The request commit adds this record's freeze pointer, this evidence line, and the supporting-page
   clarifications; it changes no rule.
 
+### Round 2 request owner evidence
+
+Commands and results at the round-2 freeze (the design-set commit), recorded by the design agent:
+
+- `git rev-parse origin/main` — `245e34aff7255476d73539d4cc43f068627f0cba` (unchanged).
+- `git diff --check` — exit 0, no output.
+- `python tools/check_docs_links.py` — `Documentation links OK (218 files scanned)`.
+- `python tools/check_process_consistency.py` — `Process consistency: OK`.
+- `./tools/verify.sh docs --require` — exit 0. Strict Zensical, DocFX (warnings as errors), and rustdoc;
+  `Documentation built in <worktree>/site`; `Closeout gate completed with required checks enabled.`
+- `./tools/verify.sh policy --require` — exit 0. Release build; NuGet licence/vulnerability audit; ApiCompat
+  (`Public API is compatible with the checked-in baseline.`); contract/symmetry drift; `Process consistency: OK`;
+  `Ran 62 tests … OK`; `SPDX headers present in 1210 source files`; `No secret patterns found in 1756 tracked
+  text files`; `advisories ok, bans ok, licenses ok, sources ok`; `Closeout gate completed with required checks
+  enabled.`
+- `git diff --name-only origin/main` (plus the untracked new page) — `.opencode/agents/design.md`,
+  `.opencode/agents/dev-free.md`, `.opencode/agents/dev.md`, `.opencode/agents/lead.md`,
+  `.opencode/agents/review.md`, `docs/development/design-proportionality.md`,
+  `docs/development/index.md`, `docs/development/orchestration.md`,
+  `docs/development/senior-consultation.md`, `docs/planning/reviews/README.md`,
+  `docs/planning/reviews/policy-update-2026-11-27-workflow-disciplines.md`, and `zensical.toml`. No `src/`,
+  `tests/`, `contracts/`, workflow, generated artifact, historical record, step page, audit, closeout, or `XC-04`
+  path.
+
+**n-2 context.** The 1755 count was taken at `9fc8c7b` before this record was tracked. At the round-1 freeze
+(`7b3148d`) and at the round-2 freeze the secret scan reports **1756** tracked text files; the one-file
+difference is this record. The gate command's commit is recorded here so the count is reproducible.
+
 > The review agent may rerun the commands and replace this evidence with its own observations. The request
 > owner evidence is part of the request and is not the review agent’s verdict.
 
 ## Review checklist
 
 Mark what was reviewed; add short inline notes only. Do not change item text.
+
+> **Round-2 scope.** The checklist below is round-1 history; its wording uses “exists” for the target state.
+> Round 2 uses the design-gate checklist in `## Re-review request (round 2)`, which asks whether the design
+> specifies each item and names the destination. Existence and implemented-state checks belong to
+> `## Post-implementation verification`. This clarification does not alter any round-1 item text.
 
 ### A. Task disciplines
 
@@ -829,7 +917,8 @@ Severity values: **Blocker**, **Major**, **Minor**, **Note**. Origin: **design**
 
 ## Record state
 
-**State:** Changes required — round 1 (see `Review round 1`)
+**State:** Re-review required — round 2 pending (round 1 was `Changes required`; see `Review round 1` and
+`## Re-review request (round 2)`)
 
 `Re-review required` is a record state, not a verdict.
 
@@ -897,12 +986,99 @@ Date:
 
 ## Resolution status
 
-The dev fills this section after a `Changes required` verdict. Do not alter the review agent-authored findings,
-evidence, or verdict.
+The design agent fills this section after a `Changes required` verdict. Do not alter the review agent-authored
+findings, evidence, or verdict.
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| M-1 | Fixed | Design agent | round-2 freeze |
+| M-2 | Fixed | Design agent | round-2 freeze |
+| M-3 | Fixed | Design agent (prompts); dev (checker) | round-2 freeze |
+| m-1 | Fixed | Design agent (plan); dev (checker) | round-2 freeze |
+| m-2 | Fixed | Design agent | round-2 freeze |
+| m-3 | Fixed | Design agent | round-2 freeze |
+| m-4 | Fixed | Design agent | round-2 freeze |
+| m-5 | Fixed | Design agent (plan); dev (checker) | round-2 freeze |
+| m-6 | Fixed | Design agent | round-2 freeze |
+| m-7 | Fixed | Design agent | round-2 freeze |
+| m-8 | Fixed | Design agent | round-2 freeze |
+| n-1 | Fixed | Design agent | round-2 freeze |
+| n-2 | Accepted | Design agent | round-2 freeze |
+
+No finding is deferred. n-2 is accepted as an evidence-context note; the gate count is now recorded with its
+commit context.
+
+### Resolution detail
+
+- **M-1 (Fixed).** The policy-update class trigger now lives in
+  `docs/development/design-proportionality.md` §1; `docs/planning/reviews/README.md` §9.1 links that class
+  instead of defining a second trigger, and the one-home map names §1 as the home.
+- **M-2 (Fixed).** `docs/development/senior-consultation.md` §1 includes a policy-update review in the trigger
+  enumeration; B1, B3, and the checker's required text name the four gate types and `policy-update review`.
+- **M-3 (Fixed).** The agent prompts now use `default`/`default, free variant`; `dev.md` no longer prescribes a
+  “strong-tier pass” and instead points to re-brief-on-default or the two-blocked-round senior escalation;
+  `dev-free.md` says “free variant of the default tier”. The checker plan scans `.opencode/agents/*.md` and
+  matches `workhorse`, `strong tier`, `strong-tier`, and bare `strong`; the binding test also covers it.
+- **m-1 (Fixed).** Published pages use absolute GitHub URLs for root and `docs/planning/` targets; H1 states the
+  rule and corrects the “link-checked” claim; `GLOSSARY.md` joins `check_docs_links.ROOT_FILES`.
+- **m-2 (Fixed).** A round-2 design-gate checklist asks whether the design specifies each item and names the
+  destination; existence and implemented-state checks are explicitly in `## Post-implementation verification`.
+  The round-1 checklist text is unchanged.
+- **m-3 (Fixed).** The risk table has an Owner column and every risk, including the three Majors, has an owner.
+- **m-4 (Fixed).** C2 now says the design-review and audit tables gain `Axis` and keep `Origin`; the
+  cross-cutting table gains `Axis` and keeps `Area`; the shared columns are aligned on `ID`, `Axis`, `Severity`.
+- **m-5 (Fixed).** B3 names the §9 prose sentences to change, and G1 requires `policy-*.md` and
+  `Senior consultant` in the binding prose, not merely `senior` somewhere in the file.
+- **m-6 (Fixed).** `senior-consultation.md` §3 and B2 state that the senior is a fresh context receiving only the
+  bounded assignment; `.opencode/agents/review.md` adds the senior consultant to its independence sentence.
+- **m-7 (Fixed).** `orchestration.md` §2 now allows the lead to facilitate discovery and recommend an option;
+  §3 says recommending is not deciding; A5 says the design agent or owner records the decision.
+- **m-8 (Fixed).** A6 now says ten new `docs/development` pages, including `senior-consultation.md`.
+- **n-1 (Fixed).** The Purpose paragraph names the minimal normative edits in the design set and the remaining
+  implementation.
+- **n-2 (Accepted).** The 1755/1756 difference is explained by the record being untracked when the owner ran the
+  gate; the new evidence records the count and its commit. No action.
+
+## Re-review request (round 2)
+
+Round 1 verdict: `Changes required` at `7b3148d44496b6feab0bf33c437085e122bd5481` (record commit
+`669bb733aeaacfb93ec2c134a745d6d22503a963`).
+
+Round 2 target: `round-2 freeze` (the design-set commit; the request commit adds the freeze SHA and the gate
+evidence). The lead handoff carries both full SHAs. The reviewed design is the round-2 freeze plus this request
+record; no code, test, contract, or historical record changes.
+
+What changed: M-1, M-2, and M-3 are fixed in the normative pages and agent prompts; m-1–m-8 are fixed; n-1 is
+fixed; n-2 is accepted. The resolution table above is the per-finding record.
+
+### Round 2 design-gate checklist
+
+This checklist asks what the design specifies, not whether the implementation exists. Existence checks are in
+`## Post-implementation verification`. The round-1 checklist above is historical and its item text is unchanged.
+
+- [ ] **M-1:** `design-proportionality.md` §1 is the single home for the policy-update class trigger; §9.1 and
+      the one-home map link it and do not define a second trigger.
+- [ ] **M-2:** the senior trigger names design review, audit, cross-cutting review, and policy-update review;
+      the record naming and binding allow `policy-<date>-<slug>-M.md`.
+- [ ] **M-3:** the agent prompts contain no `workhorse`, `strong tier`, `strong-tier`, or bare `strong`; the dev
+      escalation is re-brief-on-default plus the two-blocked-round senior escalation; the checker/binding plan
+      covers `.opencode/agents/*.md` and the retired forms.
+- [ ] **m-1:** published-to-root/planning links use absolute GitHub URLs; `GLOSSARY.md` is in the checker's
+      `ROOT_FILES` plan; H1 no longer claims the relative link is link-checked.
+- [ ] **m-2:** the round-2 checklist asks design-specification questions; existence checks are in the
+      verification section; the round-1 checklist text is unchanged.
+- [ ] **m-3:** the risk table has an Owner for every risk.
+- [ ] **m-4:** C2 states the `Origin`/`Area` difference and the aligned columns.
+- [ ] **m-5:** B3 names the §9 prose sentences; G1 requires the binding text, not just the word `senior`.
+- [ ] **m-6:** the senior is a fresh context in the page, the agent body, and the review-prompt independence
+      sentence.
+- [ ] **m-7:** the lead may facilitate discovery and recommend; recommending is not deciding.
+- [ ] **m-8:** A6 says ten development pages and includes `senior-consultation.md`.
+- [ ] **n-1:** the Purpose states the minimal normative edits in the design set.
+- [ ] **n-2:** accepted with the count/commit context.
+- [ ] The normative-home map is consistent with the fixed pages.
+- [ ] The file manifest lists the round-2 additions/changes and still protects historical records.
+- [ ] The post-implementation verification remains one bounded fresh pass, separate from this design round.
 
 ## Review rounds
 

@@ -42,6 +42,10 @@ and audit both use the `review` agent, in a fresh context each time.
   remains the memory.
 - **Discuss.** Serve as the owner's general discussion partner for questions, status, and planning conversations
   that do not require a specialised role.
+- **Facilitate discovery.** Run a discovery/grilling round when the request is ambiguous, present the current
+  frontier, and recommend an option with its consequence. Recommending is not deciding: the design agent or the
+  owner records the decision in the step page, `GLOSSARY.md`, an ADR, or `docs/planning/05-open-decisions.md`,
+  and the lead does not choose for the owner or change scope.
 - **Route documentation.** Under the OpenCode binding the lead has no edit permission. Even small,
   non-normative documentation edits are routed to the dev; the process allowance in section 5 is exercised by
   the dev, not the lead.
@@ -51,7 +55,8 @@ and audit both use the `review` agent, in a fresh context each time.
 The lead must not:
 
 - implement code, tests, configuration, contracts, or generated artifacts;
-- make design decisions, choose between plausible designs, or change scope;
+- make design decisions, choose between plausible designs, or change scope; presenting a recommended option in a
+  discovery round is not a decision and is allowed;
 - act as design agent, dev, or review agent;
 - write or edit a review, audit, or cross-cutting record, including request scope, evidence, findings,
   resolutions, or verdicts;
