@@ -23,7 +23,8 @@ owner-acceptance request per
 
 - **Status:** In progress — the human owner accepted the round-2 `Ready with notes` verdict, the High complexity
   class with no split, and the four-feature list on 2026-11-27
-- **Step branch:** `step/15-energy-engine` (created from the merged design `main` commit `895b20b`)
+- **Step branch:** `step/15-energy-engine` (created from the merged design `main` commit `895b20b`;
+  `main` `d2ba15f` synced as `6952e37` with the combined gates green)
 - **Precondition:** **Satisfied.** `fix/step-14-structure-and-tests` (the Step 14 audit maintenance branch: F-1
   `amend-1-net10` test, F-3 context file split, N-1 dashboard wording, N-2/N-3 robustness) is merged into `main`
   as `b632565` (verified 2026-11-27). F-3 split `src/rust/crates/mocassin-solver/src/context/mod.rs` (now 770

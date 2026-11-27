@@ -93,8 +93,8 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 The solver track (Phase D) is at Step 15 — Energy Engine. The human owner accepted the round-2
 `Ready with notes` design verdict on 2026-11-27, accepted the High complexity class with no split, and approved
 four features. `step/15-energy-engine` was created from the merged design `main` commit `895b20b`; feature 1
-(`transition-evaluation`) is squashed as `49ca6af` with all local gates green. Feature 2 (state application) may
-start next.
+(`transition-evaluation`) is squashed as `49ca6af` with all local gates green; `main` `d2ba15f` is merged as
+`6952e37`. Feature 2 (state application) may start next.
 
 The GUI track (Phase F) is at Step 24. Steps 23A and 23B are **Done**, merged, and tagged (`step-23a`,
 `step-23b`). The editor-layout gate is **closed**: the owner reviewed the five-option POC on 2026-11-22, picked
