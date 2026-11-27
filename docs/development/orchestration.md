@@ -18,8 +18,8 @@ decisions. The human owner remains the only approver of gates, waivers, merges, 
 Human owner
     │
     └── lead ──┬── design (design docs, ADRs, request scope in step pages)
-               ├── dev-free (features, fixes, closeout; free workhorse, first choice)
-               ├── dev (same role, paid workhorse fallback)
+               ├── dev-free (features, fixes, closeout; free variant of the default tier, first choice)
+               ├── dev (same role, paid default fallback)
                └── review (design review, step audit, cross-cutting review)
 ```
 
@@ -33,9 +33,9 @@ and audit both use the `review` agent, in a fresh context each time.
 - **Route.** Spawn `design` for design work, `review` for a frozen design or a frozen closeout, and `dev-free`
   for approved features and fixes, falling back to the paid `dev` on a rate limit, a degraded model, or
   unavailability. Spawn one fresh context per assignment.
-- **Assign the tier.** Use [`model-economics.md`](model-economics.md): strong for lead/design/review, workhorse
-  for dev, free variant first. Never upgrade a role to a premium model on your own; a frontier upgrade is an
-  owner decision.
+- **Assign the tier.** Use [`model-economics.md`](model-economics.md): the default tier for lead, design, dev,
+  and review, with the dev's free variant first. A senior consultation is an escalation, not a standing tier.
+  Never upgrade a role to a premium model on your own; a frontier upgrade is an owner decision.
 - **Relay.** Pass requests, evidence, questions, and owner decisions between the roles and the owner. Relaying
   is not transcription: each role writes its own durable record, and the lead must not rewrite or replace it.
 - **Track.** Keep the handoff card, active branch, frozen commit, and next action coherent. The repository
