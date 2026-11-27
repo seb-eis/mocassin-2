@@ -27,6 +27,8 @@ Blocker/Major drift. Use [`docs/planning/drift-checks/_template.md`](https://git
 - [ ] Status and verdict vocabularies agree across process, templates, and records.
 - [ ] No retired branch, CI matrix, review name, or tool is still described as current.
 - [ ] `Re-review required` and `Re-audit required` are record states, not verdicts.
+- [ ] The task disciplines, review axes, senior escalation, and agent output contract are current; no retired
+      tier name (`workhorse`, `strong`) remains in a normative page or agent prompt.
 
 ### Status and records
 

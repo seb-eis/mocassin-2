@@ -54,6 +54,11 @@ original behaviour to preserve, the target design, concrete tasks, acceptance cr
     plan and not an implementation authorization.
 19. [`reviews/cross-cutting/README.md`](reviews/cross-cutting/README.md) — cross-cutting phase-checkpoint
     reviews: policies and planning, architecture and design status, and documentation status.
+20. [`research/README.md`](research/README.md), [`prototypes/README.md`](prototypes/README.md), and
+    [`retrospectives/README.md`](retrospectives/README.md) — cited research notes, prototype briefs, and
+    environment retrospectives.
+21. [`reviews/senior/README.md`](reviews/senior/README.md) — advisory senior consultation records after two
+    blocked standard rounds of the same gate.
 
 ## Decisions already made
 
@@ -134,6 +139,12 @@ items are tracked in [`05-open-decisions.md`](05-open-decisions.md).
   record the result in [`status.md`](status.md) using [`drift-checks/_template.md`](drift-checks/_template.md).
 - Record Sev 1/2 postmortems in [`incidents/`](incidents/) using the template; follow
   [`../development/incident-and-rollback.md`](../development/incident-and-rollback.md).
+- Task-level practices live in [`../development/index.md`](../development/index.md): codebase design, bug
+  diagnosis, domain language, discovery, prototypes, research, review axes, TDD, and retrospectives. They link the
+  normative rule; they do not restate it.
+- A policy-update review uses `reviews/policy-<YYYY-MM-DD>-<slug>.md` and the classes in
+  [`../development/design-proportionality.md` §1](../development/design-proportionality.md#1-design-class).
+  A senior consultation is advisory and records under `reviews/senior/` after two blocked standard rounds.
 - The normative rule homes are listed in [`AGENTS.md` §3.15](../../AGENTS.md).
 - Scientific behaviour is specified in prose and tests before implementation. When the original behaviour
   is ambiguous, document the chosen interpretation in the step page.

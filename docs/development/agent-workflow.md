@@ -15,7 +15,7 @@ Use this page to prepare work, review agent output, and keep contexts small enou
   current decisions.
 - Do not carry a review agent into the implementation context, or a dev into the review context.
 - The **lead** is the long-lived coordination context and the owner's only direct interface. The role agents it
-  spawns (`design`, `dev-free`/`dev`, `review`) are the fresh contexts.
+  spawns (`design`, `dev-free`/`dev`, `review`, and `senior` on escalation only) are the fresh contexts.
 - Do not carry the lead's chat history into a review agent. Pass the spawn card, the frozen commit, and
   repository links only.
 - The model tier for each role is in [`model-economics.md`](model-economics.md). The dev starts on `dev-free`;
@@ -76,10 +76,12 @@ Last local gates:
 Last closeout CI:
 Open blockers:
 Next action:
+Applicable discipline/skill:
 ```
 
 The role ending its context writes the card; the dev records it and the lead relays it. The next context should
-not need the previous chat history.
+not need the previous chat history. The discipline line names the task practice from
+[`index.md`](index.md) that fits the next action, if one does.
 
 ## 3. Step start checklist
 
@@ -143,6 +145,10 @@ Stop before:
 ```
 
 ## 5. Evidence and approval report
+
+The everyday output contract is [`AGENTS.md` §17](https://github.com/seb-eis/mocassin-2/blob/main/AGENTS.md):
+step/feature, branch, commits, commands and results, CI, docs/status/parity, known limitations, and approval
+requested. Do not duplicate it here.
 
 A merge, a tag, or a Blocker/Major waiver is not ready for approval until the requesting agent can report the
 full picture, including every earlier round. A verdict acceptance uses the record's round table instead:
@@ -228,7 +234,8 @@ Stop before proceeding when:
 - the change would cross from one step into another;
 - tests reveal a contradiction in the plan;
 - the design class would need to move down after the design is frozen;
-- the next action would need a third Full review round without an owner decision;
+- the next action would need a third Full review round without an owner decision, or a senior consultation when
+  its trigger is not met;
 - a role-agent spawn fails, errors, or is interrupted — stop, confirm the earlier context has stopped, and
   verify the branch tip, worktree, and working-tree status before re-spawning; the failed spawn may be partially
   applied or still live and writing ([`orchestration.md`](orchestration.md) §6 and §9);
@@ -324,6 +331,8 @@ Reject or stop on:
 - pre-seeding review, audit, or cross-cutting records for work that has not started;
 - skipping a gate without a recorded waiver and a follow-up owner;
 - a new review round for Minor or Note findings alone;
+- a senior consultation before two completed blocked standard rounds, as a third standard round, or as a verdict;
+- using the senior consultant as a standing reviewer or a general upgrade;
 - using a premium model as a default or upgrading to it without the owner.
 
 ## 13. Gate references
@@ -331,6 +340,11 @@ Reject or stop on:
 This playbook does not restate the gate sequences. The normative homes are:
 
 - design classes and the pre-audit gate: [`design-proportionality.md`](design-proportionality.md);
+- task disciplines: [`index.md`](index.md) and each discipline page;
+- review axes: [`review-axes.md`](review-axes.md);
+- senior escalation: [`senior-consultation.md`](senior-consultation.md);
+- agent output contract:
+  [`AGENTS.md` §17](https://github.com/seb-eis/mocassin-2/blob/main/AGENTS.md);
 - model tiers and free-first binding: [`model-economics.md`](model-economics.md);
 - design review: [`AGENTS.md` §3.9](https://github.com/seb-eis/mocassin-2/blob/main/AGENTS.md) and
   [`docs/planning/reviews/README.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/reviews/README.md);
@@ -366,25 +380,31 @@ page. `tools/check_process_consistency.py` is the mechanical backstop.
 
 ## 15. Review agent spawn card
 
-Use this when the lead spawns a design review or audit agent on behalf of the request owner. Replace the
-bracketed values and do not add a desired verdict or a summary that replaces reading the repository.
+Use this when the lead spawns a design review, audit, cross-cutting review, or policy-update review agent on
+behalf of the request owner. Replace the bracketed values and do not add a desired verdict or a summary that
+replaces reading the repository.
 
 ```text
-You are a fresh, read-only review agent for [a design review / a step audit / a cross-cutting review]. You did
-not author or implement this work and have no shared conversation with the design agent, dev, or lead.
+You are a fresh, read-only review agent for [a design review / a step audit / a cross-cutting review / a
+policy-update review]. You did not author or implement this work and have no shared conversation with the design
+agent, dev, or lead.
 
 Frozen commit: [full commit]
-Request record: [docs/planning/reviews/step-NN.md or docs/planning/audits/step-NN.md]
+Request record: [docs/planning/reviews/step-NN.md, docs/planning/audits/step-NN.md, or
+docs/planning/reviews/policy-<date>-<slug>.md]
 Design class: [Full / Light]
 Repository: /workspace/mocassin
 
 Read AGENTS.md, the request record, the step page, and the relevant design/contract docs. Do not rely on my
-summary; inspect the repository at the frozen commit yourself.
+summary; inspect the repository at the frozen commit yourself. Pin the base and reviewed commits and use a
+three-dot diff.
 
-Run the required builds/tests and review the diff. Write evidence, findings, verdict, and checklist completion
-marks directly into the request record. You may check checklist boxes but not change item text. Do not edit any
-other file, merge, tag, push main, or delete branches. For a Full review, stop when no Blocker or Major remains;
-for a Light review, one pass is the whole review. Do not open a new round for Minor or Note findings alone.
+Run the required builds/tests and review the diff. Label every finding on the Spec or Standards review axis per
+docs/development/review-axes.md; do not merge or re-rank the axes. Write evidence, findings, verdict, and
+checklist completion marks directly into the request record. You may check checklist boxes but not change item
+text. Do not edit any other file, merge, tag, push main, or delete branches. For a Full review, stop when no
+Blocker or Major remains; for a Light review, one pass is the whole review. Do not open a new round for Minor or
+Note findings alone.
 
 If you find issues, report them; do not fix them. The human owner approves the final verdict and gate.
 State in the record that you are a fresh context with no shared conversation with the design agent, dev, lead,
@@ -397,3 +417,61 @@ Rules for the lead as spawner:
 - Do not edit the review agent's findings, evidence, or verdict.
 - Do not mark the review/audit accepted, waived, merged, or tagged.
 - Fixes require a new commit and a new review round, made by the dev or design agent.
+
+### Senior consultation spawn card
+
+Use this card only after two completed standard rounds of the same design review, audit, cross-cutting review, or
+policy-update review each ended blocked and at least one Blocker or Major is still open. The full trigger, request
+contract, and senior rules are in [`senior-consultation.md`](senior-consultation.md); do not restate them in the
+card.
+
+The request owner creates the senior record from
+`docs/planning/reviews/senior/_template.md`. Replace the bracketed values. Do not add a preferred answer, a
+competing narrative, the lead's history, or a request to inspect the whole repository.
+
+```text
+You are the senior consultant for one bounded question. This is an escalation after two completed blocked
+standard rounds, not a normal review round. Do not issue a gate verdict.
+
+Frozen commit: [full commit hash]
+Parent record: [docs/planning/reviews/step-NN.md, docs/planning/audits/step-NN.md, or the policy/XC record]
+Senior record: [docs/planning/reviews/senior/step-NN-M.md, xc-NN-M.md, or policy-<date>-<slug>-M.md]
+Step page or checkpoint: [path]
+Standard rounds escalated: [round X and round Y, with verdicts]
+Open Blocker/Major findings: [finding IDs and severities]
+Approved inspection scope: [exact files, diff range, commands, and evidence]
+Out of scope: [everything else]
+
+Question to answer:
+[one answerable question]
+
+Why this question is unresolved:
+[the contradictory evidence or missing judgment, without advocating an answer]
+
+Read only the assignment, the frozen commit, the parent record, and the paths above, plus the minimum direct
+context needed to answer. Do not scan the repository or open unrelated files. Do not guess.
+
+If the question, frozen commit, scope, or evidence is incomplete, ambiguous, contradictory, or too broad to
+answer without a repository-wide scan, stop before inspecting anything. Write `Declined` in the senior record,
+state the exact missing information and the clarification you need, and report the same refusal to the lead. Do
+not answer a different question.
+
+If the assignment is clear, answer only the question, cite the evidence, state assumptions and limitations, and
+write the answer into the senior record. Edit no other file. Commit only the senior record with `[skip ci]`.
+Do not fix findings, approve or waive anything, spawn another agent, merge, tag, push main, or delete branches.
+State in the record that you are a fresh context with no access to the lead's history, the owner's preferred
+answer, or another reviewer's reasoning.
+```
+
+Rules for the lead:
+
+- Check the trigger first: two completed blocked standard rounds of the same gate, at least one Blocker or Major
+  still open in the second round, and one answerable question.
+- Do not request a senior consultation for a first round, for Minor or Note findings only, or to avoid a standard
+  round.
+- Provide the frozen commit, the parent record, the finding IDs, and an exact bounded inspection scope.
+- Do not pass the lead's conversation history, a preferred answer, the owner's preferred outcome, or a request to
+  "review the repository".
+- If the senior declines, relay the missing information to the owner or request owner. Do not re-spawn with the
+  same vague assignment.
+- The answer is advisory. The owner decides, and a fresh standard round at the new commit remains the gate.

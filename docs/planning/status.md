@@ -236,6 +236,7 @@ early-warning signal for the next cross-cutting review.
 | --- | --- | --- | --- | --- |
 | 2026-11-12 | `38a22d2` | Fresh independent drift-check context (OpenCode subagent) | Drift found — 3 Major, 9 Minor, 3 Note; Major status/documentation drift remediated before checkpoint freeze | [2026-11-12-phase-b.md](drift-checks/2026-11-12-phase-b.md) |
 | 2026-11-18 | `dcbf499` | Phase C maintenance worktree (implementor; not a fresh reviewer) | Drift found — 2 Major, 5 Minor; all findings fixed on the maintenance branch; PowerShell docs path and Windows verification left for `XC-04` | [2026-11-18-phase-c.md](drift-checks/2026-11-18-phase-c.md) |
+| 2026-11-27 | `476b66b` | Implementor self-check (not a fresh reviewer) | No drift found — the task disciplines, review axes, senior escalation, output contract, and `default`/`senior` names agree across the normative pages, templates, prompts, and checker; the docs and policy gates are green | [POLICY-2026-11-27](reviews/policy-update-2026-11-27-workflow-disciplines.md) |
 
 ## Notes
 
@@ -297,4 +298,11 @@ early-warning signal for the next cross-cutting review.
 - Milestones M4 and M5 were backfilled on 2026-11-18 with annotated tags on the existing step merge commits:
   `milestone-m4` → `f91fc63` (Step 08, first compiled model) and `milestone-m5` → `ec2e04a` (Step 12, first
   package). Tags were pushed to `origin`; no existing tag was moved or deleted.
+- The 2026-11-27 policy update `POLICY-2026-11-27` adopts the upstream workflow disciplines: nine
+  task-discipline pages under `docs/development/` with eight matching skills, `GLOSSARY.md`,
+  research/prototype/retrospective record homes, the advisory senior consultation, the Standards/Spec review axes
+  with an `Axis` column in the three record templates, the agent output contract in `AGENTS.md` §17, and the
+  `default`/`senior` tier names (`senior` is `opencode-go/deepseek-v4-pro`). The earlier tier wording in this
+  dashboard and in `docs/planning/maintenance/` is historical and is not rewritten. The change is recorded in
+  [`reviews/policy-update-2026-11-27-workflow-disciplines.md`](reviews/policy-update-2026-11-27-workflow-disciplines.md).
 - Tag names record completed checkpoints; they do not replace this dashboard.

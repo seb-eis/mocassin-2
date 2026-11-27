@@ -61,7 +61,7 @@ class BindingTests(unittest.TestCase):
         self.assertRegex(frontmatter(AGENTS / "lead.md"), r"(?m)^mode:\s*primary\s*$")
 
     def test_every_agent_has_a_description_and_mode(self) -> None:
-        for name in ("lead", "design", "dev-free", "dev", "review"):
+        for name in ("lead", "design", "dev-free", "dev", "review", "senior"):
             with self.subTest(agent=name):
                 fm = frontmatter(AGENTS / f"{name}.md")
                 self.assertRegex(fm, r"(?m)^description:\s*\S")
@@ -75,10 +75,11 @@ class BindingTests(unittest.TestCase):
         self.assertEqual(model(AGENTS / "review.md"), "opencode-go/deepseek-v4.1-flash")
         self.assertEqual(model(AGENTS / "dev-free.md"), "opencode/deepseek-v4.1-flash-free")
         self.assertEqual(model(AGENTS / "dev.md"), "opencode-go/deepseek-v4.1-flash")
+        self.assertEqual(model(AGENTS / "senior.md"), "opencode-go/deepseek-v4-pro")
 
     def test_lead_cannot_edit_and_spawns_only_the_roles(self) -> None:
         rules = permission_rules(AGENTS / "lead.md")
-        for role in ("design", "dev-free", "dev", "review"):
+        for role in ("design", "dev-free", "dev", "review", "senior"):
             with self.subTest(role=role):
                 self.assertEqual(effective(rules, "subagent", role), "allow")
         self.assertEqual(effective(rules, "subagent", "planner"), "deny")
@@ -101,19 +102,50 @@ class BindingTests(unittest.TestCase):
         self.assertIn("Do not switch", text)
         self.assertIn("report it to the lead", text)
 
-    def test_review_writes_only_step_and_cross_cutting_records(self) -> None:
+    def test_review_writes_only_its_record_paths(self) -> None:
         rules = permission_rules(AGENTS / "review.md")
         self.assertEqual(effective(rules, "edit", "docs/planning/audits/step-11.md"), "allow")
         self.assertEqual(effective(rules, "edit", "docs/planning/reviews/step-11.md"), "allow")
+        self.assertEqual(effective(rules, "edit", "docs/planning/reviews/policy-2026-11-27-x.md"), "allow")
         self.assertEqual(
             effective(rules, "edit", "docs/planning/reviews/cross-cutting/xc-04-combined.md"), "allow"
         )
         self.assertEqual(effective(rules, "edit", "docs/planning/reviews/README.md"), "deny")
         self.assertEqual(effective(rules, "edit", "src/App.cs"), "deny")
         self.assertEqual(effective(rules, "subagent", "explore"), "deny")
+        text = body(AGENTS / "review.md")
+        self.assertIn("policy-*.md", text)
+        self.assertIn("review-axes.md", text)
+
+    def test_senior_writes_only_its_record_and_cannot_spawn(self) -> None:
+        rules = permission_rules(AGENTS / "senior.md")
+        for record in (
+            "docs/planning/reviews/senior/step-15-M.md",
+            "docs/planning/reviews/senior/xc-05-M.md",
+            "docs/planning/reviews/senior/policy-2026-11-27-x-M.md",
+        ):
+            with self.subTest(record=record):
+                self.assertEqual(effective(rules, "edit", record), "allow")
+        for path in (
+            "docs/planning/reviews/senior/README.md",
+            "docs/planning/reviews/step-15.md",
+            "docs/planning/audits/step-15.md",
+            "docs/planning/reviews/cross-cutting/xc-05.md",
+            "src/App.cs",
+            "AGENTS.md",
+        ):
+            with self.subTest(path=path):
+                self.assertEqual(effective(rules, "edit", path), "deny")
+        self.assertEqual(effective(rules, "subagent", "explore"), "deny")
+
+        text = body(AGENTS / "senior.md")
+        self.assertIn("fresh context", text)
+        self.assertIn("Declined", text)
+        self.assertIn("advisory", text)
+        self.assertIn("senior-consultation.md", text)
 
     def test_commands_use_the_lead_and_keep_the_gate_order(self) -> None:
-        for name in ("step-start", "step-closeout"):
+        for name in ("step-start", "step-closeout", "grill", "handoff", "retro"):
             with self.subTest(command=name):
                 fm = frontmatter(COMMANDS / f"{name}.md")
                 self.assertRegex(fm, r"(?m)^agent:\s*lead\s*$")
@@ -139,6 +171,33 @@ class BindingTests(unittest.TestCase):
             closeout.index("present the cumulative approval report"),
             "the audit must precede the merge approval request",
         )
+
+        for name, needle in (
+            ("grill", "docs/development/discovery.md"),
+            ("handoff", "docs/development/agent-workflow.md"),
+            ("retro", "docs/development/retrospectives.md"),
+        ):
+            with self.subTest(command=name):
+                text = body(COMMANDS / f"{name}.md")
+                self.assertIn(needle, text)
+                self.assertIn("step", text)
+                self.assertNotIn("/wp-", text)
+
+    def test_live_instructions_do_not_use_retired_tier_names(self) -> None:
+        pattern = re.compile(r"\b(?:workhorse|strong(?:[ -]tier)?)\b", re.IGNORECASE)
+        files = [AGENTS / f"{name}.md" for name in ("lead", "design", "dev-free", "dev", "review", "senior")]
+        files.extend(
+            REPO / "docs/development" / name
+            for name in (
+                "model-economics.md",
+                "orchestration.md",
+                "design-proportionality.md",
+                "agent-workflow.md",
+            )
+        )
+        for path in files:
+            with self.subTest(file=str(path.relative_to(REPO))):
+                self.assertIsNone(pattern.search(path.read_text(encoding="utf-8")))
 
 
 if __name__ == "__main__":
