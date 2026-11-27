@@ -960,35 +960,105 @@ and left unticked where there is nothing to inspect at this commit; the existenc
 The request owner completes this before a merge, tag, or Blocker/Major waiver request. It must cover the full
 history, not only the latest round.
 
-- [ ] Requested decision and frozen commit recorded
-- [ ] Every review/verification round recorded (round, date, commit, agent, verdict)
-- [ ] Every finding recorded (ID, axis, severity, issue, evidence, resolution, fix commit, status)
-- [ ] Accepted notes and waivers recorded with rationale
-- [ ] Residual risks, deferred items, and follow-up owners recorded
-- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
-- [ ] Final gate and documentation-build results recorded
+- [x] Requested decision and frozen commit recorded
+- [x] Every review/verification round recorded (round, date, commit, agent, verdict)
+- [x] Every finding recorded (ID, axis, severity, issue, evidence, resolution, fix commit, status)
+- [x] Accepted notes and waivers recorded with rationale
+- [x] Residual risks, deferred items, and follow-up owners recorded
+- [x] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
+- [x] Final gate and documentation-build results recorded
 
-Round history:
+**Decision requested:** merge `docs/adopt-workflow-disciplines` into `main` with `--no-ff`; no tag. The design was
+frozen at `fcbd20ed8ef2ad201746fb46b064c9db2e80d056` and implemented through
+`662f27c00a80621793ed94061533ea92db5980da`. This is a maintenance/policy change, not a step, so no `step-NN` tag
+is created.
+
+**Round history:**
 
 | Round | Date | Commit | Review agent | Verdict |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| Design review round 1 | 2026-11-27 | `7b3148d44496b6feab0bf33c437085e122bd5481` | DeepSeek V4.1 Flash 1017 (`opencode-go/deepseek-v4.1-flash`) | `Changes required` |
+| Design re-review round 2 | 2026-11-27 | `fcbd20ed8ef2ad201746fb46b064c9db2e80d056` (freeze); request `8f55aeb485e640fe6b273d6b2c21afa757f784aa` | DeepSeek V4.1 Flash 1017 (`opencode-go/deepseek-v4.1-flash`) | `Ready with notes` |
+| Post-implementation verification | 2026-11-27 | `662f27c00a80621793ed94061533ea92db5980da` | DeepSeek V4.1 Flash 1017 (`opencode-go/deepseek-v4.1-flash`) | `Verified` |
 
-Findings and resolutions:
+**Findings and resolutions:**
 
 | Finding | Axis | Severity | Issue | Resolution | Commit | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — | — |
+| M-1 | Spec | Major | Policy-update design class had no home and its Full trigger was defined twice. | Trigger moved to `design-proportionality.md` §1; `reviews/README.md` §9.1 links it and does not repeat it. | `fcbd20e` | Fixed |
+| M-2 | Spec | Major | Senior trigger omitted policy-update reviews. | Policy-update review added to the trigger and to the checker's required text. | `fcbd20e` | Fixed |
+| M-3 | Standards | Major | Tier retirement left `dev.md`/`dev-free.md` live and the guard missed agent prompts and the `strong-tier`/bare `strong` forms. | Prompts rewritten to `default`/`senior`; checker and binding tests scan `.opencode/agents/*.md` and all retired forms. | `fcbd20e`; checker `476b66b` | Fixed |
+| m-1 | Standards | Minor | Published-to-root/planning links would fail strict Zensical. | Absolute GitHub URL convention stated; `GLOSSARY.md` added to `ROOT_FILES`. | `fcbd20e`; `92800fa`, `476b66b` | Fixed |
+| m-2 | Spec | Minor | Design-review checklist was phrased as post-implementation existence checks. | Round-2 checklist asks design-specification questions; existence checks moved to verification. | `fcbd20e` | Fixed |
+| m-3 | Spec | Minor | Risk table had no owner. | Owner column added and every risk assigned. | `fcbd20e` | Fixed |
+| m-4 | Standards | Minor | C2 wrongly said the cross-cutting template had `Origin`. | C2 states the `Origin`/`Area` difference and the aligned columns. | `fcbd20e` | Fixed |
+| m-5 | Standards | Minor | Orchestration §9 prose stayed stale; the checker only required `senior` somewhere. | §9 prose named and updated; checker requires the binding strings and record paths. | `fcbd20e`; `01a29e2`–`476b66b` | Fixed |
+| m-6 | Spec | Minor | Senior fresh-context independence was not stated. | Fresh context stated in the senior page, agent body, and review prompt. | `fcbd20e` | Fixed |
+| m-7 | Spec | Minor | `/grill` gave the lead a design-adjacent recommend duty the lead boundary did not permit. | `orchestration.md` permits facilitating discovery and recommending; recommending is not deciding. | `fcbd20e` | Fixed |
+| m-8 | Spec | Minor | A6 said nine pages while ten were added. | A6 says ten and includes `senior-consultation.md`; index and navigation updated. | `fcbd20e`; `92800fa` | Fixed |
+| n-1 | Spec | Note | Design set changed two process files despite the purpose wording. | Purpose names the minimal normative edits in the design set. | `fcbd20e` | Fixed |
+| n-2 | Spec | Note | Secret-scan count 1755 vs 1756 was not reproducible from the commit. | Accepted as an evidence-context note; the count is now recorded with its commit context. | `fcbd20e` | Accepted |
+| R2-1 | Spec | Minor | Policy-update class definition was stated twice. | `reviews/README.md` §9.1 opens with a one-line summary linking `design-proportionality.md` §1. | `01a29e2` | Fixed |
+| R2-2 | Spec | Note | Dev prompt compressed the senior trigger to `review/audit`. | `dev.md` now says `review or audit deadlock`. | `4dbf510` | Fixed |
+| R2-3 | Standards | Note | Checker required only `Axis`, not the added `ID`/`Recommendation` columns. | Checker requires the exact findings header of all three templates; a negative test checks the `Axis` case. | `476b66b` | Fixed |
+| V-1 | Spec | Minor | Senior trigger restated in `orchestration.md` §4 and `model-economics.md` §4.2 despite the one-home rule. | Accepted by the human owner as a follow-up, not fixed. The duplicate is accurate today; the fix is to replace it with the link and the lead's/cost duty, or accept the duplicate deliberately. | — | Accepted (follow-up) |
+
+**Accepted notes and waivers:**
+
+- `n-2` — accepted as an evidence-context note. The count is now recorded with the gate command's commit; no
+  further action. Owner: design agent.
+- `R2-1` — accepted; fixed in `01a29e2`. Owner: dev. The class definition is now a one-line summary linking its
+  normative home.
+- `R2-2` — accepted; fixed in `4dbf510`. Owner: dev. The prompt uses the recommended `review or audit deadlock`
+  wording.
+- `R2-3` — accepted; fixed in `476b66b` via the stricter option. Owner: dev. The checker now requires the full
+  findings header, including `ID` and `Recommendation`.
+- `V-1` — accepted by the human owner as a follow-up, not fixed. Owner: dev/design agent; target: the next
+  relevant step or policy update. It is a Minor drift risk with no behavioural change, so it does not justify
+  another verification round.
+
+**Residual risks, deferred items, and follow-up owners:**
+
+- **V-1 duplication:** a future change to the senior trigger must also update `orchestration.md` §4 and
+  `model-economics.md` §4.2. Owner: design agent; target: next relevant process edit.
+- **Senior-tier cost and availability:** `senior` is `opencode-go/deepseek-v4-pro`, one consultation per unresolved
+  gate question. The owner confirmed it resolves in this environment; it is not exercised by this docs-only change.
+  The lead reports the cost impact in the merge request. Owner: lead/human owner.
+- **Apply-from-adoption:** the task disciplines, review axes, senior escalation, output contract, and
+  `default`/`senior` names apply from 2026-11-27. Steps 00–14 records, the earlier maintenance note, and the
+  `status.md` strong-tier note are historical and are not rewritten. Owner: human owner; no action.
+- **Step 15's outstanding design findings:** the separate `docs/step-15-design` review is `Changes required` with
+  F-1–F-3 Major, F-4–F-8 Minor, and F-9 Note. This merge does not resolve them. After the merge, `main` is merged
+  into `docs/step-15-design` and Step 15 is re-frozen before implementation (owner decision 5). Owner: design
+  agent/dev for Step 15.
+- No deferred implementation item remains in this change. The only open finding is V-1, accepted as a follow-up.
+
+**Final gate and documentation-build results:** at `662f27c00a80621793ed94061533ea92db5980da`,
+`python tools/check_process_consistency.py` → `Process consistency: OK`; `python tools/check_docs_links.py` →
+`Documentation links OK (236 files scanned).`; `python tools/check_doc_math.py` →
+`Documentation math conventions OK (232 files scanned).`; `./tools/verify.sh docs --require` → exit 0 (strict
+Zensical, DocFX 0 warnings/0 errors, rustdoc 7 crates, `Documentation built in …/site`); `./tools/verify.sh policy
+--require` → exit 0 (`Process consistency: OK`, `Ran 67 tests … OK`, `SPDX headers present in 1210 source files`,
+`No secret patterns found in 1787 tracked text files`, `advisories ok, bans ok, licenses ok, sources ok`). The
+verification record re-ran the same checks at the verified commit and reproduced the counts. The automatic `main`
+CI run is the post-merge confirmation; there is no pre-merge CI run for this docs/policy branch.
+
+**Gate statement:** no Blocker or Major finding remains unclosed. The only open finding is V-1, a Minor accepted by
+the human owner as a follow-up; no Blocker or Major is being waived.
 
 ## Human approval
 
 - [ ] Accepted: Ready for implementation
-- [ ] Accepted: Ready with notes
+- [x] Accepted: Ready with notes
 - [ ] Changes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Human owner (seb-eis)
+Date: 2026-11-27
+
+The human owner accepted the `Ready with notes` design verdict with the round-2 notes and approved implementation.
+The owner also approved merging this change into `main` on 2026-11-27 after the `Verified` post-implementation
+verification at `662f27c`. The merge is `--no-ff` and creates no tag.
 
 ## Resolution status
 
