@@ -63,8 +63,9 @@ The document key is `(Kind, ProjectScopeId)`:
 - `welcome`
 - `project.overview`
 - `project.json`
+- `model.particles`, `model.particleSets`, `model.structure`, `model.sites`, `model.dummyPositions` (24A)
 
-Later steps add `model.*` and other document kinds without changing the key shape. The tab strip is one global
+Later steps add further `model.*` and other document kinds without changing the key shape. The tab strip is one global
 collection; the project switcher activates a project's last document. The welcome document closes when the first
 real document opens. The application `ViewLocator` claims only classes named `*ViewModel` in the App view-model
 assembly and maps them to the matching view; enums, settings records, and other model objects keep their ordinary
@@ -88,12 +89,58 @@ spacing, shape, and transition fallbacks. The contract also owns the two fixed c
 button alignment rule. The interaction contract remains the home for layout behaviour, focus, and keys, including
 the new default fractions, the `layout.defaultsRevision` migration, and **View → Reset Layout**.
 
+## Model editors (24A)
+
+The shared model-editor framework lives in `Mocassin.App.ViewModels/Editors/**` and `Mocassin.App.Views/Editors/**`.
+It is one surface that every later model editor reuses; a domain supplies only its immutable models, its row
+projection, and its detail editors.
+
+- **Documents.** Particles, sets, sites, and dummy positions are master-detail documents
+  (`ModelEditorDocumentViewModel`): the table selects and the detail pane edits. The structure document is a form
+  (`StructureEditorDocumentViewModel`) with no table. The five document kinds are `model.particles`,
+  `model.particleSets`, `model.structure`, `model.sites`, and `model.dummyPositions`.
+- **Table and column policy.** `ModelTableSurface` is a composition of a header `Grid`, a virtualized `ListBox`,
+  and the `scroll-gutter-right` class — not a `TemplatedControl`. One `ModelColumn` list feeds both the header and
+  every row, so columns cannot drift; `ModelColumnWidth` maps to a grid length in the view. Sorting is typed
+  (`ModelSortKind.Text`/`Number`/`Id`) over `ModelTableCell.SortKey`, never over formatted text. Search and the
+  severity filter run app-side over the projection and announce the match count.
+- **Focus and keyboard.** The selection surface is exactly one tab stop: row containers are not tab stops and the
+  list uses one-shot tab navigation, with a deterministic tunnel `Tab` handler that moves focus to the detail
+  pane's first actionable field after `Home`/`End`. `Enter` and double-click activate the detail; arrows keep the
+  selection; `Delete`, `Ctrl+D`, `Enter`, and `Escape` are document-scoped commands.
+- **Detail and write path.** `ModelDetailViewModel` owns the editable fields (`ObservableValidator`) and assembles
+  one typed `ProjectEditor` operation. It commits through `ProjectEditCoordinator.Apply(description,
+  Func<ProjectEditor, Project, ProjectEditResult>)`; the coordinator remains the only write path and the Core
+  `ProjectDocument` overload is the only place that records the canonical `ProjectChange`. A bulk action is one
+  `BulkEditComposer` delegate over the same signature: all-or-nothing, one undo entry, and a mid-batch rejection
+  returns the document value with the accumulated diagnostics. View models never construct a `ProjectChange`.
+- **Usage index.** `ModelUsageIndex` is built lazily per immutable `Project` reference. It attributes particle
+  sets and state changes to particles, sites to sets, MMC site ids, occupation exchanges/dopings, and energy
+  references to sites, and resolves KMC reference paths through
+  `Mocassin.Symmetry.Transitions.TransitionPathResolver` so a site dependency is visible before an edit. It is an
+  affordance and a pre-check, not a validator. An unstable environment is a dependent through its own `SiteId`
+  even when its filter list is empty (m-15).
+- **Reference picker and expressions.** `ReferencePickerViewModel<T>` is the one reusable searchable picker.
+  `NumericExpression` is an in-house, bounded, culture-invariant recursive-descent parser: `+ - * / ^`,
+  parentheses, unary minus, `pi`/`e`, and `sqrt`/`ln`/`exp`/`abs`; exponent notation is part of a number, the bare
+  `e` is the constant, there is no implicit multiplication, and trigonometric functions are deliberately absent
+  until a unit convention is decided.
+- **Editor fraction.** `layout.editorFraction` is shell-owned layout state (`IEditorPaneLayout`, implemented by
+  `ShellRegionsViewModel`). One serialized writer persists it; open editors observe it and write a splitter drag
+  back through the shared state, so Reset Layout and Apply reach every open editor.
+- **Services.** `AddMocassinModelEditors` registers `IStructurePreviewService` and `IStructureValidator` as
+  singletons, the navigation target provider, the explorer node provider, and the Model-menu command registrar.
+  `Mocassin.App.ViewModels` gains a direct `Mocassin.Symmetry` project reference; the editor consumes Step 02
+  services and never re-derives exact symmetry or a resolved path.
+
 ## Navigation and commands
 
 `INavigationService` opens documents and navigates `ModelPath` targets through registered
 `INavigationTargetProvider` instances. History is a bounded 100-entry back/forward stack. An unknown domain
 writes an Application-console notice and never throws; this is what lets a Step 07 diagnostic with a model path
-remain harmless until the corresponding provider is registered.
+remain harmless until the corresponding provider is registered. The 24A provider resolves the five editor domains
+to the registered `IModelEditorFactory` and applies `Activate`/`SelectObject`/`FocusProperty`; a stale object id
+returns `null` and the shell reports it.
 
 Commands are explicit `ShellCommand` entries with a stable id, category, optional menu, framework-neutral
 gesture, and `ICommand`. The palette and cheat sheet read the same catalog. `Primary` maps to Control on

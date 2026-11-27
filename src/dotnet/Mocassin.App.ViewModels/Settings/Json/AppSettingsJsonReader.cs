@@ -189,6 +189,13 @@ internal static class AppSettingsJsonReader
             LeftFraction = leftFraction,
             RightFraction = rightFraction,
             ConsoleFraction = consoleFraction,
+            EditorFraction = ReadFraction(
+                element,
+                "editorFraction",
+                SettingsDefaults.DefaultEditorFraction,
+                SettingsDefaults.MinEditorFraction,
+                SettingsDefaults.MaxEditorFraction,
+                warnings),
             LeftVisible = ReadBool(element, "leftVisible", true, warnings),
             RightVisible = ReadBool(element, "rightVisible", true, warnings),
             ConsoleVisible = ReadBool(element, "consoleVisible", true, warnings),

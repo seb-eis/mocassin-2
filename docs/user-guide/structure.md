@@ -46,6 +46,122 @@ diagnostic hint lists the allowed settings for the space-group number when the c
 Inconsistent values are rejected with `STR003`; the API never silently overwrites user input. A user interface
 may lock dependent fields as a convenience, but the model validation is authoritative.
 
+## Editing the space group and cell in the GUI
+
+Open **Structure** from the **Model** menu or the project explorer's **Model** node. The structure document is a
+form: a space-group section and a cell-parameter section, both on the shared editor validation, undo, and
+read-only plumbing.
+
+### Space group
+
+- The search box matches the International Tables number, the Hermann–Mauguin symbol, the Hall symbol, the crystal
+  system, the axis setting, and the origin choice.
+- The **Settings** selector lists every catalog setting for the selected group number, so the origin choice and
+  the unique-axis/rhombohedral setting are explicit.
+- The details panel shows the operation count, the general multiplicity, the crystal system, and every operation
+  in matrix/translation and human-readable form (for example `x, y, z` for the identity).
+- Selecting a setting never edits the project. It builds a *candidate* structure and shows the current versus
+  candidate orbit size for every reference site. Overlapping candidates report `STR007`; cell violations report
+  `STR003`; an incompatible candidate disables **Apply**.
+- **Apply** records one undo entry. **Cancel** discards the candidate and changes nothing.
+
+### Cell parameters
+
+- The six fields (`a`, `b`, `c` in Å; `α`, `β`, `γ` in degrees) accept the same numeric expressions as the other
+  model editors: `+ - * / ^`, parentheses, `pi`/`e`, and `sqrt`/`ln`/`exp`/`abs`.
+- Fields that the resolved crystal system fixes are locked and show the reason: right angles for
+  orthorhombic/tetragonal/cubic, `a = b` for tetragonal/hexagonal, `a = b = c` for cubic/rhombohedral,
+  `α = β = γ` for rhombohedral, the unique-axis right angles for monoclinic, and `γ = 120°` for hexagonal. The
+  locks are an affordance; `CellGeometry` remains the validity authority.
+- The live cell vectors and volume update as you type. An invalid length, angle, Gram determinant, condition
+  number, or crystal-system constraint is shown with the violated inequality (for example “The cell angle α must
+  be 90°, but was 80°”) and disables **Apply**.
+- **Apply** records one undo entry; **Revert** reloads the committed cell.
+- **Reset to cubic** (cubic structures only) and **Reset to defaults** ask for confirmation and are undoable. The
+  defaults reset uses the current crystal-system locks, so it is valid for every system.
+
+### Interaction with the space group
+
+The cell form validates against the committed space group. Changing the space group first and then checking the
+cell diagnostics is the safe order; the candidate preview already reports a candidate cell violation before it is
+applied.
+
+## Editing sites and the P1 preview in the GUI
+
+Open **Sites** from the **Model** menu or the project explorer's **Model** node. The sites document is the shared
+master-detail surface: the table selects, the detail edits, and the P1 preview sits below the fields behind a
+toggle.
+
+### Site table and form
+
+- Columns: name, fractional A/B/C, stability, particle set, orbit size, multiplicity, and the representative
+  Cartesian position. The fractional fields accept the numeric expression grammar; the particle set uses the
+  searchable reference picker.
+- **Add** opens a new-site form (`Site 1`, `Site 2`, …) and never inserts a half-valid site. Apply requires a
+  name, a particle set, and three finite fractional coordinates.
+- The candidate is validated with `IStructureValidator` before Apply. An overlapping candidate (`STR007`), a
+  cell violation (`STR003`), or any other error is shown inline and **Apply is disabled**. In particular, a
+  candidate whose symmetry expansion overlaps another site has no preview; the editor surfaces the `STR007`
+  diagnostics rather than marking non-existent preview rows (m-14).
+- Applying an add or edit is one undo entry; Revert restores the committed values. Read-only sessions disable
+  the fields, Add, Apply, and the deletion actions.
+
+### P1 preview
+
+- The preview shows **this site's orbit** with the fractional position, the Cartesian position, the canonical
+  `P` index, and the orbit-member index. The indices are the engine's own `StructurePreview` orbit/position
+  data; the app does not re-derive them.
+- **Whole structure** lists every canonical P1 position in ascending `P` order with its owning reference site
+  and stability.
+- The plane selector projects the whole list onto the a–b, a–c, or b–c plane. The projection is deterministic
+  for a fixed structure and plane and is virtualized as a list.
+- There is **no generating-operation label**. No preview API exposes which symmetry operation maps a reference
+  position onto an orbit member, and the editor does not duplicate Step 02's exact symmetry to guess it (M-1).
+
+### Deletion and stability
+
+- **Delete site** is blocked whenever the usage index reports a dependent. The detail lists the dependents
+  (MMC transitions, resolved KMC path points, occupation exchanges and dopings, and energy references) and each
+  row has a **Go** action. There is no cascade for transitions, exchanges, or dopings.
+- **Delete site and energy references** is offered only when every dependent is an energy reference (stable or
+  unstable environment/filter, cluster centre, or site-energy set). It asks for confirmation, lists the energy
+  objects that will be removed, and records one undo entry.
+- Changing stability shows a warning when an MMC transition or a resolved KMC path point uses the site, because
+  the structural validator does not block that edit. Apply is still allowed; the Problems channel reports the
+  resulting `TRN012`/`TRN020` diagnostics after the edit.
+
+## Dummy positions in the GUI
+
+Open **Dummy positions** from the **Model** menu or the project explorer's **Model** node. Dummies are their own
+document (they are not nested tabs inside the structure form) and are marked with the distinct **◇** glyph and
+the **visual-only** status in the table and detail.
+
+- Each dummy has a name and three expression-capable fractional fields. It has no particle set, stability,
+  energy, or transition meaning, and may coincide with a reference site.
+- **Add**, edit (one undo entry per Apply), and **Delete** use the same coordinator and undo rules as the other
+  model editors. The multi-field forms apply on **Enter** in a focused single-line field or on the Apply button,
+  and **Delete** asks for confirmation before it records one undo entry. Read-only sessions disable the actions.
+- Dummies are persisted under `structure.dummyPositions` and round-trip through save/load unchanged. They are
+  excluded from all simulation compilation.
+
+## Structure summary in the GUI
+
+The structure document ends with a summary derived only from the structure value and the structure preview; it
+does **not** call the on-demand statistics service.
+
+| Value | Source |
+| --- | --- |
+| Reference sites | `StructureModel.Sites.Length` |
+| P1 positions | `StructurePreview.PositionList.Length` |
+| Stable/unstable **positions** | counted from `PositionList` by the owning reference site's stability; labelled positions, never sites |
+| Cell volume | `StructurePreview.CellVolumeAngstrom3` |
+| Reference-site density | `ReferenceSiteCount / CellVolumeAngstrom3` in Å⁻³ |
+| Orbit table | `StructurePreview.Orbits`: representative, multiplicity, P1 position count |
+| Large-P1 warning | the structure validator's `STR009` |
+
+If the structure cannot produce a preview (for example an invalid cell or an orbit overlap), the summary keeps
+the reference-site count and reports why the preview is unavailable.
+
 ## Reference sites
 
 A site stores a stable `CellSiteId`, a name, a fractional position, a particle-set reference, and a stability

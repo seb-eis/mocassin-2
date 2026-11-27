@@ -1,0 +1,86 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Mocassin.App.ViewModels.Editors"
+             xmlns:automation="using:Avalonia.Automation"
+             x:Class="Mocassin.App.Views.Editors.ModelTableSurface"
+             x:DataType="vm:ModelEditorViewModel">
+  <UserControl.Styles>
+    <Style Selector="ListBoxItem">
+      <Setter Property="IsTabStop" Value="False" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="MinHeight" Value="24" />
+    </Style>
+    <Style Selector="Button.model-column-header">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="6,4" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+  </UserControl.Styles>
+
+  <Grid RowDefinitions="Auto,Auto,*" Background="{DynamicResource Mocassin.WorkspaceBackground}">
+    <Grid Grid.Row="0"
+          x:Name="HeaderGrid"
+          Background="{DynamicResource Mocassin.CardBackground}"
+          Margin="0,0,20,0"
+          MinHeight="28"
+          automation:AutomationProperties.Name="Model table column headers" />
+
+    <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" Margin="8,4,20,4">
+      <TextBox Text="{Binding Table.SearchText, Mode=TwoWay}"
+               PlaceholderText="Search"
+               automation:AutomationProperties.Name="Model table search"
+               Margin="0,0,8,0" />
+      <ComboBox Grid.Column="1"
+                ItemsSource="{Binding Table.SeverityFilters}"
+                SelectedItem="{Binding Table.SeverityFilter, Mode=TwoWay}"
+                automation:AutomationProperties.Name="Model table severity filter"
+                MinWidth="120"
+                Margin="0,0,8,0" />
+      <TextBlock Grid.Column="2"
+                 Text="{Binding Table.MatchCountText}"
+                 VerticalAlignment="Center"
+                 Foreground="{DynamicResource Mocassin.ForegroundMutedBrush}"
+                 automation:AutomationProperties.LiveSetting="Polite" />
+    </Grid>
+
+    <ListBox Grid.Row="2"
+             x:Name="RowList"
+             ItemsSource="{Binding Table.Rows}"
+             Classes="scroll-gutter-right"
+             SelectionMode="Single"
+             Focusable="True"
+             IsTabStop="True"
+             KeyboardNavigation.TabNavigation="Once"
+             automation:AutomationProperties.Name="Model table rows"
+             automation:AutomationProperties.HelpText="Use the arrow keys to move, Enter to open the detail, Tab to leave the table.">
+      <ListBox.ItemsPanel>
+        <ItemsPanelTemplate>
+          <VirtualizingStackPanel />
+        </ItemsPanelTemplate>
+      </ListBox.ItemsPanel>
+      <ListBox.Styles>
+        <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+          <Setter Property="Background" Value="{DynamicResource Mocassin.SelectedBackground}" />
+          <Setter Property="Foreground" Value="{DynamicResource Mocassin.SelectedForeground}" />
+        </Style>
+      </ListBox.Styles>
+    </ListBox>
+
+    <TextBlock Grid.Row="2"
+               Text="{Binding Table.EmptyMessage}"
+               IsVisible="{Binding Table.IsEmpty}"
+               Margin="16"
+               TextWrapping="Wrap"
+               Foreground="{DynamicResource Mocassin.ForegroundMutedBrush}"
+               automation:AutomationProperties.Name="Model table empty state" />
+    <TextBlock Grid.Row="2"
+               Text="No rows match the filter."
+               IsVisible="{Binding Table.IsFilteredEmpty}"
+               Margin="16"
+               TextWrapping="Wrap"
+               Foreground="{DynamicResource Mocassin.ForegroundMutedBrush}" />
+  </Grid>
+</UserControl>

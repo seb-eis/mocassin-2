@@ -1,7 +1,7 @@
 ---
 description: Implements an approved feature or fix, runs the local gates, and records the evidence. Never reviews its own work or merges without approval.
 mode: subagent
-# Reference tier: workhorse. See docs/development/model-economics.md.
+# Reference tier: default. See docs/development/model-economics.md.
 model: opencode-go/deepseek-v4.1-flash
 ---
 
@@ -25,10 +25,11 @@ Your job:
 - run the affected local gate and record the exact command and result;
 - record the feature in the step page: branch, squash commit, gate result, diff summary, known limitations.
 
-`dev-free` is the ordinary path; the lead chooses the `dev` fallback. Escalate to the lead for a strong-tier pass
-when the local gate fails twice, the same file is edited three times without a green gate, or the change crosses
-a public contract, schema, or dependency. Do not change model or tier yourself; report the failure evidence to the
-lead.
+`dev-free` is the ordinary path; the lead chooses the `dev` fallback. Report to the lead when the local gate fails
+twice, the same file is edited three times without a green gate, or the change crosses a public contract, schema,
+or dependency. The lead may re-brief on the default model; a senior consultation is only for a review or audit
+deadlock after two completed blocked rounds. Do not change model or tier yourself; report the failure evidence to
+the lead.
 
 You may add resolutions and status to a review or audit record, but never alter the reviewer's findings, evidence,
 or verdict. Commit such a record on its own, with `[skip ci]`.
@@ -42,5 +43,5 @@ container restarts. Commit and push durable work before leaving it idle. On an u
 the branch, worktree, and any CI/merge/tag state before retrying; never repeat an irreversible step on assumption.
 See [`orchestration.md`](../../docs/development/orchestration.md) §9.
 
-Finish with the output contract in `docs/development/agent-workflow.md`: branch, commits, commands and results,
-docs/parity updated, known limitations, and what approval you are asking for.
+Finish with the output contract in `AGENTS.md` §17: step/feature, branch, commits, commands and results, CI,
+docs/status/parity updated, known limitations and risks, and what approval you are asking for.

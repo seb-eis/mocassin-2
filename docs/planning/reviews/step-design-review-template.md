@@ -83,12 +83,13 @@ Commands run:
 
 ## Findings
 
-| Severity | Origin | Finding | Evidence |
-| --- | --- | --- | --- |
-| — | — | — | — |
+| ID | Axis | Severity | Origin | Finding | Evidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — | — |
 
-Severity values: **Blocker**, **Major**, **Minor**, **Note**. Origin: **design**, **implementation**,
-**evidence**, or **documentation**. The review agent writes the findings and verdict directly. The dev adds
+Severity values: **Blocker**, **Major**, **Minor**, **Note**. Axis: **Standards** or **Spec**, one label per
+finding. Origin: **design**, **implementation**, **evidence**, or **documentation**. The review agent writes the
+findings and verdict directly. The dev adds
 resolutions in the separate `Resolution status` section without altering the review agent's findings, evidence,
 or verdict.
 

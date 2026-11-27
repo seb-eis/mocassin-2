@@ -77,11 +77,12 @@ Required for the **Architecture and design status** review; use it for any revie
 
 ## Findings
 
-| ID | Severity | Area | Finding | Evidence | Recommendation |
-| --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| ID | Axis | Severity | Area | Finding | Evidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — | — |
 
-Severity values: **Blocker**, **Major**, **Minor**, **Note**.
+Severity values: **Blocker**, **Major**, **Minor**, **Note**. Axis: **Standards** or **Spec** where the axis fits
+the finding, one label per finding.
 
 ## Record state
 

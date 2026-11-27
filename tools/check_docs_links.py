@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 from urllib.parse import unquote
 
-ROOT_FILES = ("README.md", "CONTRIBUTING.md", "AGENTS.md", "SECURITY.md")
+ROOT_FILES = ("README.md", "CONTRIBUTING.md", "AGENTS.md", "SECURITY.md", "GLOSSARY.md")
 SKIP_DIRS = {
     ".git",
     ".tmp",

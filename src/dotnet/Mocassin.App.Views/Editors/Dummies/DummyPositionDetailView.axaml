@@ -1,0 +1,71 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Mocassin.App.ViewModels.Editors.Dummies"
+             xmlns:automation="using:Avalonia.Automation"
+             x:Class="Mocassin.App.Views.Editors.Dummies.DummyPositionDetailView"
+             x:DataType="vm:DummyPositionDetailViewModel">
+  <ScrollViewer Classes="scroll-gutter-right" Background="{DynamicResource Mocassin.WorkspaceBackground}">
+    <StackPanel Spacing="10" Margin="14">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <TextBlock Text="{Binding MarkerGlyph}"
+                   FontSize="{DynamicResource Mocassin.TitleFontSize}"
+                   Foreground="{DynamicResource Mocassin.AccentBrush}"
+                   automation:AutomationProperties.Name="Dummy position marker" />
+        <TextBlock Text="Dummy position"
+                   FontWeight="SemiBold"
+                   FontSize="{DynamicResource Mocassin.TitleFontSize}"
+                   VerticalAlignment="Center" />
+      </StackPanel>
+      <TextBlock Text="{Binding Explanation}"
+                 Classes="caption"
+                 TextWrapping="Wrap"
+                 automation:AutomationProperties.Name="Dummy position explanation" />
+
+      <Grid ColumnDefinitions="120,180,36,*" ColumnSpacing="6" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="6">
+        <TextBlock Grid.Row="0" Text="Name" VerticalAlignment="Center" />
+        <TextBox Grid.Row="0" Grid.Column="1"
+                 x:Name="name"
+                 Text="{Binding Name, Mode=TwoWay}"
+                 IsEnabled="{Binding CanEditForm}"
+                 automation:AutomationProperties.Name="Dummy position name" />
+
+        <TextBlock Grid.Row="1" Text="Fractional a" VerticalAlignment="Center" />
+        <TextBox Grid.Row="1" Grid.Column="1"
+                 x:Name="fractional"
+                 Text="{Binding FieldA, Mode=TwoWay}"
+                 IsEnabled="{Binding CanEditForm}"
+                 automation:AutomationProperties.Name="Dummy fractional a" />
+        <TextBlock Grid.Row="2" Text="Fractional b" VerticalAlignment="Center" />
+        <TextBox Grid.Row="2" Grid.Column="1"
+                 Text="{Binding FieldB, Mode=TwoWay}"
+                 IsEnabled="{Binding CanEditForm}"
+                 automation:AutomationProperties.Name="Dummy fractional b" />
+        <TextBlock Grid.Row="3" Text="Fractional c" VerticalAlignment="Center" />
+        <TextBox Grid.Row="3" Grid.Column="1"
+                 Text="{Binding FieldC, Mode=TwoWay}"
+                 IsEnabled="{Binding CanEditForm}"
+                 automation:AutomationProperties.Name="Dummy fractional c" />
+      </Grid>
+
+      <TextBlock Text="{Binding FieldError}"
+                 IsVisible="{Binding HasFieldError}"
+                 Foreground="{DynamicResource Mocassin.ErrorForeground}"
+                 TextWrapping="Wrap" />
+      <TextBlock Text="{Binding ErrorMessage}"
+                 IsVisible="{Binding HasError}"
+                 Foreground="{DynamicResource Mocassin.ErrorForeground}"
+                 TextWrapping="Wrap" />
+      <TextBlock Text="{Binding ConflictMessage}"
+                 IsVisible="{Binding HasConflict}"
+                 Foreground="{DynamicResource Mocassin.WarningForeground}"
+                 TextWrapping="Wrap" />
+
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <Button Content="Apply" Command="{Binding ApplyCommand}"
+                automation:AutomationProperties.Name="Apply dummy position" />
+        <Button Content="Revert" Command="{Binding RevertCommand}"
+                automation:AutomationProperties.Name="Revert dummy position" />
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

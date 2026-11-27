@@ -8,9 +8,11 @@ using Mocassin.App.ViewModels.Dialogs;
 using Mocassin.App.ViewModels.Dialogs.Requests;
 using Mocassin.App.ViewModels.Documents;
 using Mocassin.App.ViewModels.Editing;
+using Mocassin.App.ViewModels.Editors;
 using Mocassin.App.ViewModels.Navigation;
 using Mocassin.App.ViewModels.Projects;
 using Mocassin.Packages.Projects.Templates;
+using Mocassin.Core.Diagnostics;
 using Mocassin.App.ViewModels.Settings;
 using Mocassin.App.ViewModels.Settings.Blocks;
 using Mocassin.App.ViewModels.Settings.Dialog;
@@ -54,6 +56,8 @@ internal sealed partial class ShellViewModel : ObservableObject
 
     [ObservableProperty]
     private bool isCheatSheetOpen;
+
+    private ModelEditorDocumentViewModel? navigationDocument;
 
     [ObservableProperty]
     private bool hasInspectorContent;
@@ -645,9 +649,24 @@ internal sealed partial class ShellViewModel : ObservableObject
         forwardCommand.NotifyCanExecuteChanged();
     }
 
+    private async void OnEditorNavigationRequested(object? sender, ModelPath path) =>
+        await Navigation.NavigateToAsync(path, NavigationIntent.Activate);
+
     private void UpdateActiveDocument()
     {
         var active = Documents.ActiveDocument;
+        if (navigationDocument is not null)
+        {
+            navigationDocument.NavigationRequested -= OnEditorNavigationRequested;
+            navigationDocument = null;
+        }
+
+        if (active is ModelEditorDocumentViewModel editorDocument)
+        {
+            editorDocument.NavigationRequested += OnEditorNavigationRequested;
+            navigationDocument = editorDocument;
+        }
+
         StatusBar.SetActiveDocument(active?.Title);
         var isWelcome = active is not null
             && string.Equals(active.Key.Kind, DocumentKinds.Welcome, StringComparison.Ordinal);

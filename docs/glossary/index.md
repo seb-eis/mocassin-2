@@ -1,5 +1,10 @@
 # Glossary, Notation, and Units
 
+> **Boundary.** This page is the published scientific glossary, notation, and units reference for users and readers
+> of the site. The root [`GLOSSARY.md`](https://github.com/seb-eis/mocassin-2/blob/main/GLOSSARY.md) is the working
+> ubiquitous language for contributors and agents: process and project terms only. No term is defined in both; a
+> term with a process and a scientific meaning is defined here and linked from the root entry.
+
 ## Monte Carlo terms
 
 | Term | Meaning |

@@ -1,0 +1,47 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Mocassin.App.ViewModels.Editors"
+             xmlns:automation="using:Avalonia.Automation"
+             xmlns:editors="using:Mocassin.App.Views.Editors.Structure"
+             x:Class="Mocassin.App.Views.Editors.StructureEditorDocumentView"
+             x:DataType="vm:StructureEditorDocumentViewModel">
+  <Grid RowDefinitions="Auto,*" Background="{DynamicResource Mocassin.WorkspaceBackground}">
+    <Border Grid.Row="0"
+            Background="{DynamicResource Mocassin.CardBackground}"
+            BorderBrush="{DynamicResource Mocassin.BorderBrush}"
+            BorderThickness="0,0,0,1"
+            Padding="10,4">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Text="{Binding Editor.DiagnosticSummary.SummaryText}"
+                   VerticalAlignment="Center"
+                   automation:AutomationProperties.Name="Structure validation summary" />
+        <Button Grid.Column="1"
+                Content="Open Problems"
+                Command="{Binding Editor.DiagnosticSummary.OpenProblemsCommand}"
+                IsVisible="{Binding Editor.DiagnosticSummary.HasDiagnostics}"
+                automation:AutomationProperties.Name="Open the Problems channel" />
+      </Grid>
+    </Border>
+
+    <Border Grid.Row="1"
+            IsVisible="{Binding Editor.IsReadOnly}"
+            Background="{DynamicResource Mocassin.WarningBackground}"
+            BorderBrush="{DynamicResource Mocassin.WarningBorderBrush}"
+            BorderThickness="0,0,0,1"
+            Padding="10,4">
+      <TextBlock Text="This project is open read-only; editor commands are disabled."
+                 TextWrapping="Wrap"
+                 automation:AutomationProperties.Name="Read-only project banner" />
+    </Border>
+
+    <ScrollViewer Grid.Row="1" Classes="scroll-gutter-right">
+      <StackPanel Spacing="16">
+        <editors:SpaceGroupEditorView DataContext="{Binding Structure.SpaceGroupEditor}" />
+        <Border Height="1" Background="{DynamicResource Mocassin.BorderBrush}" Margin="14,0" />
+        <editors:CellParametersView DataContext="{Binding Structure.CellParameters}" />
+        <Border Height="1" Background="{DynamicResource Mocassin.BorderBrush}" Margin="14,0" />
+        <editors:StructureSummaryView DataContext="{Binding Structure.Summary}" />
+      </StackPanel>
+    </ScrollViewer>
+  </Grid>
+</UserControl>

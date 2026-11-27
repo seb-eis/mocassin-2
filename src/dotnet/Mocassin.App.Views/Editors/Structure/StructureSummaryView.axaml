@@ -1,0 +1,54 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Mocassin.App.ViewModels.Editors.Structure"
+             xmlns:automation="using:Avalonia.Automation"
+             x:Class="Mocassin.App.Views.Editors.Structure.StructureSummaryView"
+             x:DataType="vm:StructureSummaryViewModel">
+  <StackPanel Spacing="8" Margin="14">
+    <TextBlock Text="Structure summary" FontWeight="SemiBold" FontSize="{DynamicResource Mocassin.TitleFontSize}" />
+    <TextBlock Text="{Binding PreviewStatus}" Classes="caption"
+               automation:AutomationProperties.Name="Structure summary preview status" />
+
+    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="3" ColumnSpacing="10">
+      <TextBlock Text="Reference sites" FontWeight="SemiBold" />
+      <TextBlock Grid.Column="1" Text="{Binding ReferenceSiteCount}"
+                 automation:AutomationProperties.Name="Reference site count" />
+      <TextBlock Grid.Row="1" Text="P1 positions" FontWeight="SemiBold" />
+      <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding P1PositionCount}"
+                 automation:AutomationProperties.Name="P1 position count" />
+      <TextBlock Grid.Row="2" Text="Stable positions" FontWeight="SemiBold" />
+      <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding StablePositionCount}"
+                 automation:AutomationProperties.Name="Stable position count" />
+      <TextBlock Grid.Row="3" Text="Unstable positions" FontWeight="SemiBold" />
+      <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding UnstablePositionCount}"
+                 automation:AutomationProperties.Name="Unstable position count" />
+      <TextBlock Grid.Row="4" Text="Cell volume" FontWeight="SemiBold" />
+      <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding CellVolumeText}"
+                 automation:AutomationProperties.Name="Cell volume" />
+      <TextBlock Grid.Row="5" Text="{Binding DensityLabel}" FontWeight="SemiBold" TextWrapping="Wrap" />
+      <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding ReferenceSiteDensityText}"
+                 automation:AutomationProperties.Name="Reference-site density" />
+    </Grid>
+
+    <Border Classes="banner-warning" Padding="8" IsVisible="{Binding HasLargeP1Warning}">
+      <TextBlock Text="{Binding LargeP1WarningText}" TextWrapping="Wrap"
+                 automation:AutomationProperties.Name="Large P1 warning" />
+    </Border>
+
+    <TextBlock Text="Orbit table" FontWeight="SemiBold" />
+    <ListBox ItemsSource="{Binding Orbits}"
+             MaxHeight="200"
+             automation:AutomationProperties.Name="Structure summary orbit table">
+      <ListBox.ItemTemplate>
+        <DataTemplate x:DataType="vm:StructureSummaryOrbitRowViewModel">
+          <Grid ColumnDefinitions="160,170,90,100" ColumnSpacing="6">
+            <TextBlock Text="{Binding SiteName}" />
+            <TextBlock Grid.Column="1" Text="{Binding RepresentativeText}" />
+            <TextBlock Grid.Column="2" Text="{Binding Multiplicity}" />
+            <TextBlock Grid.Column="3" Text="{Binding PositionCount}" />
+          </Grid>
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+    </ListBox>
+  </StackPanel>
+</UserControl>

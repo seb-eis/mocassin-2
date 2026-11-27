@@ -34,7 +34,7 @@ Status legend:
 | Model statistics and feasibility | Y | Implemented | 07 | Counts, rule/memory estimates, buildability warnings |
 | Headless `mocassin validate` | Y | Done | 07/12 | `validation-v1`, diagnostics, statistics, and exit codes in 07; the complete CLI command surface, shared report family, and parser conventions in 12 |
 | `validation-v1` report | Y | Implemented | 07 | Sorted diagnostics, summary, optional statistics; schema checked |
-| GUI diagnostic navigation | Y | Partial | 07/23B/24/25 | `ModelPath` navigation and the target registry in 23A; status indicator, Problems channel, and error banner in 23B; domain providers and stats panels in 24/25 |
+| GUI diagnostic navigation | Y | Partial | 07/23B/24A/24B/25 | `ModelPath` navigation and the target registry in 23A; status indicator, Problems channel, and error banner in 23B; the 24A particle/set/structure/site/dummy providers and the 24B transition providers; energy/lattice/simulation panels in 25 |
 
 ## 2. Particles and structure
 
@@ -44,14 +44,14 @@ Status legend:
 | Implicit void particle | Y | Implemented | 03 | Reserved ID; compiled index 0 belongs to 08 |
 | 63 custom particle limit | Y | Implemented | 03 | Enforced |
 | Particle sets with first-as-default | Y | Implemented | 03 | Ordered `particleIds`; composed validation |
-| Drag-and-drop set membership | Y | Planned | 24 | + keyboard |
-| Space group selection (274 settings) | Y | Partial | 02/03/24 | Catalog, lookup, and validation in 02/03; selection UI in 24 |
-| Space-group operation display | Y | Planned | 24 | Operations are available from the catalog |
-| Cell parameters + crystal-system locks | Y | Partial | 02/03/24 | Corrected transform, validation, and tolerances in 02/03; UI locks in 24 |
+| Drag-and-drop set membership | Y | Implemented | 24A | Set detail's own project-particle drag source plus keyboard Add/Remove/Move; both paths share one insertion method |
+| Space group selection (274 settings) | Y | Implemented | 02/03/24A | Catalog, lookup, and validation in 02/03; searchable picker, settings selector, operation details, and pre-apply orbit/overlap preview in 24A |
+| Space-group operation display | Y | Implemented | 24A | Operation count, general multiplicity, matrix/translation, and human-readable form from the catalog |
+| Cell parameters + crystal-system locks | Y | Implemented | 02/03/24A | Corrected transform, validation, and tolerances in 02/03; expression fields, locks, live vectors/volume, geometry diagnostics, and undoable resets in 24A |
 | Stable/unstable sites | Y | Implemented | 03 | Unstable sites default to void |
-| P1 expansion preview | Y | Partial | 02/03/24 | Encoder and P1 order in 02; preview API/cache in 03; UI in 24 |
+| P1 expansion preview | Y | Implemented | 02/03/24A | Encoder and P1 order in 02; preview API/cache in 03; orbit/whole-structure rows, canonical indices, and deterministic 2D projection in 24A |
 | Site overlap validation | Y | Implemented | 03 | Exact grid; structured `CellSiteId` paths |
-| Dummy position editor | Y | Planned | 24 | Model, JSON, and validation in 03; editor UI in 24 |
+| Dummy position editor | Y | Implemented | 24A | Model, JSON, and validation in 03; distinct-glyph visual-only document with save/load round-trip in 24A |
 | Correct triclinic/rhombohedral cell vectors | Y | Improvement | 02 | Implemented in 02; fixes original bug |
 | Valid group 47 data | Y | Improvement | 02 | Implemented in 02; fixes corrupt setting |
 | Multiple site definitions per orbit | Y | Implemented | 03 | With overlap diagnostics |
@@ -60,9 +60,9 @@ Status legend:
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
-| State changes [D,A] | Y | Partial | 04/24 | Model, validation, persistence, preview, and editor API in 04; editor UI in 24 |
-| State-change groups | Y | Partial | 04/24 | Mixed physical/charge and stable/unstable roles rejected; editor UI in 24 |
-| Abstract chains with D/S linkers | Y | Partial | 04/24 | Six patterns + custom grammar; `D S D` rejected; editor UI in 24 |
+| State changes [D,A] | Y | Partial | 04/24B | Model, validation, persistence, preview, and editor API in 04; editor UI in 24B |
+| State-change groups | Y | Partial | 04/24B | Mixed physical/charge and stable/unstable roles rejected; editor UI in 24B |
+| Abstract chains with D/S linkers | Y | Partial | 04/24B | Six patterns + custom grammar; `D S D` rejected; editor UI in 24B |
 | 2-site MMC | Y | Partial | 04/08/17 | Model, validation, and preview in 04; exchange rules in 08/17 |
 | 3-site KMC migration | Y | Partial | 04/08/16 | Model, path validation, and preview in 04; rules and KMC dual-DOF default in 08/16 |
 | 5-site interstitialcy | Y | Partial | 04/08 | Model, path validation, preview, and sample in 04; rules in 08 |
@@ -73,9 +73,9 @@ Status legend:
 | Reverse rule generation (2/3-site) | Y | Done | 08 | Auto-inverse for `Metropolis2`/`Migration3`; `CeriaKineticMigrationCompilesForwardAndInverseRules` and `MetropolisExchangeCompilesForwardAndInverseRulesWithoutState1`; explicit reverse stays separate |
 | No reverse for complex mechanisms | Y | Done | 08 | `CorrectedVehicleCompilesUnidirectionalRules`, `CorrectedInterstitialcyCompilesWithASpectatorCentre`, and `ExplicitReverseCompilationTests`; `GeneratesReverse` validated in 04 |
 | Dependent/hidden rules | Y | Partial | 08/29 | Explicit deduplication and dependent/hidden counts exist; equivalent-start orbit reduction and `DependentRules` emission are the accepted Step 08 audit m1 gap. Step 29's release gate requires every required parity item to be implemented or explicitly deferred (roadmap M12; Step 29 §9). |
-| Reference path editing/preview | Y | Partial | 04/24 | Preview API in 04; editor UI in 24 |
+| Reference path editing/preview | Y | Partial | 04/24B | Preview API in 04; editor UI in 24B |
 | Ambiguity detection | Y | Improvement | 08 | Compile-time `CMP004` with both identities |
-| Transition rule count preview | N | Improvement | 24 | Step 07 statistics are advisory; Step 08 is authoritative |
+| Transition rule count preview | N | Improvement | 24B | Step 07 statistics are advisory; Step 08 is authoritative; the transition editor's rule-count preview is 24B |
 
 ## 4. Energy and lattice
 
@@ -143,7 +143,7 @@ Status legend:
 | Job collections/configs | Y | Done | 10 | Typed Core records, project JSON/manifest, authored-order expansion, and structural `JOB` validation |
 | Base + config overrides | Y | Partial | 10/26 | Correct simulation → collection → config inheritance, kind checks, and extension replacement in 10; editor UI in 26 |
 | Job duplicates/multiplier | Y | Done | 10 | `jobCountPerConfig`/simulation default, 1-based IDs, per-duplicate seeds |
-| Selection optimizers | Y | Partial | 10/11/14/26 | P1 image expansion, dual-DOF rule, and `JOB009` reference check in 10; `.msl` encoding in 11; supercell pool removal in 14 (design freeze: feature 4, implementation pending); editor UI in 26. Partial until Step 14 is implemented. |
+| Selection optimizers | Y | Partial | 10/11/14/26 | P1 image expansion, dual-DOF rule, and `JOB009` reference check in 10; `.msl` encoding in 11; supercell pool removal in the Step 14 context (`SelectionPools`/`set_selectable`, merged and tagged); editor UI in 26. Partial until the Step 26 editor UI lands. |
 | Lattice size + doping values | Y | Partial | 10/26 | Deterministic supercell, dopings, truncation, compensation, and preview in 10; editor UI in 26 |
 | Build template selection | Y | Partial | 12/26 | `--template` selects a build template; `--job-template` and `--parameterization` override it; ambiguity lists IDs and names; the implicit parameterization default is applied when none exists; selection UI in 26 |
 | Build preview (no package write) | Y | Done | 10/12 | Shared `ILatticePreviewService` and `BuildPreviewBuilder`; the CLI projects `BuildResult.Preview` into `build-v1` preview mode, never opens or writes `.msl`, and rejects `-o`/`--force`/`--compact` |
@@ -163,7 +163,7 @@ Status legend:
 | --- | :---: | --- | --- | --- |
 | Package reader and solver foundation | Y | Done | 13 | Read-only `.msl` reader, bounded decode, validated runtime model/job/lattice, canonical signature re-encode, `mocassin-sim --dry-run`; real `msl-v1`, `amend-1-net10`, populated/MMC, and C-centered packages. The populated fixture carries the per-node mask difference; the C-centered fixture carries the real cross-bucket equivalent-start mapping and a mask difference. No physics until 14–19 |
 | Deterministic RNG and seed derivation | Y | Done | 13 | ChaCha12, SHA-256 job/lattice derivation, Lemire bounded draws, 64-byte `RngStateV1`, cross-language golden vectors; replaces the PCG32 defects |
-| Simulation context initialization | Y | Done | 11/13/14 | Step 14 implemented (features 1–6), merged into `main` as `dd5a811`, and tagged `step-14`; audit `Passed with notes` (F-1–F-3/N-1–N-3 deferred to `fix/step-14-structure-and-tests`). Design freeze: lattice/environment arenas, owner-major per-P1 link CSR with an inverse routing index, one cluster instance per slot-0 link with the `step-11-amend-2` `ClusterTable::lookup` code resolution, site+pair owner vectors and per-centre cluster energy, exact initial lattice energy, supercell selection pools, receiver-major per-`(P1,direction)` jump status, tracker index space, goals/normalization/`dt`, resume hook. Runtime is built from the Step 13 `JobPackage`; no energy deltas, KMC/MMC loop, trackers, or `.mcs` in Step 14. The code-expansion contract is approved and implemented by `step-11.1`. **Feature 1 of 6 squashed (2026-11-21):** modules, `Dimensions`/`EnvId`, limits, phase-0 `MemoryPlan`/`MemoryReport`, lattice/flag/mobile-tracker arenas, zeroed counters, phased cancellation, and the `Send`/`!Sync` marker. **Feature 2 of 6 squashed (2026-11-21):** owner-major per-P1 link CSR with the inverse routing index, partner resolution, `linked`, one cluster instance per slot-0 link with the multi-centre member-site fallback, cluster codes/code ids via `ClusterTable::lookup` (no solver symmetry), and the link/cluster memory plan and caps. **Feature 3 of 6 squashed (2026-11-21):** the eV→kT factor, field scale/direction, site table, site+pair vectors, per-instance cluster energies, the exact initial lattice energy (site once, pair ×0.5, cluster once per instance and cell), and the independent recomputation/debug check. **Feature 4 of 6 squashed (2026-11-21):** supercell selection pools with reserved capacity, mask/optimizer application and `set_selectable`; active-collection direction filtering; receiver-major jump status with the structural receiver filter, derived bound, `resolve_node`/`resolve_path`, and link-carried cluster associations; the pool/jump memory plan and caps; the `DirectionPool` retirement and `JumpLink` reshape (public Rust API break, no format change). **Feature 5 of 6 squashed (2026-11-21):** KMC goals/block with checked arithmetic and zero-total/zero-mobile errors, counters, the mobile/static/global tracker index space, `K_fix`/`K_auto`/`K_norm`/`nu_max`/`dof`/`dt`, the fresh/restored RNG and time, and the `ResumeState` validation/re-derivation/`AlreadyCompleted` hook; MMC has no goals/time. Feature 6 completes the real-writer 10×10×10 and multi-centre fixtures, the context-summary snapshot, the allocation proof, the Criterion benchmark/baseline, the implementation documentation, and the closeout. |
+| Simulation context initialization | Y | Done | 11/13/14 | Step 14 implemented (features 1–6), merged into `main` as `dd5a811`, and tagged `step-14`; audit `Passed with notes` (F-1, F-3, and N-1–N-3 closed on `fix/step-14-structure-and-tests`; F-2's owner-major delta test re-pointed to Step 15). Design freeze: lattice/environment arenas, owner-major per-P1 link CSR with an inverse routing index, one cluster instance per slot-0 link with the `step-11-amend-2` `ClusterTable::lookup` code resolution, site+pair owner vectors and per-centre cluster energy, exact initial lattice energy, supercell selection pools, receiver-major per-`(P1,direction)` jump status, tracker index space, goals/normalization/`dt`, resume hook. Runtime is built from the Step 13 `JobPackage`; no energy deltas, KMC/MMC loop, trackers, or `.mcs` in Step 14. The code-expansion contract is approved and implemented by `step-11.1`. **Feature 1 of 6 squashed (2026-11-21):** modules, `Dimensions`/`EnvId`, limits, phase-0 `MemoryPlan`/`MemoryReport`, lattice/flag/mobile-tracker arenas, zeroed counters, phased cancellation, and the `Send`/`!Sync` marker. **Feature 2 of 6 squashed (2026-11-21):** owner-major per-P1 link CSR with the inverse routing index, partner resolution, `linked`, one cluster instance per slot-0 link with the multi-centre member-site fallback, cluster codes/code ids via `ClusterTable::lookup` (no solver symmetry), and the link/cluster memory plan and caps. **Feature 3 of 6 squashed (2026-11-21):** the eV→kT factor, field scale/direction, site table, site+pair vectors, per-instance cluster energies, the exact initial lattice energy (site once, pair ×0.5, cluster once per instance and cell), and the independent recomputation/debug check. **Feature 4 of 6 squashed (2026-11-21):** supercell selection pools with reserved capacity, mask/optimizer application and `set_selectable`; active-collection direction filtering; receiver-major jump status with the structural receiver filter, derived bound, `resolve_node`/`resolve_path`, and link-carried cluster associations; the pool/jump memory plan and caps; the `DirectionPool` retirement and `JumpLink` reshape (public Rust API break, no format change). **Feature 5 of 6 squashed (2026-11-21):** KMC goals/block with checked arithmetic and zero-total/zero-mobile errors, counters, the mobile/static/global tracker index space, `K_fix`/`K_auto`/`K_norm`/`nu_max`/`dof`/`dt`, the fresh/restored RNG and time, and the `ResumeState` validation/re-derivation/`AlreadyCompleted` hook; MMC has no goals/time. Feature 6 completes the real-writer 10×10×10 and multi-centre fixtures, the context-summary snapshot, the allocation proof, the Criterion benchmark/baseline, the implementation documentation, and the closeout. |
 | MMC engine | Y | Planned | 17 | |
 | KMC engine | Y | Planned | 16 | |
 | Rejection KMC selection | Y | Planned | 16 | Uniform over directions |
@@ -225,14 +225,16 @@ Status legend:
 | Shell/tree/tabs/console/status | Y | Implemented | 23A | Regions, document tabs, project switcher/explorer, Application console, populated status bar; Problems channel in 23B |
 | Project lifecycle | Y | Implemented | 23A | New/open/save/save-as/close/reload, recents, locks, read-only, external-change detection |
 | Undo/redo | N | Improvement | 23B | Single per-project stack over `ProjectDocument`, bounded, save-point correct; Edit-menu Undo/Redo commands follow the active project |
-| Model validator/problems | Y | Partial | 23B/07 | Validity status item, Problems channel seeded from the retained load result (conditional `Load` stage), severity/code/text/source filters, sorting, help anchors, revalidate, edit diagnostics, and navigable `ModelPath` targets in 23B; domain providers and full statistics panels in 24/25 |
+| Model validator/problems | Y | Partial | 23B/07/24A/24B/25 | Validity status item, Problems channel seeded from the retained load result (conditional `Load` stage), severity/code/text/source filters, sorting, help anchors, revalidate, edit diagnostics, and navigable `ModelPath` targets in 23B; 24A particle/set/structure/site/dummy providers and 24B transition providers; full statistics panels in 25 |
 | Command palette and shortcut cheat sheet | N | Implemented | 23A | Searchable command catalog with platform gestures |
 | Application settings and logging | N | Implemented | 23A/23B | Versioned `mocassin.settings` v1 with migration and retention in 23A; `autosave`/`session` additive fields in 23B; structured rolling logs replace the original XML settings file |
 | Crash recovery dialog | N | Improvement | 23A/23B | Global exception boundary, log entry, and "open log folder" in 23A; captured dirty-session snapshots, the 2 s bounded async recovery writer, per-session status, and the recovery action in 23B; the dead-UI path writes no snapshots, and the autosave fallback is failure-injected in a PR-fast test |
 | Application diagnostics | N | Deferred | 23A/23B | App-side environment report (distinct from CLI `doctor`) |
-| Particle/set editor | Y | Planned | 24 | |
-| Structure editor | Y | Planned | 24 | |
-| Transition editor | Y | Planned | 24 | |
+| Shared model-editor framework | Y | Implemented | 24A | ADR 0003 table + detail surface, one column/header policy, one-tab-stop focus with `Home`/`End` + `Tab`, typed sort, multi-select, reusable reference picker, in-house numeric expression, lazy usage index with resolved KMC paths, and the additive typed `ProjectDocument.Apply` overload; shell-owned `layout.editorFraction`. The particle and structure UX is delivered in the same step's later features |
+| Particle/set editor | Y | Implemented | 24A | Pinned void, usage counts, blocked delete, bulk charge, drag/keyboard ordered membership, default badge, empty-set error, occupation chips |
+| Structure editor | Y | Implemented | 24A | Space-group picker and preview, cell parameters with locks/expressions, site table and P1 preview, dummy document, and the structure summary; transitions remain 24B |
+| Structure summary | Y | Implemented | 24A | Reference sites, P1/stable/unstable position counts, volume, reference-site density, orbit table, and `STR009` from the structure value and preview; no `ModelStatistics` call |
+| Transition editor | Y | Planned | 24B | State changes, groups, chains, reference paths, and the rule-count preview |
 | Energy editor | Y | Planned | 25 | |
 | Lattice/doping editor | Y | Planned | 25 | |
 | Simulation editor | Y | Planned | 25 | |
@@ -249,7 +251,7 @@ Status legend:
 | Lattice recycle tool | Y | Planned | 28 | |
 | Remote deploy | N | Deferred | post-1.0 | Local + HPC scripts first |
 | Accessibility/high contrast | N | Partial | 23A | Automation-name sweep, automation-role and deterministic Tab-order tests, light/dark/high-contrast baselines, and an automated Xvfb real-window capture in 23A; manual screen-reader checks remain release evidence |
-| Numeric expression input | Y | Planned | 24/25 | |
+| Numeric expression input | Y | Implemented | 24A | Shared nested-only expression grammar for fractional and cell fields; trigonometric functions deliberately deferred |
 | Localization | N | Deferred | post-1.0 | Invariant first; resources ready |
 
 ## 10. Platform, packaging, and quality

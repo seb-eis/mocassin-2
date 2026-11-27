@@ -8,11 +8,12 @@ namespace Mocassin.App.ViewModels.Shell;
 /// <summary>
 /// Holds the visibility of the four shell regions and their proportional layout.
 /// </summary>
-internal sealed partial class ShellRegionsViewModel : ObservableObject
+internal sealed partial class ShellRegionsViewModel : ObservableObject, IEditorPaneLayout
 {
     private double leftFraction = SettingsDefaults.DefaultLeftFraction;
     private double rightFraction = SettingsDefaults.DefaultRightFraction;
     private double consoleFraction = SettingsDefaults.DefaultConsoleFraction;
+    private double editorFraction = SettingsDefaults.DefaultEditorFraction;
 
     [ObservableProperty]
     private bool isProjectsVisible = true;
@@ -72,6 +73,17 @@ internal sealed partial class ShellRegionsViewModel : ObservableObject
                 OnPropertyChanged(nameof(DocumentsFraction));
             }
         }
+    }
+
+    /// <summary>
+    /// Gets or sets the editor selection-pane share of the editor width.
+    /// </summary>
+    public double EditorFraction
+    {
+        get => editorFraction;
+        set => SetProperty(
+            ref editorFraction,
+            ShellLayoutFractions.ClampEditor(value));
     }
 
     /// <summary>

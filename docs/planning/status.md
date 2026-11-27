@@ -67,7 +67,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 11 | [Simulation Package and `.msl` Writer](steps/step-11-simulation-package-and-msl-writer.md) | C. Compilation | Done | `step/11-simulation-package-and-msl-writer` (merged and deleted) | — (amendment 2 merged and tagged `step-11.1`) | [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43948410478) at `84ceb76`; [closeout](https://github.com/seb-eis/mocassin-2/actions/runs/43944825353) / [Windows platform](https://github.com/seb-eis/mocassin-2/actions/runs/43944396192) at `4197166`; amendment 2 closeout [44896189617](https://github.com/seb-eis/mocassin-2/actions/runs/44896189617) and [main green](https://github.com/seb-eis/mocassin-2/actions/runs/44912274715) at `58c8e9a` | `84ceb76`; amendment 2 `58c8e9a` | `step-11`; amendment 2 `step-11.1` | [Passed with notes](audits/step-11.md) — round 2 at `4197166` (`fda68e6`); N-1/N-4/N-6 accepted 2026-11-16. Amendment 2: [Passed with notes](audits/step-11-amend-2.md) at `ef568be` — accepted 2026-11-21, A2A-01–A2A-03 fixed | Ready with notes — accepted 2026-11-15 ([record](reviews/step-11.md)); amendment 1 `Ready with notes` — accepted 2026-11-15 ([record](reviews/step-11-amend-1.md)); amendment 2 round 4 `Ready for implementation` at `bf273ff` ([record](reviews/step-11-amend-2.md)) — merged and tagged |
 | 12 | [Build Orchestration and `mocassin` CLI](steps/step-12-build-orchestration-and-cli.md) | C. Compilation | Done | `step/12-build-orchestration-and-cli` (merged and deleted) | — | [Ubuntu](https://github.com/seb-eis/mocassin-2/actions/runs/44377851616) / [Windows](https://github.com/seb-eis/mocassin-2/actions/runs/44378270028) closeout green at `07851d8`; [main green](https://github.com/seb-eis/mocassin-2/actions/runs/44381922313) | `ec2e04a` | `step-12` | [Passed with notes](audits/step-12.md) at `07851d8` — accepted by the human owner 2026-11-18; F-9/N-4 fixed, N-5 accepted risk | Ready with notes — **accepted by the human owner 2026-11-17** at `1b6af90` ([record](reviews/step-12.md); round 5; R5-1–R5-3 resolved); implementation started 2026-11-17 |
 | 13 | [Rust Solver Foundation and Package Reader](steps/step-13-rust-solver-foundation-and-package-reader.md) | D. Solver | Done | `step/13-rust-solver-foundation-and-package-reader` (merged and deleted) | 7/7 + audit fix + centered fixture | [closeout](https://github.com/seb-eis/mocassin-2/actions/runs/44831177039) green at `3128121`; [main](https://github.com/seb-eis/mocassin-2/actions/runs/44834521989) green at `2613a0d` | `2613a0d` | `step-13` | [Passed with notes](audits/step-13.md) — accepted 2026-11-20; F-9/N-5–N-7 fixed | Ready with notes — accepted by the human owner 2026-11-18 at `b9cda11`; hold lifted 2026-11-19 |
-| 14 | [Simulation Context Initialization](steps/step-14-simulation-context-initialization.md) | D. Solver | Done | `step/14-simulation-context-initialization` (merged and deleted) | 6/6 squashed + audit accepted | [closeout 44922414484](https://github.com/seb-eis/mocassin-2/actions/runs/44922414484) green at `3fd4516`; [main 44924317743](https://github.com/seb-eis/mocassin-2/actions/runs/44924317743) green at `dd5a811` | `dd5a811` | `step-14` | [Passed with notes](audits/step-14.md) — accepted 2026-11-21; F-1–F-3/N-1–N-3 deferred to `fix/step-14-structure-and-tests` | Ready with notes — accepted by the human owner 2026-11-21 at `620f20a` (round 4; freeze `a430d64`); class High accepted; six features approved |
+| 14 | [Simulation Context Initialization](steps/step-14-simulation-context-initialization.md) | D. Solver | Done | `step/14-simulation-context-initialization` (merged and deleted) | 6/6 squashed + audit accepted | [closeout 44922414484](https://github.com/seb-eis/mocassin-2/actions/runs/44922414484) green at `3fd4516`; [main 44924317743](https://github.com/seb-eis/mocassin-2/actions/runs/44924317743) green at `dd5a811` | `dd5a811` | `step-14` | [Passed with notes](audits/step-14.md) — accepted 2026-11-21; F-1, F-3, N-1–N-3 closed on `fix/step-14-structure-and-tests` (2026-11-22); F-2 re-pointed to Step 15 | Ready with notes — accepted by the human owner 2026-11-21 at `620f20a` (round 4; freeze `a430d64`); class High accepted; six features approved |
 | 15 | [Energy Engine](steps/step-15-energy-engine.md) | D. Solver | Not started | — | — | — | — | — | Not requested | Not requested |
 | 16 | [Kinetic Monte Carlo Engine](steps/step-16-kmc-engine.md) | D. Solver | Not started | — | — | — | — | — | Not requested | Not requested |
 | 17 | [Metropolis Monte Carlo Engine](steps/step-17-mmc-engine.md) | D. Solver | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -78,7 +78,8 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 22 | [Python Analysis API](steps/step-22-python-analysis-api.md) | E. Results | Not started | — | — | — | — | — | Not requested | Not requested |
 | 23a | [Workspace and Project Lifecycle](steps/step-23a-workspace-and-project-lifecycle.md) | F. GUI | Done | `step/23a-workspace-and-project-lifecycle` (merged and deleted) | — | [Ubuntu 44889193801](https://github.com/seb-eis/mocassin-2/actions/runs/44889193801), Windows 44889462922, macOS 44889646766 green at `30dcf3e`; [main green](https://github.com/seb-eis/mocassin-2/actions/runs/44892961809) at `9f4d186` | `9f4d186` | `step-23a` | [Passed with notes](audits/step-23a.md) at `30dcf3e` — accepted by the human owner 2026-11-21; R3-1…R3-3 fixed, R3-4/R3-5 accepted | Ready with notes — **accepted by the human owner 2026-11-20** at `b9c56fe` ([record](reviews/step-23a.md), round 3 `b6a472c`); class High accepted; five features approved |
 | 23b | [Editing, Diagnostics, and Recovery](steps/step-23b-editing-diagnostics-and-recovery.md) | F. GUI | Done | `step/23b-editing-diagnostics-and-recovery` | F1 (`bb048ad`); F2 (`77c1b9c`); F3 (`97c42ec`); F4 (`a14ef1f`; fixes `833f135`, `eb120e1`); audit round 1 fixes F1–F7 (`ca64c9a`); notes/owner acceptance `172df45` | Ubuntu [44932597523](https://github.com/seb-eis/mocassin-2/actions/runs/44932597523), Windows [44932918537](https://github.com/seb-eis/mocassin-2/actions/runs/44932918537), macOS [44932432910](https://github.com/seb-eis/mocassin-2/actions/runs/44932432910) green at `fe79552`; main CI [44935708199](https://github.com/seb-eis/mocassin-2/actions/runs/44935708199) green at the merge | `a48da3b` | `step-23b` | [Passed with notes](audits/step-23b.md) — **owner accepted 2026-11-21** | Ready with notes — **accepted by the human owner 2026-11-21** at `a33711d` ([record](reviews/step-23b.md), round 4 `c4ded0e`); class High accepted; four features approved |
-| 24 | [Particle, Structure, and Transition Editors](steps/step-24-model-editors-particle-structure-transitions.md) | F. GUI | Not started | — | — | — | — | — | Not requested | Not requested |
+| 24a | [Shared Editor Framework, Particles, and Structure](steps/step-24a-model-editors-particles-and-structure.md) | F. GUI | Done | `step/24a-model-editors-particles-and-structure` (merged and deleted) | F1 squashed (`c24d1cf`, m-13 docs `f77bfd3`); F2 squashed (`0c749c2`); F3 squashed (`82cd326`); F4 squashed (`034981d`); F5 squashed (`5128f9f`); F6 squashed (`9d0cfd7`); audit round-1 fixes squashed (`10c7206`); `all --require` green 2026-11-24 | Round 1: Ubuntu [45477848106](https://github.com/seb-eis/mocassin-2/actions/runs/45477848106), Windows 45478516289, macOS 45479315065 green at `5dd70e6`; round 2: Ubuntu [45491888826](https://github.com/seb-eis/mocassin-2/actions/runs/45491888826), Windows 45492513811, macOS 45493153286 green at `10c7206`; main [45498967177](https://github.com/seb-eis/mocassin-2/actions/runs/45498967177) green at `95e24e6` | `95e24e648af2aa27ab949c786c4d0cb2649bc569` | `step-24a` | [Passed with notes — owner-accepted 2026-11-24](audits/step-24a.md); F-9/F-10/F-11 follow-up owner `fix/step-24a-notes` or 24B/Step 25 | Ready with notes — **accepted by the human owner 2026-11-23** at `b75efea` ([record](reviews/step-24a.md), round 2 `f4cc809`); class High accepted; six features approved; revised D-2 confirmed; n-3/n-4/n-5 corrected before the start gate; m-13/m-14/m-15 accepted for implementation-time resolution |
+| 24b | [Transition Editors](steps/step-24b-model-editors-transitions.md) | F. GUI | Not started | — | — | — | — | — | Not requested | Not requested — freeze after 24A feature 1 |
 | 25 | [Energy, Lattice, and Simulation Editors](steps/step-25-model-editors-energy-lattice-simulations.md) | F. GUI | Not started | — | — | — | — | — | Not requested | Not requested |
 | 26 | [Parameterization, Job Templates, and Build UI](steps/step-26-parameterization-job-templates-and-build-ui.md) | F. GUI | Not started | — | — | — | — | — | Not requested | Not requested |
 | 27 | [3D Viewer and Visualization](steps/step-27-3d-viewer-and-visualization.md) | F. GUI | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -88,6 +89,24 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 31 | [Packaging and Release](steps/step-31-packaging-and-release.md) | G. Release and documentation | Not started | — | — | — | — | — | Not requested | Not requested |
 
 ## Active work
+
+The GUI track (Phase F) is at Step 24. Steps 23A and 23B are **Done**, merged, and tagged (`step-23a`,
+`step-23b`). The editor-layout gate is **closed**: the owner reviewed the five-option POC on 2026-11-22, picked
+option 1 (`ListBox` table + detail) composed with option 4's `GridSplitter` master-detail, and the decision is
+recorded in [ADR 0003](adr/0003-avalonia-mvvm-stack.md#editor-layout-decision-2026-11-22); the spike code is
+discarded and the POC report is the durable evidence. At the same gate the owner split Step 24 into **24A**
+(shared editor framework, particles, structure) and **24B** (transition editors). The 24A design review round 2
+returned **`Ready with notes`** at `b75efea`, the human owner accepted it on 2026-11-23 (class High as one unit,
+six features, revised D-2 confirmed), and the step branch
+`step/24a-model-editors-particles-and-structure` carries the six squashed features. The independent audit round 1
+returned **`Fixes required`** at `5dd70e6` (Major F-1 on the debounced site-overlap gate, six Minor findings, one
+Note); the fixes F-1…F-8 were applied on
+`feature/step-24a-model-editors-particles-and-structure/fix-audit-round-1` (squashed `10c7206`). The independent
+audit round 2 returned **`Passed with notes`** (F-9 Minor, F-10/F-11 Notes); the owner accepted it on 2026-11-24.
+Step 24A merged into `main` with `--no-ff` as `95e24e648af2aa27ab949c786c4d0cb2649bc569`, the automatic main CI
+[45498967177](https://github.com/seb-eis/mocassin-2/actions/runs/45498967177) is green, and the annotated tag
+`step-24a` points at the merge. The F-9/F-10/F-11 follow-up is owned by a post-merge `fix/step-24a-notes`
+maintenance branch or 24B/Step 25. 24B is next, because it consumes the framework.
 
 Phase C — Compilation and build (Steps 08–12) is complete and tagged: `step-08` through `step-12`, with Step 08
 merged as `f91fc63` and Step 12 as `ec2e04a` (both `--no-ff`). The Phase C cross-cutting checkpoint `XC-04`
@@ -182,8 +201,8 @@ and approved the merge and tag. The closeout gates are green at `07851d8`: Ubunt
 with `--no-ff` as `ec2e04a6b45fa14d9a88a9bd0eac9310949de69e`; automatic main CI
 [`44381922313`](https://github.com/seb-eis/mocassin-2/actions/runs/44381922313) is green at that merge commit;
 the annotated `step-12` tag is pushed; and the step branch is deleted locally and remotely. Step 13 — Rust
-Solver Foundation and Package Reader is **In progress** on `step/13-rust-solver-foundation-and-package-reader`
-from the design merge `056d8c1`.
+Solver Foundation and Package Reader is **Done**: merged into `main` as `2613a0d` (`--no-ff`, from the design
+merge `056d8c1`) and tagged `step-13`.
 
 ## Cross-cutting phase checkpoints
 
@@ -217,6 +236,7 @@ early-warning signal for the next cross-cutting review.
 | --- | --- | --- | --- | --- |
 | 2026-11-12 | `38a22d2` | Fresh independent drift-check context (OpenCode subagent) | Drift found — 3 Major, 9 Minor, 3 Note; Major status/documentation drift remediated before checkpoint freeze | [2026-11-12-phase-b.md](drift-checks/2026-11-12-phase-b.md) |
 | 2026-11-18 | `dcbf499` | Phase C maintenance worktree (implementor; not a fresh reviewer) | Drift found — 2 Major, 5 Minor; all findings fixed on the maintenance branch; PowerShell docs path and Windows verification left for `XC-04` | [2026-11-18-phase-c.md](drift-checks/2026-11-18-phase-c.md) |
+| 2026-11-27 | `476b66b` | Implementor self-check (not a fresh reviewer) | No drift found — the task disciplines, review axes, senior escalation, output contract, and `default`/`senior` names agree across the normative pages, templates, prompts, and checker; the docs and policy gates are green | [POLICY-2026-11-27](reviews/policy-update-2026-11-27-workflow-disciplines.md) |
 
 ## Notes
 
@@ -235,36 +255,59 @@ early-warning signal for the next cross-cutting review.
   branch on 2026-11-16; the merge into `main` is `f5a52e3` (`--no-ff`, `[skip ci]`). No CI run was dispatched
   for the merge: the change is documentation/containerfile-only and the owner's rebuild is the verification.
   The `step-11` tag is unchanged.
-- A bounded GUI visual refresh is implemented on `fix/gui-visual-refresh` from `main` at `89dbe22` (commits
-  `f7f5627`, `eb69292`, `c137421`, plus the evidence commit) and awaits the owner's `--no-ff` merge approval. It
-  adds the light/dark token palette and card chrome, the fixed Console/Validation tabs, the 20 %/22 %/32 % layout
-  defaults with the one-time `layout.defaultsRevision` upgrade, and **View → Reset Layout**. Windows
+- The bounded GUI visual refresh merged into `main` as `5592418` (`--no-ff`, 2026-11-21) from
+  `fix/gui-visual-refresh`, which was branched from `main` at `89dbe22` (commits `f7f5627`, `eb69292`,
+  `c137421`, plus the evidence commit). It adds the light/dark token palette and card chrome, the fixed
+  Console/Validation tabs, the 20 %/22 %/32 % layout defaults with the one-time `layout.defaultsRevision`
+  upgrade, and **View → Reset Layout**. Windows
   [44961539734](https://github.com/seb-eis/mocassin-2/actions/runs/44961539734) and macOS
   [44961806131](https://github.com/seb-eis/mocassin-2/actions/runs/44961806131) platform gates are green;
-  `./tools/verify.sh all --require` passed locally. No step branch, step tag, parity row, ADR, or amendment is
+  `./tools/verify.sh all --require` passed locally. No step branch, step tag, parity row, ADR, or amendment was
   created; the implementation evidence is in
   [`maintenance/2026-11-21-gui-visual-refresh.md`](maintenance/2026-11-21-gui-visual-refresh.md).
-- The fixed accent family GUI maintenance fix is implemented on `fix/gui-accent-propagation` from `main` at
-  `19cb6ffe190e02449ce8b827706f365f2ea7afe2` (commits `8021cb9`, `e3a3f4e`, and the evidence commits) and
-  awaits the owner's `--no-ff` merge approval. It removes the Settings accent choice and the
-  `AccentPalette`/reader/validator path, delivers the fixed `#007ACC` palette and high-contrast family to the
-  realized CheckBox/Slider/TreeView/ProgressBar/TextBox parts with targeted selected-state styles, and accepts
-  a legacy `accent` property as a silent no-op. Windows
+- The fixed accent family GUI maintenance fix merged into `main` as `033da6f` (`--no-ff`, 2026-11-22) from
+  `fix/gui-accent-propagation`, which was branched from `main` at
+  `19cb6ffe190e02449ce8b827706f365f2ea7afe2` (commits `8021cb9`, `e3a3f4e`, and the evidence commits). It
+  removes the Settings accent choice and the `AccentPalette`/reader/validator path, delivers the fixed `#007ACC`
+  palette and high-contrast family to the realized CheckBox/Slider/TreeView/ProgressBar/TextBox parts with
+  targeted selected-state styles, and accepts a legacy `accent` property as a silent no-op. Windows
   [45016997359](https://github.com/seb-eis/mocassin-2/actions/runs/45016997359) and macOS
   [45017296087](https://github.com/seb-eis/mocassin-2/actions/runs/45017296087) platform gates are green;
   `./tools/verify.sh all --require` passed locally with 301 App tests. No step branch, step tag, parity row,
-  ADR, interaction-contract, or format change is created; the implementation evidence is in
+  ADR, interaction-contract, or format change was created; the implementation evidence is in
   [`maintenance/2026-11-22-gui-accent-propagation.md`](maintenance/2026-11-22-gui-accent-propagation.md).
+- The open investigation branch `fix/gui-palette-freeze` (command-palette freeze — negative reproduction, no fix
+  shipped) is **kept as evidence per owner decision 2026-11-22**; it is not merged and not deleted. Its record
+  `docs/planning/maintenance/2026-11-22-gui-palette-freeze.md` exists only on that branch, not on `main` — see
+  the record on the branch.
 - Step 08 received a maintenance fix on 2026-11-20 on branch `fix/step-08-equivalent-start-mapping` (commits
   `1899421`, `85e27b2`, `4f5059e`), merged into `main` as `1f5b473` with the owner's approval. A centered group
   now emits one direction with every translation-equivalent start and a cross-bucket `jump_mapping`; the
   `msl-v1`/`amend-1-net10` canonical summaries are unchanged. The `step-08` tag and merge are unchanged.
   Step 13's `step-13-centered` fixture consumes the fixed compiler; the later `4973d02` smoke bound is a
   separate shared-runner test-budget change.
+- The model-binding policy was reconciled with the owner's `ea53c47` agent-definition change on 2026-11-23 (owner
+  decision, Option B): the strong tier (`lead`, `design`, `review`) is `opencode-go/deepseek-v4.1-flash` for cost,
+  with `docs/development/model-economics.md` §6 and `tools/tests/test_opencode_binding.py` updated to match. Merged
+  as `8899569` (`--no-ff`) from `docs/model-binding-reconciliation` (`cf6be8e`); main CI
+  [45263507253](https://github.com/seb-eis/mocassin-2/actions/runs/45263507253) is green with every code job
+  path-filtered out (the change is docs/tools-only); the branch was deleted.
 - Milestones M0–M3 were backfilled on 2026-11-12 with annotated tags on the existing step merge commits:
   `milestone-m0` → `47a9a90`, `milestone-m1` → `7b4a994`, `milestone-m2` → `dbf5691`, `milestone-m3` →
   `3ed558a`. Tags were pushed to `origin`; no step tag was moved.
 - Milestones M4 and M5 were backfilled on 2026-11-18 with annotated tags on the existing step merge commits:
   `milestone-m4` → `f91fc63` (Step 08, first compiled model) and `milestone-m5` → `ec2e04a` (Step 12, first
   package). Tags were pushed to `origin`; no existing tag was moved or deleted.
+- The 2026-11-27 policy update `POLICY-2026-11-27` adopts the upstream workflow disciplines: nine
+  task-discipline pages under `docs/development/` with eight matching skills, `GLOSSARY.md`,
+  research/prototype/retrospective record homes, the advisory senior consultation, the Standards/Spec review axes
+  with an `Axis` column in the three record templates, the agent output contract in `AGENTS.md` §17, and the
+  `default`/`senior` tier names (`senior` is `opencode-go/deepseek-v4-pro`). The earlier tier wording in this
+  dashboard and in `docs/planning/maintenance/` is historical and is not rewritten. The change is recorded in
+  [`reviews/policy-update-2026-11-27-workflow-disciplines.md`](reviews/policy-update-2026-11-27-workflow-disciplines.md).
+- **Revert obligation, 2026-11-27 → 2026-12-11.** By owner decision the `dev-free` binding is temporarily
+  `opencode-go/hungerg-free` (HungerG Free, cost 0) for a cost experiment; `dev` remains the paid
+  `opencode-go/deepseek-v4.1-flash` default and fallback, and no other role changed. On **2026-12-11** the
+  binding reverts to `opencode/deepseek-v4.1-flash-free`. Revert steps, scope, and risks:
+  [`maintenance/2026-11-27-temporary-free-dev-binding.md`](maintenance/2026-11-27-temporary-free-dev-binding.md).
 - Tag names record completed checkpoints; they do not replace this dashboard.

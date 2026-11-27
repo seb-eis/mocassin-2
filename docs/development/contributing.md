@@ -46,6 +46,10 @@ contributor sequence.
 | Gate | Normative home |
 | --- | --- |
 | Branch model, feature squash, step completion, tags | `AGENTS.md` §3.1–§3.7 |
+| Task disciplines | `docs/development/index.md` and each discipline page |
+| Review axes | `docs/development/review-axes.md` |
+| Senior escalation | `docs/development/senior-consultation.md` |
+| Agent output contract | `AGENTS.md` §17 |
 | Design review | `AGENTS.md` §3.9 and `docs/planning/reviews/README.md` |
 | Step audit | `AGENTS.md` §3.10 and `docs/planning/audits/README.md` |
 | Closeout evidence and merge-tree rule | `docs/planning/closeout/README.md` |

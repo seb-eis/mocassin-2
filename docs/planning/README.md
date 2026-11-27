@@ -54,6 +54,11 @@ original behaviour to preserve, the target design, concrete tasks, acceptance cr
     plan and not an implementation authorization.
 19. [`reviews/cross-cutting/README.md`](reviews/cross-cutting/README.md) — cross-cutting phase-checkpoint
     reviews: policies and planning, architecture and design status, and documentation status.
+20. [`research/README.md`](research/README.md), [`prototypes/README.md`](prototypes/README.md), and
+    [`retrospectives/README.md`](retrospectives/README.md) — cited research notes, prototype briefs, and
+    environment retrospectives.
+21. [`reviews/senior/README.md`](reviews/senior/README.md) — advisory senior consultation records after two
+    blocked standard rounds of the same gate.
 
 ## Decisions already made
 
@@ -99,7 +104,8 @@ items are tracked in [`05-open-decisions.md`](05-open-decisions.md).
 | E. Results | [22](steps/step-22-python-analysis-api.md) | Python `.mcs`/`.msr` reader, basic evaluations, pytest, mkdocstrings |
 | F. GUI | [23A](steps/step-23a-workspace-and-project-lifecycle.md) | Avalonia workspace, navigation, settings, project lifecycle |
 | F. GUI | [23B](steps/step-23b-editing-diagnostics-and-recovery.md) | Editing/undo, validation surface, dirty state, autosave, recovery |
-| F. GUI | [24](steps/step-24-model-editors-particle-structure-transitions.md) | Particle, structure, and transition editors |
+| F. GUI | [24A](steps/step-24a-model-editors-particles-and-structure.md) | Shared editor framework, particles and sets, structure and sites |
+| F. GUI | [24B](steps/step-24b-model-editors-transitions.md) | State changes, chains, KMC/MMC transition editors, compile preview |
 | F. GUI | [25](steps/step-25-model-editors-energy-lattice-simulations.md) | Energy, lattice, and simulation editors |
 | F. GUI | [26](steps/step-26-parameterization-job-templates-and-build-ui.md) | Parameterization, job templates, build/deploy UI |
 | F. GUI | [27](steps/step-27-3d-viewer-and-visualization.md) | Cross-platform 3D viewer and overlays |
@@ -133,6 +139,12 @@ items are tracked in [`05-open-decisions.md`](05-open-decisions.md).
   record the result in [`status.md`](status.md) using [`drift-checks/_template.md`](drift-checks/_template.md).
 - Record Sev 1/2 postmortems in [`incidents/`](incidents/) using the template; follow
   [`../development/incident-and-rollback.md`](../development/incident-and-rollback.md).
+- Task-level practices live in [`../development/index.md`](../development/index.md): codebase design, bug
+  diagnosis, domain language, discovery, prototypes, research, review axes, TDD, and retrospectives. They link the
+  normative rule; they do not restate it.
+- A policy-update review uses `reviews/policy-<YYYY-MM-DD>-<slug>.md` and the classes in
+  [`../development/design-proportionality.md` §1](../development/design-proportionality.md#1-design-class).
+  A senior consultation is advisory and records under `reviews/senior/` after two blocked standard rounds.
 - The normative rule homes are listed in [`AGENTS.md` §3.15](../../AGENTS.md).
 - Scientific behaviour is specified in prose and tests before implementation. When the original behaviour
   is ambiguous, document the chosen interpretation in the step page.
