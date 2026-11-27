@@ -26,8 +26,8 @@ cheaper than an expensive model that also finishes in one pass, and both are che
 Five rules, in order:
 
 1. **Free capacity first.** Boilerplate and throwaway work use a free model. Ordinary implementation uses the free
-   variant of the default tier (`dev-free`). The paid default (`dev`) is the fallback when the free variant is
-   rate-limited, degraded, or withdrawn.
+   variant of the default tier (`dev-free`, bound to a temporary free model until 2026-12-11 — see §6). The paid
+   default (`dev`) is the fallback when the free variant is rate-limited, degraded, or withdrawn.
 2. **The default tier carries the standing roles.** Lead, design, dev, and review use
    `opencode-go/deepseek-v4.1-flash`. Implementation is free variant first and paid variant second.
 3. **Senior is the only escalation.** A focused senior consultation uses `opencode-go/deepseek-v4-pro`, after the
@@ -141,13 +141,21 @@ bindings of one dev role:
 | --- | --- | --- |
 | default | `lead`, `design`, `review` | `opencode-go/deepseek-v4.1-flash` |
 | default | `dev` | `opencode-go/deepseek-v4.1-flash` |
-| default, free | `dev-free` | `opencode/deepseek-v4.1-flash-free` |
+| default, free (temporary) | `dev-free` | `opencode-go/hungerg-free` |
 | senior | `senior` | `opencode-go/deepseek-v4-pro` |
 
 **Re-pinned 2026-11-23.** By owner decision the lead, design, and review binding moved from
 `opencode-go/glm-5.3` to `opencode-go/deepseek-v4.1-flash` for cost. **Adopted 2026-11-27.** The tier names are now
 `default` and `senior`; `senior` is the only escalation. The agent files (`.opencode/agents/*.md`) carry the binding
 and `tools/tests/test_opencode_binding.py` enforces this table, so a tier change updates both with it.
+
+**Temporary dev-free exception, 2026-11-27 to 2026-12-11.** By owner decision the `dev-free` binding runs
+HungerG Free (`opencode-go/hungerg-free`, cost 0 in the provider catalog) for a cost-measurement experiment. The
+scope is only the `dev-free` binding: `dev` remains the paid `default` binding and the fallback, and `lead`,
+`design`, `review`, and `senior` are unchanged. This is a temporary exception to "free variant of the default
+tier" (section 2 rule 1), not a tier change. On **2026-12-11** the binding reverts to the standard
+`opencode/deepseek-v4.1-flash-free`; the revert steps are in
+[`docs/planning/maintenance/2026-11-27-temporary-free-dev-binding.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/maintenance/2026-11-27-temporary-free-dev-binding.md).
 
 The dev role has two bindings so the lead can execute the free-first rule: it spawns `dev-free`, and when the
 spawn fails or that binding reports a rate limit, a degraded model, or unavailability, it re-spawns the same
