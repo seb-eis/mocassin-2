@@ -920,10 +920,13 @@ Severity values: **Blocker**, **Major**, **Minor**, **Note**. Origin: **design**
 
 ## Record state
 
-**State:** Re-review required — round 2 pending (round 1 was `Changes required`; see `Review round 1` and
-`## Re-review request (round 2)`)
+**State:** Ready with notes
 
-`Re-review required` is a record state, not a verdict.
+> Round-2 state is `Ready with notes`: no Blocker or Major remains. R2-1 is Minor and R2-2/R2-3 are Notes; the
+> human owner must accept or defer them explicitly before implementation starts. Round-1 findings, evidence, and
+> verdict are unchanged below; the round-2 verdict is in `### Re-review round 2`.
+
+`Re-review required` is a record state, not a verdict. Round 2 used `Ready with notes` as its verdict.
 
 ## Reviewer independence
 
@@ -1064,29 +1067,46 @@ unchanged.
 This checklist asks what the design specifies, not whether the implementation exists. Existence checks are in
 `## Post-implementation verification`. The round-1 checklist above is historical and its item text is unchanged.
 
-- [ ] **M-1:** `design-proportionality.md` §1 is the single home for the policy-update class trigger; §9.1 and
-      the one-home map link it and do not define a second trigger.
-- [ ] **M-2:** the senior trigger names design review, audit, cross-cutting review, and policy-update review;
-      the record naming and binding allow `policy-<date>-<slug>-M.md`.
-- [ ] **M-3:** the agent prompts contain no `workhorse`, `strong tier`, `strong-tier`, or bare `strong`; the dev
+- [x] **M-1:** `design-proportionality.md` §1 is the single home for the policy-update class trigger; §9.1 and
+      the one-home map link it and do not define a second trigger. — Verified: the trigger is only at
+      `design-proportionality.md:25-32`; `reviews/README.md:230-233` says "the trigger is not repeated here". R2-1
+      records that the class *definition* sentence is still duplicated.
+- [x] **M-2:** the senior trigger names design review, audit, cross-cutting review, and policy-update review;
+      the record naming and binding allow `policy-<date>-<slug>-M.md`. — Verified in `senior-consultation.md:13-21`,
+      record B1/B3, and the round-2 checklist. R2-2 notes `dev.md`'s "review/audit" shorthand.
+- [x] **M-3:** the agent prompts contain no `workhorse`, `strong tier`, `strong-tier`, or bare `strong`; the dev
       escalation is re-brief-on-default plus the two-blocked-round senior escalation; the checker/binding plan
-      covers `.opencode/agents/*.md` and the retired forms.
-- [ ] **m-1:** published-to-root/planning links use absolute GitHub URLs; `GLOSSARY.md` is in the checker's
-      `ROOT_FILES` plan; H1 no longer claims the relative link is link-checked.
-- [ ] **m-2:** the round-2 checklist asks design-specification questions; existence checks are in the
-      verification section; the round-1 checklist text is unchanged.
-- [ ] **m-3:** the risk table has an Owner for every risk.
-- [ ] **m-4:** C2 states the `Origin`/`Area` difference and the aligned columns.
-- [ ] **m-5:** B3 names the §9 prose sentences; G1 requires the binding text, not just the word `senior`.
-- [ ] **m-6:** the senior is a fresh context in the page, the agent body, and the review-prompt independence
-      sentence.
-- [ ] **m-7:** the lead may facilitate discovery and recommend; recommending is not deciding.
-- [ ] **m-8:** A6 says ten development pages and includes `senior-consultation.md`.
-- [ ] **n-1:** the Purpose states the minimal normative edits in the design set.
-- [ ] **n-2:** accepted with the count/commit context.
-- [ ] The normative-home map is consistent with the fixed pages.
-- [ ] The file manifest lists the round-2 additions/changes and still protects historical records.
-- [ ] The post-implementation verification remains one bounded fresh pass, separate from this design round.
+      covers `.opencode/agents/*.md` and the retired forms. — Verified by grep over the changed agents and
+      process pages; `dev.md:30-32` uses the re-brief/senior rule; E6 and G1 cover the same file set.
+- [x] **m-1:** published-to-root/planning links use absolute GitHub URLs; `GLOSSARY.md` is in the checker's
+      `ROOT_FILES` plan; H1 no longer claims the relative link is link-checked. — Verified at record A2/H1/G1; the
+      docs gate passes with the current absolute-URL pages. GitHub redirects a directory `blob` URL to `tree`.
+- [x] **m-2:** the round-2 checklist asks design-specification questions; existence checks are in the
+      verification section; the round-1 checklist text is unchanged. — Verified by diff: only the round-2 scope
+      note was added; no round-1 item text or mark changed.
+- [x] **m-3:** the risk table has an Owner for every risk. — Verified at record lines 634-644; every row names an
+      owner.
+- [x] **m-4:** C2 states the `Origin`/`Area` difference and the aligned columns. — Verified at record lines
+      326-332. R2-3 is a Note on the added `ID`/`Recommendation` columns not being in the checker.
+- [x] **m-5:** B3 names the §9 prose sentences; G1 requires the binding text, not just the word `senior`. —
+      Verified at record B3 and G1; the §9 prose sentences are named and the required strings are specific.
+- [x] **m-6:** the senior is a fresh context in the page, the agent body, and the review-prompt independence
+      sentence. — Verified in `senior-consultation.md:42-46`, record B2, and `.opencode/agents/review.md`.
+- [x] **m-7:** the lead may facilitate discovery and recommend; recommending is not deciding. — Verified in
+      `orchestration.md` §2 ("Facilitate discovery") and §3 ("recommending is not deciding").
+- [x] **m-8:** A6 says ten development pages and includes `senior-consultation.md`. — Verified at record A6;
+      `docs/development/index.md` and `zensical.toml` both contain the senior page.
+- [x] **n-1:** the Purpose states the minimal normative edits in the design set. — Verified at record lines
+      34-41.
+- [x] **n-2:** accepted with the count/commit context. — Accepted; the policy gate at `8f55aeb` reports 1757
+      tracked text files, matching the round-2 evidence.
+- [x] The normative-home map is consistent with the fixed pages. — Verified rows 543-544 name the fixed homes;
+      R2-1 is the only remaining duplication.
+- [x] The file manifest lists the round-2 additions/changes and still protects historical records. — Verified
+      against `git diff --name-only origin/main...HEAD`: the 12 changed paths match the manifest, and no
+      historical/step/audit/closeout path is present.
+- [x] The post-implementation verification remains one bounded fresh pass, separate from this design round. —
+      Section I is unchanged and the verification section is still `Not run`.
 
 ## Review rounds
 
@@ -1164,6 +1184,80 @@ pass at the frozen commit. The three Major findings are material inconsistencies
 fixable in a small edit. The Minor and Note findings are recorded for the owner's accept/defer decision and do
 not by themselves justify another round; the Majors do. A fresh round on a re-frozen commit is required, and a
 third Full round would need the owner's decision and a recorded reason.
+
+### Re-review round 2
+
+#### Independence and frozen state
+
+I am a fresh, independent review context. I did not author or implement this design and have no shared
+conversation with the design agent, the dev, the lead, or the round-1 review agent. The lead supplied only the
+design freeze `fcbd20ed8ef2ad201746fb46b064c9db2e80d056`, the round-2 request tip
+`8f55aeb485e640fe6b273d6b2c21afa757f784aa`, this record, and the repository; no desired verdict, summary, or
+conversation history was supplied. My model is DeepSeek V4.1 Flash 1017 (`opencode-go/deepseek-v4.1-flash`).
+
+The design under review is the 12-file design set at `fcbd20e` over `origin/main` `245e34a`. The request commit
+`8f55aeb` changes only this record (`git diff --stat fcbd20e HEAD`: one file, +33/−25), so the gate results below
+apply to the design tree; the record text is the round-2 request. Round 1 is preserved: the `### Review round 1`
+block is byte-identical to `669bb73` (74 lines, 4972 bytes, `cmp` clean), and the round-1 findings and checklist
+item text are unchanged (only the design agent's `Record state` update and the round-2 scope note were added).
+
+#### Commands and results
+
+| Command | Result |
+| --- | --- |
+| `git rev-parse HEAD` | `8f55aeb485e640fe6b273d6b2c21afa757f784aa` |
+| `git rev-parse origin/main` | `245e34aff7255476d73539d4cc43f068627f0cba` |
+| `git status --short` | empty |
+| `git diff --stat fcbd20e HEAD` | this record only, +33/−25 |
+| `git diff --check` | exit 0, no output |
+| `./tools/verify.sh docs --require` | **exit 0**; math 215 files, links 218 files; Zensical strict "No issues found"; DocFX 0 warnings/0 errors; rustdoc 7 crates; `Documentation built in …/site`; `Closeout gate completed with required checks enabled.` |
+| `./tools/verify.sh policy --require` | **exit 0**; 26 contract files; 5 + 4 + 2 projection fixtures; 274 space-group settings; `Process consistency: OK`; `Ran 62 tests … OK`; 1210 SPDX files; 1757 tracked text files; `advisories ok, bans ok, licenses ok, sources ok`; `Closeout gate completed with required checks enabled.` |
+| `python tools/check_docs_links.py` | exit 0, `Documentation links OK (218 files scanned).` |
+| `python tools/check_process_consistency.py` | exit 0, `Process consistency: OK` |
+| `python tools/check_doc_math.py` | exit 0, `Documentation math conventions OK (215 files scanned).` |
+| round-1 block `cmp` against `669bb73` | identical |
+
+#### Round-1 finding verification
+
+| Finding | Fix location | Result |
+| --- | --- | --- |
+| M-1 | `design-proportionality.md:25-32`; `reviews/README.md:230-233`; record lines 103-105 and map row 543 | **Fixed.** One trigger home; §9.1 links and disclaims. R2-1 notes the definition sentence is repeated. |
+| M-2 | `senior-consultation.md:13-21`; record B1/B3 and checklist M-2 | **Fixed.** All four families named; the binding and record naming allow policy records. R2-2 notes `dev.md`'s shorthand. |
+| M-3 | `.opencode/agents/{design,dev-free,dev,lead,review}.md`; `design-proportionality.md:11`; `orchestration.md:21-22,36-39`; record E5/E6/G1 | **Fixed.** Grep finds no retired forms in the changed agents or the rewritten pages; the checker/binding plan covers the same set. |
+| m-1 | record A2 (209-214), H1 (476-481), G1 (457-458) | **Fixed.** Absolute GitHub URLs; docs gate passes; a directory `blob` URL redirects to `tree`. |
+| m-2 | record round-2 checklist | **Fixed.** Design-specification questions; round-1 item text unchanged. |
+| m-3 | record risks (634-644) | **Fixed.** Owner column present for every risk. |
+| m-4 | record C2 (326-332) | **Fixed.** Origin/Area difference and aligned columns stated. R2-3 notes the added `ID`/`Recommendation` columns are not checked. |
+| m-5 | record B3 (286-301), G1 (442-451) | **Fixed.** §9 prose named; the required strings are specific. |
+| m-6 | `senior-consultation.md:42-46`; record B2 (279-281); `.opencode/agents/review.md` | **Fixed.** Fresh context stated in all three. |
+| m-7 | `orchestration.md` §2/§3; record A5 (233-237) | **Fixed.** "Facilitate discovery"; "recommending is not deciding". |
+| m-8 | record A6 (245-248); `docs/development/index.md`; `zensical.toml` | **Fixed.** Ten pages named; the senior page is in the index and nav. |
+| n-1 | record Purpose (34-41) | **Fixed.** Minimal normative edits named. |
+| n-2 | record round-2 evidence (710-713); policy gate | **Accepted.** 1757 matches the gate at `8f55aeb`. |
+
+#### Findings
+
+Three findings: one **Minor** and two **Notes**. No Blocker or Major.
+
+| ID | Axis | Severity | Origin | Finding | Evidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- |
+| R2-1 | Spec | **Minor** | **documentation** | **The policy-update class definition is now stated twice.** `design-proportionality.md` §1 and `reviews/README.md` §9.1 open with the same sentence ("A policy-update review is the design-review gate for a process, workflow, role, or agent-prompt change that is not a step design"). The *trigger* has one home and §9.1 says it is not repeated, so the round-1 M-1 defect is fixed; the duplicated definition is a drift risk, not a contradiction. | `docs/development/design-proportionality.md:25-27`; `docs/planning/reviews/README.md:219-221` | Make §9.1's opening a one-line summary that links §1, or accept the duplication as a deliberate summary. |
+| R2-2 | Spec | **Note** | **documentation** | **The dev prompt compresses the senior trigger to "a review/audit deadlock".** The normative trigger names design review, audit, cross-cutting review, and policy-update review; "review/audit" is a generic shorthand that could be read as excluding the last two. The lead, not the dev, decides the spawn, so this is not material. | `.opencode/agents/dev.md:30-32`; `docs/development/senior-consultation.md:15-16` | Say "review or audit deadlock" or name the four gate types if the prompt should mirror the trigger exactly. |
+| R2-3 | Standards | **Note** | **evidence** | **C2 adds `ID` and `Recommendation` to the step-design and audit findings tables, but G1 only checks for an `Axis` column, and the resolution detail says only "gain Axis and keep Origin".** The target schema is explicit and implementable; the two extra columns are not covered by the planned checker, so a partial implementation would pass. | record C2 (326-332), G1 (445); `docs/planning/reviews/step-design-review-template.md:86`; `docs/planning/audits/step-audit-template.md:90` | Either state that only the `Axis` column is required, or add the `ID`/`Recommendation` requirement to G1. |
+
+#### Verdict
+
+- [ ] Ready for implementation
+- [x] Ready with notes
+- [ ] Changes required
+- [ ] Waived
+
+**Ready with notes.** No Blocker or Major remains, so the round-2 design review passes the Full stop rule and a
+third round is not justified. The three round-1 Majors are fixed in the normative documents and agent prompts,
+the eight Minors are fixed, and n-2 is accepted. The revised published-page link plan is implementable: the
+absolute-URL convention matches the existing pages, `check_docs_links.py` treats the URLs as external, and the
+docs gate passes with strict Zensical. The remaining R2-1 (Minor) and R2-2/R2-3 (Notes) are recorded for explicit
+owner acceptance or deferral; none blocks implementation. Round-1 text is unchanged.
 
 ## Post-implementation verification
 
