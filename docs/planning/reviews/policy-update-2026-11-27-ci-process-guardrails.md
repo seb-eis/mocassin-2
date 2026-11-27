@@ -21,8 +21,8 @@
 | Request tip | The record commit whose parent is `f00fd0f` (this commit; no rule change) |
 | Request owner | Dev |
 | Review initiated by | Lead |
-| Review agent | — (not yet assigned) |
-| Review date | — (not yet assigned) |
+| Review agent | DeepSeek V4.1 Flash 1017 (`opencode-go/deepseek-v4.1-flash`), fresh independent context |
+| Review date | 2026-11-27 |
 | Authority | Lead assignment of the CI guardrail change, 2026-11-27; owner decision recorded under “Owner decisions” |
 
 This is a **design review of the change at the reviewed commit**. The branch already carries the implementation,
@@ -271,73 +271,204 @@ standards.
 
 ### A. Problem, class, and scope
 
-- [ ] **Spec** — The request states the concrete failure (guardrails added, no CI consumer, two green merges) and it
+- [x] **Spec** — The request states the concrete failure (guardrails added, no CI consumer, two green merges) and it
       is reproducible from the branch and the gate history.
-- [ ] **Spec** — Full is the right class: the trigger names the CI policy and the gate's enforcement coverage, and
+      _Verified: `git show 8e9afef:.github/workflows/ci.yml` and `git show be930c4:.github/workflows/ci.yml` contain
+      no `process:` job; the CI run history itself is not in the clone._
+- [x] **Spec** — Full is the right class: the trigger names the CI policy and the gate's enforcement coverage, and
       the change is not argued down to Light.
-- [ ] **Spec** — Scope and non-goals are explicit; the non-goals protect the cost policy (no new run, no widened
+      _Verified against design-proportionality §1: the change edits the CI policy and a gate's enforcement
+      coverage, both Full triggers._
+- [x] **Spec** — Scope and non-goals are explicit; the non-goals protect the cost policy (no new run, no widened
       job) and the isolated review boundary (no Step 15, no binding change).
+      _Verified: `git diff --name-only` has 7 files; none is a Step 15 page, a binding, or another job._
 
 ### B. Job scope and cheapness
 
-- [ ] **Spec** — The job runs exactly the four guardrails that lacked a consumer, and no other check moves into it.
-- [ ] **Standards** — It installs no dependency, builds neither .NET nor Rust, has a timeout, and uses only the
+- [x] **Spec** — The job runs exactly the four guardrails that lacked a consumer, and no other check moves into it.
+      _Verified: the four steps match D1; `check_doc_math.py` runs non-strict, exactly as `tools/verify.sh` runs it._
+- [x] **Standards** — It installs no dependency, builds neither .NET nor Rust, has a timeout, and uses only the
       standard library.
-- [ ] **Standards** — It is registered where the other Ubuntu-only jobs are, follows their checkout/setup style, and
+      _Verified: `timeout-minutes: 10`; checkout plus `setup-python` only; the `tools/tests` imports are the
+      standard library plus local `tools.*` modules; the suite ran in under one second._
+- [x] **Standards** — It is registered where the other Ubuntu-only jobs are, follows their checkout/setup style, and
       does not inherit a matrix.
+      _Verified: `needs: changes`, the same `if:` expression as the other Ubuntu-only jobs, `ubuntu-latest`, no
+      `strategy`/matrix._
 
 ### C. Trigger correctness
 
 - [ ] **Spec** — Every path family the four checks read is covered, and the case arm, `ci-policy.md` §3, and
       `AGENTS.md` §3.13 agree.
-- [ ] **Spec** — The four added families each have a stated reason tied to a check the job runs.
-- [ ] **Standards** — No other job is widened: a contracts-only path still enables only `contracts`, and a code path
+      _Not met: the three filter homes agree, but several files that `check_process_consistency.py` validates are
+      not in the arm — see F-1._
+- [x] **Spec** — The four added families each have a stated reason tied to a check the job runs.
+      _Verified: D3 ties `ci-policy.md`/`status.md` to the status vocabulary and `maintenance`/`drift-checks` to the
+      checker's template and required-file checks; all four are in the arm._
+- [x] **Standards** — No other job is widened: a contracts-only path still enables only `contracts`, and a code path
       never enables `process`.
-- [ ] **Spec** — `ci.yml`, `force_all`, and `platforms=all` enable the job; `platforms=windows`/`macos` do not.
+      _Verified with the shipped filter and by `test_contract_tooling_does_not_enable_the_process_job` and
+      `test_code_changes_do_not_enable_the_process_job`._
+- [x] **Spec** — `ci.yml`, `force_all`, and `platforms=all` enable the job; `platforms=windows`/`macos` do not.
+      _Verified against the condition and the platform-gate evaluator; `force_all` with `windows`/`macos` is still
+      skipped because the `platforms` clause is false (F-4)._
 
 ### D. Cost and budget
 
-- [ ] **Spec** — The added cost is bounded and described, and the §5 budget-guard reading is recorded as an owner
+- [x] **Spec** — The added cost is bounded and described, and the §5 budget-guard reading is recorded as an owner
       decision rather than assumed.
-- [ ] **Standards** — No new trigger, runner, matrix, secret, or dependency is introduced, so §3.13's CI cost policy
+      _Verified: Owner decision 3; see question 1 in Evidence and F-5._
+- [x] **Standards** — No new trigger, runner, matrix, secret, or dependency is introduced, so §3.13's CI cost policy
       and the closeout-only rule still hold.
+      _Verified: `on:` is unchanged, the job sits inside the existing closeout/main runs, and it has no
+      matrix/secret/dependency._
 
 ### E. Discovery consistency and tests
 
-- [ ] **Standards** — The job's discovery command equals `tools/verify.sh`'s, and the `-t .` root is what the suite
+- [x] **Standards** — The job's discovery command equals `tools/verify.sh`'s, and the `-t .` root is what the suite
       needs; a drift guard fails if they diverge.
-- [ ] **Spec** — The filter proof covers a positive list, a `.opencode` path, a `docs/planning/status.md` path, and
+      _Verified: `tools/verify.sh:180` and the job both contain `python -m unittest discover -s tools/tests -t .`;
+      the red proof fails the guard at `80cffd6`._
+- [x] **Spec** — The filter proof covers a positive list, a `.opencode` path, a `docs/planning/status.md` path, and
       the negative `tools/contracts/**` case.
-- [ ] **Standards** — The new tests fail on the pre-fix tree for the reasons claimed, and the drift guard is a
+      _Verified: 16 positive families, `.opencode/agents/dev-free.md`, `docs/planning/status.md`, and the
+      `tools/contracts/manifest.json` / `tools/check-license-headers.py` negatives._
+- [x] **Standards** — The new tests fail on the pre-fix tree for the reasons claimed, and the drift guard is a
       divergence check, not a restatement of the current list.
+      _Verified: six failures at `80cffd6` with only the new test file copied in; the documented-list test passed
+      there because the workflow and both prose homes agreed on the smaller list, as the request says._
 
 ### F. Documentation, evidence, and gates
 
-- [ ] **Spec** — `ci-policy.md` §2–§3, `AGENTS.md` §3.13, `contributing.md`, and `status.md` agree with the workflow
+- [x] **Spec** — `ci-policy.md` §2–§3, `AGENTS.md` §3.13, `contributing.md`, and `status.md` agree with the workflow
       and with each other.
-- [ ] **Standards** — `check_process_consistency.py`, `check_docs_links.py`, `check_doc_math.py`, and both
+      _Verified: the two normative filter lists equal the case arm after `**`→`*` normalisation; the job-table row
+      and the status note match. The stale workflow header comment is F-2._
+- [x] **Standards** — `check_process_consistency.py`, `check_docs_links.py`, `check_doc_math.py`, and both
       `verify.sh --require` modes pass at the reviewed commit, and the recorded counts match the tree.
-- [ ] **Spec** — No step page, audit, closeout, tag, code, contract, format, or generated artifact is touched.
-- [ ] **Standards** — The record follows §9.1: request-owned fields, a reviewer-owned section, one verdict, one
+      _Verified: exact outputs in Evidence; 238 link files, 234 math files, 77 tests, 1211 SPDX files, 1790 tracked
+      text files._
+- [x] **Spec** — No step page, audit, closeout, tag, code, contract, format, or generated artifact is touched.
+      _Verified: the 7-file `git diff --name-only` contains only the workflow, three docs, the status note, and two
+      test files._
+- [x] **Standards** — The record follows §9.1: request-owned fields, a reviewer-owned section, one verdict, one
       record commit with `[skip ci]`.
+      _Verified shape; the filename pattern is a separate §9.1 deviation (F-3). This record commit touches only this
+      file._
 
 ## Evidence
 
-Review agent: — (to be filled by the review agent). Include the frozen and reviewed commits, the three-dot diff,
-the commands above with their exact output, and the files read.
+### Review round 1 — 2026-11-27
+
+> **Reviewer independence.** I am a fresh, independent review context. I did not author or implement this change
+> and have no shared conversation with the dev, design agent, lead, or any other review agent. The lead supplied
+> only the frozen commit, the request record, the repository, and the required commands; no desired verdict,
+> summary, or conversation history was provided. My model is DeepSeek V4.1 Flash 1017
+> (`opencode-go/deepseek-v4.1-flash`).
+
+**Pinned point.** Base `be930c4e1d21bb96cde08bdb67ed20cb59631a20` (`origin/main`); reviewed tree
+`f00fd0fe1b8b529fe703f9a8fd43af87d0d59589`; request commit
+`061f761d0621c7bf60bd658c610bbfe35afaa738` (the subject record commit, documentation-only). This round's record
+commit has parent `061f761`; the reviewed delta is the three-dot diff `be930c4...f00fd0f` (7 files, +367/−17),
+and the only later change is the request text that already sits in `061f761`.
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Refs | `git rev-parse HEAD` / `git rev-parse origin/main` | `061f761…` / `be930c4…` |
+| Diff | `git diff --stat be930c4...f00fd0f` | 7 files, +367/−17 |
+| Diff names | `git diff --name-only be930c4...f00fd0f` | `.github/workflows/ci.yml`, `AGENTS.md`, `docs/development/contributing.md`, `docs/planning/ci-policy.md`, `docs/planning/status.md`, `tools/tests/test_ci_platform_gate.py`, `tools/tests/test_ci_process_job.py` |
+| Whitespace | `git diff --check be930c4...f00fd0f` | exit 0, no output |
+| Tool suite | `python -m unittest discover -s tools/tests -t .` | `Ran 77 tests in 0.869s` — `OK` |
+| Process checker | `python tools/check_process_consistency.py` | `Process consistency: OK` |
+| Links | `python tools/check_docs_links.py` | `Documentation links OK (238 files scanned).` |
+| Math | `python tools/check_doc_math.py` | `Documentation math conventions OK (234 files scanned).` |
+| Docs gate | `./tools/verify.sh docs --require` | exit 0 — `Documentation math conventions OK (234 files scanned).`; `Documentation links OK (238 files scanned).`; `No issues found`; DocFX 0 warnings / 0 errors; rustdoc for 7 crates; `Documentation built in …/site`; `Closeout gate completed with required checks enabled.` |
+| Policy gate | `./tools/verify.sh policy --require` | exit 0 — `Public API is compatible with the checked-in baseline.`; `Contract artifacts are current (26 files)`; `space-group catalog is current: 274 settings …`; `Process consistency: OK`; `Ran 77 tests … OK`; `SPDX headers present in 1211 source files`; `No secret patterns found in 1790 tracked text files`; `advisories ok, bans ok, licenses ok, sources ok`; `Closeout gate completed with required checks enabled.` |
+
+**Filter and condition.** I ran the shipped filter by importing the test helper, which extracts the live `run: |`
+body from `ci.yml` and executes it: 16 positive families (`.opencode/*`, `AGENTS.md`, `GLOSSARY.md`,
+`opencode.json`, `docs/development/*`, `docs/planning/reviews/*`, `docs/planning/audits/*`,
+`docs/planning/ci-policy.md`, `docs/planning/status.md`, `docs/planning/maintenance/*`,
+`docs/planning/drift-checks/*`, `zensical.toml`, the three `tools/check_*.py`, `tools/tests/*`) give
+`process=true` and every other area `false`; `tools/contracts/manifest.json` and
+`tools/check-license-headers.py` give `contracts=true`, `process=false`; `src/dotnet`, `src/rust`, and `src/python`
+code paths give `process=false`; `.github/workflows/ci.yml` sets all six area flags true. The documented lists in
+`ci-policy.md` §3 and `AGENTS.md` §3.13 are token-for-token equal to the case arm after the test's `**`→`*`
+normalisation (verified by printing all three sets). Bash `case` treats `*` as matching `/`, so the documented
+`**` forms and the workflow `*` forms are equivalent; I confirmed this with a direct `case` probe. The process
+job's `if:` is character-for-character the same expression as `rust`, `python`, `contracts`, and `api-compat`, and
+`test_ci_platform_gate.py` evaluates it for push/ubuntu/all/windows/macos.
+
+**Red proof reproduced.** `git archive 80cffd6 | tar -x -C /home/node/tmp/redproof`, copied only
+`tools/tests/test_ci_process_job.py` from `f00fd0f`, then `python -m unittest tools.tests.test_ci_process_job -v`:
+`Ran 9 tests`, `FAILED (failures=6)`. The failures were the four paths added by `f00fd0f`
+(`docs/planning/ci-policy.md`, `docs/planning/status.md`, `docs/planning/maintenance/…`,
+`docs/planning/drift-checks/…`), the job-block discovery command, and
+`test_tool_test_discovery_matches_the_verify_script`. `test_documented_filter_lists_match_the_workflow_arm` passed
+at `80cffd6`, as the request says, because the workflow and both prose homes then agreed on the smaller list.
+The scratch tree was `/home/node/tmp/redproof`; the repository was not modified.
+
+**Coverage gap reproduced (F-1).** `REQUIRED_FILES`, `REQUIRED_INTEGRATION`, and `NORMATIVE_FILES` in
+`tools/check_process_consistency.py` list files that no `process` glob matches: `docs/planning/README.md`,
+`docs/planning/04-roadmap.md` (integration text `split trigger`), `docs/planning/closeout/README.md`,
+`docs/planning/closeout/_template.json`, `docs/planning/incidents/_template.md`,
+`docs/planning/research/README.md` and `_template.md`, `docs/planning/prototypes/README.md` and `_template.md`,
+`docs/planning/retrospectives/README.md` and `_template.md`, `tools/check_closeout_evidence.py`, and
+`tools/verify.sh`. `detect(["docs/planning/closeout/_template.json"])` returns every area `false`, including
+`process`. In a scratch copy of `f00fd0f` at `/home/node/tmp/gapproof`, replacing `"merge_tree_ci"` in that
+template made `python tools/check_process_consistency.py` exit 1 with
+`closeout template is missing field: "merge_tree_ci"`. The real tree was not modified.
+
+**Question 1 — does `ci-policy.md` §5's budget guard permit the new job?** Yes, on the recorded reading. §5 says
+"switch to closeout-only CI and ask the owner before adding any run"; this change adds no trigger and no run — it
+adds one short Ubuntu job inside the existing closeout and `main` runs, and it does not widen any other job. The
+owner recorded that reading in Owner decision 3. The wording does not explicitly address a job that increases the
+minutes of an existing run, so a future policy edit should say "run or job" if the intent is spend-based (F-5).
+No owner waiver is missing for this change.
+
+**Question 2 — is one combined Full pass adequate, or is a separate post-implementation verification required?**
+Adequate as approved. `reviews/README.md` §9.1 describes a `## Post-implementation verification` pass at the
+implemented commit; here the reviewed commit is both the design and the implementation (the branch already carries
+the code), so one independent pass answers both the five design questions and the implemented-state questions
+against the same tree. The owner explicitly accepted one standard pass (Owner decision 1), and this round is that
+pass. A short verification section would make the record shape match §9.1 exactly; that is F-6 (Note), not a
+reason for another round.
+
+**Question 3 — does the record filename satisfy §9.1?** Not strictly. Both normative homes
+(`design-proportionality.md` §1 and `reviews/README.md` §9.1) state `policy-<YYYY-MM-DD>-<slug>.md`; this record is
+`policy-update-2026-11-27-ci-process-guardrails.md`, following the earlier record's `policy-update-` prefix. The
+binding's `policy-*.md` glob accepts both, so there is no gate failure, but the pattern is not met (F-3).
+
+**Not run.** No CI run was dispatched for this branch: per the CI policy there are no per-feature or per-push
+runs, and this is a maintenance branch, not a step closeout. The automatic `main` run after an approved merge is
+the CI confirmation. The "two adoption merges went green" CI history is not available in the clone; what is
+reproducible is that `8e9afef` and `be930c4` touched process paths while their `ci.yml` had no `process:` job.
+
+**Files read.** `AGENTS.md` §3.8–§3.13 and §17; `docs/planning/reviews/README.md` §2.2, §5–§9.1, §11;
+`docs/development/design-proportionality.md` §1–§2; `docs/development/review-axes.md`;
+`docs/planning/ci-policy.md` §2–§6; `.github/workflows/ci.yml` (full); `tools/verify.sh` (dispatch and discovery
+line); `tools/check_process_consistency.py`; `tools/check_docs_links.py`; `tools/check_doc_math.py`;
+`tools/tests/test_ci_process_job.py`; `tools/tests/test_ci_platform_gate.py`;
+`docs/development/contributing.md`; `docs/planning/status.md`; the prior policy record's post-implementation
+verification section; `.opencode/agents/review.md`.
 
 ## Findings
 
 | ID | Axis | Severity | Origin | Finding | Evidence | Recommendation |
 | --- | --- | --- | --- | --- | --- | --- |
-| | | | | | | |
+| F-1 | Spec | **Major** | **design** | **The `process` filter still omits normative process files that the same four guardrails validate, so an edit to them can break `check_process_consistency.py` without starting the job — the failure mode this change exists to prevent.** Checklist C claims "Every path family the four checks read is covered", but D5's rationale ("`check_process_consistency.py` validates the maintenance and drift-check templates") applies equally to the closeout, research, prototype, retrospective, and incident templates, the planning index/roadmap, `tools/check_closeout_evidence.py`, and `tools/verify.sh`. The job would be skipped while the checker would fail. | The checker's `REQUIRED_FILES`/`REQUIRED_INTEGRATION`/`NORMATIVE_FILES` list `docs/planning/README.md`, `docs/planning/04-roadmap.md` (`split trigger`), `docs/planning/closeout/README.md`, `docs/planning/closeout/_template.json`, `docs/planning/incidents/_template.md`, `docs/planning/{research,prototypes,retrospectives}/README.md` and `_template.md`, `tools/check_closeout_evidence.py`, and `tools/verify.sh`; none match a `process` glob. Running the shipped filter over `docs/planning/closeout/_template.json` gives `process=false`; in a scratch copy at `f00fd0f`, replacing `"merge_tree_ci"` in that template made the checker exit 1 with `closeout template is missing field: "merge_tree_ci"`. | Add the omitted families to the case arm and to both normative lists (or a bounded `docs/planning/*` set that includes these homes), add their sample paths to `PROCESS_PATHS`, and update the checklist text; alternatively record the residual gap as an accepted risk and drop the "every path family" claim. |
+| F-2 | Standards | Minor | documentation | The `ci.yml` header comment still says "The Rust, Python, contracts, and API-compatibility jobs are Ubuntu-only by job condition" and omits the new process job, although the earlier paragraph of the same comment block was updated to mention "the process/binding checks". | `.github/workflows/ci.yml` lines 18–21 (post-diff); the updated paragraph at lines 7–9. | Add process/binding to the sentence so the workflow header matches the job set. |
+| F-3 | Standards | Minor | documentation | The record filename does not follow the normative `policy-<YYYY-MM-DD>-<slug>.md` pattern; it uses the `policy-update-` prefix of the earlier record. The binding's `policy-*.md` glob accepts both, so this is a process-conformance issue, not a gate failure. | `design-proportionality.md` §1 ("Its record is `docs/planning/reviews/policy-<YYYY-MM-DD>-<slug>.md`") and `reviews/README.md` §9.1 (same pattern); the record path and its justification at lines 33–37. | Rename to `policy-2026-11-27-ci-process-guardrails.md` before merge (the record is new and not linked from a normative page), or record an explicit owner decision that amends the pattern or the precedent. |
+| F-4 | Spec | Note | documentation | The "Decision table: what runs and when" row for "`workflow_dispatch` with `force_all=true`" says the process job runs without qualifying `platforms`. With `platforms=windows` or `macos`, `force_all` sets `process=true` but the job-level condition still skips the job; D4 states this, but the table reads as unconditional. | Record decision-table row (line 175); D4; `ci.yml` line 412. | Qualify the row with "(`platforms=ubuntu` or `all`)". |
+| F-5 | Standards | Note | documentation | `ci-policy.md` §5 says "add no new run without owner approval"; this change adds no trigger or run, only a job inside the existing closeout/main runs, and the owner approved it on that reading. The wording does not explicitly cover a new job that increases the billable minutes of an existing run. | `ci-policy.md` §5; Owner decision 3; unchanged `on:` block in `ci.yml`; Evidence question 1. | In a later policy edit, say "run or job" if the guard is meant to cover added jobs. |
+| F-6 | Standards | Note | design | `reviews/README.md` §9.1 describes a `## Post-implementation verification` section for a policy update; this record has none. The owner approved one combined Full pass and the reviewed commit is both the design and the implementation, so a separate pass is not required, but the record shape does not state that in a verification section. | `reviews/README.md` §9.1 lines 232–243; Owner decision 1; the record preamble at lines 28–31; Evidence question 2. | Optional: add a short `## Post-implementation verification` section recording the combined-pass decision; it does not change this round's verdict or require another round. |
 
 Severity values: **Blocker**, **Major**, **Minor**, **Note**. Origin: **design**, **implementation**,
 **evidence**, or **documentation**. Axis: **Standards** or **Spec**.
 
 ## Record state
 
-**State:** Ready for review
+**State:** Changes required — round 1; F-1 (Major, Spec) is open.
 
 `Ready for review` means the design and the reviewed tree are frozen at `f00fd0f` and the request is complete. A
 `Changes required` verdict returns the work to the dev for a fix commit and a fresh round; `Ready for
@@ -350,11 +481,11 @@ Reviewer only. Tick one.
 
 - [ ] Ready for implementation
 - [ ] Ready with notes
-- [ ] Changes required
+- [x] Changes required
 - [ ] Waived
 
-Follow-up owner:
-Follow-up change:
+Follow-up owner: Dev
+Follow-up change: F-1 (Major, Spec) — add the omitted normative process paths to the `process` arm, both normative filter lists, and the filter proof. F-2/F-3 are Minor and can ride with the fix; F-4–F-6 are Notes for owner acceptance or deferral.
 
 ## Human approval
 
