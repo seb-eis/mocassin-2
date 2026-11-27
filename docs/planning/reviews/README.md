@@ -214,6 +214,30 @@ review is performed.
 The review record keeps each round: `### Review round 1`, `### Re-review round 2`, etc. Never overwrite an
 earlier round.
 
+### 9.1 Policy-update reviews
+
+A **policy-update review** is the design-review gate for a process, workflow, role, or agent-prompt change that
+is not a step design. It uses the same independence, evidence, finding-severity, and verdict rules as a step
+design review, but its record is `docs/planning/reviews/policy-<YYYY-MM-DD>-<slug>.md`.
+
+- The record owner (design agent or dev) writes the request fields, scope, non-goals, decision and mapping
+  tables, checklist, and resolutions. The review agent writes its own metadata, `Record state`, checklist
+  marks, `Evidence`, `Findings`, `Verdict`, and, for the post-implementation verification, the separate
+  verification section.
+- The review agent may edit only the assigned policy record and commits only that file with `[skip ci]`. The
+  binding's `docs/planning/reviews/policy-*.md` allow rule exists for this record class; it does not permit
+  editing any other file.
+- A policy update is `Full` when it changes a gate, a role, the agent binding, the CI policy, or a normative
+  process rule. It uses the full checklist and stops when no Blocker or Major remains.
+- Historical policy records are not rewritten. A later policy update supersedes the affected rule in the
+  normative pages and records the supersession in its own record.
+- A policy-update review may use the senior consultation after two completed standard rounds still leave a
+  Blocker or Major; the senior record is `docs/planning/reviews/senior/policy-<date>-<slug>-M.md` and the
+  senior answer is advisory.
+- The post-implementation verification pass is appended to the same record under
+  `## Post-implementation verification`; it is not a second design round and does not change the design
+  verdict.
+
 ## 10. Step amendment reviews
 
 - Amendment reviews use the same statuses, severity, verdict, and review agent write scope as a normal design
