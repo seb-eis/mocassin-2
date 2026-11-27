@@ -159,11 +159,13 @@ A platform gate keeps the same path filters, concurrency group, permissions, and
 Python runs on 3.13 only. The full 3.11/3.12/3.13 matrix is a manual/nightly concern until the Python surface
 grows enough to justify it.
 
-The process/binding job is deliberately cheap: it installs nothing and builds neither .NET nor Rust. It runs
-`tools/check_process_consistency.py`, `tools/check_docs_links.py`, `tools/check_doc_math.py`, and the
-`tools/tests` suite, which use only the Python standard library. It exists because the 2026-11-27 workflow
-adoption added those guardrails without a CI consumer; licence, secret, contract, and dependency checks stay in
-the contracts/policy job. The filter also covers the planning index and roadmap, the closeout, incident,
+The process/binding job is deliberately cheap: it installs only the pinned contracts requirements
+(`msgpack==1.2.4`) and builds neither .NET nor Rust. It runs `tools/check_process_consistency.py`,
+`tools/check_docs_links.py`, `tools/check_doc_math.py`, and the `tools/tests` suite. The process checkers use
+only the Python standard library; the install is required by the existing parameterization projection test.
+It exists because the 2026-11-27 workflow adoption added those guardrails without a CI consumer; licence,
+secret, contract, and dependency checks stay in the contracts/policy job. The filter also covers the planning
+index and roadmap, the closeout, incident,
 research, prototype, and retrospective homes, maintenance and drift checks, and `tools/check_closeout_evidence.py`
 and `tools/verify.sh`, because the process checker validates those pages and templates and the job mirrors the
 local gate. A regression test imports the checker's required, normative, and verdict path lists, so adding a new
