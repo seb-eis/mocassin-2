@@ -23,7 +23,7 @@ cheaper than an expensive model that also finishes in one pass, and both are che
 
 ## 2. Default policy
 
-Five rules, in order:
+Six rules, in order:
 
 1. **Free capacity first.** Boilerplate and throwaway work use a free model. Ordinary implementation uses the free
    variant of the default tier (`dev-free`, bound to a temporary free model until 2026-12-11 — see §6). The paid
@@ -38,6 +38,9 @@ Five rules, in order:
    allowance cap, not against the subscription price.
 5. **Review on the default tier plus tests.** The dev's context must not review its own output. Independence is the
    fresh context, not a model difference.
+6. **Concurrency cap.** Run at most **3 concurrent `dev-free` sessions**. Queue the remaining assignments; do not
+   start a fourth free session. A `dev-free` session that reports a rate limit is re-spawned on the paid `dev`
+   binding for the same bounded assignment, and the fallback is recorded.
 
 ### Work classes
 
@@ -96,17 +99,10 @@ escalation.
 
 ### 4.2 Senior focused consultation
 
-The senior tier is the only model escalation. The lead may request **one** focused consultation only when:
-
-- two completed standard rounds of the same design review, audit, cross-cutting review, or policy-update review
-  each ended blocked;
-- at least one Blocker or Major from the second round is still open;
-- the remaining disagreement reduces to one answerable question.
-
-The trigger, request contract, senior rules, and advisory effect are in
-[`senior-consultation.md`](senior-consultation.md); do not repeat them here. The answer is advisory, the owner
-decides, and a fresh standard round at the new commit remains the gate. A senior consultation is not a third
-standard round and not a verdict.
+The senior tier is the only model escalation. The lead may request **one** focused consultation only under the
+normative [trigger in `senior-consultation.md` §1](senior-consultation.md#1-trigger). The answer is advisory, the
+owner decides, and a fresh standard round at the new commit remains the gate. A senior consultation is not a
+third standard round and not a verdict.
 
 ## 5. Cost guardrails
 
@@ -160,7 +156,8 @@ tier" (section 2 rule 1), not a tier change. On **2026-12-11** the binding rever
 The dev role has two bindings so the lead can execute the free-first rule: it spawns `dev-free`, and when the
 spawn fails or that binding reports a rate limit, a degraded model, or unavailability, it re-spawns the same
 assignment on `dev` and records the fallback. Both bindings follow `.opencode/agents/dev.md`; only the model line
-differs. The lead never upgrades a role to a premium or frontier model on its own.
+differs. The lead never upgrades a role to a premium or frontier model on its own. The
+[§2 concurrency cap](#2-default-policy) applies to the `dev-free` binding.
 
 Free variants are time-limited and can disappear, so the paid binding is part of the policy rather than an
 optional convenience. Change the provider prefix and model IDs when a project uses another provider; keep the

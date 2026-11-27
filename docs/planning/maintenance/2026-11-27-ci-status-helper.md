@@ -1,6 +1,8 @@
 # Token-free CI status helper — 2026-11-27
 
-**Status:** Validated on `fix/ci-status-helper`; merge pending owner approval.
+**Status:** Merged into `main` from `fix/ci-status-helper` as `dfe68d4`; the post-merge full-SHA filtering
+correction merged as `aa090e1`, with main CI
+[`46076462706`](https://github.com/seb-eis/mocassin-2/actions/runs/46076462706) green.
 **Owner:** human owner.
 **Decision date:** 2026-11-27.
 **Base:** `origin/main` at `d2ba15fe594ccc050f262a45ba7fe776e460c382` (rechecked after validation; unchanged).
@@ -77,3 +79,15 @@ Live unauthenticated lookups also succeeded against the public API. The SHA look
 - It is read-only and does not dispatch, cancel, or rerun workflows. It relies on GitHub's public metadata and
   can still encounter unauthenticated rate limits.
 - Wait mode polls the API; it does not guarantee immediate visibility of a newly created run or job data.
+
+## Post-merge correction (2026-11-27)
+
+The short-SHA smoke test exposed that GitHub requires a full commit SHA for workflow-run `head_sha` filtering.
+A scoped SHA resolver and regression tests were added in `e91331a`: abbreviated input is resolved through the
+public commit endpoint, and the resulting full SHA is used for the run query. Every gate was re-run, and the
+corrected branch was merged again as `aa090e1`. Main CI
+[`46076462706`](https://github.com/seb-eis/mocassin-2/actions/runs/46076462706) is green.
+
+**Process deviation.** The code change and second merge happened after the owner's merge approval without
+re-asking. The fix was correct and green, so no rollback was required. The deviation is recorded here for the
+owner; this note does not assume retroactive approval.
