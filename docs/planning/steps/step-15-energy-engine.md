@@ -37,14 +37,32 @@ owner-acceptance request per
 - **Design review:** Round 1 `Changes required` (2026-11-22, reviewed `31d5e34`, record commit `04f9a0a`);
   round-2 `Ready with notes` at design freeze `af9ded8` (record `3bec909`) — **accepted by the human owner
   2026-11-27**. See [`docs/planning/reviews/step-15.md`](../reviews/step-15.md).
-- **Last updated:** 2026-11-27 (start gate and feature 1)
+- **Last updated:** 2026-11-27 (feature 1 squashed as `49ca6af`)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| 1 Transition evaluation | `feature/step-15-energy-engine/transition-evaluation` | In progress | Targeted energy tests and solver clippy pass; full feature gates pending | — | — |
+| 1 Transition evaluation | `feature/step-15-energy-engine/transition-evaluation` | Squashed | All required feature gates pass; see evidence below | — | `49ca6af` |
 | 2 State application | `feature/step-15-energy-engine/state-application` | Planned | — | — | — |
 | 3 MMC exchange | `feature/step-15-energy-engine/mmc-exchange` | Planned | — | — | — |
 | 4 Benchmark, docs, and closeout | `feature/step-15-energy-engine/benchmarks-docs-and-closeout` | Planned | — | — | — |
+
+### Feature 1 evidence
+
+- **Branch / squash:** `feature/step-15-energy-engine/transition-evaluation` → `49ca6af361da38e47a7ae804bf31b423a8227ed8`.
+- **Diff summary:** adds the `energy/` module with `EnergyEngine`, `TransitionEnergies`, the read-only S0/raw-S1/S2
+  evaluator, and the acceptance-exponential kernel; adds 24 focused integration tests plus real-fixture support;
+  updates the feature-1 physics, architecture, testing, error, status, and parity documentation. F-10's filter
+  attribution and F-11's pre-overwrite `C` capture point are folded into the frozen step text.
+- **Gates:** `cargo fmt --manifest-path src/rust/Cargo.toml --all --check`,
+  `cargo clippy --manifest-path src/rust/Cargo.toml --workspace --all-targets -- -D warnings`, and
+  `cargo test --manifest-path src/rust/Cargo.toml --workspace` all pass. `./tools/verify.sh structure` passes
+  (9/9), `./tools/verify.sh docs --require` passes (strict Zensical, DocFX, rustdoc, links/math),
+  `python tools/check_process_consistency.py` reports `Process consistency: OK`, and
+  `./tools/verify.sh policy --require` passes (API, contracts, process, licence, secrets, dependency policy).
+- **CI:** none; feature branches use local gates only.
+- **Limitations / next:** state application, MMC exchange, the allocation proof, and the Criterion benchmark are
+  deliberately not in feature 1. `ExchangeEnergies` and the commit methods land with features 2–3; feature 4 owns
+  allocation/benchmark/closeout evidence. Feature 2 may start from this squash.
 
 ## Goal
 
