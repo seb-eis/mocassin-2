@@ -683,7 +683,8 @@ Commands and results at the design freeze (the design-set commit) are recorded h
 
 ### Round 2 request owner evidence
 
-Commands and results at the round-2 freeze (the design-set commit), recorded by the design agent:
+Commands and results at the round-2 freeze `fcbd20ed8ef2ad201746fb46b064c9db2e80d056` (the design-set
+commit), recorded by the design agent:
 
 - `git rev-parse origin/main` — `245e34aff7255476d73539d4cc43f068627f0cba` (unchanged).
 - `git diff --check` — exit 0, no output.
@@ -693,7 +694,7 @@ Commands and results at the round-2 freeze (the design-set commit), recorded by 
   `Documentation built in <worktree>/site`; `Closeout gate completed with required checks enabled.`
 - `./tools/verify.sh policy --require` — exit 0. Release build; NuGet licence/vulnerability audit; ApiCompat
   (`Public API is compatible with the checked-in baseline.`); contract/symmetry drift; `Process consistency: OK`;
-  `Ran 62 tests … OK`; `SPDX headers present in 1210 source files`; `No secret patterns found in 1756 tracked
+  `Ran 62 tests … OK`; `SPDX headers present in 1210 source files`; `No secret patterns found in 1757 tracked
   text files`; `advisories ok, bans ok, licenses ok, sources ok`; `Closeout gate completed with required checks
   enabled.`
 - `git diff --name-only origin/main` (plus the untracked new page) — `.opencode/agents/design.md`,
@@ -706,8 +707,9 @@ Commands and results at the round-2 freeze (the design-set commit), recorded by 
   path.
 
 **n-2 context.** The 1755 count was taken at `9fc8c7b` before this record was tracked. At the round-1 freeze
-(`7b3148d`) and at the round-2 freeze the secret scan reports **1756** tracked text files; the one-file
-difference is this record. The gate command's commit is recorded here so the count is reproducible.
+(`7b3148d`) the scan reported **1756** (this record); at the round-2 freeze (`fcbd20e`) it reports **1757**
+(this record plus the new `docs/development/senior-consultation.md`). The gate command's commit is recorded here so the
+count is reproducible.
 
 > The review agent may rerun the commands and replace this evidence with its own observations. The request
 > owner evidence is part of the request and is not the review agent’s verdict.
@@ -991,19 +993,19 @@ findings, evidence, or verdict.
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| M-1 | Fixed | Design agent | round-2 freeze |
-| M-2 | Fixed | Design agent | round-2 freeze |
-| M-3 | Fixed | Design agent (prompts); dev (checker) | round-2 freeze |
-| m-1 | Fixed | Design agent (plan); dev (checker) | round-2 freeze |
-| m-2 | Fixed | Design agent | round-2 freeze |
-| m-3 | Fixed | Design agent | round-2 freeze |
-| m-4 | Fixed | Design agent | round-2 freeze |
-| m-5 | Fixed | Design agent (plan); dev (checker) | round-2 freeze |
-| m-6 | Fixed | Design agent | round-2 freeze |
-| m-7 | Fixed | Design agent | round-2 freeze |
-| m-8 | Fixed | Design agent | round-2 freeze |
-| n-1 | Fixed | Design agent | round-2 freeze |
-| n-2 | Accepted | Design agent | round-2 freeze |
+| M-1 | Fixed | Design agent | fcbd20e |
+| M-2 | Fixed | Design agent | fcbd20e |
+| M-3 | Fixed | Design agent (prompts); dev (checker) | fcbd20e |
+| m-1 | Fixed | Design agent (plan); dev (checker) | fcbd20e |
+| m-2 | Fixed | Design agent | fcbd20e |
+| m-3 | Fixed | Design agent | fcbd20e |
+| m-4 | Fixed | Design agent | fcbd20e |
+| m-5 | Fixed | Design agent (plan); dev (checker) | fcbd20e |
+| m-6 | Fixed | Design agent | fcbd20e |
+| m-7 | Fixed | Design agent | fcbd20e |
+| m-8 | Fixed | Design agent | fcbd20e |
+| n-1 | Fixed | Design agent | fcbd20e |
+| n-2 | Accepted | Design agent | fcbd20e |
 
 No finding is deferred. n-2 is accepted as an evidence-context note; the gate count is now recorded with its
 commit context.
@@ -1036,20 +1038,25 @@ commit context.
 - **m-8 (Fixed).** A6 now says ten new `docs/development` pages, including `senior-consultation.md`.
 - **n-1 (Fixed).** The Purpose paragraph names the minimal normative edits in the design set and the remaining
   implementation.
-- **n-2 (Accepted).** The 1755/1756 difference is explained by the record being untracked when the owner ran the
-  gate; the new evidence records the count and its commit. No action.
+- **n-2 (Accepted).** The 1755 → 1756 → 1757 progression is explained by the record and the new senior page
+  being tracked at each freeze; the new evidence records the count and its commit. No action.
 
 ## Re-review request (round 2)
 
 Round 1 verdict: `Changes required` at `7b3148d44496b6feab0bf33c437085e122bd5481` (record commit
 `669bb733aeaacfb93ec2c134a745d6d22503a963`).
 
-Round 2 target: `round-2 freeze` (the design-set commit; the request commit adds the freeze SHA and the gate
-evidence). The lead handoff carries both full SHAs. The reviewed design is the round-2 freeze plus this request
-record; no code, test, contract, or historical record changes.
+Round 2 target: `fcbd20ed8ef2ad201746fb46b064c9db2e80d056` (the design-set commit; the request commit adds
+the freeze SHA and the gate evidence). The lead handoff carries both full SHAs. The reviewed design is
+`fcbd20ed8ef2ad201746fb46b064c9db2e80d056` plus this request record; no code, test, contract, or historical
+record changes.
 
 What changed: M-1, M-2, and M-3 are fixed in the normative pages and agent prompts; m-1–m-8 are fixed; n-1 is
 fixed; n-2 is accepted. The resolution table above is the per-finding record.
+
+Round-2 reviewer: record your metadata, evidence, findings, and verdict in a new `### Re-review round 2` under
+`## Review rounds`; leave the round-1 `Request` metadata, checklist marks, findings, evidence, and verdict
+unchanged.
 
 ### Round 2 design-gate checklist
 
