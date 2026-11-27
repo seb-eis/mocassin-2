@@ -603,6 +603,7 @@ additionally needs an ADR).
 | Review initiated by | Lead, on request of the design agent |
 | Design class | Full |
 | Reviewed commit | `af9ded889825a8b1932329a657eb7460208178f5` (design re-freeze) |
+| Fixed point | `04f9a0a` (round-1 record HEAD). The design delta under review is `git diff 51f6636..af9ded8`; `51f6636` is the `origin/main` merge and is not part of the Step 15 design. |
 | Record request commit | The documentation-only record commit that appends this request; its parent is the reviewed commit `af9ded8` |
 | Docs branch | `docs/step-15-design`; `origin/main` = `be930c4` merged at `51f6636` (a merge commit, not a rebase) |
 | Review date | — (pending round 2) |
