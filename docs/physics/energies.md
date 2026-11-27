@@ -110,7 +110,46 @@ missing-code error. The energy engine must not call the cluster lookup for such 
 absent `cluster_code_id` and a zero energy row for that cell. The multi-centre instance fixture and the
 resumed-lattice test cover the rule.
 
+## Transition energies (Step 15 feature 1)
+
+For a resolved path \(p_0,\ldots,p_{L-1}\) and rule states \(S0,S1,S2\), the solver evaluates
+
+$$
+\begin{aligned}
+s_0 &= \sum_i E[p_i][S0_i] + \sum_c C[c][S0_c], \\
+\mathrm{raw}\,s_1 &= \sum_{i=1}^{L-1} E[p_i][S1_i], \\
+\mathrm{conf} &= s_2 - s_0, \\
+s_1 &= s_0 + \mathrm{raw}\,s_1 + \tfrac12\mathrm{conf}, \\
+\mathrm{field} &= -\tfrac12\,\texttt{field\_scale}\,
+  (\texttt{charge\_transport\_vector}\cdot\hat e), \\
+b_{01} &= (s_1-s_0)+\mathrm{field}, \qquad
+b_{10} &= (s_1-s_2)-\mathrm{field}.
+\end{aligned}
+$$
+
+\(E\) is the site+pair owner vector and \(C\) is the separate cluster term at each path centre. Raw S1 reads
+only \(E\): node 0 contributes zero, and cluster terms enter S1 through \(s_0\) and the midpoint correction.
+All internal values are in \(kT\); a direct model-table read is multiplied by `ev_to_kt` exactly once.
+
+S2 is a read-only direct sum, not a backup/apply/restore. For **every** path node, including an unchanged
+spectator receiver, the evaluator walks that node's own forward links. A link whose partner is another path
+node contributes the owner's table and owner's row at the final receiver particle. The partner-change test is
+only a zero-delta skip; there is no receiver-change filter and no structural-stability filter. Duplicate
+periodic images with distinct pair tables all contribute. The jump-status table is not the source for this
+sum: it keeps one sorted receiver link per ordered path pair and filters receivers by structural stability.
+The original additionally excluded initially-void receivers; Step 14 corrected that filter.
+
+Each affected cluster code is built once from the final occupation tuple, with path-node S2 values as slot
+overrides, and resolved through the package's `code_expansions` map. A void centre or member contributes the
+zero row without a lookup. A non-void tuple absent from a present map, or a non-canonical tuple in a pre-map
+package, fails closed. A present v1 `static_correction` also fails closed because its non-null semantics are
+undefined; every v1 rule uses the dynamic path.
+
+The acceptance kernel returns \(\exp(-b_{01})\). Libm is the default; the job's `useFastExp` flag opts into
+the bounded binary-exponent approximation.
+
 ## Units
 
-Model and parameter tables use electronvolts (eV). The solver converts to thermal units once per job.
-Transport output uses SI units.
+Model and parameter tables use electronvolts (eV). The solver computes \(kT_eV = k_B T\) once per job and
+stores vectors, cluster rows, field scale, and lattice totals in \(kT\). Direct pair/cluster table reads are
+scaled by `ev_to_kt` at the read; eV appears only at output boundaries. Transport output uses SI units.

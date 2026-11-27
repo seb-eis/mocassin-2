@@ -8,11 +8,11 @@
 //! jump status, the tracker index space, the counters, and the goals/normalization state. Steps 15–18 consume it;
 //! this crate never reads a package, never writes a package, and never opens SQLite.
 //!
-//! Step 14 builds the context in six features. Feature 1 (this commit) establishes the module layout, the
-//! dimension/index contract, the context limits and memory plan, the lattice/flag/mobile-tracker arenas, the
-//! counter allocation, the phase pipeline with cancellation, and the documented error/exit mapping. The
-//! link/cluster, energy, pool/jump-status, goal/normalization, and fixture work lands in features 2–6.
+//! Step 14 builds the context. Step 15 feature 1 adds the read-only transition-energy evaluator and the
+//! acceptance-exponential kernel; state application, MMC exchange, benchmarks, and closeout follow in later
+//! Step 15 features.
 
 #![forbid(unsafe_op_in_unsafe_fn)]
 
 pub mod context;
+pub mod energy;

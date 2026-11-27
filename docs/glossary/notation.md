@@ -34,6 +34,11 @@ Rules:
 - There are no implicit conversions between unit types; wrapping a bare `double` is explicit.
 - JSON stores a plain number; the field name or schema description carries the unit.
 - Unit-cell counts are `A*B*C`, never `A+B+C`.
+- The solver uses \(kT_eV = k_B T\) internally. Model pair/cluster tables stay in eV and each direct read is
+  multiplied by `ev_to_kt = 1 / kT_eV` exactly once; output lattice energies convert back to eV.
+- The field factor is \(\texttt{field\_scale} = |E|\,10^{-10}/kT_eV\) for \(E\) in V/m and displacement in Å.
+  The transition term is \(-\tfrac12\,\texttt{field\_scale}(\texttt{charge\_transport\_vector}\cdot\hat e)\);
+  a positive charge displacement along the field lowers the forward barrier.
 
 ## Fractional coordinates
 

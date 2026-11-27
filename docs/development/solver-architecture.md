@@ -90,8 +90,10 @@ jobs row
    authored vacancy); a `true` flag at index 0 is rejected. Each rule must preserve the non-void particle-symbol
    multiset and charge within `1e-9`; `path_vector`/`length` must match the per-node movements and the cell
    vectors; a no-charge-change rule must have a zero transport vector. The full positional
-   `charge_transport_vector` formula is assigned to Step 15 because the v1 payload has no fractional P1
-   coordinates (see [the simulation package format](../reference/msl-format.md) and the Step 13 design).
+   `charge_transport_vector` formula cannot be recomputed from the v1 payload because it has no fractional P1
+   coordinates. Step 15 consumes the reader-validated finite vector verbatim and rejects a non-finite computed
+   field term; a future `.msl` revision must carry the positional data or a signed transport vector (see
+   [the simulation package format](../reference/msl-format.md) and the Step 13 design).
 5. **Signatures.** The six-field parameterization projection and the five-field lattice projection are
    re-encoded with the fixed-width canonical writer and compared with the stored signatures. The compiled-model
    signature is an identity string and is not re-encoded.
@@ -197,15 +199,29 @@ error.
 `a` with partner `b`, or owner `b` with partner `a`. It is evaluated over `link_range(position(a))` and
 `incoming(a)`; it never synthesises a reverse link and is not an energy shortcut (the energy is the owner's row).
 
-**Energy-engine design (Step 15).** The transition evaluation is a read-only direct sum. S0/raw-S1 read the
-context vectors, and the S2 correction walks **every** path node's own forward links — changed and spectator
-receivers alike — because the vectors sum every link; the jump-status receiver set (structural stability) is not
-the evaluation source (Step 15 §3; design-review round-1 F-1). On commit, the affected cluster set is the
-deduplicated union of the member-side `ClusterAssoc` route from `incoming(V)` and
-`centres(position(V)) × cell(V)` for each changed environment, rebuilt once per `(instance, cell)` (Step 15
-§4/§6; F-3). The incremental lattice energy applies the 0.5 pair factor once and weights every unchanged
-owner's pair delta by that owner's `STABLE` flag, because the total sums pair rows over stable environments only
-(Step 15 §5; F-2). The MMC exchange applies each direction's own cross-term, recorded as deviation D-7.
+**Energy engine (Step 15).** Feature 1 exposes `EnergyEngine::new(&mut context)`,
+`EnergyEngine::transition_energies`, `TransitionEnergies` (including the no-field barrier accessors), and
+`acceptance_exponential(barrier, use_fast_exp)`. The supported composition is a short-lived engine per call;
+no struct may hold both the context and a second mutable engine borrow. Evaluation allocates nothing and
+mutates nothing. State application and MMC exchange land in later Step 15 features.
+
+S0 and raw S1 read the context vectors. The S2 correction walks **every** path node's own forward links —
+changed and spectator receivers alike — because the vectors sum every link. The partner-change test is only a
+zero-delta skip; there is no receiver-change or structural-stability filter. The jump-status table is not the
+source: it keeps one sorted receiver link per ordered path pair and filters receivers by structural stability.
+The original additionally excluded initially-void receivers, which Step 14 fixed. Duplicate periodic images and
+structurally unstable receivers still require the exact owner-link walk (Step 15 §3; round-1 F-1, round-2 F-10).
+Cluster S2 tuples are built once from the final state and resolved through `cluster_lookup`; void centre/member
+tuples use the zero row without a lookup. A present v1 `static_correction` fails closed with exit 12, a
+non-finite field term is exit 13, and other computed non-finite energies are invariant failures.
+
+On commit, the affected cluster set will be the deduplicated union of the member-side `ClusterAssoc` route from
+`incoming(V)` and `centres(position(V)) × cell(V)` for each changed environment, rebuilt once per
+`(instance, cell)` (Step 15 §4/§6; F-3). The pre-commit row `C` is captured before the step-6 overwrite, for
+example in the step-1 resolve pass, and the cluster difference uses that captured value (round-2 F-11). The
+incremental lattice energy applies the 0.5 pair factor once and weights every unchanged owner's pair delta by
+that owner's `STABLE` flag, because the total sums pair rows over stable environments only (Step 15 §5; F-2).
+The MMC exchange will apply each direction's own cross-term, recorded as deviation D-7.
 
 **Clusters.** A cluster link's `byte_position` is the environment's own slot (slot `0` = a centre). A cluster
 table can have **more than one centre**: the writer adds slot `0` to every P1 position of the centre site, so the

@@ -68,7 +68,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 12 | [Build Orchestration and `mocassin` CLI](steps/step-12-build-orchestration-and-cli.md) | C. Compilation | Done | `step/12-build-orchestration-and-cli` (merged and deleted) | — | [Ubuntu](https://github.com/seb-eis/mocassin-2/actions/runs/44377851616) / [Windows](https://github.com/seb-eis/mocassin-2/actions/runs/44378270028) closeout green at `07851d8`; [main green](https://github.com/seb-eis/mocassin-2/actions/runs/44381922313) | `ec2e04a` | `step-12` | [Passed with notes](audits/step-12.md) at `07851d8` — accepted by the human owner 2026-11-18; F-9/N-4 fixed, N-5 accepted risk | Ready with notes — **accepted by the human owner 2026-11-17** at `1b6af90` ([record](reviews/step-12.md); round 5; R5-1–R5-3 resolved); implementation started 2026-11-17 |
 | 13 | [Rust Solver Foundation and Package Reader](steps/step-13-rust-solver-foundation-and-package-reader.md) | D. Solver | Done | `step/13-rust-solver-foundation-and-package-reader` (merged and deleted) | 7/7 + audit fix + centered fixture | [closeout](https://github.com/seb-eis/mocassin-2/actions/runs/44831177039) green at `3128121`; [main](https://github.com/seb-eis/mocassin-2/actions/runs/44834521989) green at `2613a0d` | `2613a0d` | `step-13` | [Passed with notes](audits/step-13.md) — accepted 2026-11-20; F-9/N-5–N-7 fixed | Ready with notes — accepted by the human owner 2026-11-18 at `b9cda11`; hold lifted 2026-11-19 |
 | 14 | [Simulation Context Initialization](steps/step-14-simulation-context-initialization.md) | D. Solver | Done | `step/14-simulation-context-initialization` (merged and deleted) | 6/6 squashed + audit accepted | [closeout 44922414484](https://github.com/seb-eis/mocassin-2/actions/runs/44922414484) green at `3fd4516`; [main 44924317743](https://github.com/seb-eis/mocassin-2/actions/runs/44924317743) green at `dd5a811` | `dd5a811` | `step-14` | [Passed with notes](audits/step-14.md) — accepted 2026-11-21; F-1, F-3, N-1–N-3 closed on `fix/step-14-structure-and-tests` (2026-11-22); F-2 re-pointed to Step 15 | Ready with notes — accepted by the human owner 2026-11-21 at `620f20a` (round 4; freeze `a430d64`); class High accepted; six features approved |
-| 15 | [Energy Engine](steps/step-15-energy-engine.md) | D. Solver | Not started | — | — | — | — | — | Not requested | Not requested |
+| 15 | [Energy Engine](steps/step-15-energy-engine.md) | D. Solver | In progress | `step/15-energy-engine` | 1 Transition evaluation | — | — | — | Not requested | Round-2 `Ready with notes` — accepted 2026-11-27 at `af9ded8` (record `3bec909`); class High accepted, no split, four features approved |
 | 16 | [Kinetic Monte Carlo Engine](steps/step-16-kmc-engine.md) | D. Solver | Not started | — | — | — | — | — | Not requested | Not requested |
 | 17 | [Metropolis Monte Carlo Engine](steps/step-17-mmc-engine.md) | D. Solver | Not started | — | — | — | — | — | Not requested | Not requested |
 | 18 | [Tracking, Statistics, and State Writer](steps/step-18-tracking-statistics-and-state-writer.md) | D. Solver | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -89,6 +89,11 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 31 | [Packaging and Release](steps/step-31-packaging-and-release.md) | G. Release and documentation | Not started | — | — | — | — | — | Not requested | Not requested |
 
 ## Active work
+
+The solver track (Phase D) is at Step 15 — Energy Engine. The human owner accepted the round-2
+`Ready with notes` design verdict on 2026-11-27, accepted the High complexity class with no split, and approved
+four features. `step/15-energy-engine` was created from the merged design `main` commit `895b20b`; feature 1
+(`transition-evaluation`) is implementing the read-only evaluator and acceptance-exponential kernel.
 
 The GUI track (Phase F) is at Step 24. Steps 23A and 23B are **Done**, merged, and tagged (`step-23a`,
 `step-23b`). The editor-layout gate is **closed**: the owner reviewed the five-option POC on 2026-11-22, picked

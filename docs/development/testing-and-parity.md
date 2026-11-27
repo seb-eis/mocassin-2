@@ -145,6 +145,27 @@ or SQLite. Prefer real temporary directories and real files produced by the real
   the 10×10×10 acceptance are PR-medium; the Criterion benchmark and the 500k-position stress are
   nightly/manual.
 
+## Energy engine (Step 15)
+
+- **Feature 1 acceptance.** `energy_transition` covers the hand-computed three-site migration and reversal,
+  the two-particle pair swap, the asymmetric one-directional owner-major link, the spectator receiver, and
+  duplicate periodic-image links. `energy_cluster` covers the three-body final-state tuple (with both
+  one-member intermediates absent), raw-S1 site+pair-only behavior, centre-only changes, void centre/member
+  zero rows, all eight amendment-2 raw assignments, and the `ExpansionMapAbsent`/`MissingOccupationCode`
+  failures. `energy_errors` covers field sign/magnitude, non-finite field and computed-energy failures, the
+  fail-closed `Some` static correction, and invalid selected environments. These are PR-fast.
+- **Real packages and read-only proof.** `energy_acceptance` opens `msl-v1`, `step-13-populated`, and
+  `step-11-amend-2` through the real reader, mutates only cloned in-process models/lattices, and compares real
+  rules with an independent full-state pair/site/cluster recomputation. It also snapshots lattice, flags,
+  tracker ids, vectors, cluster codes/rows, total energy, and time around repeated evaluations. The real-package
+  pass is PR-medium; the focused hand systems are PR-fast.
+- **Acceptance exponential.** `energy_exponential` proves libm is the default, the job flag is off by default,
+  non-finite semantics match `f64::exp`, and the opt-in approximation stays within the 3.5% relative-error
+  bound over `[-700, 700]`; extreme inputs use libm. PR-fast.
+- **No mocks.** Tests use real packages, real context/domain values, and independent direct sums. The later
+  allocation-counting and Criterion benchmark evidence belongs to feature 4; state-application and MMC tests
+  belong to features 2 and 3.
+
 ## Avalonia workspace (Step 23A)
 
 - `Mocassin.App.Tests` references the app, view models, and views and uses the first-party `Avalonia.Headless`

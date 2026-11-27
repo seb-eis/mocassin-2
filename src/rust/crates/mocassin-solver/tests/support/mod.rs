@@ -7,6 +7,8 @@
 
 #![allow(dead_code)]
 
+pub mod energy;
+
 use std::path::Path;
 use std::sync::Arc;
 

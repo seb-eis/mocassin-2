@@ -21,9 +21,9 @@ owner-acceptance request per
 
 ## Implementation status
 
-- **Status:** Not started — design re-frozen 2026-11-27 after design-review round 1; the start gate follows the
-  round-2 review
-- **Step branch:** — (created from the reviewed `main` commit after the owner approves the start gate)
+- **Status:** In progress — the human owner accepted the round-2 `Ready with notes` verdict, the High complexity
+  class with no split, and the four-feature list on 2026-11-27
+- **Step branch:** `step/15-energy-engine` (created from the merged design `main` commit `895b20b`)
 - **Precondition:** **Satisfied.** `fix/step-14-structure-and-tests` (the Step 14 audit maintenance branch: F-1
   `amend-1-net10` test, F-3 context file split, N-1 dashboard wording, N-2/N-3 robustness) is merged into `main`
   as `b632565` (verified 2026-11-27). F-3 split `src/rust/crates/mocassin-solver/src/context/mod.rs` (now 770
@@ -34,14 +34,14 @@ owner-acceptance request per
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Round 1 `Changes required` (2026-11-22, reviewed `31d5e34`, record commit `04f9a0a`); round-2
-  request `Re-review required` — [`docs/planning/reviews/step-15.md`](../reviews/step-15.md) (design class `Full`,
-  new freeze commit recorded there)
-- **Last updated:** 2026-11-27 (round-1 resolutions and design re-freeze)
+- **Design review:** Round 1 `Changes required` (2026-11-22, reviewed `31d5e34`, record commit `04f9a0a`);
+  round-2 `Ready with notes` at design freeze `af9ded8` (record `3bec909`) — **accepted by the human owner
+  2026-11-27**. See [`docs/planning/reviews/step-15.md`](../reviews/step-15.md).
+- **Last updated:** 2026-11-27 (start gate and feature 1)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| 1 Transition evaluation | `feature/step-15-energy-engine/transition-evaluation` | Planned | — | — | — |
+| 1 Transition evaluation | `feature/step-15-energy-engine/transition-evaluation` | In progress | Targeted energy tests and solver clippy pass; full feature gates pending | — | — |
 | 2 State application | `feature/step-15-energy-engine/state-application` | Planned | — | — | — |
 | 3 MMC exchange | `feature/step-15-energy-engine/mmc-exchange` | Planned | — | — | — |
 | 4 Benchmark, docs, and closeout | `feature/step-15-energy-engine/benchmarks-docs-and-closeout` | Planned | — | — | — |
@@ -390,11 +390,13 @@ F-1). The per-node correction is therefore accumulated for **every** path node, 
    from the reading side. The `S0_i ≠ S2_i` receiver filter is **not** applied; only the partner filter
    `S0_j ≠ S2_j` remains, and only as a zero-delta skip. The receiver walk is also **unfiltered by structural
    stability**: the energy vectors sum every forward link of every environment, so the exact S2 sum must too.
-   The jump-status link set's structural-stability receiver filter (Step 14 §9.2) is not the evaluation's
-   source — it would drop a spectator receiver, a path node that is void at initialization but occupied later
-   (Step 14 §9.2's correctness fix), and duplicate periodic images. **All** links in the receiver's own range
-   contribute, including several periodic images of the same partner with distinct pair tables (deviation D-2;
-   the precomputed jump-status links keep only the first sorted link per pair and would undercount them).
+   The jump-status link set (Step 14 §9.2) is not the evaluation's source: it keeps one sorted receiver link per
+   ordered path-node pair and filters receivers by structural stability. A stable spectator receiver remains in
+   that set; the original additionally excluded initially-void receivers, which Step 14 fixed by filtering on
+   structural stability rather than initial occupation. The jump-status set still drops duplicate periodic images
+   and structurally unstable receivers, so it cannot replace the exact owner-link walk. **All** links in the
+   receiver's own range contribute, including several periodic images of the same partner with distinct pair
+   tables (deviation D-2; the first-sorted-link rule would undercount them).
 3. `s_2 = Σ_i (E[p_i][S2_i] + Δ_i) + Σ_c C_S2[c]` where `C_S2[c]` is the override-resolved cluster term of §2
    and the sum over `i` again runs over **every** path node. Cluster codes are built once per affected
    instance from the final state (`occupation_code` with the `S2` overrides); no intermediate code exists, so
@@ -457,7 +459,9 @@ original's `DistributeEnvironmentUpdate` orientation:
   `(instance, cell(V))` — the instance copy whose centre is `V`. Add it to the affected set. The **affected set**
   is the deduplicated union, over every changed `V`, of the member-side `(instance, cell(owner))` pairs and the
   centre-side `(instance, cell(V))` pairs. Rebuild and account once per affected `(instance, cell)`; an instance
-  may be reached by both routes (deduplicate).
+  may be reached by both routes (deduplicate). The pre-commit row `C` for every affected `(instance, cell)` is
+  captured before the rebuild overwrites it (for example during the step-1 resolve pass); the cluster difference
+  is accumulated later from that captured value.
 - Cluster code lookup is Step 14's `cluster_lookup`/`ClusterTable::lookup` (the `step-11-amend-2` expansion
   map). This step does not search `occupation_codes`, does not sort the slot tuple, and does not apply
   symmetry: `MissingFromMap`/`ExpansionMapAbsent` keep their Step 14 meanings and exits.
@@ -500,7 +504,9 @@ original's `DistributeEnvironmentUpdate` orientation:
   contains the deltas from the other changed environments, which is why the second bracket excludes changed
   environments — the 0.5 applies exactly once per pair row). `C`/`C'` are the affected `(instance, cell)` rows
   at the centre's current particle; a centre particle change moves the row, and the affected set is the
-  deduplicated union of the member-side and centre-side routes (§4). `lattice_energy_ev += ΔU * kt_ev`.
+  deduplicated union of the member-side and centre-side routes (§4). `C` is captured before the step-6 rebuild
+  overwrites the row (for example in the step-1 resolve pass), and the cluster term is `C' − C` from that
+  captured value. `lattice_energy_ev += ΔU * kt_ev`.
 - The debug consistency assertion (`check_lattice_energy` against `recompute_lattice_energy_kt`) runs after
   every accepted step in debug builds and in the property tests; release runs recompute periodically (before
   save/abort decisions, Step 16/17's call sites) as a defensive check.
@@ -514,8 +520,9 @@ order is fixed, documented, and never hash-iteration-dependent:
 
 1. **Resolve before mutating.** Rebuild every affected instance's raw tuple from the final state
    (`occupation_code` + `S2` overrides) and resolve the codes through `cluster_lookup`, so a lookup failure
-   returns before the first mutation. (The evaluation already resolved the same tuples, so this is a safety
-   net, not a second cost centre.)
+   returns before the first mutation. Capture each affected `(instance, cell)` row `C` in this pass, before any
+   rebuild can overwrite it. (The evaluation already resolved the same tuples, so this is a safety net, not a
+   second cost centre.)
 2. **Particles and flags.** `set_particle` for each path node with `S0_i ≠ S2_i`, then derive the node's
    `flags` entry once per change (crate-internal `LatticeState` helper; `STABLE`/`MOBILE` per Step 14 §3 —
    never a full-array scan).
@@ -529,7 +536,8 @@ order is fixed, documented, and never hash-iteration-dependent:
 6. **Cluster rebuild.** Once per affected `(instance, cell)` — the deduplicated union of the member-side
    `ClusterAssoc` route and the centre-side `centres(position(V)) × cell(V)` route (§4) — store the new code,
    `code_id`, and every allowed centre particle's energy row from the committed state.
-7. **Lattice energy.** Accumulate the exact `ΔU` (§5) into `lattice_energy_ev`, over the same affected set.
+7. **Lattice energy.** Accumulate the exact `ΔU` (§5) into `lattice_energy_ev`, over the same affected set,
+   using the `C` values captured in step 1 rather than rereading the overwritten cluster rows.
 8. Counters, histograms, tracker values, and time are **not** touched here: Steps 16/17 increment, Step 18
    records.
 
@@ -636,7 +644,7 @@ observable effect. D-5's decomposition and D-4's fail-closed rule are recorded a
 - [ ] Add the `energy/` concept module (`EnergyEngine`, `TransitionEnergies`, `ExchangeEnergies`, the
       acceptance-exponential kernel) on top of the post-F-3 split context layout; keep every touched file below
       800 lines.
-- [ ] Implement the read-only transition evaluation (§2/§3): path resolution via `resolve_path`, S0/raw-S1
+- [x] Implement the read-only transition evaluation (§2/§3): path resolution via `resolve_path`, S0/raw-S1
       vector reads, per-node owner-major pair deltas over **every** path node's own links (changed and spectator
       receivers; the partner-change filter is a zero-delta skip), override-based cluster S2 codes with the void
       zero-row rule, the field term, and the `Result` error mapping.
@@ -646,7 +654,7 @@ observable effect. D-5's decomposition and D-4's fail-closed rule are recorded a
       deltas) with the debug consistency assertion.
 - [ ] Implement the MMC exchange entry points (§7) sharing the delta kernel, with the linked/unlinked and
       one-directionally linked split (deviation D-7).
-- [ ] Reject a `Some` static correction fail-closed (§3); record the deferral in the docs pages.
+- [x] Reject a `Some` static correction fail-closed (§3); record the deferral in the docs pages.
 - [ ] Add the hand-computed, real-package, property, allocation, and benchmark tests (§Tests); run the
       `energy` Criterion benchmark and record the baseline entry.
 - [ ] Update the documentation pages, parity rows, status dashboard, and closeout evidence; run the pre-audit
@@ -654,22 +662,22 @@ observable effect. D-5's decomposition and D-4's fail-closed rule are recorded a
 
 ## Acceptance criteria
 
-- [ ] Hand-computed pair, site, and cluster systems match exactly through `transition_energies` (two
+- [x] Hand-computed pair, site, and cluster systems match exactly through `transition_energies` (two
       particles/one pair, a site offset, a 3-body cluster).
-- [ ] A 3-site migration with known S0/S1/S2 (hand-built rule) produces the expected `TransitionEnergies`;
+- [x] A 3-site migration with known S0/S1/S2 (hand-built rule) produces the expected `TransitionEnergies`;
       reversing the migration swaps the forward/backward barriers.
-- [ ] **F-2 (Step 14 audit deferral, owned here):** on a package with an asymmetric pair table
+- [x] **F-2 (Step 14 audit deferral, owned here):** on a package with an asymmetric pair table
       (`t[a][b] ≠ t[b][a]`) and a one-directional link, the transition energies equal a brute-force
       recomputation that uses the owner's table and row, and differ from the transposed/sender-major value.
-- [ ] Field terms have the correct sign and magnitude for a known charge displacement (a positive charge moving
+- [x] Field terms have the correct sign and magnitude for a known charge displacement (a positive charge moving
       along the field lowers the forward barrier); a non-finite field term is rejected (exit 13).
-- [ ] Cluster codes: the `step-11-amend-2` fixture's eight raw assignments (including the two non-canonical
+- [x] Cluster codes: the `step-11-amend-2` fixture's eight raw assignments (including the two non-canonical
       tuples) evaluate through the context's `cluster_lookup` with no solver-side symmetry; a void centre or
       member contributes the zero row with no lookup; a run-time non-canonical non-void tuple fails closed
       with the Step 14 error.
-- [ ] A receiver with duplicate periodic-image links (distinct pair tables) to the same changed sender
+- [x] A receiver with duplicate periodic-image links (distinct pair tables) to the same changed sender
       accumulates every link's delta (deviation D-2).
-- [ ] A **spectator receiver** (`S0_i = S2_i`) that owns a link to a changed node receives its own-row delta;
+- [x] A **spectator receiver** (`S0_i = S2_i`) that owns a link to a changed node receives its own-row delta;
       `s2` equals a brute-force recomputation over every path node's links (round-1 F-1).
 - [ ] The incremental `ΔU` weights an unchanged owner's per-link delta by `σ_O`; an unstable unchanged owner of
       a link to a changed environment contributes no pair row, and the incremental total equals the full
@@ -677,7 +685,7 @@ observable effect. D-5's decomposition and D-4's fail-closed rule are recorded a
 - [ ] A cluster whose **centre** changes while no member changes is rebuilt (code, `code_id`, rows) and its
       `C' − C` term enters `ΔU`; an instance reached by both the member-side and centre-side routes is rebuilt
       once (round-1 F-3).
-- [ ] A rule with `static_correction = Some(..)` (hand-mutated; the v1 writer emits `None` for every rule) is
+- [x] A rule with `static_correction = Some(..)` (hand-mutated; the v1 writer emits `None` for every rule) is
       rejected fail-closed with the documented exit-12 error; every real sample rule is `None` and dynamic.
 - [ ] `apply_state_change` updates every owner of a changed environment — including owners outside the path —
       plus particles, flags, mobile tracker ids, pool membership, and the affected instances' codes and rows
