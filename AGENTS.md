@@ -420,10 +420,10 @@ checked there, not in another design-review round.
    new commit. The new round is appended; earlier rounds are not overwritten. Do not open a new round for Minor
    or Note findings alone.
 
-   After two completed standard rounds of the same review each ended blocked and at least one Blocker or Major is
-   still open, the lead may request **one** senior focused consultation before a third standard round. The same
-   escalation is available to a step audit, a cross-cutting review, and a policy-update review. The trigger,
-   request contract, senior rules, and advisory effect are in
+   After two completed standard rounds of the same design review each ended blocked and at least one Blocker or
+   Major is still open, the lead may request **one** senior focused consultation before a third standard round.
+   The same escalation is available to a step audit, a cross-cutting review, and a policy-update review. The
+   trigger, request contract, senior rules, and advisory effect are in
    [`docs/development/senior-consultation.md`](docs/development/senior-consultation.md). The answer is advisory,
    the human owner decides, and a fresh standard round at the new commit remains the gate; a senior consultation
    is not a round and not a verdict.

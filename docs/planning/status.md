@@ -298,11 +298,11 @@ early-warning signal for the next cross-cutting review.
 - Milestones M4 and M5 were backfilled on 2026-11-18 with annotated tags on the existing step merge commits:
   `milestone-m4` → `f91fc63` (Step 08, first compiled model) and `milestone-m5` → `ec2e04a` (Step 12, first
   package). Tags were pushed to `origin`; no existing tag was moved or deleted.
-- The 2026-11-27 policy update `POLICY-2026-11-27` adopts the upstream workflow disciplines: eight task
-  disciplines with skills and `docs/development` pages, `GLOSSARY.md`, research/prototype/retrospective record
-  homes, the advisory senior consultation, the Standards/Spec review axes with an `Axis` column in the three
-  record templates, the agent output contract in `AGENTS.md` §17, and the `default`/`senior` tier names
-  (`senior` is `opencode-go/deepseek-v4-pro`). The earlier tier wording in this dashboard and in
-  `docs/planning/maintenance/` is historical and is not rewritten. The change is recorded in
+- The 2026-11-27 policy update `POLICY-2026-11-27` adopts the upstream workflow disciplines: nine
+  task-discipline pages under `docs/development/` with eight matching skills, `GLOSSARY.md`,
+  research/prototype/retrospective record homes, the advisory senior consultation, the Standards/Spec review axes
+  with an `Axis` column in the three record templates, the agent output contract in `AGENTS.md` §17, and the
+  `default`/`senior` tier names (`senior` is `opencode-go/deepseek-v4-pro`). The earlier tier wording in this
+  dashboard and in `docs/planning/maintenance/` is historical and is not rewritten. The change is recorded in
   [`reviews/policy-update-2026-11-27-workflow-disciplines.md`](reviews/policy-update-2026-11-27-workflow-disciplines.md).
 - Tag names record completed checkpoints; they do not replace this dashboard.
