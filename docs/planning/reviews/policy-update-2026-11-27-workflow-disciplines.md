@@ -1100,6 +1100,15 @@ templates, prompts, and checker; no stale command, path, mode, or tag was found;
 gates pass. The result is recorded in the `docs/planning/status.md` drift-check table. This is a maintenance signal,
 not a gate.
 
+**Re-run after the final documentation-only commits.** At tip
+`8cba401ae2e208debff19a02babfa3a2d5f7a039`, the gates were re-run: `python tools/check_process_consistency.py`
+→ `Process consistency: OK`; `python tools/check_docs_links.py` → `Documentation links OK (236 files scanned).`;
+`python tools/check_doc_math.py` → `Documentation math conventions OK (232 files scanned).`;
+`./tools/verify.sh docs --require` → exit 0 (strict Zensical, DocFX 0 warnings/0 errors, rustdoc 7 crates,
+`Documentation built in …/site`); `./tools/verify.sh policy --require` → exit 0 (`Process consistency: OK`,
+`Ran 67 tests … OK`, `SPDX headers present in 1210 source files`,
+`No secret patterns found in 1787 tracked text files`, and `advisories ok, bans ok, licenses ok, sources ok`).
+
 **Deferred.** The bounded post-implementation verification pass is left to the independent verification agent in
 `## Post-implementation verification`; nothing else is deferred. Residual risk: the senior tier's availability and
 cost were owner-confirmed for this environment but are not exercised by this documentation-only change; the
