@@ -623,8 +623,8 @@ confirmation gate, not the development loop. The full rationale and cost data ar
 
 | Run | Trigger | Runner | Scope |
 | --- | --- | --- | --- |
-| Main merge | automatic `push` to `main` | Ubuntu | Path-filtered jobs |
-| Step closeout | one manual `workflow_dispatch` per step | Ubuntu | Path-filtered jobs |
+| Main merge | automatic `push` to `main` | Ubuntu | Path-filtered jobs, including process/binding checks |
+| Step closeout | one manual `workflow_dispatch` per step | Ubuntu | Path-filtered jobs, including process/binding checks |
 | Platform gate | manual `workflow_dispatch` with `platforms` | Windows/macOS | On demand only |
 | Documentation | manual `docs.yml` | Ubuntu | Full docs build |
 | Benchmark | manual `benchmark.yml` | Ubuntu | Selected benchmark |
@@ -637,6 +637,12 @@ Rules:
 - Automatic CI is Ubuntu-only. Windows and macOS are manual. Promote Windows to automatic closeout/main when
   platform-specific code first appears; keep macOS manual until there is macOS-specific behaviour to validate.
 - Path filters must ensure that only affected jobs run. A change to `.github/workflows/ci.yml` forces all jobs.
+- The `Process and binding checks` job runs when process-relevant paths change: `.opencode/**`, `AGENTS.md`,
+  `GLOSSARY.md`, `opencode.json`, `docs/development/**`, `docs/planning/reviews/**`, `docs/planning/audits/**`,
+  `zensical.toml`, `tools/check_process_consistency.py`, `tools/check_docs_links.py`, `tools/check_doc_math.py`,
+  and `tools/tests/**`. A `ci.yml` change enables it together with every other job. It is Ubuntu-only, installs no
+  dependencies, builds neither .NET nor Rust, and runs the process checker, the documentation link and math
+  checks, and the `tools/tests` suite.
 - Documentation is validated locally with `zensical build --strict` (and the other docs commands). The
   separate `docs.yml` workflow is manual until the documentation is mature enough to justify automatic runs.
 - Keep Nightly manual-only; do not add a schedule until real long-running suites exist. If a schedule is later introduced, run it weekly on Ubuntu.
