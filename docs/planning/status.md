@@ -305,4 +305,9 @@ early-warning signal for the next cross-cutting review.
   `default`/`senior` tier names (`senior` is `opencode-go/deepseek-v4-pro`). The earlier tier wording in this
   dashboard and in `docs/planning/maintenance/` is historical and is not rewritten. The change is recorded in
   [`reviews/policy-update-2026-11-27-workflow-disciplines.md`](reviews/policy-update-2026-11-27-workflow-disciplines.md).
+- **Revert obligation, 2026-11-27 → 2026-12-11.** By owner decision the `dev-free` binding is temporarily
+  `opencode-go/hungerg-free` (HungerG Free, cost 0) for a cost experiment; `dev` remains the paid
+  `opencode-go/deepseek-v4.1-flash` default and fallback, and no other role changed. On **2026-12-11** the
+  binding reverts to `opencode/deepseek-v4.1-flash-free`. Revert steps, scope, and risks:
+  [`maintenance/2026-11-27-temporary-free-dev-binding.md`](maintenance/2026-11-27-temporary-free-dev-binding.md).
 - Tag names record completed checkpoints; they do not replace this dashboard.

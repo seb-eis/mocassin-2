@@ -13,6 +13,7 @@ REPO = Path(__file__).resolve().parents[2]
 AGENTS = REPO / ".opencode" / "agents"
 COMMANDS = REPO / ".opencode" / "commands"
 CONFIG = REPO / "opencode.json"
+MODEL_ECONOMICS = REPO / "docs" / "development" / "model-economics.md"
 
 PERMISSION_RE = re.compile(
     r"\{\s*action:\s*\"?([^\",}]+)\"?,\s*resource:\s*\"([^\"]*)\",\s*effect:\s*(\w+)\s*\}"
@@ -54,6 +55,26 @@ def effective(rules: list[tuple[str, str, str]], action: str, resource: str) -> 
     return result
 
 
+def binding_table() -> dict[str, str]:
+    """Binding name to model ID, read from the model-economics reference binding table."""
+    text = MODEL_ECONOMICS.read_text(encoding="utf-8")
+    start = text.index("## 6. Reference binding")
+    end = text.index("## 7.", start)
+    table: dict[str, str] = {}
+    for line in text[start:end].splitlines():
+        if not line.startswith("|"):
+            continue
+        cells = [cell.strip() for cell in line.strip("|").split("|")]
+        if len(cells) != 3:
+            continue
+        models = re.findall(r"`([^`]+)`", cells[2])
+        if len(models) != 1:
+            continue
+        for binding in re.findall(r"`([^`]+)`", cells[1]):
+            table[binding] = models[0]
+    return table
+
+
 class BindingTests(unittest.TestCase):
     def test_default_agent_is_the_primary_lead(self) -> None:
         config = json.loads(CONFIG.read_text(encoding="utf-8"))
@@ -73,9 +94,20 @@ class BindingTests(unittest.TestCase):
         self.assertEqual(model(AGENTS / "lead.md"), "opencode-go/deepseek-v4.1-flash")
         self.assertEqual(model(AGENTS / "design.md"), "opencode-go/deepseek-v4.1-flash")
         self.assertEqual(model(AGENTS / "review.md"), "opencode-go/deepseek-v4.1-flash")
-        self.assertEqual(model(AGENTS / "dev-free.md"), "opencode/deepseek-v4.1-flash-free")
+        self.assertEqual(model(AGENTS / "dev-free.md"), "opencode-go/hungerg-free")
         self.assertEqual(model(AGENTS / "dev.md"), "opencode-go/deepseek-v4.1-flash")
         self.assertEqual(model(AGENTS / "senior.md"), "opencode-go/deepseek-v4-pro")
+
+    def test_agent_files_agree_with_the_reference_binding_table(self) -> None:
+        table = binding_table()
+        self.assertEqual(
+            set(table),
+            {"lead", "design", "review", "dev", "dev-free", "senior"},
+            "the reference binding table must list every binding exactly once",
+        )
+        for binding, expected in table.items():
+            with self.subTest(binding=binding):
+                self.assertEqual(model(AGENTS / f"{binding}.md"), expected)
 
     def test_lead_cannot_edit_and_spawns_only_the_roles(self) -> None:
         rules = permission_rules(AGENTS / "lead.md")
