@@ -9,9 +9,13 @@ using Mocassin.App.Tests.TestSupport;
 namespace Mocassin.App.Tests.Visual;
 
 /// <summary>
-/// Absolute pixel-change budgets for a screenshot comparison.
+/// Absolute whole-image and fixed-region pixel-change budgets for a screenshot comparison.
 /// </summary>
-internal sealed record VisualComparisonTolerance(int MaximumChannelDelta, int MaximumChangedPixels);
+internal sealed record VisualComparisonTolerance(
+    int MaximumChannelDelta,
+    int MaximumChangedPixels,
+    int RegionSize = 100,
+    int MaximumChangedPixelsPerRegion = 64);
 
 /// <summary>
 /// A decoded BGRA image consumed by the platform-independent comparison core.
@@ -28,7 +32,13 @@ internal sealed record VisualComparison(
     int ChangedPixels,
     int TotalPixels,
     int MaximumObservedChannelDelta,
-    string? FailureReason);
+    string? FailureReason)
+{
+    /// <summary>
+    /// Gets the largest changed-pixel count in any fixed comparison region.
+    /// </summary>
+    public int MaximumObservedRegionChangedPixels { get; init; }
+}
 
 /// <summary>
 /// Shared deterministic pixel comparison for shell and editor screenshots.
@@ -36,10 +46,11 @@ internal sealed record VisualComparison(
 internal static class VisualComparer
 {
     /// <summary>
-    /// Gets the calibrated screenshot policy: channel deltas up to 8 are ignored, and no changed pixel is allowed.
-    /// Two independent normalized captures of every current shell/editor baseline had zero changed pixels.
+    /// Gets the owner-approved interim policy: channel deltas up to 8 are ignored, with an absolute 1,024-pixel
+    /// whole-image budget and a 64-pixel budget per 100×100 region. Normalized repeat captures had zero changes;
+    /// the budgets still reject all 31 stale references measured before regeneration.
     /// </summary>
-    public static VisualComparisonTolerance DefaultTolerance { get; } = new(8, 0);
+    public static VisualComparisonTolerance DefaultTolerance { get; } = new(8, 1024, 100, 64);
 
     public static VisualComparison Compare(
         VisualImage expected,
@@ -47,6 +58,14 @@ internal static class VisualComparer
         VisualComparisonTolerance tolerance)
     {
         ArgumentNullException.ThrowIfNull(tolerance);
+        if (tolerance.MaximumChannelDelta < 0
+            || tolerance.MaximumChangedPixels < 0
+            || tolerance.RegionSize <= 0
+            || tolerance.MaximumChangedPixelsPerRegion < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(tolerance), "Visual comparison budgets must be non-negative.");
+        }
+
         ValidateImage(expected);
         ValidateImage(actual);
 
@@ -64,8 +83,13 @@ internal static class VisualComparer
 
         var expectedPixels = expected.Pixels.Span;
         var actualPixels = actual.Pixels.Span;
+        var width = expected.Size.Width;
+        var regionColumns = (width + tolerance.RegionSize - 1) / tolerance.RegionSize;
+        var regionRows = (expected.Size.Height + tolerance.RegionSize - 1) / tolerance.RegionSize;
+        var regionCounts = new int[regionColumns * regionRows];
         var changedPixels = 0;
         var maximumObservedChannelDelta = 0;
+        var maximumObservedRegionChangedPixels = 0;
         for (var offset = 0; offset < expectedPixels.Length; offset += 4)
         {
             var pixelDelta = 0;
@@ -77,14 +101,25 @@ internal static class VisualComparer
             }
 
             maximumObservedChannelDelta = Math.Max(maximumObservedChannelDelta, pixelDelta);
-            if (pixelDelta > tolerance.MaximumChannelDelta)
+            if (pixelDelta <= tolerance.MaximumChannelDelta)
             {
-                changedPixels++;
+                continue;
             }
+
+            changedPixels++;
+            var pixelIndex = offset / 4;
+            var x = pixelIndex % width;
+            var y = pixelIndex / width;
+            var regionIndex = ((y / tolerance.RegionSize) * regionColumns) + (x / tolerance.RegionSize);
+            regionCounts[regionIndex]++;
+            maximumObservedRegionChangedPixels = Math.Max(
+                maximumObservedRegionChangedPixels,
+                regionCounts[regionIndex]);
         }
 
-        var totalPixels = expected.Size.Width * expected.Size.Height;
-        var isMatch = changedPixels <= tolerance.MaximumChangedPixels;
+        var totalPixels = width * expected.Size.Height;
+        var isMatch = changedPixels <= tolerance.MaximumChangedPixels
+            && maximumObservedRegionChangedPixels <= tolerance.MaximumChangedPixelsPerRegion;
         return new VisualComparison(
             isMatch,
             expected.Size,
@@ -94,7 +129,12 @@ internal static class VisualComparer
             maximumObservedChannelDelta,
             isMatch
                 ? null
-                : $"Changed {changedPixels} pixels; the absolute budget is {tolerance.MaximumChangedPixels}.");
+                : $"Changed {changedPixels} pixels (budget {tolerance.MaximumChangedPixels}); "
+                    + $"largest {tolerance.RegionSize}×{tolerance.RegionSize} region changed "
+                    + $"{maximumObservedRegionChangedPixels} pixels (budget {tolerance.MaximumChangedPixelsPerRegion}).")
+        {
+            MaximumObservedRegionChangedPixels = maximumObservedRegionChangedPixels,
+        };
     }
 
     public static VisualComparison CompareBaseline(

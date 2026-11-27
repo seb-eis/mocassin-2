@@ -177,11 +177,19 @@ or SQLite. Prefer real temporary directories and real files produced by the real
   captures show the welcome document and the two console tabs at 1000 × 700; high contrast keeps compact
   density. The open-project captures show an active project with both explorer node icons, the project-row icon,
   and the Overview/JSON tab icons. Linux compares shell and editor captures with the shared `VisualComparer`:
-  a channel delta greater than 8 counts a changed pixel, and the absolute changed-pixel budget is zero. Captures
-  fix the console timestamp, status-bar version, settings/data paths, and project path, and disable motion so the
-  result is deterministic. Windows/macOS do not pixel-compare. Regenerate with
-  `MOCASSIN_REGENERATE_VISUAL_BASELINES=1` on the Linux reference environment only after the owner approves the
-  baseline correction in the maintenance record.
+  a channel delta greater than 8 counts a changed pixel, with an absolute 1,024-pixel whole-image budget and a
+  64-pixel budget per 100×100 region. Captures fix the console timestamp, status-bar version, settings/data paths,
+  and project path, and disable motion so the result is deterministic. The current render is the **interim
+  reference**, not an approved defect-free target: Step 24A visual defects are corrected after Step 24B, when a new
+  baseline set is created. These interim baselines must not be cited as visual acceptance for Step 24.
+  Windows/macOS do not pixel-compare. Regenerate on the Linux reference environment only after the owner approves
+  the baseline correction in the maintenance record:
+
+  ```sh
+  MOCASSIN_REGENERATE_VISUAL_BASELINES=1 dotnet test \
+    src/dotnet/Mocassin.App.Tests/Mocassin.App.Tests.csproj -c Release \
+    --filter "FullyQualifiedName~ScreenshotTests"
+  ```
 - The accessibility sweep asserts an accessible name on every primary interactive control type in the real
   shell, the expected automation role for the menu, tabs, project lists, explorer, and console filter, and a
   deterministic Tab order. The Xvfb harness captures the real X11 window for light, dark, high-contrast,

@@ -1,10 +1,24 @@
 # Editor visual-baseline comparison gap — 2026-11-27
 
-**Status:** Implemented; existing baseline corrections await owner review
+**Status:** Implemented with an interim visual reference; Step 24A visual correction deferred until after Step 24B
 **Branch:** `fix/editor-visual-baselines`
-**Base:** `origin/main` at `895b20b33e8d747c6875bfa603c9b891da1dd4ad`
-**Design class:** **None** — test-only comparison helper, assertions, deterministic capture support, and evidence; no production API, format, dependency, or architecture change.
+**Original base:** `895b20b33e8d747c6875bfa603c9b891da1dd4ad`
+**Synced main:** `804b26b038713095a686530b21a729a2e42be4dd` (merge `40a9275c17f01bbcfcfe53a59425ffb495b3c860`)
+**Design class:** **None** — test-only comparison helper, assertions, deterministic capture support, baselines, and evidence; no production API, format, dependency, or architecture change.
 **Complexity class:** **Low** — one test seam, fast comparer unit tests, and a bounded Ubuntu screenshot matrix.
+
+## Owner decision and limits
+
+The human owner decided on 2026-11-27 to:
+
+1. use the current render as the **interim visual reference** and regenerate all 31 baselines;
+2. adopt the evidence-based interim threshold of channel delta 8, 1,024 changed pixels per whole image, and 64
+   changed pixels per 100×100 region;
+3. correct Step 24A visual defects only **after Step 24B is complete**, when a new baseline set will be created.
+
+The interim baselines are **not an approved defect-free target** and must not be cited as visual acceptance for
+Step 24. They intentionally preserve the current render, including known Step 24A visual defects, until the
+post-24B correction and replacement baseline set.
 
 ## Defect
 
@@ -39,90 +53,89 @@ Passed: 1, failed: 0 (about 7 s)
 ```
 
 The original baseline was restored immediately and its SHA-256 matched the pre-probe value. No blank image or
-instrumentation is committed. Scratch scripts and logs are under `.tmp/editor-visual-baseline-gap/`.
+instrumentation was committed.
 
 After the comparer was wired into the editor test, the same blank-baseline probe failed for the intended reason:
 
 ```text
-particles-light.png: Changed 336529 pixels; the absolute budget is 0.
+particles-light.png: Changed 336529 pixels.
 Maximum channel delta: 255.
 Test Run Failed. Total tests: 1; failed: 1.
 ```
 
-The original baseline was again restored and hash-verified. This is the minimized red/green regression proof.
+The original baseline was again restored and hash-verified. The comparer unit suite retains a zero-budget
+single-pixel red proof alongside the approved interim-policy tests.
 
-## Ranked falsifiable hypotheses and outcomes
+## Diagnosis: capture conditions versus stale reference
 
-1. **Missing editor pixel assertion — confirmed.** The size-only assertion accepted the blank image; the shared
-   pixel comparer rejects it with 336,529 changed pixels.
-2. **Channel-order mismatch — controlled.** The actual `WriteableBitmap` is saved and decoded through PNG before
-   comparison, so baseline and actual use the same decoded BGRA representation. The measured comparer counts
-   match the independent PNG measurement script.
-3. **Animation timing — partly confirmed.** Initial repeat captures differed in opacity-animated text. Screenshot
-   settings now use `ReduceMotion = true`; the remaining repeat differences were volatile text/paths, not layout.
-4. **Localized baseline drift — confirmed.** The old 5 % shell allowance accepted concentrated changes. The new
-   absolute budget rejects every changed pixel above the channel threshold, regardless of image size or region.
-5. **Benign raster noise — not observed after normalization.** Two independent normalized runs of all 31 captures
-   produced zero changed pixels. No tolerance headroom was added beyond that evidence.
+The original screenshot tests from parent commit `895b20b` were restored temporarily, instrumented only to save
+frames, run, and restored. Window size, render scale, theme call, pump sequence, and capture timing were the
+original ones.
 
-## Measured tolerance basis
+| Case | Baseline vs pre-fix captures | Baseline vs new helper | Pre-fix vs new helper |
+| --- | ---: | ---: | ---: |
+| `particles-light` | 65,720 / 67,823 / 67,919 | 68,494 | 10,972 |
+| shell `dark` | 4,829 / 2,796 / 6,558 | 6,430 | 5,956 |
 
-Calibration ran on the Linux worktree runner with .NET 11.0.0, Avalonia 12.1.6, and the resolved SkiaSharp
-3.119.4 stack. Two independent `dotnet test` processes captured all 16 editor and 15 shell images. An independent
-standard-library PNG decoder measured decoded RGB pixels; a pixel counted as changed when any channel delta was
-greater than 8.
+The pre-fix captures also differed by roughly 0.4–8 %, so the helper was not the cause of the all-baseline
+failure:
 
-Before normalization, repeat-run differences were localized to the console timestamp, settings paths, project
-path, and animated/volatile text. The final captures stabilize those inputs:
+- `particles-light` differed by 5.70–5.90 % under pre-fix conditions. In the latest run, 56,833 changed pixels
+  were outside the project-card, console, and status-bar regions. This is persistent stale-reference or
+  renderer/UI drift.
+- shell `dark` differed by 0.40–0.94 % under pre-fix conditions, entirely in the console/status bands
+  `y=552..692`; there were zero changed pixels elsewhere. This was localized volatile text/font rasterization,
+  not a large layout region hidden by 5 %.
+- The helper-only delta was also confined to volatile regions: 10,960 of 10,972 editor pixels and all 5,956 shell
+  pixels. The helper changed motion, fixed volatile text/paths, and added one pump; it did not change window size
+  or render scale.
 
-- console: one `Information` entry, `MOCASSIN shell started.`, at fixed `2026-01-01T00:00:00Z`;
-- status bar version: fixed `visual-test`;
-- app settings/data workspace: fixed `/tmp/mocassin-visual-baselines/visual-baselines`;
-- project: real ceria fixture copied to and loaded from
-  `/tmp/mocassin-visual-baselines/project/ceria.mocprj`;
-- motion: `ReduceMotion = true` for every light/dark/high-contrast capture.
+## Measured threshold basis
 
-Final repeat-run result: **0 changed pixels in all 31 comparisons**, with maximum channel delta 0. The policy is
-therefore:
+Two independent normalized runs of all 31 captures produced **0 changed pixels**, with maximum channel delta 0.
+Before regeneration, the stored references differed from the current capture by 3,493–92,166 pixels, and their
+worst 100×100 regions differed by 795–6,329 pixels. The owner-approved interim policy therefore rejects all 31
+old references while allowing small localized raster variance:
 
 ```text
-maximum per-channel delta: 8
-maximum changed pixels:    0 (absolute, not a percentage)
+maximum per-channel delta:             8
+maximum changed pixels per image:      1,024
+maximum changed pixels per 100×100 region: 64
 ```
 
-A difference of 4 in one channel passes; a difference of 9 fails. A size mismatch fails separately. The 5 %
-whole-image shell allowance is removed. No baseline was regenerated to obtain these measurements.
+A 16×16 displaced block is 256 pixels and fails the region budget. A 100 px one-pixel horizontal shift affects
+about 200 edge pixels and fails. A 100×100 layout defect is 10,000 pixels and fails both budgets. The retired 5 %
+shell allowance was 35,000 pixels and would also hide that 100×100 defect, which is only 1.43 % of a 1000×700
+shell image.
 
-## Fix
+Absolute zero remains a useful same-condition determinism assertion, but it is not the acceptance gate because
+the stored reference and renderer drift made it unusable before regeneration.
 
-- Added `Visual/VisualComparer.cs`: one shared BGRA comparison core, PNG-normalized baseline wrapper, size-mismatch
-  result, absolute changed-pixel budget, and failure-artifact writer.
-- Both `ScreenshotTests` and `ModelEditorScreenshotTests` now call
-  `VisualComparer.AssertBaselineMatches(..., VisualComparer.DefaultTolerance)`.
-- Added `Visual/VisualCaptureSupport.cs` and deterministic `TempWorkspace`/project-fixture support so volatile
-  text and paths are stable across runs and checkout locations.
-- Added five PR-fast `VisualComparerTests`: identical images, below-threshold difference, above-threshold
-  difference, size mismatch, and an absolute budget that does not scale with image size. They use in-memory decoded
-  images and need no headless session.
-- On failure, the comparer saves `<baseline>.actual.png` and a magenta-highlighted `<baseline>.diff.png` under
-  `.tmp/visual-baseline-failures/` and includes both paths in the assertion message.
-- Updated `docs/development/testing-and-parity.md` and `docs/development/platform-checklist.md` to describe the
-  shared strict comparison and owner-approved regeneration requirement.
+## Implementation
 
-## Affected tests and baselines
+- `Visual/VisualComparer.cs` compares decoded BGRA pixels after PNG-normalizing the captured frame. It enforces
+  the whole-image and fixed-region budgets, reports both maxima, fails size mismatches, and writes actual/diff
+  artifacts on failure.
+- Both screenshot test classes use `VisualComparer.DefaultTolerance`.
+- Eight PR-fast `VisualComparerTests` cover identical images, below-threshold differences, the approved small
+  difference allowance, whole-image budget failure, region budget failure, size mismatch, absolute-budget
+  semantics, and the retained zero-budget red proof. They need no headless session.
+- `VisualCaptureSupport` fixes the console timestamp, status-bar version, settings/data paths, and project path;
+  screenshot settings disable motion.
+- All 31 baselines were regenerated from the current render with the owner-approved command:
 
-The strict visual filter runs five facts. Each fact fails fast on its first mismatched baseline:
+  ```sh
+  MOCASSIN_REGENERATE_VISUAL_BASELINES=1 dotnet test \
+    src/dotnet/Mocassin.App.Tests/Mocassin.App.Tests.csproj -c Release \
+    --filter "FullyQualifiedName~ScreenshotTests"
+  ```
 
-| Test | First rejected baseline | Changed pixels |
-| --- | --- | ---: |
-| `ModelEditorScreenshotTests.TheModelEditorsHaveVisualBaselines` | `particles-light.png` | 68,494 |
-| `ScreenshotTests.TheShellRendersLightDarkAndHighContrastBaselines` | `light.png` | 6,301 |
-| `ScreenshotTests.TheValidationAndSettingsOverlaysHaveLightAndDarkBaselines` | `light-validation.png` | 3,584 |
-| `ScreenshotTests.TheOpenProjectIconSurfacesHaveLightDarkAndHighContrastBaselines` | `light-project.png` | 11,234 |
-| `ScreenshotTests.ThePaletteCheatSheetAndTabHoverHaveBaselines` | `light-palette.png` | 23,342 |
+- The same visual suite then passed without regeneration: **5/5 facts**, covering all 31 baselines.
 
-The offline normalized-capture comparison checked every baseline, not only the fail-fast examples. All 31
-existing baselines differ from the stabilized current capture. No baseline file is modified by this branch.
+## Historical pre-regeneration mismatch
+
+These counts explain why the old references were replaced. They are historical measurements, not the interim
+acceptance result.
 
 | Baseline | Group | Changed pixels | Total pixels | Maximum channel delta | Repeat-run changed pixels |
 | --- | --- | ---: | ---: | ---: | ---: |
@@ -158,39 +171,44 @@ existing baselines differ from the stabilized current capture. No baseline file 
 | `light-validation.png` | shell | 3,584 | 700,000 | 255 | 0 |
 | `light.png` | shell | 6,301 | 700,000 | 255 | 0 |
 
-Actual and diff images for all 31 are saved under `.tmp/visual-baseline-failures/`; `summary.json` there records
-the counts and paths. The full two-run measurements are under
-`.tmp/editor-visual-baseline-gap/calibration-normalized/measurements.json`. These directories are gitignored.
-
-The comparison proves that the baselines are stale or environment-dependent; it does not by itself decide
-whether each pixel difference is a product layout defect or reference-renderer drift. The owner must review the
-actual/diff pairs before approving any regeneration.
+The actual/diff evidence remains outside the repository at
+`/home/node/tmp/visual-baseline-review/actual-diff/`; the full mismatch table and isolation measurements are under
+`/home/node/tmp/visual-baseline-review/measurements/`.
 
 ## Commands and results
 
 | Command | Result |
 | --- | --- |
-| `dotnet test src/dotnet/Mocassin.App.Tests/Mocassin.App.Tests.csproj -c Release --filter "FullyQualifiedName~VisualComparerTests" --logger "console;verbosity=normal"` | **Pass:** 5/5 |
-| `dotnet test src/dotnet/Mocassin.App.Tests/Mocassin.App.Tests.csproj -c Release --no-build --filter "FullyQualifiedName~ScreenshotTests" --logger "console;verbosity=normal"` | **Fail as expected pending baseline approval:** 0 passed, 5 failed |
-| `dotnet test src/dotnet/Mocassin.App.Tests/Mocassin.App.Tests.csproj -c Release --no-build --filter "FullyQualifiedName!~ScreenshotTests" --logger "console;verbosity=minimal"` | **Pass:** 467/467 |
-| `dotnet test src/dotnet/Mocassin.App.Tests/Mocassin.App.Tests.csproj -c Release --no-build --logger "console;verbosity=minimal"` | **Fail as expected pending baseline approval:** 467 passed, 5 failed, 472 total |
+| `dotnet test src/dotnet/Mocassin.App.Tests/Mocassin.App.Tests.csproj -c Release --filter "FullyQualifiedName~VisualComparerTests" --logger "console;verbosity=normal"` | **Pass:** 8/8 |
+| `MOCASSIN_REGENERATE_VISUAL_BASELINES=1 dotnet test ... --filter "FullyQualifiedName~ScreenshotTests"` | **Pass:** 5/5; regenerated 31 baselines |
+| `dotnet test src/dotnet/Mocassin.App.Tests/Mocassin.App.Tests.csproj -c Release --no-build --filter "FullyQualifiedName~ScreenshotTests" --logger "console;verbosity=normal"` | **Pass:** 5/5 without regeneration |
+| `dotnet test src/dotnet/Mocassin.App.Tests/Mocassin.App.Tests.csproj -c Release --logger "console;verbosity=minimal"` | **Pass:** 475/475 |
 | `dotnet build Mocassin.slnx -c Release` | **Pass:** 0 warnings, 0 errors |
 | `dotnet format Mocassin.slnx --verify-no-changes` | **Pass:** no formatting changes; workspace-load warning only |
 | `./tools/verify.sh structure` | **Pass:** 9/9 architecture/structure tests; `git diff --check` clean |
 | `./tools/verify.sh docs --require` | **Pass:** Release build, math/link checks, strict Zensical, DocFX, and rustdoc; required checks enabled |
+| `./tools/verify.sh policy --require` | **Pass:** API compatibility, contract artifacts, projection checks, catalog provenance, process consistency, link checks, 94 tool tests, SPDX, secrets, and advisories; required checks enabled |
+
+All gates above were re-run after merging `origin/main` at `804b26b`. The visual suite also passed a second
+run without regeneration before that merge, with no capture exceeding the threshold.
 
 No CI run was dispatched. This is a maintenance branch, not a step closeout.
 
-## Residual platform limitation
+## Dev-binding fallback
+
+The `dev-free` binding regenerated the baselines and updated the documentation but was rate-limited after
+merging `main`, before committing. The assignment continued on the paid `dev` fallback in the same worktree and
+branch; no regenerated baseline or documentation edit was discarded. The fallback recorded its own build, test,
+format, structure, docs, and policy results in the table above.
+
+## Residual platform limitation and risk
 
 The repository's UI evidence policy pixel-compares screenshots on Ubuntu only. Windows and macOS remain manual
 platform-gate evidence; text rendering is not compared across operating systems. The fixed `/tmp` capture paths
 are used only after the Linux guard returns, so they do not affect Windows/macOS test execution.
 
-## Owner decision on baseline changes
-
-**No baseline has been regenerated or changed.** All 31 baselines listed above need owner review. Regeneration
-requires an explicit owner decision recorded in this maintenance record; until then the strict visual tests stay
-red and the actual/diff evidence stays available under `.tmp/`.
+The interim baselines include known Step 24A visual defects by owner decision. They prove deterministic capture
+and comparison behavior only; they do not prove Step 24 visual correctness. Step 24A visual corrections and a new
+baseline set remain mandatory after Step 24B.
 
 No merge, tag, or `main` push is requested by this record.

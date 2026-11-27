@@ -22,7 +22,7 @@ already in progress.
 
 | Runner | Automated headless suite | Screenshot comparison |
 | --- | --- | --- |
-| Ubuntu | Yes — full suite | Yes — shared pixel comparer, channel delta 8, zero changed-pixel budget; volatile text/paths normalized |
+| Ubuntu | Yes — full suite | Yes — shared pixel comparer: channel delta 8, 1,024 whole-image pixels, 64 pixels per 100×100 region; volatile text/paths normalized |
 | Windows | Yes — focused platform job | No — rendering-dependent |
 | macOS | Yes — focused platform job | No — rendering-dependent |
 
