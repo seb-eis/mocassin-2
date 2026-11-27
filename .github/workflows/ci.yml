@@ -134,7 +134,7 @@ jobs:
                 contracts=true ;;
               tools/check-api-compat.sh|tools/update-api-baseline.sh|tools/api-projects.txt)
                 api=true ;;
-              .opencode/*|AGENTS.md|GLOSSARY.md|opencode.json|docs/development/*|docs/planning/reviews/*|docs/planning/audits/*|zensical.toml|tools/check_process_consistency.py|tools/check_docs_links.py|tools/check_doc_math.py|tools/tests/*)
+              .opencode/*|AGENTS.md|GLOSSARY.md|opencode.json|docs/development/*|docs/planning/reviews/*|docs/planning/audits/*|docs/planning/ci-policy.md|docs/planning/status.md|docs/planning/maintenance/**|docs/planning/drift-checks/**|zensical.toml|tools/check_process_consistency.py|tools/check_docs_links.py|tools/check_doc_math.py|tools/tests/*)
                 process=true ;;
               .github/workflows/ci.yml)
                 ci=true ;;
@@ -430,8 +430,10 @@ jobs:
       - name: Documentation math conventions
         run: python tools/check_doc_math.py
 
+      # Same discovery root as `tools/verify.sh`, so CI and the local gate run
+      # the identical test set.
       - name: Tool tests
-        run: python -m unittest discover -s tools/tests
+        run: python -m unittest discover -s tools/tests -t .
 
   api-compat:
     name: Public API compatibility

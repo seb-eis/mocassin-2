@@ -148,7 +148,7 @@ enables only affected jobs:
 | Rust | `src/rust/`, Cargo files, toolchain, or `deny.toml` change | Ubuntu only |
 | Python | `src/python/` or its `pyproject.toml` change | Ubuntu only |
 | Contracts and policy | any code changes, or contract/symmetry/licence/secret tooling changes | Ubuntu only |
-| Process and binding | `.opencode/**`, `AGENTS.md`, `GLOSSARY.md`, `opencode.json`, `docs/development/**`, `docs/planning/reviews/**`, `docs/planning/audits/**`, `zensical.toml`, `tools/check_process_consistency.py`, `tools/check_docs_links.py`, `tools/check_doc_math.py`, or `tools/tests/**` change | Ubuntu only |
+| Process and binding | `.opencode/**`, `AGENTS.md`, `GLOSSARY.md`, `opencode.json`, `docs/development/**`, `docs/planning/reviews/**`, `docs/planning/audits/**`, `docs/planning/ci-policy.md`, `docs/planning/status.md`, `docs/planning/maintenance/**`, `docs/planning/drift-checks/**`, `zensical.toml`, `tools/check_process_consistency.py`, `tools/check_docs_links.py`, `tools/check_doc_math.py`, or `tools/tests/**` change | Ubuntu only |
 | Public API compatibility | .NET public surface changes | Ubuntu only |
 | Documentation | separate manual workflow | Ubuntu only |
 
@@ -163,7 +163,11 @@ The process/binding job is deliberately cheap: it installs nothing and builds ne
 `tools/check_process_consistency.py`, `tools/check_docs_links.py`, `tools/check_doc_math.py`, and the
 `tools/tests` suite, which use only the Python standard library. It exists because the 2026-11-27 workflow
 adoption added those guardrails without a CI consumer; licence, secret, contract, and dependency checks stay in
-the contracts/policy job.
+the contracts/policy job. The filter also covers `docs/planning/ci-policy.md` and `docs/planning/status.md`
+(the normative CI and status pages) and `docs/planning/maintenance/**` and `docs/planning/drift-checks/**`,
+because `check_process_consistency.py` validates the maintenance and drift-check templates. It does not widen
+any other job, and the test step uses `-t .` so it discovers exactly the `tools/tests` set that
+`tools/verify.sh` runs.
 
 A change to `.github/workflows/ci.yml` forces all jobs so the pipeline itself is validated. Because
 `platforms=windows`/`macos` suppresses the Ubuntu-only jobs even when their paths changed, a workflow-validation

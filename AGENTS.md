@@ -639,10 +639,12 @@ Rules:
 - Path filters must ensure that only affected jobs run. A change to `.github/workflows/ci.yml` forces all jobs.
 - The `Process and binding checks` job runs when process-relevant paths change: `.opencode/**`, `AGENTS.md`,
   `GLOSSARY.md`, `opencode.json`, `docs/development/**`, `docs/planning/reviews/**`, `docs/planning/audits/**`,
-  `zensical.toml`, `tools/check_process_consistency.py`, `tools/check_docs_links.py`, `tools/check_doc_math.py`,
-  and `tools/tests/**`. A `ci.yml` change enables it together with every other job. It is Ubuntu-only, installs no
-  dependencies, builds neither .NET nor Rust, and runs the process checker, the documentation link and math
-  checks, and the `tools/tests` suite.
+  `docs/planning/ci-policy.md`, `docs/planning/status.md`, `docs/planning/maintenance/**`,
+  `docs/planning/drift-checks/**`, `zensical.toml`, `tools/check_process_consistency.py`,
+  `tools/check_docs_links.py`, `tools/check_doc_math.py`, and `tools/tests/**`. A `ci.yml` change enables it
+  together with every other job. It is Ubuntu-only, installs no dependencies, builds neither .NET nor Rust, and
+  runs the process checker, the documentation link and math checks, and the `tools/tests` suite with the same
+  discovery root as `tools/verify.sh`.
 - Documentation is validated locally with `zensical build --strict` (and the other docs commands). The
   separate `docs.yml` workflow is manual until the documentation is mature enough to justify automatic runs.
 - Keep Nightly manual-only; do not add a schedule until real long-running suites exist. If a schedule is later introduced, run it weekly on Ubuntu.

@@ -6,6 +6,10 @@ The 2026-11-27 workflow adoption added `tools/check_process_consistency.py`,
 but no CI job ran them. These assertions execute the shipped change-detection
 snippet over sample file lists and guard the lightweight job that consumes it,
 so the guardrails cannot silently drop out of CI again.
+
+Two drift guards sit on top of the behaviour checks: the normative filter lists
+in `docs/planning/ci-policy.md` and `AGENTS.md` must match the workflow's case
+arm, and the job's test command must be the one `tools/verify.sh` runs.
 """
 
 from __future__ import annotations
@@ -18,6 +22,9 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 WORKFLOW = REPO / ".github" / "workflows" / "ci.yml"
+CI_POLICY = REPO / "docs" / "planning" / "ci-policy.md"
+AGENTS = REPO / "AGENTS.md"
+VERIFY = REPO / "tools" / "verify.sh"
 
 JOB_RE = re.compile(r"(?m)^  (?P<name>[a-z][a-z-]*):\n")
 JOB_IF_RE = re.compile(r"(?m)^    if: (?P<expression>\S.*)$")
@@ -33,11 +40,35 @@ PROCESS_PATHS = (
     "docs/development/index.md",
     "docs/planning/reviews/step-15.md",
     "docs/planning/audits/step-15.md",
+    "docs/planning/ci-policy.md",
+    "docs/planning/status.md",
+    "docs/planning/maintenance/2026-11-27-temporary-free-dev-binding.md",
+    "docs/planning/drift-checks/2026-11-18-phase-c.md",
     "zensical.toml",
     "tools/check_process_consistency.py",
     "tools/check_docs_links.py",
     "tools/check_doc_math.py",
     "tools/tests/test_ci_process_job.py",
+)
+
+# The tool-test discovery command shared by the job and `tools/verify.sh`.
+DISCOVERY_COMMAND = "python -m unittest discover -s tools/tests -t ."
+
+# Single-file filter tokens. A documented token is a filter token when it ends
+# with `*` or is one of these; that keeps unrelated backticked paths in the same
+# prose (for example `tools/verify.sh`) out of the comparison.
+SINGLE_FILE_FILTERS = frozenset(
+    {
+        "AGENTS.md",
+        "GLOSSARY.md",
+        "opencode.json",
+        "zensical.toml",
+        "docs/planning/ci-policy.md",
+        "docs/planning/status.md",
+        "tools/check_process_consistency.py",
+        "tools/check_docs_links.py",
+        "tools/check_doc_math.py",
+    }
 )
 
 
@@ -71,6 +102,51 @@ def filter_run() -> str:
         else:
             break
     return "\n".join(lines)
+
+
+def workflow_filter_patterns() -> set[str]:
+    """Return the process case-arm alternatives, with `**` folded to `*`."""
+    lines = filter_run().splitlines()
+    for index, line in enumerate(lines):
+        if line.strip() != "process=true ;;":
+            continue
+        pattern_line = lines[index - 1].strip()
+        if not pattern_line.endswith(")"):
+            raise AssertionError(f"unexpected process case arm: {pattern_line}")
+        return {part.replace("**", "*") for part in pattern_line[:-1].split("|")}
+    raise AssertionError("the filter step has no `process=true` case arm")
+
+
+def documented_filter_patterns(text: str) -> set[str]:
+    """Return the filter tokens documented in one prose block."""
+    return {
+        token.replace("**", "*")
+        for token in re.findall(r"`([^`]+)`", text)
+        if token.endswith("*") or token in SINGLE_FILE_FILTERS
+    }
+
+
+def ci_policy_filter_row() -> str:
+    for line in CI_POLICY.read_text(encoding="utf-8").splitlines():
+        if line.startswith("| Process and binding |"):
+            cells = line.split("|")
+            if len(cells) < 3:
+                break
+            return cells[2]
+    raise AssertionError("ci-policy.md has no 'Process and binding' path-filter row")
+
+
+def agents_filter_bullet() -> str:
+    lines = AGENTS.read_text(encoding="utf-8").splitlines()
+    for index, line in enumerate(lines):
+        if line.startswith("- The `Process and binding checks` job runs"):
+            block = [line]
+            for following in lines[index + 1 :]:
+                if following.startswith("- ") or not following.strip():
+                    break
+                block.append(following)
+            return "\n".join(block)
+    raise AssertionError("AGENTS.md has no process/binding filter bullet")
 
 
 def detect(changed: list[str]) -> dict[str, str]:
@@ -160,13 +236,39 @@ class ProcessJobTests(unittest.TestCase):
             "python tools/check_process_consistency.py",
             "python tools/check_docs_links.py",
             "python tools/check_doc_math.py",
-            "python -m unittest discover -s tools/tests",
+            DISCOVERY_COMMAND,
         ):
             with self.subTest(command=command):
                 self.assertIn(command, block)
         for absent in ("dotnet", "cargo", "pip install"):
             with self.subTest(absent=absent):
                 self.assertNotIn(absent, block, "the process job must stay cheap")
+
+    def test_tool_test_discovery_matches_the_verify_script(self) -> None:
+        self.assertIn(
+            DISCOVERY_COMMAND,
+            VERIFY.read_text(encoding="utf-8"),
+            "tools/verify.sh must keep the discovery command the job mirrors",
+        )
+        self.assertIn(DISCOVERY_COMMAND, job_block("process"))
+
+    def test_documented_filter_lists_match_the_workflow_arm(self) -> None:
+        expected = workflow_filter_patterns()
+        self.assertIn(
+            ".opencode/*",
+            expected,
+            "the drift guard expects the workflow arm, not the documented list",
+        )
+        for label, documented in (
+            ("docs/planning/ci-policy.md", ci_policy_filter_row()),
+            ("AGENTS.md §3.13", agents_filter_bullet()),
+        ):
+            with self.subTest(home=label):
+                self.assertEqual(
+                    documented_filter_patterns(documented),
+                    expected,
+                    f"{label} and the workflow filter disagree",
+                )
 
     def test_process_job_is_path_filtered_and_ubuntu_only(self) -> None:
         match = JOB_IF_RE.search(job_block("process"))
