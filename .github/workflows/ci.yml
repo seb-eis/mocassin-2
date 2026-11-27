@@ -5,8 +5,8 @@ name: CI
 # are no per-feature or per-push step-branch runs.
 #
 # The Ubuntu run is the full gate: the complete .NET test suite with coverage,
-# the format check, Rust, Python, contracts/policy, and public API
-# compatibility.
+# the format check, Rust, Python, contracts/policy, public API compatibility,
+# and the process/binding checks.
 #
 # Windows and macOS are manual platform gates and are deliberately focused.
 # They build the solution, then run the package-writer, results-reader, and CLI
@@ -16,7 +16,7 @@ name: CI
 # path and locking behaviour, and the guarded Ctrl+C/SIGTERM signal path plus
 # the Windows `mocassin-sim.exe` probe selection. A platform gate does not
 # repeat the boilerplate suite, coverage, or the format check. The Rust,
-# Python, contracts, and API-compatibility jobs
+# Python, contracts, process/binding, and API-compatibility jobs
 # are Ubuntu-only by job condition: they run on a `push` to `main` or when
 # `platforms` is `ubuntu`/`all`, never for `windows` or `macos`.
 # `platforms=windows` therefore runs the short Ubuntu `changes` job plus one
@@ -69,6 +69,7 @@ jobs:
       python: ${{ steps.filter.outputs.python }}
       contracts: ${{ steps.filter.outputs.contracts }}
       api: ${{ steps.filter.outputs.api }}
+      process: ${{ steps.filter.outputs.process }}
       os: ${{ steps.filter.outputs.os }}
     steps:
       - uses: actions/checkout@v7
@@ -118,6 +119,7 @@ jobs:
           python=false
           contracts=false
           api=false
+          process=false
           ci=false
 
           while IFS= read -r file; do
@@ -132,6 +134,8 @@ jobs:
                 contracts=true ;;
               tools/check-api-compat.sh|tools/update-api-baseline.sh|tools/api-projects.txt)
                 api=true ;;
+              .opencode/*|AGENTS.md|GLOSSARY.md|opencode.json|docs/development/*|docs/planning/reviews/*|docs/planning/audits/*|docs/planning/README.md|docs/planning/04-roadmap.md|docs/planning/ci-policy.md|docs/planning/status.md|docs/planning/maintenance/*|docs/planning/drift-checks/*|docs/planning/closeout/*|docs/planning/incidents/*|docs/planning/research/*|docs/planning/prototypes/*|docs/planning/retrospectives/*|zensical.toml|tools/check_process_consistency.py|tools/check_closeout_evidence.py|tools/check_docs_links.py|tools/check_doc_math.py|tools/verify.sh|tools/tests/*)
+                process=true ;;
               .github/workflows/ci.yml)
                 ci=true ;;
             esac
@@ -145,9 +149,11 @@ jobs:
           if [[ "$dotnet" == "true" ]]; then
             api=true
           fi
-          # A CI-workflow change validates the whole pipeline.
+          # A CI-workflow change validates the whole pipeline, including the
+          # process/binding guardrails the workflow itself invokes.
           if [[ "$ci" == "true" ]]; then
             all=true
+            process=true
           fi
 
           if [[ "$all" == "true" ]]; then
@@ -156,6 +162,7 @@ jobs:
             python=true
             contracts=true
             api=true
+            process=true
           fi
 
           # Ubuntu is the full gate. A platform gate targets exactly the
@@ -178,6 +185,7 @@ jobs:
             echo "python=${python}"
             echo "contracts=${contracts}"
             echo "api=${api}"
+            echo "process=${process}"
             echo "os=${os}"
           } >> "$GITHUB_OUTPUT"
 
@@ -397,6 +405,39 @@ jobs:
 
       - name: Rust dependency policy
         run: cargo deny --manifest-path src/rust/Cargo.toml check
+
+  process:
+    name: Process and binding checks
+    needs: changes
+    if: needs.changes.outputs.process == 'true' && (github.event_name == 'push' || inputs.platforms == 'ubuntu' || inputs.platforms == 'all')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      # The process checkers use only the standard library. The existing
+      # projection test requires msgpack, so install only the pinned contracts
+      # requirements; this job still builds neither .NET nor Rust.
+      - name: Install contracts test requirements
+        run: python -m pip install -r tools/contracts/requirements.txt
+
+      - name: Process consistency
+        run: python tools/check_process_consistency.py
+
+      - name: Documentation links
+        run: python tools/check_docs_links.py
+
+      - name: Documentation math conventions
+        run: python tools/check_doc_math.py
+
+      # Same discovery root as `tools/verify.sh`, so CI and the local gate run
+      # the identical test set.
+      - name: Tool tests
+        run: python -m unittest discover -s tools/tests -t .
 
   api-compat:
     name: Public API compatibility

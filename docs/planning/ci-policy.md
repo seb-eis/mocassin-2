@@ -43,9 +43,9 @@ where seven would have sufficed — about 74 minutes of re-dispatch overhead. St
 
 | Run | Trigger | Runner | Scope |
 | --- | --- | --- | --- |
-| Main merge | `push` to `main` | Ubuntu | Path-filtered jobs, full .NET suite |
-| Step closeout | one manual `workflow_dispatch` per step | Ubuntu | Path-filtered jobs, full .NET suite |
-| Platform gate | manual `workflow_dispatch` with `platforms` | Selected runner only; `windows`/`macos` never start an Ubuntu job except `changes` | Focused .NET platform tests; no Rust, Python, contracts, or API jobs |
+| Main merge | `push` to `main` | Ubuntu | Path-filtered jobs, full .NET suite, process/binding checks |
+| Step closeout | one manual `workflow_dispatch` per step | Ubuntu | Path-filtered jobs, full .NET suite, process/binding checks |
+| Platform gate | manual `workflow_dispatch` with `platforms` | Selected runner only; `windows`/`macos` never start an Ubuntu job except `changes` | Focused .NET platform tests; no Rust, Python, contracts, process/binding, or API jobs |
 | Documentation | manual `docs.yml` | Ubuntu | Full docs build |
 | Benchmark | manual `benchmark.yml` | Ubuntu | Selected benchmark |
 | Nightly | manual placeholder; no schedule until real suites exist | — | — |
@@ -87,7 +87,8 @@ It is not a second closeout run and it never re-runs the Ubuntu path.
 | `all` | `["ubuntu-latest","windows-latest","macos-latest"]` | Ubuntu `changes`, the full Ubuntu path, and both focused gates |
 
 `windows` does **not** imply an Ubuntu job beyond the short `changes` detection job. The Rust, Python,
-contracts/policy, and API-compatibility jobs carry a job-level condition in addition to their path filter:
+contracts/policy, process/binding, and API-compatibility jobs carry a job-level condition in addition to their
+path filter:
 
 ```text
 needs.changes.outputs.<area> == 'true'
@@ -120,10 +121,10 @@ Note on current content: the SQLite reader tests arrive with Step 11, so on `mai
 package-writer suite, which already covers atomic rename and temporary-file handling; the results half grows
 with the reader. Recheck this paragraph when a project is renamed and update the workflow in the same change.
 
-**Rust, Python, contracts, and API compatibility stay Ubuntu-only.** The platform gate is a .NET gate: the Rust
-job no longer uses the OS matrix (`platforms=windows` does not start a Windows Rust job), the Python,
-contracts/policy, and API-compatibility jobs are pinned to `ubuntu-latest`, and all four are skipped by the
-job-level condition above for `platforms=windows`/`macos`. If the Rust solver later grows
+**Rust, Python, contracts, process/binding, and API compatibility stay Ubuntu-only.** The platform gate is a
+.NET gate: the Rust job no longer uses the OS matrix (`platforms=windows` does not start a Windows Rust job), the
+Python, contracts/policy, process/binding, and API-compatibility jobs are pinned to `ubuntu-latest`, and all five
+are skipped by the job-level condition above for `platforms=windows`/`macos`. If the Rust solver later grows
 `cfg(windows)`/`cfg(target_os = ...)` code, promote it under section 4 with its own decision; do not widen the
 current Windows gate by accident.
 
@@ -147,20 +148,35 @@ enables only affected jobs:
 | Rust | `src/rust/`, Cargo files, toolchain, or `deny.toml` change | Ubuntu only |
 | Python | `src/python/` or its `pyproject.toml` change | Ubuntu only |
 | Contracts and policy | any code changes, or contract/symmetry/licence/secret tooling changes | Ubuntu only |
+| Process and binding | `.opencode/**`, `AGENTS.md`, `GLOSSARY.md`, `opencode.json`, `docs/development/**`, `docs/planning/reviews/**`, `docs/planning/audits/**`, `docs/planning/README.md`, `docs/planning/04-roadmap.md`, `docs/planning/ci-policy.md`, `docs/planning/status.md`, `docs/planning/maintenance/**`, `docs/planning/drift-checks/**`, `docs/planning/closeout/**`, `docs/planning/incidents/**`, `docs/planning/research/**`, `docs/planning/prototypes/**`, `docs/planning/retrospectives/**`, `zensical.toml`, `tools/check_process_consistency.py`, `tools/check_closeout_evidence.py`, `tools/check_docs_links.py`, `tools/check_doc_math.py`, `tools/verify.sh`, or `tools/tests/**` change | Ubuntu only |
 | Public API compatibility | .NET public surface changes | Ubuntu only |
 | Documentation | separate manual workflow | Ubuntu only |
 
 Path filters decide *whether* a job is enabled; the `platforms` input decides *where* the .NET job runs and
-*whether* the Ubuntu-only jobs (Rust, Python, contracts/policy, API compatibility) start at all. A platform
-gate keeps the same path filters, concurrency group, permissions, and timeouts as the Ubuntu path.
+*whether* the Ubuntu-only jobs (Rust, Python, contracts/policy, process/binding, API compatibility) start at all.
+A platform gate keeps the same path filters, concurrency group, permissions, and timeouts as the Ubuntu path.
 
 Python runs on 3.13 only. The full 3.11/3.12/3.13 matrix is a manual/nightly concern until the Python surface
 grows enough to justify it.
 
+The process/binding job is deliberately cheap: it installs only the pinned contracts requirements
+(`msgpack==1.2.4`) and builds neither .NET nor Rust. It runs `tools/check_process_consistency.py`,
+`tools/check_docs_links.py`, `tools/check_doc_math.py`, and the `tools/tests` suite. The process checkers use
+only the Python standard library; the install is required by the existing parameterization projection test.
+It exists because the 2026-11-27 workflow adoption added those guardrails without a CI consumer; licence,
+secret, contract, and dependency checks stay in the contracts/policy job. The filter also covers the planning
+index and roadmap, the closeout, incident,
+research, prototype, and retrospective homes, maintenance and drift checks, and `tools/check_closeout_evidence.py`
+and `tools/verify.sh`, because the process checker validates those pages and templates and the job mirrors the
+local gate. A regression test imports the checker's required, normative, and verdict path lists, so adding a new
+checked file without a matching filter fails the suite. It does not widen any other job, and the test step uses
+`-t .` so it discovers exactly the `tools/tests` set that `tools/verify.sh` runs.
+
 A change to `.github/workflows/ci.yml` forces all jobs so the pipeline itself is validated. Because
 `platforms=windows`/`macos` suppresses the Ubuntu-only jobs even when their paths changed, a workflow-validation
 dispatch must use `platforms=all` (or one `ubuntu` plus one `windows` dispatch): `platforms=windows` would
-validate the Windows gate but skip the Ubuntu full-suite path and the Rust, Python, contracts, and API jobs.
+validate the Windows gate but skip the Ubuntu full-suite path and the Rust, Python, contracts, process/binding,
+and API jobs.
 
 ## 4. Platform promotion
 
@@ -185,13 +201,13 @@ two scopes.
 
 - Target: **≤300 billable minutes per month**.
 - If usage passes 50% of the allowance before mid-month, switch to closeout-only CI and ask the owner before
-  adding any run.
+  adding any run or job.
 - If a platform gate is needed, prefer Windows before macOS. The focused Windows gate costs about 16–20 billable
   minutes, not the ~36 of the former Ubuntu-plus-Windows run. A normal macOS gate still costs about 30 billable
   minutes even focused, because of the 10× multiplier; a long macOS job can cost hundreds.
 - Use `[skip ci]` for docs-only commits and merges.
 - **Status 2026-11-14:** about 1,320–1,340 of 2,000 minutes used (66–67%), so the 50% guard is active. Stay
-  closeout-only, add no new run without owner approval, and defer Windows/macOS platform gates to the next
+  closeout-only, add no new run or job without owner approval, and defer Windows/macOS platform gates to the next
   monthly reset unless a platform-specific change makes one mandatory.
 
 ## 6. Commands

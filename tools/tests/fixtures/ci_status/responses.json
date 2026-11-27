@@ -1,0 +1,160 @@
+{
+  "invalid-json": {
+    "status": 200,
+    "raw_body": "{not json"
+  },
+  "malformed-run": {
+    "status": 200,
+    "body": {
+      "id": 101,
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "1111111111111111111111111111111111111111"
+    }
+  },
+  "no-ci-runs": {
+    "status": 200,
+    "body": {"total_count": 0, "workflow_runs": []}
+  },
+  "rate-limit-403": {
+    "status": 403,
+    "headers": {"x-ratelimit-remaining": "0"},
+    "reason": "Forbidden",
+    "body": {"message": "API rate limit exceeded"}
+  },
+  "rate-limit-429": {
+    "status": 429,
+    "headers": {"retry-after": "60"},
+    "reason": "Too Many Requests",
+    "body": {"message": "API rate limit exceeded"}
+  },
+  "completed-103": {
+    "status": 200,
+    "body": {
+      "id": 103,
+      "name": "CI",
+      "event": "workflow_dispatch",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "3333333333333333333333333333333333333333"
+    }
+  },
+  "GET /repos/acme/mocassin/commits/1111111": {
+    "status": 200,
+    "body": {"sha": "1111111111111111111111111111111111111111"}
+  },
+  "GET /repos/acme/mocassin/actions/runs/101": {
+    "status": 200,
+    "body": {
+      "id": 101,
+      "name": "CI",
+      "event": "workflow_dispatch",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "1111111111111111111111111111111111111111"
+    }
+  },
+  "GET /repos/acme/mocassin/actions/runs/101/jobs": {
+    "status": 200,
+    "body": {
+      "total_count": 2,
+      "jobs": [
+        {
+          "name": "Detect changes",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Contracts",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    }
+  },
+  "GET /repos/acme/mocassin/actions/runs/102": {
+    "status": 200,
+    "body": {
+      "id": 102,
+      "name": "CI",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "failure",
+      "head_sha": "2222222222222222222222222222222222222222"
+    }
+  },
+  "GET /repos/acme/mocassin/actions/runs/102/jobs": {
+    "status": 200,
+    "body": {
+      "total_count": 1,
+      "jobs": [
+        {"name": "Contracts", "status": "completed", "conclusion": "failure"}
+      ]
+    }
+  },
+  "GET /repos/acme/mocassin/actions/runs/103": {
+    "status": 200,
+    "body": {
+      "id": 103,
+      "name": "CI",
+      "event": "workflow_dispatch",
+      "status": "in_progress",
+      "conclusion": null,
+      "head_sha": "3333333333333333333333333333333333333333"
+    }
+  },
+  "GET /repos/acme/mocassin/actions/runs/103/jobs": {
+    "status": 200,
+    "body": {
+      "total_count": 1,
+      "jobs": [
+        {"name": "Detect changes", "status": "in_progress", "conclusion": null}
+      ]
+    }
+  },
+  "GET /repos/acme/mocassin/actions/runs/104": {
+    "status": 200,
+    "body": {
+      "id": 104,
+      "name": "CI",
+      "event": "workflow_dispatch",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "head_sha": "4444444444444444444444444444444444444444"
+    }
+  },
+  "GET /repos/acme/mocassin/actions/runs/104/jobs": {
+    "status": 200,
+    "body": {
+      "total_count": 1,
+      "jobs": [
+        {"name": "Contracts", "status": "completed", "conclusion": "cancelled"}
+      ]
+    }
+  },
+  "GET /repos/acme/mocassin/actions/runs": {
+    "status": 200,
+    "body": {
+      "total_count": 2,
+      "workflow_runs": [
+        {
+          "id": 101,
+          "name": "CI",
+          "event": "workflow_dispatch",
+          "status": "completed",
+          "conclusion": "success",
+          "head_sha": "1111111111111111111111111111111111111111"
+        },
+        {
+          "id": 202,
+          "name": "Documentation",
+          "event": "workflow_dispatch",
+          "status": "completed",
+          "conclusion": "failure",
+          "head_sha": "1111111111111111111111111111111111111111"
+        }
+      ]
+    }
+  }
+}

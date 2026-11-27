@@ -35,6 +35,7 @@ UBUNTU_ONLY_JOBS = {
     "python": "python",
     "contracts": "contracts",
     "api-compat": "api",
+    "process": "process",
 }
 
 
@@ -252,7 +253,7 @@ class PlatformGateTests(unittest.TestCase):
         # decision instead of inheriting the Ubuntu runner by default.
         self.assertEqual(
             set(job_names()),
-            {"changes", "dotnet", "rust", "python", "contracts", "api-compat"},
+            {"changes", "dotnet", "rust", "python", "contracts", "api-compat", "process"},
         )
 
     def test_changes_job_is_unconditional_on_ubuntu(self) -> None:

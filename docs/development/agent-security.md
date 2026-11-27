@@ -46,6 +46,10 @@ minimum controls for MOCASSIN.
 - Run `python tools/check-no-secrets.py` before every push.
 - If a secret is exposed, rotate it immediately; deleting the latest copy is not enough.
 - Use short-lived, scoped credentials when an agent genuinely needs access.
+- Read CI status for this **public repository** with `python tools/ci_status.py`, unauthenticated. Never run
+  `git credential fill`, inspect the git credential store, or read a token file for a status check.
+- `GH_TOKEN` is optional for higher GitHub API rate limits. Set it only in the environment of the one command
+  that needs it; the helper reads no other token source and never prints the value.
 
 ### Code and dependencies
 

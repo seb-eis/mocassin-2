@@ -148,7 +148,8 @@ Project-local Python dependencies for `mocassin-analysis`: `msgpack`, `numpy`, `
 | DocFX | Required | Steps 00, 30 | Covered in the .NET section. |
 | rustdoc | Required | Steps 00, 30 | Ships with the Rust toolchain; `cargo doc`. |
 | `actionlint` | Optional | Step 00 | Validates `.github/workflows/ci.yml`. |
-| `gh` | Optional | Step 31 | Release/PR automation. Do not use `gh auth login`; derive `GH_TOKEN` per command. |
+| `tools/ci_status.py` | Required | Agent CI status checks | Repository-local Python 3 standard-library helper for read-only public GitHub `CI` status. No package install, `gh`, or token is required; `GH_TOKEN` is optional per command. |
+| `gh` | Optional | Step 31 | Release/PR automation only; CI status uses `tools/ci_status.py`. Do not use `gh auth login`; derive `GH_TOKEN` per command. |
 | `syft` | Optional | Step 31 | CycloneDX/SBOM generation. |
 | `grype` | Optional | Step 31 | Artifact vulnerability scanning. |
 | `cosign` | Optional | Step 31 | Signing/provenance if enabled. |
@@ -224,6 +225,7 @@ docfx --version
 zensical --version
 python -c 'import mkdocstrings, mkdocstrings_handlers.python'
 pytest --version
+python tools/ci_status.py --help
 xvfb-run -a glxinfo -B
 ```
 
