@@ -419,8 +419,12 @@ jobs:
         with:
           python-version: "3.13"
 
-      # The tools and their tests use only the standard library, so this job
-      # installs nothing and builds neither .NET nor Rust.
+      # The process checkers use only the standard library. The existing
+      # projection test requires msgpack, so install only the pinned contracts
+      # requirements; this job still builds neither .NET nor Rust.
+      - name: Install contracts test requirements
+        run: python -m pip install -r tools/contracts/requirements.txt
+
       - name: Process consistency
         run: python tools/check_process_consistency.py
 

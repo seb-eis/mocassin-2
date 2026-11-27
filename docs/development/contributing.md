@@ -114,7 +114,7 @@ The `CI` workflow has these jobs:
 | `Rust` | Ubuntu by default; `cargo fmt`, `clippy -D warnings`, tests, Release build |
 | `Python` | Ubuntu, Python 3.13; pytest with JUnit/coverage, wheel/sdist |
 | `Contracts and policy` | Manifest drift, SPDX headers, secret scan, `cargo deny` |
-| `Process and binding` | Ubuntu; process/binding drift, documentation link and math checks, `tools/tests` |
+| `Process and binding` | Ubuntu; pinned contracts test requirement (`msgpack==1.2.4`) for the projection test, process/binding drift, documentation link and math checks, `tools/tests` |
 | `Public API compatibility` | ApiCompat against the checked-in baseline assemblies |
 
 Documentation is built by the separate manual `Documentation` workflow. Benchmarks and long-running suites
